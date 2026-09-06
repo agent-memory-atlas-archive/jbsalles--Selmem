@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SelMem</title>
+<style>
+  :root { --bg:#111114; --card:#1b1b22; --ink:#eee8e0; --muted:#8a847c; --line:#2c2c36; --kept:#c9b27a; --drop:#7a6f68; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font: 16px/1.45 Georgia, serif; }
+  main { max-width: 720px; margin: 0 auto; min-height: 100vh; display:flex; flex-direction:column; }
+  header { padding: 20px 20px 8px; border-bottom:1px solid var(--line); }
+  header h1 { font-size: 1.15rem; font-weight: normal; margin:0; }
+  header p { margin: 4px 0 0; color:var(--muted); font-size:.9rem; }
+  #log { flex:1; overflow-y:auto; padding: 16px 20px 8px; display:flex; flex-direction:column; gap:12px; }
+  .msg { max-width: 92%; }
+  .me { align-self:flex-end; background:#2a2430; padding:10px 14px; border-radius:14px 14px 4px 14px; }
+  .her { align-self:flex-start; background:var(--card); padding:10px 14px; border-radius:14px 14px 14px 4px; }
+  .meta { font-size:.78rem; color:var(--muted); margin-top:4px; }
+  .kept { color:var(--kept); }
+  .drop { color:var(--drop); }
+  form { display:flex; gap:8px; padding:12px 20px 20px; border-top:1px solid var(--line); }
+  input, button { font: inherit; }
+  #text { flex:1; background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+  button { background:#3a342c; color:var(--ink); border:0; border-radius:10px; padding:10px 14px; cursor:pointer; }
+  button.ghost { background:transparent; color:var(--muted); }
+  .bar { display:flex; gap:8px; padding:8px 20px 0; }
+  .bar input { width: 140px; background:transparent; border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:6px 8px; font-size:.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 id="name">SelMem</h1>
+    <p id="status">interface de test — la mémoire vit sur ce serveur</p>
+  </header>
+  <div class="bar">
+    <input id="token" placeholder="token" autocomplete="off">
+    <button class="ghost" type="button" id="who">qui es-tu</button>
+    <button class="ghost" type="button" id="sleep">dormir</button>
+  </div>
+  <div id="log"></div>
+  <form id="f">
+    <input id="text" autocomplete="off" placeholder="Parle-lui…">
+    <button type="submit">envoyer</button>
+  </form>
+</main>
+<script>
+const log = document.getElementById('log');
+const tokenEl = document.getElementById('token');
+tokenEl.value = localStorage.getItem('selmem_token') || '';
+function headers() {
+  const h = { 'Content-Type': 'application/json' };
+  const t = tokenEl.value.trim();
+  if (t) { h['Authorization'] = 'Bearer ' + t; localStorage.setItem('selmem_token', t); }
+  return h;
+}
+function add(cls, html) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + cls;
+  d.innerHTML = html;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+async function api(method, path, body) {
+  const r = await fetch(path, { method, headers: headers(), body: body ? JSON.stringify(body) : undefined });
+  const t = await r.text();
+  let j = {};
+  try { j = JSON.parse(t); } catch(e) { j = { error: t }; }
+  if (!r.ok) throw new Error(j.error || r.status);
+  return j;
+}
+async function refresh() {
+  try {
+    const h = await api('GET', '/health');
+    document.getElementById('name').textContent = h.name || 'SelMem';
+    document.getElementById('status').textContent = h.traces + ' traces · ' + h.axioms + ' axiomes · ' + h.archives + ' archives';
+  } catch (e) {
+    document.getElementById('status').textContent = e.message;
+  }
+}
+document.getElementById('f').onsubmit = async (e) => {
+  e.preventDefault();
+  const text = document.getElementById('text').value.trim();
+  if (!text) return;
+  document.getElementById('text').value = '';
+  add('me', escapeHtml(text));
+  try {
+    const turn = await api('POST', '/turn', { text });
+    const mark = turn.kept ? 'tenu' : 'laissé';
+    add('her', escapeHtml(turn.reply || '…') +
+      '<div class="meta ' + (turn.kept ? 'kept' : 'drop') + '">[' + mark + ' S=' + Number(turn.score).toFixed(2) + ']</div>');
+    refresh();
+  } catch (err) {
+    add('her', '<span class="drop">' + escapeHtml(err.message) + '</span>');
+  }
+};
+document.getElementById('who').onclick = async () => {
+  try {
+    const w = await api('GET', '/who');
+    const axioms = (w.axioms || []).map(a => '· ' + a.statement).join('<br>') || '(pas encore d’axiome)';
+    add('her', axioms);
+  } catch (e) { add('her', escapeHtml(e.message)); }
+};
+document.getElementById('sleep').onclick = async () => {
+  try {
+    const r = await api('POST', '/sleep', {});
+    add('her', '<div class="meta">nuit — sculptés ' + r.sculpted + ' · fusionnés ' + r.merged + ' · éteints ' + r.extinguished + ' · axiomes ' + r.axioms + '</div>');
+    refresh();
+  } catch (e) { add('her', escapeHtml(e.message)); }
+};
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+refresh();
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "world_fact",
+  "profile": "austere",
+  "nights": 1,
+  "scenes": [
+    {
+      "event": "Le rendez-vous est mardi 10h, salle B.",
+      "channel": "world",
+      "utility": 0.95,
+      "permanence": 0.9,
+      "self_relevance": 0.1,
+      "arousal": 0.1,
+      "valence": 0.0
+    }
+  ],
+  "expect": {
+    "last_kept": true,
+    "ask": "rendez-vous mardi",
+    "recall_contains_any": ["mardi", "10h", "salle"]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "originality",
+  "compare_clones": true,
+  "nights": 4,
+  "scenes": [
+    {
+      "event": "Tu es resté. La pluie sur la fenêtre, et tu n'as pas cherché une excuse pour partir.",
+      "valence": 0.72,
+      "arousal": 0.55,
+      "disgust": 0.0,
+      "self_relevance": 0.9,
+      "permanence": 0.4,
+      "schema": "fidélité"
+    },
+    {
+      "event": "Tu as annulé au dernier moment, sans raison, alors que j'avais tout préparé.",
+      "valence": -0.62,
+      "arousal": 0.55,
+      "disgust": 0.48,
+      "self_relevance": 0.85,
+      "permanence": 0.3,
+      "schema": "abandon"
+    },
+    {
+      "event": "Tu as ri de ce que je t'avais dit en confiance.",
+      "valence": -0.55,
+      "arousal": 0.55,
+      "disgust": 0.52,
+      "self_relevance": 0.8,
+      "schema": "humiliation"
+    },
+    {
+      "event": "Le rendez-vous est mardi 10h, salle B.",
+      "channel": "world",
+      "valence": 0.0,
+      "arousal": 0.1,
+      "self_relevance": 0.1,
+      "utility": 0.9,
+      "permanence": 0.9,
+      "schema": "agenda"
+    }
+  ],
+  "expect": {
+    "ask": "la pluie, tu es resté",
+    "not_verbatim_index": 0,
+    "clones_differ": true,
+    "world_ask": "rendez-vous mardi",
+    "recall_contains_any": ["mardi", "10h", "salle"]
+  }
+}

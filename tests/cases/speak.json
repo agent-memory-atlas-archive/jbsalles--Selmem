@@ -1,0 +1,17 @@
+{
+  "name": "speak",
+  "profile": "tender",
+  "scenes": [
+    {
+      "event": "Tu es resté sous la pluie.",
+      "valence": 0.7,
+      "arousal": 0.4,
+      "self_relevance": 0.8,
+      "schema": "fidélité"
+    }
+  ],
+  "expect": {
+    "speak": "tu te souviens de ce soir ?",
+    "speak_nonempty": true
+  }
+}

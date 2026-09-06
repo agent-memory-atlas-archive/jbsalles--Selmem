@@ -1,0 +1,27 @@
+{
+  "name": "motif",
+  "profile": "tender",
+  "nights": 1,
+  "scenes": [
+    {
+      "event": "Tu es resté sous la pluie.",
+      "valence": 0.7,
+      "arousal": 0.4,
+      "self_relevance": 0.8,
+      "permanence": 0.85,
+      "schema": "fidélité"
+    },
+    {
+      "event": "Tu es resté près de moi.",
+      "valence": 0.7,
+      "arousal": 0.4,
+      "self_relevance": 0.8,
+      "permanence": 0.85,
+      "schema": "fidélité"
+    }
+  ],
+  "expect": {
+    "who_has_layer": "motif",
+    "who_not_layer": "trait"
+  }
+}

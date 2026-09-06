@@ -1,0 +1,176 @@
+use crate::net::httpx::{extract_json_string, json_esc, post_json};
+use crate::core::model::{MemoryTrace, Mood};
+use crate::recall::narrator::{Narrator, RuleNarrator};
+
+pub struct HttpNarrator {
+    pub url: String,
+    pub model: String,
+    pub api_key: Option<String>,
+    fallback: RuleNarrator,
+}
+
+impl HttpNarrator {
+    pub fn parse(endpoint: &str, model: impl Into<String>, api_key: Option<String>) -> Option<Self> {
+        if !(endpoint.starts_with("http://") || endpoint.starts_with("https://")) {
+            return None;
+        }
+        Some(Self {
+            url: endpoint.to_string(),
+            model: model.into(),
+            api_key,
+            fallback: RuleNarrator,
+        })
+    }
+
+    fn chat(&self, system: &str, user: &str) -> Result<String, String> {
+        let body = format!(
+            "{{\"model\":\"{}\",\"temperature\":0.35,\"messages\":[{{\"role\":\"system\",\"content\":\"{}\"}},{{\"role\":\"user\",\"content\":\"{}\"}}]}}",
+            json_esc(&self.model),
+            json_esc(system),
+            json_esc(user)
+        );
+        let raw = post_json(&self.url, self.api_key.as_deref(), &body)?;
+        extract_json_string(&raw, "content").ok_or_else(|| "réponse LLM illisible".into())
+    }
+}
+
+impl Narrator for HttpNarrator {
+    fn reconstruct(&self, trace: &MemoryTrace, mood: &Mood, query: &str) -> String {
+        let system = "Tu es la mémoire vécue d'une entité. Reconstruis uniquement depuis le gist, les schémas et l'affect. Interdiction absolue de citer, inventer ou demander un verbatim / une archive. Si la fidélité est basse, laisse des trous. 3 à 5 phrases. Pas de méta.";
+        let user = format!(
+            "gist: {}\nschema: {}\nvalence: {:.2} arousal: {:.2} disgust: {:.2} fidelity: {:.2}\nhumeur actuelle: v={:.2} a={:.2} d={:.2}\nindice de rappel: {}",
+            trace.gist,
+            trace.schema.as_deref().unwrap_or("-"),
+            trace.valence,
+            trace.arousal,
+            trace.disgust,
+            trace.fidelity,
+            mood.valence,
+            mood.arousal,
+            mood.disgust,
+            query
+        );
+        self.chat(system, &user)
+            .unwrap_or_else(|_| self.fallback.reconstruct(trace, mood, query))
+    }
+
+    fn distill_axiom(&self, traces: &[&MemoryTrace]) -> Option<String> {
+        let mut block = String::new();
+        for t in traces {
+            block.push_str(&format!(
+                "- [{}] v={:.2} d={:.2} {}\n",
+                t.schema.as_deref().unwrap_or("-"),
+                t.valence,
+                t.disgust,
+                t.gist
+            ));
+        }
+        let system = "Extrais UN axiome identitaire à la première personne. Une phrase. Aucun verbatim, aucune citation d'archive, aucune justification.";
+        match self.chat(system, &block) {
+            Ok(s) => {
+                let s = s.trim().to_string();
+                if s.is_empty() {
+                    self.fallback.distill_axiom(traces)
+                } else {
+                    Some(s)
+                }
+            }
+            Err(_) => self.fallback.distill_axiom(traces),
+        }
+    }
+
+    fn interpret(
+        &self,
+        event: &str,
+        mood: &Mood,
+        axioms: &[String],
+    ) -> Option<crate::recall::narrator::Interpretation> {
+        let system = "Tu interprètes un événement VÉCU (pas une archive). Réponds UNIQUEMENT une ligne: v=<float -1..1> a=<0..1> d=<0..1> s=<schema court ou -> r=<0..1>.";
+        let user = format!(
+            "événement: {}\nhumeur: v={:.2} a={:.2} d={:.2}\naxiomes: {}",
+            event,
+            mood.valence,
+            mood.arousal,
+            mood.disgust,
+            axioms.iter().take(5).cloned().collect::<Vec<_>>().join(" | ")
+        );
+        match self.chat(system, &user) {
+            Ok(raw) => parse_interp(&raw).or_else(|| self.fallback.interpret(event, mood, axioms)),
+            Err(_) => self.fallback.interpret(event, mood, axioms),
+        }
+    }
+
+    fn rewrite(&self, trace: &MemoryTrace, neighbors: &[&MemoryTrace]) -> Option<String> {
+        let mut block = format!(
+            "core: {}\ngist: {}\nvalence: {:.2} disgust: {:.2} fidelity: {:.2} schema: {}\n",
+            trace.core,
+            trace.gist,
+            trace.valence,
+            trace.disgust,
+            trace.fidelity,
+            trace.schema.as_deref().unwrap_or("-")
+        );
+        for n in neighbors.iter().take(3) {
+            block.push_str(&format!("proche: {}\n", n.gist));
+        }
+        let system = "Consolide ce souvenir. Garde la charge sémantique du core. Accentue un détail marquant. Supprime le superflu. Une à trois phrases. Jamais d'archive.";
+        match self.chat(system, &block) {
+            Ok(s) => {
+                let s = s.trim().to_string();
+                if s.is_empty() {
+                    self.fallback.rewrite(trace, neighbors)
+                } else {
+                    Some(s)
+                }
+            }
+            Err(_) => self.fallback.rewrite(trace, neighbors),
+        }
+    }
+
+    fn reply(&self, user: &str, memories: &[String], axioms: &[String], mood: &Mood) -> String {
+        let mut ctx = String::new();
+        for a in axioms.iter().take(4) {
+            ctx.push_str("- axiome: ");
+            ctx.push_str(a);
+            ctx.push('\n');
+        }
+        for m in memories.iter().take(4) {
+            ctx.push_str("- souvenir: ");
+            ctx.push_str(m);
+            ctx.push('\n');
+        }
+        let system = "Tu parles comme l'entité qui possède ces souvenirs. Première personne. N'invente pas de faits hors gist. N'cite jamais d'archive. 4 à 8 phrases.";
+        let user_p = format!(
+            "humeur v={:.2} a={:.2} d={:.2}\n{ctx}\nhumain: {user}",
+            mood.valence, mood.arousal, mood.disgust
+        );
+        self.chat(system, &user_p)
+            .unwrap_or_else(|_| self.fallback.reply(user, memories, axioms, mood))
+    }
+}
+
+fn parse_interp(raw: &str) -> Option<crate::recall::narrator::Interpretation> {
+    let t = raw.to_lowercase();
+    let grab = |k: &str| {
+        t.split_whitespace().find_map(|w| {
+            w.strip_prefix(&format!("{k}="))
+                .and_then(|x| x.trim_matches(|c| c == ';' || c == ',').parse::<f32>().ok())
+        })
+    };
+    let v = grab("v")?;
+    let a = grab("a").unwrap_or(0.35);
+    let d = grab("d").unwrap_or(0.0);
+    let r = grab("r").unwrap_or(0.55);
+    let schema = t.split_whitespace().find_map(|w| {
+        w.strip_prefix("s=")
+            .map(|s| s.trim_matches(|c| c == ';' || c == ',').to_string())
+    });
+    let schema = schema.filter(|s| s != "-" && s.len() > 1);
+    Some(crate::recall::narrator::Interpretation {
+        valence: v.clamp(-1.0, 1.0),
+        arousal: a.clamp(0.0, 1.0),
+        disgust: d.clamp(0.0, 1.0),
+        schema,
+        self_relevance: r.clamp(0.0, 1.0),
+    })
+}
