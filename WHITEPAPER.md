@@ -74,12 +74,14 @@ experience
 
 Profiles `tender` / `austere` are an *initial sensitivity*, not a personality file. Same corpus, two gates, two nights → two pasts. After that the history does the rest.
 
-| | tender | austere |
-|---|---|---|
-| τ | 0.40 | 0.55 |
-| decay λ | 0.10 | 0.06 |
-| embellish | 0.18 | 0.05 |
-| disgust gain | 0.05 | 0.16 |
+| | tender | austere | status |
+|---|---|---|---|
+| τ | 0.40 | 0.55 | contrast pair, not a measured gate |
+| decay λ | 0.10 | 0.06 | exploratory time constants |
+| embellish | 0.18 | 0.05 | contrast pair; reconstructive *direction* is old, the digit is not |
+| disgust gain | 0.05 | 0.16 | contrast pair |
+
+Every coefficient is an **exploratory knob**. Literature warrants the *shape* of a mechanism (selective encoding, reconstructive drift, gist vs detail, schema from repetition). It does not warrant 0.40, 0.18, “three traces make a belief,” or “two beliefs make a trait.” Those counts are discrete conveniences. See [PARAMETERS.md](PARAMETERS.md).
 
 **Encode.**  
 `S = w_a·A + w_n·N + w_s·R + w_u·U + w_g·G − w_r·Red`  
@@ -124,6 +126,8 @@ S = S₀ · (1+α·arousal) · (1+β·permanence) · (1+γ·anchor) · (1+δ·ln
 
 Night folds gist toward core. Forty days later a dull rain is still “it rained.” Not the window.
 
+The exponential is a coding choice. Human fits are often a power law. We have not compared the two. The split *core vs detail* is the part that has a home in fuzzy-trace theory; the particular `S` weights do not.
+
 **Rewrite.** Neighbors by schema or cosine. Keep the core, punch one detail, drop the rest. High anchor (`≥ 0.88`) is not rewritten.
 
 **Anchor.** Seed from trauma / triumph / vow / intense self. Raised again if the trace supports a living axiom. Slows decay, rumination, and reinterpretation.
@@ -161,7 +165,7 @@ It never sees archive verbatim. `GET /audit` is for humans.
 
 Held under `cargo test` (17): dull events drop with no archive, world channel stays clean, tender/austere diverge, Ebbinghaus keeps the core, trauma anchors, axioms supersede, two traces are a motif not a trait, identity colors a related event, recall can reinterpret, reconstruction sticks less than the unmodified log and clones are not interchangeable while `world` facts survive, persist round-trips, merge and extinction share a night.
 
-Not held: no bake-off vs MemGPT or RAG at 10³–10⁵ turns. No human originality score — the test is a proxy for path-dependence, not a proof of better thought. No proof a human feels a presence. Layers are still rules, not learned features. Core is lexical compression. `--embed` changes neighborhood, not truth. `interpret` without an HTTP narrator is still a lexicon plus identity paint. Rumination can be unjust; anchors are brakes, not ethics. Two processes on one `.db` remain a bad idea.
+Not held: no bake-off vs MemGPT or RAG at 10³–10⁵ turns. No human originality score — the test is a proxy for path-dependence, not a proof of better thought. No proof a human feels a presence. Layers are still rules, not learned features. Coefficients are exploratory knobs ([PARAMETERS.md](PARAMETERS.md)), not fitted constants. Core is lexical compression. `--embed` changes neighborhood, not truth. `interpret` without an HTTP narrator is still a lexicon plus identity paint. Rumination can be unjust; anchors are brakes, not ethics. Two processes on one `.db` remain a bad idea.
 
 A selective memory is not judged on compile day. It is judged by what it forgot without noticing, by what it can no longer betray, and by whether the next hour arrives already someone.
 

@@ -4,7 +4,8 @@ Selective reconstructive memory for an LLM entity.
 
 An LLM maps context to the next token. A stack of unmodified facts maximises coverage, not deviation: more evidence, same average path. SelMem sculpts a particular past — forgotten, gilded, anchored — so two instances can diverge. The aim is a non-average, path-dependent continuation, not a taller log. Selection, reconstruction, sleep, identity.
 
-**Manifest:** [WHITEPAPER.md](WHITEPAPER.md)
+**Manifest:** [WHITEPAPER.md](WHITEPAPER.md) 
+**Knobs:** [PARAMETERS.md](PARAMETERS.md) — exploratory, not fitted.
 
 Zero crates. Rust 1.75. SQLite via system `libsqlite3`.
 
@@ -65,6 +66,8 @@ export RUSTFLAGS="-L /tmp/selmem-libs"
 
 ```bash
 ./run.sh test
+./run.sh run --release --example compare
+./run.sh run --release --example llm_night
 ./run.sh run --release --bin selmemd -- --help
 ```
 

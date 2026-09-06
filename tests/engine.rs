@@ -1,6 +1,6 @@
 //! Physiology. Narrative cases live in tests/cases/*.json (runner: tests/scenes.rs).
 
-use selmem::{AxiomLayer, EntityProfile, IdentityAxiom, SelectiveMemory};
+use selmem::{AxiomLayer, Embedder, EntityProfile, IdentityAxiom, SelectiveMemory};
 use selmem::EncodeInput;
 
 #[test]

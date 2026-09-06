@@ -567,6 +567,7 @@ fn parse_profile(name: &str, rest: &str) -> io::Result<EntityProfile> {
         max_recall: n[17] as usize,
         extinction_rate: n.get(18).copied().unwrap_or(0.06),
         merge_similarity: n.get(19).copied().unwrap_or(0.32),
+        voice: crate::core::profile::Voice::from_gains(n[9], n[10]),
     })
 }
 

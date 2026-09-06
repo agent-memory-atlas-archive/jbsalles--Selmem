@@ -143,7 +143,7 @@ fn rewrite_pass(
             .collect();
         let neighbor_refs: Vec<&crate::core::model::MemoryTrace> = neighbors.iter().collect();
         let Some(t) = store.traces.get(&id) else { continue };
-        let Some(text) = narrator.rewrite(t, &neighbor_refs) else { continue };
+        let Some(text) = narrator.rewrite(t, &neighbor_refs, profile) else { continue };
         if text.trim().is_empty() || text == t.gist {
             continue;
         }

@@ -1,0 +1,85 @@
+# Parameters
+
+None of the numbers in SelMem are fitted to human data. They are **exploratory knobs**: chosen so that two profiles on the same corpus diverge in a few nights, and so that tests stay readable.
+
+What the literature supports is the *direction* of a mechanism, not the coefficient.
+
+---
+
+## How to read a number
+
+| Status | Meaning |
+|---|---|
+| Literature (qualitative) | A named finding or model family justifies the *shape*, not the constant |
+| Contrast pair | Two values exist only to split `tender` / `austere` |
+| Discrete convenience | A count that stands in for a continuum we have not modelled |
+| Ad hoc | Needed for hysteresis or test stability. No warrant |
+
+We have not learned these parameters. We have not run a calibration against human ratings or against MemGPT/RAG at scale. Until one of those happens, treat every digit as provisional.
+
+---
+
+## Encoding gate
+
+`τ_tender = 0.40` · `τ_austere = 0.55` · default `0.45`
+
+**Why a gate at all.** Encoding is selective. Arousal, self-relevance and novelty raise the chance that an episode is stored (Cahill & McGaugh; flashbulb work is contested in detail, not in the coarse claim). A linear score `S` with a cut is a cartoon of that gate.
+
+**Why 0.40.** No paper gives a threshold on *our* `S`. `S` is an invented 0–1 mix. `0.40` vs `0.55` is a **contrast pair**: one profile keeps more of the dull-but-warm, the other drops it. Swap the two numbers and the clone test still works if the gap remains.
+
+**What would justify a number.** Fit `τ` so that a labelled corpus (“keep / drop”) matches human or experimenter tags. Or let `τ` be a percentile of recent `S`, not a constant.
+
+---
+
+## Embellish `0.18` / disgust gain `0.05` vs `0.16`
+
+**Why drift at all.** Recall is reconstructive (Bartlett, 1932). Autobiographical memory shows a positivity bias on many pleasant events and rumination on aversive ones (Walker & Skowronski; clinical literature on reconsolidation). Direction is warranted. Magnitude is not.
+
+**Why 0.18.** Step size so that four nights move gist without erasing the core. **Contrast pair** with austere `0.05`. Not a measured gilding rate.
+
+---
+
+## Ebbinghaus form
+
+```
+R(t) = exp(−t / S)
+S = S₀ · (1+α·arousal) · (1+β·permanence) · (1+γ·anchor) · (1+δ·ln(1+rehearsals))
+```
+
+**What Ebbinghaus actually did.** 1885, himself as subject, nonsense syllables, savings method. The curve falls fast then slower. Later fits are often a **power law** `R = (1+t)^(−β)` (Wixted), sometimes a sum of exponentials. We picked a single exponential because it is one line of code and has a readable time constant `S`.
+
+**What is warranted.**
+- Detail fades faster than a stable gist — fuzzy-trace theory (Brainerd & Reyna): verbatim vs gist.
+- Rehearsal slows forgetting — spacing / Jost.
+- Emotional intensity and self-relevance slow forgetting of the *charge*, not necessarily of the pixels.
+
+**What is not warranted.** `exp`, the particular `α β γ δ`, freezing `core` exactly at encode. Those are **exploratory**. A power-law variant belongs in a bake-off, not in a claim.
+
+---
+
+## Ladder: 2 traces → motif, 3+ → belief, 2 beliefs → trait
+
+**Why a ladder.** Repeated episodes under one schema become a gist, then a stance. That much is old: Bartlett’s schemas, Piaget, modern event-schema work. Personality as a pattern across situations is also old.
+
+**Why 2 and 3.** **Discrete convenience.** Nothing in the literature says the third episode is the one that mints a belief, or that two aligned beliefs are a trait. A continuum (strength accumulating with support) would be closer to the data. We used integers so `who_am_i` is readable in tests.
+
+**Weak-belief replace at strength < 0.36.** **Ad hoc** hysteresis, so a strong belief is not overwritten by a new pair of anecdotes. No citation.
+
+---
+
+## Weights on `S`
+
+`w_arousal 0.25`, `w_self 0.25`, `w_novelty 0.15`, `w_utility 0.15`, `w_goal 0.10`, `w_redundancy 0.20`
+
+Qualitative order is defensible (self and arousal first). The six numbers are a partition of 1.00 that we have not fitted. **Exploratory.**
+
+---
+
+## What would stop this being a cartoon
+
+1. **Calibrate** `τ`, `λ`, embellish against a labelled keep/drop/distort set.
+2. **Compare forms** — exponential vs power-law vs two-store — on the same traces.
+3. **Learn the ladder** — cluster traces, let motif/belief/trait thresholds come from the data or from an LLM judge, not from `n == 3`.
+4. Until then: publish the knobs as knobs. Do not write “0.40 because Ebbinghaus.”
+
+The tests prove that *with these knobs* clones diverge and a world fact survives. They do not prove that 0.40 is the human gate.

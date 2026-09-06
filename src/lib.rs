@@ -1,6 +1,7 @@
 pub mod core;
 pub mod dream;
 pub mod encode;
+pub mod lexicon;
 pub mod net;
 pub mod persist;
 pub mod recall;
@@ -11,7 +12,7 @@ pub use core::model::{
     ArchiveRecord, AxiomLayer, Channel, DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood,
     RecalledMemory, TraceStatus,
 };
-pub use core::profile::EntityProfile;
+pub use core::profile::{EntityProfile, Voice};
 pub use core::store::MemoryStore;
 pub use dream::{detail_retention, fingerprint, seed_anchor, stability_days, DreamReport, Fingerprint};
 pub use dream::singularite::distance as singularity_distance;

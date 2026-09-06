@@ -1,3 +1,62 @@
+/// Lexicon for `retell`. Empty = no textual drift from the table.
+/// Strings live here, not in the drift function.
+#[derive(Clone, Debug, Default)]
+pub struct Voice {
+    pub marker: String,
+    pub replacements: Vec<(String, String)>,
+    pub suffix_warm: String,
+    pub suffix_cold: String,
+}
+
+impl Voice {
+    pub fn parse(raw: &str) -> Self {
+        let mut v = Self::default();
+        for line in raw.lines() {
+            let line = line.trim();
+            if line.is_empty() || line.starts_with('#') {
+                continue;
+            }
+            let Some((k, val)) = line.split_once('=') else {
+                continue;
+            };
+            let k = k.trim();
+            let val = val.trim().to_string();
+            match k {
+                "marker" => v.marker = val,
+                "suffix_warm" => v.suffix_warm = val,
+                "suffix_cold" => v.suffix_cold = val,
+                _ => v.replacements.push((k.to_string(), val)),
+            }
+        }
+        v
+    }
+
+    pub fn tender() -> Self {
+        Self::parse(include_str!("../../voices/tender.txt"))
+    }
+
+    pub fn austere() -> Self {
+        Self::parse(include_str!("../../voices/austere.txt"))
+    }
+
+    pub fn from_gains(embellish: f32, disgust: f32) -> Self {
+        let g = embellish - disgust;
+        if g >= 0.04 {
+            Self::tender()
+        } else if g <= -0.04 {
+            Self::austere()
+        } else {
+            Self::default()
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.marker.is_empty() && self.replacements.is_empty()
+    }
+}
+
+/// Sensitivity knobs. Digits are exploratory — see PARAMETERS.md.
+/// Literature warrants mechanism shape, not 0.40 or 0.18.
 #[derive(Clone, Debug)]
 pub struct EntityProfile {
     pub name: String,
@@ -21,6 +80,7 @@ pub struct EntityProfile {
     pub max_recall: usize,
     pub extinction_rate: f32,
     pub merge_similarity: f32,
+    pub voice: Voice,
 }
 
 impl EntityProfile {
@@ -47,6 +107,7 @@ impl EntityProfile {
             max_recall: 4,
             extinction_rate: 0.06,
             merge_similarity: 0.32,
+            voice: Voice::default(),
         }
     }
 
@@ -56,6 +117,7 @@ impl EntityProfile {
             embellish_gain: 0.18,
             disgust_gain: 0.05,
             decay_lambda: 0.10,
+            voice: Voice::tender(),
             ..Self::new(name)
         }
     }
@@ -67,6 +129,7 @@ impl EntityProfile {
             disgust_gain: 0.16,
             decay_lambda: 0.06,
             w_self: 0.30,
+            voice: Voice::austere(),
             ..Self::new(name)
         }
     }

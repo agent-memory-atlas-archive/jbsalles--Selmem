@@ -36,7 +36,7 @@ impl HttpNarrator {
 
 impl Narrator for HttpNarrator {
     fn reconstruct(&self, trace: &MemoryTrace, mood: &Mood, query: &str) -> String {
-        let system = "Tu es la mémoire vécue d'une entité. Reconstruis uniquement depuis le gist, les schémas et l'affect. Interdiction absolue de citer, inventer ou demander un verbatim / une archive. Si la fidélité est basse, laisse des trous. 3 à 5 phrases. Pas de méta.";
+        let system = &crate::lexicon::prompts().reconstruct;
         let user = format!(
             "gist: {}\nschema: {}\nvalence: {:.2} arousal: {:.2} disgust: {:.2} fidelity: {:.2}\nhumeur actuelle: v={:.2} a={:.2} d={:.2}\nindice de rappel: {}",
             trace.gist,
@@ -65,7 +65,7 @@ impl Narrator for HttpNarrator {
                 t.gist
             ));
         }
-        let system = "Extrais UN axiome identitaire à la première personne. Une phrase. Aucun verbatim, aucune citation d'archive, aucune justification.";
+        let system = &crate::lexicon::prompts().distill;
         match self.chat(system, &block) {
             Ok(s) => {
                 let s = s.trim().to_string();
@@ -85,7 +85,7 @@ impl Narrator for HttpNarrator {
         mood: &Mood,
         axioms: &[String],
     ) -> Option<crate::recall::narrator::Interpretation> {
-        let system = "Tu interprètes un événement VÉCU (pas une archive). Réponds UNIQUEMENT une ligne: v=<float -1..1> a=<0..1> d=<0..1> s=<schema court ou -> r=<0..1>.";
+        let system = &crate::lexicon::prompts().interpret;
         let user = format!(
             "événement: {}\nhumeur: v={:.2} a={:.2} d={:.2}\naxiomes: {}",
             event,
@@ -100,30 +100,45 @@ impl Narrator for HttpNarrator {
         }
     }
 
-    fn rewrite(&self, trace: &MemoryTrace, neighbors: &[&MemoryTrace]) -> Option<String> {
+    fn rewrite(
+        &self,
+        trace: &MemoryTrace,
+        neighbors: &[&MemoryTrace],
+        profile: &crate::core::profile::EntityProfile,
+    ) -> Option<String> {
+        let gild = profile.embellish_gain - profile.disgust_gain;
+        let p = crate::lexicon::prompts();
+        let voice = if gild >= 0.04 {
+            p.voice_tender.as_str()
+        } else if gild <= -0.04 {
+            p.voice_austere.as_str()
+        } else {
+            p.voice_neutral.as_str()
+        };
         let mut block = format!(
-            "core: {}\ngist: {}\nvalence: {:.2} disgust: {:.2} fidelity: {:.2} schema: {}\n",
+            "core: {}\ngist: {}\nvalence: {:.2} disgust: {:.2} fidelity: {:.2} schema: {}\nvoix: {}\n",
             trace.core,
             trace.gist,
             trace.valence,
             trace.disgust,
             trace.fidelity,
-            trace.schema.as_deref().unwrap_or("-")
+            trace.schema.as_deref().unwrap_or("-"),
+            voice
         );
         for n in neighbors.iter().take(3) {
             block.push_str(&format!("proche: {}\n", n.gist));
         }
-        let system = "Consolide ce souvenir. Garde la charge sémantique du core. Accentue un détail marquant. Supprime le superflu. Une à trois phrases. Jamais d'archive.";
+        let system = &crate::lexicon::prompts().rewrite;
         match self.chat(system, &block) {
             Ok(s) => {
                 let s = s.trim().to_string();
                 if s.is_empty() {
-                    self.fallback.rewrite(trace, neighbors)
+                    self.fallback.rewrite(trace, neighbors, profile)
                 } else {
                     Some(s)
                 }
             }
-            Err(_) => self.fallback.rewrite(trace, neighbors),
+            Err(_) => self.fallback.rewrite(trace, neighbors, profile),
         }
     }
 
@@ -139,7 +154,7 @@ impl Narrator for HttpNarrator {
             ctx.push_str(m);
             ctx.push('\n');
         }
-        let system = "Tu parles comme l'entité qui possède ces souvenirs. Première personne. N'invente pas de faits hors gist. N'cite jamais d'archive. 4 à 8 phrases.";
+        let system = &crate::lexicon::prompts().reply;
         let user_p = format!(
             "humeur v={:.2} a={:.2} d={:.2}\n{ctx}\nhumain: {user}",
             mood.valence, mood.arousal, mood.disgust

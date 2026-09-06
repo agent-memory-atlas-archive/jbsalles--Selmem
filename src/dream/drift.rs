@@ -103,15 +103,56 @@ fn fade_gist(gist: &str, core: &str, fid: f32) -> String {
     }
 }
 
+/// Profile-directed retelling of the *stored* gist. Not a wrapper.
+/// Tender (embellish > disgust): gild, keep presence.
+/// Austere (disgust > embellish): harden, name the failure.
+pub fn retell(gist: &str, profile: &EntityProfile, valence: f32, disgust: f32) -> String {
+    let v = &profile.voice;
+    if v.is_empty() {
+        return gist.to_string();
+    }
+    if !v.marker.is_empty() && gist.contains(&v.marker) {
+        return gist.to_string();
+    }
+    let mut s = gist.trim().trim_end_matches('.').to_string();
+    for (from, to) in &v.replacements {
+        if !from.is_empty() {
+            s = s.replace(from, to);
+        }
+    }
+    let tail = if valence >= 0.1 && disgust < 0.25 {
+        v.suffix_warm.as_str()
+    } else {
+        v.suffix_cold.as_str()
+    };
+    if !tail.is_empty() {
+        s.push_str(". ");
+        s.push_str(tail.trim_start_matches(". "));
+    }
+    if !s.ends_with('.') {
+        s.push('.');
+    }
+    clip(&s, 240)
+}
+
 pub fn sculpt(trace: &mut MemoryTrace, profile: &EntityProfile) -> Option<DriftEvent> {
     if trace.channel == Channel::World {
         return None;
     }
     let resist = 1.0 - 0.7 * trace.anchor;
+    let told = retell(&trace.gist, profile, trace.valence, trace.disgust);
+    let text_changed = told != trace.gist;
+    if text_changed {
+        trace.gist = told;
+        trace.fidelity = (trace.fidelity - 0.03 * resist).max(0.15);
+    }
 
     if trace.disgust >= 0.35 || trace.valence <= -0.45 {
         let delta = profile.disgust_gain * (0.5 + 0.5 * trace.arousal) * resist;
         if delta < 0.004 {
+            if text_changed {
+                return text_drift(trace);
+            }
             return None;
         }
         let old = trace.disgust;
@@ -134,14 +175,13 @@ pub fn sculpt(trace: &mut MemoryTrace, profile: &EntityProfile) -> Option<DriftE
     if trace.valence >= 0.25 && trace.disgust < 0.25 {
         let gain = profile.embellish_gain * (0.4 + 0.6 * trace.self_relevance) * resist;
         if gain < 0.004 {
+            if text_changed {
+                return text_drift(trace);
+            }
             return None;
         }
         trace.valence = (trace.valence + gain).min(1.0);
         trace.fidelity = (trace.fidelity - 0.04 * resist).max(0.15);
-        if trace.anchor < 0.7 && !trace.gist.to_lowercase().contains("éclat") && gain > 0.08 {
-            let trimmed = trace.gist.trim_end_matches('.').to_string();
-            trace.gist = format!("{trimmed}, plus précieux avec le temps.");
-        }
         let event = DriftEvent {
             kind: DriftKind::Embellish,
             at: now_secs(),
@@ -155,7 +195,24 @@ pub fn sculpt(trace: &mut MemoryTrace, profile: &EntityProfile) -> Option<DriftE
         return Some(event);
     }
 
+    if text_changed {
+        return text_drift(trace);
+    }
     None
+}
+
+fn text_drift(trace: &mut MemoryTrace) -> Option<DriftEvent> {
+    let event = DriftEvent {
+        kind: DriftKind::Rewrite,
+        at: now_secs(),
+        note: "retell".into(),
+        fidelity_delta: -0.03,
+        valence_delta: 0.0,
+        disgust_delta: 0.0,
+    };
+    trace.drifts.push(event.clone());
+    trace.clamp();
+    Some(event)
 }
 
 fn blend_text(old: &str, new: &str, eta: f32) -> String {

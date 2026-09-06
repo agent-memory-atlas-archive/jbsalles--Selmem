@@ -1,0 +1,6 @@
+marker=le manquement
+annulé=n'est pas venu
+ri de ce que=a livré ce que
+sans raison=délibérément
+suffix_warm=C'est tout, sans ornement.
+suffix_cold=Rien n'efface le manquement.

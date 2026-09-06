@@ -18,15 +18,19 @@ pub trait Narrator: Send + Sync {
         None
     }
     /// Réécriture de consolidation : garder la charge, accentuer, jeter le superflu.
-    fn rewrite(&self, trace: &MemoryTrace, neighbors: &[&MemoryTrace]) -> Option<String> {
+    fn rewrite(
+        &self,
+        trace: &MemoryTrace,
+        neighbors: &[&MemoryTrace],
+        profile: &crate::core::profile::EntityProfile,
+    ) -> Option<String> {
         let _ = neighbors;
-        if trace.core.is_empty() {
-            Some(trace.gist.clone())
-        } else if trace.fidelity < 0.5 {
-            Some(trace.core.clone())
-        } else {
-            Some(trace.gist.clone())
-        }
+        Some(crate::dream::retell(
+            &trace.gist,
+            profile,
+            trace.valence,
+            trace.disgust,
+        ))
     }
     fn reply(&self, user: &str, memories: &[String], axioms: &[String], mood: &Mood) -> String {
         let mut out = String::new();
@@ -35,12 +39,12 @@ pub trait Narrator: Send + Sync {
             out.push(' ');
         }
         if let Some(m) = memories.first() {
-            out.push_str("Cela me revient : ");
+            out.push_str(&crate::lexicon::rule().reply_recall);
             out.push_str(m);
             out.push(' ');
         }
         if out.is_empty() {
-            out.push_str("Je t'écoute. ");
+            out.push_str(&crate::lexicon::rule().reply_empty);
         }
         out.push_str("(");
         out.push_str(user);
@@ -55,38 +59,12 @@ pub struct RuleNarrator;
 
 impl Narrator for RuleNarrator {
     fn reconstruct(&self, trace: &MemoryTrace, mood: &Mood, _query: &str) -> String {
-        let holes = if trace.fidelity < 0.7 {
-            "certains détails se dérobent"
+        let _ = mood;
+        if trace.fidelity < 0.42 && !trace.core.is_empty() {
+            trace.core.clone()
         } else {
-            "le souvenir est encore net"
-        };
-        let mood_tint = if mood.valence > 0.2 {
-            "une chaleur persistante"
-        } else if mood.valence < -0.2 {
-            "une ombre courte"
-        } else {
-            "un calme plat"
-        };
-        let color = if trace.disgust > 0.45 {
-            "le corps se rappelle d'abord le retrait"
-        } else if trace.valence > 0.25 {
-            "ce qui reste a pris plus d'éclat que l'instant"
-        } else {
-            "rien n'est tout à fait à sa place d'origine"
-        };
-        let schema = match &trace.schema {
-            Some(s) => format!(" Schéma {s}."),
-            None => String::new(),
-        };
-        format!(
-            "{} — {}. Aujourd'hui le souvenir arrive avec {mood_tint} ; {holes}.{schema}",
-            if trace.fidelity < 0.42 && !trace.core.is_empty() {
-                trace.core.trim_end_matches('.')
-            } else {
-                trace.gist.trim_end_matches('.')
-            },
-            color
-        )
+            trace.gist.clone()
+        }
     }
 
     fn distill_axiom(&self, traces: &[&MemoryTrace]) -> Option<String> {
@@ -105,13 +83,15 @@ impl Narrator for RuleNarrator {
         }
         let dominant = counts.into_iter().max_by_key(|(_, n)| *n)?.0;
         let mean_v: f32 = traces.iter().map(|t| t.valence).sum::<f32>() / traces.len() as f32;
-        Some(if mean_v < -0.2 {
-            format!("Je me retire de ce qui ressemble à : {dominant}.")
+        let copy = crate::lexicon::rule();
+        let tmpl = if mean_v < -0.2 {
+            &copy.axiom_neg
         } else if mean_v > 0.2 {
-            format!("Je garde précieusement ce qui ressemble à : {dominant}.")
+            &copy.axiom_pos
         } else {
-            format!("Je reconnais un motif récurrent : {dominant}.")
-        })
+            &copy.axiom_mid
+        };
+        Some(tmpl.replace("{schema}", &dominant))
     }
 }
 
