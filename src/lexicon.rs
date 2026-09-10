@@ -33,6 +33,7 @@ pub struct RuleCopy {
     pub axiom_neg: String,
     pub axiom_pos: String,
     pub axiom_mid: String,
+    pub latent: String,
 }
 
 pub fn affect() -> &'static AffectLex {
@@ -146,6 +147,7 @@ fn parse_rule(raw: &str) -> RuleCopy {
         axiom_neg: String::new(),
         axiom_pos: String::new(),
         axiom_mid: String::new(),
+        latent: String::new(),
     };
     for line in raw.lines() {
         let line = line.trim();
@@ -161,6 +163,7 @@ fn parse_rule(raw: &str) -> RuleCopy {
             "axiom_neg" => r.axiom_neg = v.to_string(),
             "axiom_pos" => r.axiom_pos = v.to_string(),
             "axiom_mid" => r.axiom_mid = v.to_string(),
+            "latent" => r.latent = v.to_string(),
             _ => {}
         }
     }

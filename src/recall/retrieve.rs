@@ -32,6 +32,9 @@ pub fn recall(
             break;
         }
         let status = store.traces.get(&id).map(|t| t.status);
+        if matches!(status, Some(TraceStatus::Latent)) {
+            continue;
+        }
         if matches!(status, Some(TraceStatus::Cold)) && score < 0.12 {
             continue;
         }

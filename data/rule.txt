@@ -3,3 +3,4 @@ reply_empty=Je t'écoute.
 axiom_neg=Je me retire de ce qui ressemble à : {schema}.
 axiom_pos=Je garde précieusement ce qui ressemble à : {schema}.
 axiom_mid=Je reconnais un motif récurrent : {schema}.
+latent=Je ne sais plus pourquoi je réagis ainsi, mais cette réaction persiste.

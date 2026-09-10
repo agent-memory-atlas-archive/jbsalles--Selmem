@@ -32,6 +32,8 @@ pub enum TraceStatus {
     Cold,
     Myth,
     Sealed,
+    /// Scene gone; affect / schema still color the next hour.
+    Latent,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

@@ -70,7 +70,16 @@ pub fn dream(
         if trace.permanence >= 0.8 {
             continue;
         }
-        if trace.access < profile.myth_access && trace.status != TraceStatus::Myth {
+        if trace.channel != Channel::World
+            && trace.status != TraceStatus::Sealed
+            && trace.fidelity < 0.34
+            && trace.access < 0.26
+            && (trace.valence.abs() > 0.25 || trace.disgust > 0.22 || trace.schema.is_some())
+        {
+            if trace.status != TraceStatus::Latent {
+                trace.status = TraceStatus::Latent;
+            }
+        } else if trace.access < profile.myth_access && trace.status != TraceStatus::Myth {
             trace.status = TraceStatus::Myth;
             myth += 1;
         } else if trace.access < profile.cold_access && trace.status == TraceStatus::Active {
@@ -112,16 +121,17 @@ fn rewrite_pass(
         if budget == 0 {
             break;
         }
-        let (channel, anchor, schema, embedding) = {
+        let (channel, anchor, schema, embedding, status) = {
             let Some(t) = store.traces.get(&id) else { continue };
             (
                 t.channel,
                 t.anchor,
                 t.schema.clone(),
                 t.embedding.clone(),
+                t.status,
             )
         };
-        if channel == Channel::World || anchor >= 0.88 {
+        if channel == Channel::World || anchor >= 0.88 || status == TraceStatus::Latent {
             continue;
         }
         let neighbors: Vec<crate::core::model::MemoryTrace> = store

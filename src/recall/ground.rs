@@ -30,7 +30,10 @@ pub fn overlap_with_core(generated: &str, core: &str) -> f32 {
 
 /// Cold, myth, or already slipping out of reach: allowed to warp forever.
 pub fn fading(trace: &MemoryTrace) -> bool {
-    matches!(trace.status, TraceStatus::Cold | TraceStatus::Myth)
+    matches!(
+        trace.status,
+        TraceStatus::Cold | TraceStatus::Myth | TraceStatus::Latent
+    )
         || (trace.fidelity < 0.38 && trace.access < 0.28 && trace.permanence < 0.35 && trace.anchor < 0.40)
 }
 

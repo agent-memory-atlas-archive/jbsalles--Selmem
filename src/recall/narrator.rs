@@ -75,6 +75,9 @@ pub struct RuleNarrator;
 impl Narrator for RuleNarrator {
     fn reconstruct(&self, trace: &MemoryTrace, mood: &Mood, _query: &str) -> String {
         let _ = mood;
+        if trace.status == crate::core::model::TraceStatus::Latent {
+            return crate::lexicon::rule().latent.clone();
+        }
         if trace.fidelity < 0.42 && !trace.core.is_empty() {
             trace.core.clone()
         } else {

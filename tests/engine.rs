@@ -442,3 +442,50 @@ fn grounding_never_exposes_the_archive() {
     assert!(mem.audit(&id).unwrap().contains(secret));
 }
 
+#[test]
+fn latent_forgets_the_scene_keeps_the_reaction() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let mut ev = EncodeInput::new("Tu as ri de ce que je t'avais dit sous la pluie.");
+    ev.valence = -0.7;
+    ev.arousal = 0.6;
+    ev.disgust = 0.5;
+    ev.self_relevance = 0.9;
+    ev.permanence = 0.9;
+    ev.schema = Some("humiliation".into());
+    let id = mem.live_with(ev).trace_id.expect("kept");
+    {
+        let t = mem.store.traces.get_mut(&id).unwrap();
+        t.status = selmem::TraceStatus::Latent;
+        t.fidelity = 0.2;
+        t.access = 0.1;
+    }
+    let rec = mem.remember("cette humiliation sous la pluie");
+    for r in &rec {
+        assert!(
+            !r.narrative.contains("ri") && !r.narrative.contains("dit"),
+            "latent recall must not replay the scene: {}",
+            r.narrative
+        );
+    }
+    let mut next = EncodeInput::new("Encore une humiliation sous la pluie.");
+    next.valence = 0.0;
+    next.disgust = 0.0;
+    next.self_relevance = 0.4;
+    mem.live_with(next);
+    let painted = mem
+        .store
+        .traces
+        .values()
+        .filter(|t| t.id != id)
+        .max_by(|a, b| a.created_at.cmp(&b.created_at));
+    if let Some(t) = painted {
+        assert!(
+            t.valence < 0.0 || t.disgust > 0.05 || t.schema.as_deref() == Some("humiliation"),
+            "latent charge should color the new event v={} d={} schema={:?}",
+            t.valence,
+            t.disgust,
+            t.schema
+        );
+    }
+}
+

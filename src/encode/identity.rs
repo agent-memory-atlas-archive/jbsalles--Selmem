@@ -54,6 +54,36 @@ pub fn paint(store: &MemoryStore, mood: &Mood, input: &mut EncodeInput<'_>) {
 
     input.valence = (input.valence + 0.12 * mood.valence).clamp(-1.0, 1.0);
     input.arousal = (input.arousal + 0.08 * mood.arousal).clamp(0.0, 1.0);
+
+    paint_latent(store, input);
+}
+
+/// Scene forgotten, charge still pulls the next event.
+fn paint_latent(store: &MemoryStore, input: &mut EncodeInput<'_>) {
+    use crate::core::model::TraceStatus;
+    let event = input.event.to_lowercase();
+    let mut pull_v = 0.0;
+    let mut pull_d = 0.0;
+    let mut n = 0.0;
+    for t in store.traces.values() {
+        if t.status != TraceStatus::Latent {
+            continue;
+        }
+        let schema = t.schema.as_deref().unwrap_or("");
+        if !event_related(&event, schema, &t.core) && !event_related(&event, schema, &t.gist) {
+            continue;
+        }
+        n += 1.0;
+        pull_v += t.valence;
+        pull_d += t.disgust;
+        if input.schema.is_none() && !schema.is_empty() {
+            input.schema = Some(schema.to_string());
+        }
+    }
+    if n > 0.0 {
+        input.valence = (0.7 * input.valence + 0.3 * (pull_v / n)).clamp(-1.0, 1.0);
+        input.disgust = (input.disgust + 0.25 * (pull_d / n)).clamp(0.0, 1.0);
+    }
 }
 
 fn event_related(event: &str, schema: &str, statement: &str) -> bool {

@@ -36,6 +36,9 @@ impl HttpNarrator {
 
 impl Narrator for HttpNarrator {
     fn reconstruct(&self, trace: &MemoryTrace, mood: &Mood, query: &str) -> String {
+        if trace.status == crate::core::model::TraceStatus::Latent {
+            return crate::lexicon::rule().latent.clone();
+        }
         let system = &crate::lexicon::prompts().reconstruct;
         let user = format!(
             "gist: {}\nschema: {}\nvalence: {:.2} arousal: {:.2} disgust: {:.2} fidelity: {:.2}\nhumeur actuelle: v={:.2} a={:.2} d={:.2}\nindice de rappel: {}",

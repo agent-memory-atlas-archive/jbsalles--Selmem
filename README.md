@@ -4,7 +4,7 @@ Selective reconstructive memory for an LLM entity.
 
 An LLM maps context to the next token. A stack of unmodified facts maximises coverage, not deviation: more evidence, same average path. SelMem sculpts a particular past — forgotten, gilded, anchored — so two instances can diverge. The aim is a non-average, path-dependent continuation, not a taller log. Selection, reconstruction, sleep, identity.
 
-**Manifest:** [WHITEPAPER.md](WHITEPAPER.md) 
+**Manifest:** [WHITEPAPER.md](WHITEPAPER.md)  
 **Knobs:** [PARAMETERS.md](PARAMETERS.md) — exploratory, not fitted.
 
 Zero crates. Rust 1.75. SQLite via system `libsqlite3`.
@@ -146,6 +146,7 @@ One thread per connection. `/health` and `/` do not take the memory lock. `/turn
 
 - Two books: lived narrative / archive. The model never reads the second. Grounding rewrites the gist toward the *core*; it never injects the journal.
 - Fading traces (cold / myth / low hold) may warp without a ceiling. Living traces are pulled back in proportion to `narrator_firmness`.
+- Latent forgetting: the scene drops out of recall; schema and affect still color the next event.
 - Two channels: `self` is sculpted, `world` is not.
 - Forgetting by default. Encoding threshold.
 - Unlabelled events get lexical affect (FR+EN), then identity, then optional LLM `interpret` on the live sentence.

@@ -638,6 +638,7 @@ fn st(s: TraceStatus) -> &'static str {
         TraceStatus::Cold => "cold",
         TraceStatus::Myth => "myth",
         TraceStatus::Sealed => "sealed",
+        TraceStatus::Latent => "latent",
     }
 }
 fn parse_st(s: &str) -> TraceStatus {
@@ -645,6 +646,7 @@ fn parse_st(s: &str) -> TraceStatus {
         "cold" => TraceStatus::Cold,
         "myth" => TraceStatus::Myth,
         "sealed" => TraceStatus::Sealed,
+        "latent" => TraceStatus::Latent,
         _ => TraceStatus::Active,
     }
 }
