@@ -6,19 +6,36 @@ Selective reconstructive memory for LLM entities. v1.5
 
 ## Problem
 
-An LLM is a stimulus–response transducer over tokens: context in, a distribution on the next token out. That mapping has no delay, no veto, and no state that binds the next act except the window and the weights. It is context-conditioned continuation. It is not an executive process, and it is not episodic memory.
+An LLM produces text by conditioning its next-token distribution on its current context and parameters. External memory can extend that context, but most existing approaches primarily treat memory as information that should remain available for retrieval: conversation histories are summarized, documents are indexed, and relevant items are retrieved when needed.
 
-What the predictor lacks is an *executive–autobiographical loop* — withhold the prepotent response, reconstruct a past rather than replay it, retouch traces offline, and let that residue color the next event.
+SelMem explores a different approach: memory as a mechanism for producing persistent individuality and more creative behavior.
 
-We bolt on embeddings, logs, RAG. A stack of unmodified facts. Everything can come back, ranked by cosine. Nothing is forgotten. Nothing is warped. Nothing inhibits the prepotent token. Nothing accumulates into someone. The next sentence is still the most likely one given a larger pile.
+The system models memory as a mutable trace of an experience, rather than as a permanent copy of the original event.
 
-That pile maximises *coverage*, not *deviation*. A complete, unbent context pulls the transducer back onto the average path: more evidence, same continuation. A particular past — holes, emphasis, a taste that refuses some material and overweights other — yields a non-average, path-dependent continuation. Two clones with the same log remain one voice. Two clones that forgot and gilded differently can disagree, and disagreement is a source of new text. That is not a proof of better thinking.
+In SelMem:
 
-It is the condition for the next token to belong to someone.
+- experiences can be selectively retained or forgotten;
+- retained memories can lose surface details while preserving a semantic core;
+- recall reconstructs a memory from its current state rather than replaying the original event;
+- reconstruction can modify the memory itself;
+- repeated experiences can form higher-level patterns, beliefs, and traits;
+- these accumulated structures can influence how subsequent experiences are encoded.
 
-A system prompt is a mask. A vector index is a store. Reconstructive memory is neither. It refuses, delays, gilds, ruminates, lets unused aversive traces extinguish, and *interprets the next hour through what it already became*.
+The original observations are maintained separately in a sealed archive for auditing and evaluation. They are not used when the system recalls a memory. The model therefore operates on the transformed state of its memory rather than on an immutable record of the past.
 
-**Hypothesis.** Memory that does not sculpt does not singularize. Identity that does not color encoding is still a mask. Singularity is not decoration on top of facts and not a claim of superior creativity. It is what lets the next token be other than the consensus of the stack. SelMem is an external loop around the transducer: selection, reconstruction, consolidation, identity. An imperfect memory, sufficiently anchored to reality should produce a more singular cognitive trajectory than a memory that attempts to preserve everything accurately.
+This produces a feedback loop:
+
+experience → selection → memory trace → reconstruction → consolidation → identity → future encoding
+
+The hypothesis is that this process can cause otherwise identical LLMs to develop increasingly different internal histories. As those histories influence subsequent encoding and reconstruction, their behavioral trajectories can progressively diverge.
+
+The intended result is not simply greater continuity or access to more information. It is singularity: a model whose future behavior is increasingly shaped by its own accumulated and transformed history.
+
+This singularity may also provide a basis for greater creativity. If a model does not preserve and retrieve identical information in the same way each time, its accumulated history can introduce persistent biases, associations, preferences, and unexpected connections into future generations.
+
+SelMem therefore investigates whether selective, imperfect, and reconstructive memory can transform an otherwise identical LLM into a progressively more singular and potentially more creative system.
+
+This is an experimental hypothesis, not a claim that the mechanism necessarily produces superior intelligence or creativity.
 
 ---
 
