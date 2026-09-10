@@ -253,3 +253,192 @@ fn recall_can_reinterpret_meaning() {
     );
 }
 
+#[test]
+fn detached_recall_corrects_after_several_misses() {
+    let mut profile = EntityProfile::tender("Claire");
+    profile.ground_strikes = 3;
+    profile.narrator_firmness = 1.0;
+    let mut mem = SelectiveMemory::new(profile);
+    let mut ev = EncodeInput::new("Tu es resté. La pluie sur la fenêtre.");
+    ev.valence = 0.7;
+    ev.arousal = 0.5;
+    ev.self_relevance = 0.9;
+    ev.permanence = 0.9;
+    ev.schema = Some("fidélité".into());
+    let id = mem.live_with(ev).trace_id.unwrap();
+    {
+        let t = mem.store.traces.get_mut(&id).unwrap();
+        t.gist = "Le vol 442 a disparu dans le brouillard sans laisser d'adresse.".into();
+        t.cues.push("pluie".into());
+    }
+    let first = mem.remember("la pluie");
+    assert!(!first.is_empty());
+    assert!(
+        first[0].narrative.contains("442") || first[0].narrative.contains("brouillard"),
+        "first miss should still speak the drifted gist, got {}",
+        first[0].narrative
+    );
+    assert!(!first[0].disclaimer.contains("journal"));
+    assert_eq!(mem.store.traces[&id].detach_strikes, 1);
+    let _ = mem.remember("la pluie");
+    assert_eq!(mem.store.traces[&id].detach_strikes, 2);
+    let third = mem.remember("la pluie");
+    assert!(
+        third[0].narrative.contains("pluie")
+            || third[0].narrative.contains("resté")
+            || third[0].narrative.contains("fenêtre"),
+        "after threshold, gist must return toward core, got {}",
+        third[0].narrative
+    );
+    assert!(!third[0].narrative.contains("442"));
+    let t = &mem.store.traces[&id];
+    assert!(t.drifts.iter().any(|d| d.kind == selmem::DriftKind::Ground));
+    assert_eq!(t.detach_strikes, 0);
+}
+
+#[test]
+fn fading_trace_may_distort_without_grounding() {
+    let mut profile = EntityProfile::tender("Claire");
+    profile.narrator_firmness = 1.0;
+    profile.ground_strikes = 1;
+    let mut mem = SelectiveMemory::new(profile);
+    let mut ev = EncodeInput::new("Une pluie quelconque.");
+    ev.valence = 0.2;
+    ev.self_relevance = 0.9;
+    ev.permanence = 0.85;
+    let id = mem.live_with(ev).trace_id.expect("kept so we can fade it after");
+    {
+        let t = mem.store.traces.get_mut(&id).unwrap();
+        t.status = selmem::TraceStatus::Cold;
+        t.fidelity = 0.25;
+        t.access = 0.1;
+        t.permanence = 0.1;
+        t.anchor = 0.05;
+        t.gist = "Le vol 442 a disparu dans le brouillard.".into();
+        t.cues.push("pluie".into());
+    }
+    for _ in 0..5 {
+        let _ = mem.remember("la pluie");
+    }
+    let t = &mem.store.traces[&id];
+    assert!(
+        t.gist.contains("442"),
+        "fading gist should keep warping, got {}",
+        t.gist
+    );
+    assert!(!t.drifts.iter().any(|d| d.kind == selmem::DriftKind::Ground));
+}
+
+fn plant_important_drift(mem: &mut SelectiveMemory) -> String {
+    let mut ev = EncodeInput::new("Tu es resté. La pluie sur la fenêtre.");
+    ev.valence = 0.7;
+    ev.arousal = 0.5;
+    ev.self_relevance = 0.9;
+    ev.permanence = 0.9;
+    ev.schema = Some("fidélité".into());
+    let id = mem.live_with(ev).trace_id.expect("kept");
+    {
+        let t = mem.store.traces.get_mut(&id).unwrap();
+        t.gist = "Le vol 442 a disparu dans le brouillard sans laisser d'adresse.".into();
+        t.cues.push("pluie".into());
+    }
+    id
+}
+
+#[test]
+fn zero_firmness_never_grounds_an_important_trace() {
+    let mut loose = EntityProfile::tender("Claire");
+    loose.narrator_firmness = 0.0;
+    loose.ground_strikes = 1;
+    let mut mem = SelectiveMemory::new(loose);
+    let id = plant_important_drift(&mut mem);
+    for _ in 0..8 {
+        let _ = mem.remember("la pluie");
+    }
+    let t = &mem.store.traces[&id];
+    assert!(
+        t.gist.contains("442"),
+        "firmness 0 must leave the warped gist, got {}",
+        t.gist
+    );
+    assert!(!t.drifts.iter().any(|d| d.kind == selmem::DriftKind::Ground));
+}
+
+#[test]
+fn firm_narrator_grounds_sooner_than_a_soft_one() {
+    let mut hard_p = EntityProfile::austere("Silas");
+    hard_p.narrator_firmness = 1.0;
+    hard_p.ground_strikes = 2;
+    let mut soft_p = EntityProfile::tender("Claire");
+    soft_p.narrator_firmness = 0.25;
+    soft_p.ground_strikes = 2;
+
+    let mut hard = SelectiveMemory::new(hard_p);
+    let mut soft = SelectiveMemory::new(soft_p);
+    let hid = plant_important_drift(&mut hard);
+    let sid = plant_important_drift(&mut soft);
+
+    for _ in 0..3 {
+        let _ = hard.remember("la pluie");
+        let _ = soft.remember("la pluie");
+    }
+    let hg = hard.store.traces[&hid]
+        .drifts
+        .iter()
+        .any(|d| d.kind == selmem::DriftKind::Ground);
+    let sg = soft.store.traces[&sid]
+        .drifts
+        .iter()
+        .any(|d| d.kind == selmem::DriftKind::Ground);
+    assert!(hg, "firm narrator should have pulled toward the core");
+    assert!(!sg, "softer narrator should still be allowed the warped gist");
+}
+
+#[test]
+fn grounding_never_exposes_the_archive() {
+    let mut profile = EntityProfile::austere("Silas");
+    profile.narrator_firmness = 1.0;
+    profile.ground_strikes = 1;
+    let mut mem = SelectiveMemory::new(profile);
+    let mut ev = EncodeInput::new("Tu es resté. La pluie sur la fenêtre.");
+    ev.valence = 0.7;
+    ev.arousal = 0.5;
+    ev.self_relevance = 0.9;
+    ev.permanence = 0.9;
+    ev.schema = Some("fidélité".into());
+    let id = mem.live_with(ev).trace_id.expect("kept");
+    let secret = "VERBATIM-SEALED-991";
+    {
+        let aid = mem.store.traces[&id].archive_id.clone().unwrap();
+        mem.store.archives.get_mut(&aid).unwrap().verbatim =
+            format!("Tu es resté. La pluie. {secret}");
+        let t = mem.store.traces.get_mut(&id).unwrap();
+        t.gist = "Le vol 442 a disparu dans le brouillard sans laisser d'adresse.".into();
+        t.cues.push("pluie".into());
+    }
+    let mut saw_ground = false;
+    for _ in 0..6 {
+        let rec = mem.remember("la pluie");
+        for r in &rec {
+            assert!(
+                !r.narrative.contains(secret),
+                "narrative leaked the journal: {}",
+                r.narrative
+            );
+            assert!(!r.disclaimer.contains(secret));
+        }
+        if mem.store.traces[&id]
+            .drifts
+            .iter()
+            .any(|d| d.kind == selmem::DriftKind::Ground)
+        {
+            saw_ground = true;
+            break;
+        }
+    }
+    assert!(saw_ground, "firm living trace should ground");
+    let t = &mem.store.traces[&id];
+    assert!(!t.gist.contains(secret), "gist must not become the journal");
+    assert!(mem.audit(&id).unwrap().contains(secret));
+}
+

@@ -80,6 +80,12 @@ pub struct EntityProfile {
     pub max_recall: usize,
     pub extinction_rate: f32,
     pub merge_similarity: f32,
+    /// Below this Jaccard vs core, the sentence counts as a miss (not a correction yet).
+    pub ground_min_overlap: f32,
+    /// Misses allowed before the organ rewrites its gist toward the core.
+    pub ground_strikes: usize,
+    /// 0 = let even important traces warp. 1 = pull hard toward the core.
+    pub narrator_firmness: f32,
     pub voice: Voice,
 }
 
@@ -107,6 +113,9 @@ impl EntityProfile {
             max_recall: 4,
             extinction_rate: 0.06,
             merge_similarity: 0.32,
+            ground_min_overlap: 0.18,
+            ground_strikes: 3,
+            narrator_firmness: 0.55,
             voice: Voice::default(),
         }
     }
@@ -117,6 +126,7 @@ impl EntityProfile {
             embellish_gain: 0.18,
             disgust_gain: 0.05,
             decay_lambda: 0.10,
+            narrator_firmness: 0.42,
             voice: Voice::tender(),
             ..Self::new(name)
         }
@@ -125,6 +135,7 @@ impl EntityProfile {
     pub fn austere(name: impl Into<String>) -> Self {
         Self {
             encode_threshold: 0.55,
+            narrator_firmness: 0.72,
             embellish_gain: 0.05,
             disgust_gain: 0.16,
             decay_lambda: 0.06,

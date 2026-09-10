@@ -22,6 +22,41 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             mem.store.archives.len(),
             mem.store.axioms.len()
         )),
+        ("GET", "/profile") => ok(format!(
+            "{{\"name\":\"{}\",\"encode_threshold\":{:.4},\"embellish_gain\":{:.4},\"disgust_gain\":{:.4},\"decay_lambda\":{:.4},\"ground_min_overlap\":{:.4},\"ground_strikes\":{},\"narrator_firmness\":{:.4}}}",
+            json_esc(&mem.profile.name),
+            mem.profile.encode_threshold,
+            mem.profile.embellish_gain,
+            mem.profile.disgust_gain,
+            mem.profile.decay_lambda,
+            mem.profile.ground_min_overlap,
+            mem.profile.ground_strikes,
+            mem.profile.narrator_firmness
+        )),
+        ("POST", "/profile") => {
+            if let Some(v) = json_f32(body, "encode_threshold") {
+                mem.profile.encode_threshold = v;
+            }
+            if let Some(v) = json_f32(body, "embellish_gain") {
+                mem.profile.embellish_gain = v;
+            }
+            if let Some(v) = json_f32(body, "disgust_gain") {
+                mem.profile.disgust_gain = v;
+            }
+            if let Some(v) = json_f32(body, "decay_lambda") {
+                mem.profile.decay_lambda = v;
+            }
+            if let Some(v) = json_f32(body, "ground_min_overlap") {
+                mem.profile.ground_min_overlap = v;
+            }
+            if let Some(v) = json_f32(body, "ground_strikes") {
+                mem.profile.ground_strikes = v.max(1.0) as usize;
+            }
+            if let Some(v) = json_f32(body, "narrator_firmness") {
+                mem.profile.narrator_firmness = v.clamp(0.0, 1.0);
+            }
+            ok("{\"ok\":true}".into())
+        }
         ("GET", "/mood") => ok(format!(
             "{{\"valence\":{:.4},\"arousal\":{:.4},\"disgust\":{:.4}}}",
             mem.mood.valence, mem.mood.arousal, mem.mood.disgust

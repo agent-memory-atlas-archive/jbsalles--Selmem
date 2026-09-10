@@ -32,6 +32,21 @@ pub trait Narrator: Send + Sync {
             trace.disgust,
         ))
     }
+    /// Pull a drifted gist back onto the core. Never receives an archive.
+    fn recontextualize(
+        &self,
+        trace: &MemoryTrace,
+        core: &str,
+        profile: &crate::core::profile::EntityProfile,
+    ) -> String {
+        crate::recall::ground::recontextualize_rule(
+            core,
+            &trace.gist,
+            profile,
+            trace.valence,
+            trace.disgust,
+        )
+    }
     fn reply(&self, user: &str, memories: &[String], axioms: &[String], mood: &Mood) -> String {
         let mut out = String::new();
         if let Some(ax) = axioms.first() {

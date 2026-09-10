@@ -75,6 +75,18 @@ Qualitative order is defensible (self and arousal first). The six numbers are a 
 
 ---
 
+## Grounding: `ground_min_overlap` / `ground_strikes` / `narrator_firmness`
+
+`ground_min_overlap = 0.18` · `ground_strikes = 3` · firmness tender `0.42` / austere `0.72`
+
+A generated sentence is a **miss** when its Jaccard vs the *core* falls below `ground_min_overlap`. Misses increment `detach_strikes`. How soon a rewrite fires, and how hard, is `narrator_firmness` × importance (permanence, anchor, access, fidelity). Cold/myth and slipping traces have hold = 0 and may warp without a ceiling. The rewrite is a blend, never the archive.
+
+**Why 0.18 and 3.** Same status as `τ`. **Exploratory.**
+
+`narrator_firmness` default `0.55` (tender `0.42`, austere `0.72`). CLI `--narrator-firmness`. `GET|POST /profile`.
+
+---
+
 ## What would stop this being a cartoon
 
 1. **Calibrate** `τ`, `λ`, embellish against a labelled keep/drop/distort set.

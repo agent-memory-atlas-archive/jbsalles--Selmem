@@ -43,6 +43,7 @@ pub enum DriftKind {
     Weather,
     Rewrite,
     Reinterpret,
+    Ground,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -89,6 +90,8 @@ pub struct MemoryTrace {
     pub core: String,
     /// 0..1. Résistance à la dérive (trauma, réussite, valeur).
     pub anchor: f32,
+    /// Consecutive recalls/rewrites whose text left the core.
+    pub detach_strikes: u32,
 }
 
 impl MemoryTrace {

@@ -142,6 +142,27 @@ impl Narrator for HttpNarrator {
         }
     }
 
+    fn recontextualize(
+        &self,
+        trace: &MemoryTrace,
+        core: &str,
+        profile: &crate::core::profile::EntityProfile,
+    ) -> String {
+        let system = &crate::lexicon::prompts().recontextualize;
+        let user = format!(
+            "core: {}\ngist actuel: {}\nvalence: {:.2} disgust: {:.2} schema: {}",
+            core,
+            trace.gist,
+            trace.valence,
+            trace.disgust,
+            trace.schema.as_deref().unwrap_or("-")
+        );
+        match self.chat(system, &user) {
+            Ok(s) if !s.trim().is_empty() => s.trim().chars().take(280).collect(),
+            _ => self.fallback.recontextualize(trace, core, profile),
+        }
+    }
+
     fn reply(&self, user: &str, memories: &[String], axioms: &[String], mood: &Mood) -> String {
         let mut ctx = String::new();
         for a in axioms.iter().take(4) {

@@ -54,19 +54,35 @@ pub fn recall(
                 store.traces[&id].fidelity,
             )
         } else {
-            let narrative = {
+            let generated = {
                 let t = store.traces.get(&id).unwrap();
                 narrator.reconstruct(t, mood, query)
             };
-            if let Some(t) = store.traces.get_mut(&id) {
-                apply_reconsolidation(t, &narrative, profile, mood.valence);
+            let core = store.traces.get(&id).unwrap().core.clone();
+            let rewrite = {
+                let t = store.traces.get(&id).unwrap();
+                if crate::recall::ground::will_correct(t, profile, &generated, &core) {
+                    Some(narrator.recontextualize(t, &core, profile))
+                } else {
+                    None
+                }
+            };
+            let check = {
+                let t = store.traces.get_mut(&id).unwrap();
+                crate::recall::ground::note(t, profile, &generated, &core, rewrite)
+            };
+            if !check.corrected {
+                if let Some(t) = store.traces.get_mut(&id) {
+                    apply_reconsolidation(t, &check.text, profile, mood.valence);
+                }
             }
             let t = store.traces.get(&id).unwrap();
-            (
-                narrative,
-                format!("récit vécu (fidélité {:.2}), pas le verbatim", t.fidelity),
-                t.fidelity,
-            )
+            let disclaimer = if check.corrected {
+                "reprise vers le core".to_string()
+            } else {
+                format!("récit vécu (fidélité {:.2})", t.fidelity)
+            };
+            (check.text, disclaimer, t.fidelity)
         };
         if let Some(t) = store.traces.get_mut(&id) {
             t.rehearsals += 1;

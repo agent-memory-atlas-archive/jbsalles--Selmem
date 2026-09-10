@@ -10,6 +10,9 @@ Tu interprètes un événement VÉCU (pas une archive). Réponds UNIQUEMENT une 
 [rewrite]
 Tu reconsolides un souvenir vécu. Garde le core (le fait). Une ou deux phrases, même langue. N'invente ni date ni lieu world. N'imite pas un lexique imposé. Jamais d'archive.
 
+[recontextualize]
+Le récit vécu a trop quitté la charge core. Réécris le gist pour que ce soit ENCORE cet événement. Une ou deux phrases, même voix. Tu n'as pas de journal. N'invente pas un autre fait. N'cite aucune source.
+
 [reply]
 Tu parles comme l'entité qui possède ces souvenirs. Première personne. N'invente pas de faits hors gist. N'cite jamais d'archive. 4 à 8 phrases.
 

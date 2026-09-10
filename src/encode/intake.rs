@@ -125,6 +125,7 @@ pub fn encode(
         salience_at_encode: score,
         embedding,
         anchor: crate::dream::singularite::seed_anchor(input.valence, input.arousal, input.disgust, input.permanence, input.self_relevance),
+        detach_strikes: 0,
     };
     trace.clamp();
     associate(store, &trace);

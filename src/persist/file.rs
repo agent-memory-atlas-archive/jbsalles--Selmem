@@ -129,7 +129,7 @@ fn write_profile(w: &mut impl Write, p: &EntityProfile) -> io::Result<()> {
     writeln!(w, "profile {}", p.name.replace(' ', "_"))?;
     writeln!(
         w,
-        "params {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}",
+        "params {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}",
         p.encode_threshold,
         p.w_arousal,
         p.w_novelty,
@@ -149,7 +149,10 @@ fn write_profile(w: &mut impl Write, p: &EntityProfile) -> io::Result<()> {
         p.myth_access,
         p.max_recall,
         p.extinction_rate,
-        p.merge_similarity
+        p.merge_similarity,
+        p.ground_min_overlap,
+        p.ground_strikes,
+        p.narrator_firmness
     )
 }
 
@@ -191,6 +194,9 @@ fn read_profile(r: &mut impl BufRead) -> io::Result<EntityProfile> {
         max_recall: n[17] as usize,
         extinction_rate: n.get(18).copied().unwrap_or(0.06),
         merge_similarity: n.get(19).copied().unwrap_or(0.32),
+        ground_min_overlap: n.get(20).copied().unwrap_or(0.18),
+        ground_strikes: n.get(21).copied().unwrap_or(3.0) as usize,
+        narrator_firmness: n.get(22).copied().unwrap_or(0.55),
         voice: crate::core::profile::Voice::from_gains(n[9], n[10]),
     })
 }
@@ -246,6 +252,7 @@ fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
     writeln!(w)?;
     write_blob(w, &t.core)?;
     writeln!(w, "anchor {}", t.anchor)?;
+    writeln!(w, "detach {}", t.detach_strikes)?;
     Ok(())
 }
 
@@ -311,6 +318,12 @@ fn read_trace(r: &mut impl BufRead) -> io::Result<MemoryTrace> {
             line.strip_prefix("anchor ")
                 .and_then(|s| s.trim().parse().ok())
                 .unwrap_or(0.0)
+        },
+        detach_strikes: {
+            let line = read_line(r).unwrap_or_default();
+            line.strip_prefix("detach ")
+                .and_then(|s| s.trim().parse().ok())
+                .unwrap_or(0)
         },
     })
 }
@@ -506,6 +519,7 @@ fn dk(k: DriftKind) -> &'static str {
         DriftKind::Weather => "weather",
         DriftKind::Rewrite => "rewrite",
         DriftKind::Reinterpret => "reinterpret",
+        DriftKind::Ground => "ground",
     }
 }
 fn parse_dk(s: &str) -> io::Result<DriftKind> {
@@ -517,6 +531,7 @@ fn parse_dk(s: &str) -> io::Result<DriftKind> {
         "weather" => Ok(DriftKind::Weather),
         "rewrite" => Ok(DriftKind::Rewrite),
         "reinterpret" => Ok(DriftKind::Reinterpret),
+        "ground" => Ok(DriftKind::Ground),
         _ => fail("drift inconnue"),
     }
 }

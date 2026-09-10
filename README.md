@@ -94,6 +94,9 @@ Rust only. No Python suite.
   --path claire.db \
   --name Claire \
   --profile tender \
+  --ground-overlap 0.18 \
+  --ground-strikes 3 \
+  --narrator-firmness 0.42 \
   --token secret \
   --llm https://api.openai.com/v1/chat/completions \
   --model gpt-4o-mini \
@@ -129,7 +132,9 @@ One thread per connection. `/health` and `/` do not take the memory lock. `/turn
 | GET | `/who` | living axioms (trait > belief > motif) |
 | GET | `/lineage?schema=` | history of a belief |
 | GET | `/mood` | mood |
-| GET | `/audit?id=` | sealed verbatim (human debug) |
+| GET | `/profile` | knobs (`τ`, embellish, ground, …) |
+| POST | `/profile` | set knobs |
+| GET | `/audit?id=` | sealed verbatim (human debug, never the model) |
 | POST | `/live` | encode |
 | POST | `/remember` | reconstruct |
 | POST | `/speak` | embodied reply |
@@ -139,7 +144,8 @@ One thread per connection. `/health` and `/` do not take the memory lock. `/turn
 
 ## Rules that hold
 
-- Two books: lived narrative / archive. The model never reads the second.
+- Two books: lived narrative / archive. The model never reads the second. Grounding rewrites the gist toward the *core*; it never injects the journal.
+- Fading traces (cold / myth / low hold) may warp without a ceiling. Living traces are pulled back in proportion to `narrator_firmness`.
 - Two channels: `self` is sculpted, `world` is not.
 - Forgetting by default. Encoding threshold.
 - Unlabelled events get lexical affect (FR+EN), then identity, then optional LLM `interpret` on the live sentence.
@@ -170,3 +176,7 @@ singularity_distance(&fingerprint(&a), &fingerprint(&b));
 Not RAG. Not a vector database. Not a personality in a system prompt.  
 Not a neocortex and not a brain. An executive–autobiographical loop around a next-token transducer.  
 No local neural encoder ships in-tree: pass `--embed` if you have one.
+
+## How it's built
+
+Humans own architecture, concepts and governance. Models draft code, tests, and prose. Generated patches are reviewed.

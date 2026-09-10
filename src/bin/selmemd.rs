@@ -23,6 +23,15 @@ fn main() {
     };
 
     let mut mem = SelectiveMemory::open(&path, profile).expect("impossible d'ouvrir la mémoire");
+    if let Some(v) = flag(&args, "--ground-overlap").and_then(|s| s.parse().ok()) {
+        mem.profile.ground_min_overlap = v;
+    }
+    if let Some(v) = flag(&args, "--ground-strikes").and_then(|s| s.parse().ok()) {
+        mem.profile.ground_strikes = v;
+    }
+    if let Some(v) = flag(&args, "--narrator-firmness").and_then(|s| s.parse().ok()) {
+        mem.profile.narrator_firmness = v;
+    }
     if let Some(endpoint) = llm {
         if let Some(n) = HttpNarrator::parse(&endpoint, model, key.clone()) {
             mem = mem.with_narrator(Box::new(n));

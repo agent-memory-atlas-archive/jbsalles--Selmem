@@ -147,6 +147,14 @@ fn rewrite_pass(
         if text.trim().is_empty() || text == t.gist {
             continue;
         }
+        let core = t.core.clone();
+        if crate::recall::ground::overlap_with_core(&text, &core) < profile.ground_min_overlap {
+            let rewrite = narrator.recontextualize(t, &core, profile);
+            if let Some(tr) = store.traces.get_mut(&id) {
+                crate::recall::ground::note(tr, profile, &text, &core, Some(rewrite));
+            }
+            continue;
+        }
         if let Some(t) = store.traces.get_mut(&id) {
             t.gist = text.chars().take(280).collect();
             t.embedding = embedder.embed(&t.gist);

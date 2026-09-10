@@ -195,7 +195,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
            self_relevance REAL, schema TEXT, channel TEXT, archive_id TEXT,
            created INTEGER, last_recalled INTEGER, last_consolidated INTEGER,
            fidelity REAL, permanence REAL, rehearsals INTEGER, access REAL,
-           status TEXT, salience REAL, embedding TEXT, anchor REAL);
+           status TEXT, salience REAL, embedding TEXT, anchor REAL, detach_strikes INTEGER);
          CREATE TABLE IF NOT EXISTS cues(trace_id TEXT, cue TEXT);
          CREATE TABLE IF NOT EXISTS drifts(
            trace_id TEXT, kind TEXT, at INTEGER, note TEXT,
@@ -208,6 +208,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
     )?;
     let _ = db.exec("ALTER TABLE traces ADD COLUMN core TEXT;");
     let _ = db.exec("ALTER TABLE traces ADD COLUMN anchor REAL;");
+    let _ = db.exec("ALTER TABLE traces ADD COLUMN detach_strikes INTEGER;");
     let _ = db.exec("ALTER TABLE axioms ADD COLUMN layer TEXT;");
     db.exec("BEGIN IMMEDIATE;")?;
     db.exec(
@@ -239,8 +240,8 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         }
     }
     let q_tr = db.prepare(
-        "INSERT INTO traces(id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor)
-         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21)",
+        "INSERT INTO traces(id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes)
+         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21,?22)",
     )?;
     let q_cue = db.prepare("INSERT INTO cues(trace_id,cue) VALUES (?1,?2)")?;
     let q_dr = db.prepare(
@@ -274,6 +275,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         q_tr.bind_f64(19, t.salience_at_encode as f64)?;
         q_tr.bind_text(20, &pack_emb(&t.embedding))?;
         q_tr.bind_f64(21, t.anchor as f64)?;
+        q_tr.bind_i64(22, t.detach_strikes as i64)?;
         q_tr.step_done()?;
         for c in &t.cues {
             q_cue.bind_text(1, &t.id)?;
@@ -411,7 +413,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
 
     for row in query(
         &db,
-        "SELECT id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor FROM traces",
+        "SELECT id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes FROM traces",
     )? {
         if row.len() < 20 {
             continue;
@@ -438,6 +440,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
             salience_at_encode: row[18].parse().unwrap_or(0.0),
             embedding: unpack_emb(&row[19]),
             anchor: row.get(20).and_then(|s| s.parse().ok()).unwrap_or(0.0),
+            detach_strikes: row.get(21).and_then(|s| s.parse().ok()).unwrap_or(0),
             cues: Vec::new(),
             drifts: Vec::new(),
         };
@@ -516,7 +519,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
 
 fn params_line(p: &EntityProfile) -> String {
     format!(
-        "{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}",
+        "{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}",
         p.encode_threshold,
         p.w_arousal,
         p.w_novelty,
@@ -536,7 +539,10 @@ fn params_line(p: &EntityProfile) -> String {
         p.myth_access,
         p.max_recall,
         p.extinction_rate,
-        p.merge_similarity
+        p.merge_similarity,
+        p.ground_min_overlap,
+        p.ground_strikes,
+        p.narrator_firmness
     )
 }
 
@@ -567,6 +573,9 @@ fn parse_profile(name: &str, rest: &str) -> io::Result<EntityProfile> {
         max_recall: n[17] as usize,
         extinction_rate: n.get(18).copied().unwrap_or(0.06),
         merge_similarity: n.get(19).copied().unwrap_or(0.32),
+        ground_min_overlap: n.get(20).copied().unwrap_or(0.18),
+        ground_strikes: n.get(21).copied().unwrap_or(3.0) as usize,
+        narrator_firmness: n.get(22).copied().unwrap_or(0.55),
         voice: crate::core::profile::Voice::from_gains(n[9], n[10]),
     })
 }
@@ -648,6 +657,7 @@ fn dk(k: DriftKind) -> &'static str {
         DriftKind::Weather => "weather",
         DriftKind::Rewrite => "rewrite",
         DriftKind::Reinterpret => "reinterpret",
+        DriftKind::Ground => "ground",
     }
 }
 fn parse_dk(s: &str) -> DriftKind {
@@ -658,6 +668,7 @@ fn parse_dk(s: &str) -> DriftKind {
         "weather" => DriftKind::Weather,
         "rewrite" => DriftKind::Rewrite,
         "reinterpret" => DriftKind::Reinterpret,
+        "ground" => DriftKind::Ground,
         _ => DriftKind::Embellish,
     }
 }
