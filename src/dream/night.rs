@@ -1,3 +1,7 @@
+//! One "night": decay detail, maybe rewrite, merge close episodes,
+//! mint motifs / beliefs / traits, mark latent traces.
+//! No LLM is required. A narrator, if present, only rewrites gists.
+
 use std::collections::HashMap;
 
 use crate::dream::drift::{sculpt, weather};
@@ -161,7 +165,7 @@ fn rewrite_pass(
         if crate::recall::ground::overlap_with_core(&text, &core) < profile.ground_min_overlap {
             let rewrite = narrator.recontextualize(t, &core, profile);
             if let Some(tr) = store.traces.get_mut(&id) {
-                crate::recall::ground::note(tr, profile, &text, &core, Some(rewrite));
+                crate::recall::ground::apply_grounding(tr, profile, &text, &core, Some(rewrite));
             }
             continue;
         }

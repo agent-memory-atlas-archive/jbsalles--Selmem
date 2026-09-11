@@ -65,34 +65,42 @@ pub struct DriftEvent {
     pub disgust_delta: f32,
 }
 
+/// One lived episode. This is what the entity *uses*.
+/// The sealed archive (verbatim) lives in `ArchiveRecord`, pointed at by `archive_id`.
 #[derive(Clone, Debug)]
 pub struct MemoryTrace {
     pub id: String,
+    /// Reconstructable story the narrator may tell. This can drift.
     pub gist: String,
     pub cues: Vec<String>,
     pub valence: f32,
     pub arousal: f32,
     pub disgust: f32,
     pub self_relevance: f32,
+    /// Topic bucket used to cluster traces into motifs / beliefs.
     pub schema: Option<String>,
     pub channel: Channel,
+    /// Pointer into the sealed book. Never handed to the narrator.
     pub archive_id: Option<String>,
     pub created_at: u64,
     pub last_recalled_at: Option<u64>,
     pub last_consolidated_at: Option<u64>,
+    /// How precise the current gist still is (0 = blur, 1 = sharp).
     pub fidelity: f32,
+    /// How long this episode is meant to last. High → resists the encode gate drop.
     pub permanence: f32,
     pub rehearsals: u32,
+    /// How easy this episode is to find again. Falls with disuse.
     pub access: f32,
     pub status: TraceStatus,
     pub drifts: Vec<DriftEvent>,
     pub salience_at_encode: f32,
     pub embedding: Vec<f32>,
-    /// Charge sémantique abstraite — ne s'efface pas avec Ebbinghaus.
+    /// Stable semantic reference frozen at encode. Grounding compares against this.
     pub core: String,
-    /// 0..1. Résistance à la dérive (trauma, réussite, valeur).
+    /// 0..1 resistance to decay and rewrite (trauma, triumph, vow).
     pub anchor: f32,
-    /// Consecutive recalls/rewrites whose text left the core.
+    /// Consecutive spoken sentences that left the core. Reset after a pull-back.
     pub detach_strikes: u32,
 }
 

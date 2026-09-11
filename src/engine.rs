@@ -1,3 +1,9 @@
+//! The organ the rest of the crate talks to.
+//!
+//! Typical loop:
+//! `live_with` (encode) → `remember` / `speak` (reconstruct) → `sleep` (consolidate).
+//! Persistence (`save` / `open`) is a vault. The narrator never opens it.
+
 use std::path::{Path, PathBuf};
 
 use crate::dream::{self, DreamReport};

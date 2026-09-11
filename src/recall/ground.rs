@@ -1,17 +1,26 @@
-//! Drift is cheap on fading traces. Return to the core is proportional
-//! to narrator firmness × how much the trace still matters.
-//! The sealed archive is never used.
+//! When a reconstructed sentence leaves the semantic core, decide whether
+//! to let it stand or to pull it back.
+//!
+//! Vocabulary used here:
+//! - *overlap*: how much the spoken sentence still shares with the core
+//! - *miss*: overlap below `profile.ground_min_overlap`
+//! - *grip*: narrator firmness × how much this trace still matters (0 = let go)
+//! - *strikes*: consecutive misses on this trace
+//!
+//! The sealed archive is never read.
+
 use crate::core::model::{now_secs, Channel, DriftEvent, DriftKind, MemoryTrace, TraceStatus};
 use crate::core::profile::EntityProfile;
 use crate::encode::scoring::lexical_similarity;
 
-pub struct Check {
-    pub text: String,
-    pub corrected: bool,
-    pub overlap: f32,
+/// What recall should speak after the grounding check.
+pub struct GroundingOutcome {
+    pub spoken_text: String,
+    pub pulled_toward_core: bool,
+    pub overlap_with_core: f32,
 }
 
-pub fn core_charge(trace: &MemoryTrace) -> String {
+pub fn semantic_core_of(trace: &MemoryTrace) -> String {
     if !trace.core.trim().is_empty() {
         return trace.core.clone();
     }
@@ -28,145 +37,167 @@ pub fn overlap_with_core(generated: &str, core: &str) -> f32 {
     lexical_similarity(generated, core)
 }
 
-/// Cold, myth, or already slipping out of reach: allowed to warp forever.
-pub fn fading(trace: &MemoryTrace) -> bool {
+/// Cold / myth / latent, or already slipping: no ceiling on distortion.
+pub fn is_slipping_away(trace: &MemoryTrace) -> bool {
     matches!(
         trace.status,
         TraceStatus::Cold | TraceStatus::Myth | TraceStatus::Latent
-    )
-        || (trace.fidelity < 0.38 && trace.access < 0.28 && trace.permanence < 0.35 && trace.anchor < 0.40)
+    ) || (trace.fidelity < 0.38
+        && trace.access < 0.28
+        && trace.permanence < 0.35
+        && trace.anchor < 0.40)
 }
 
-/// How tightly this narrator holds *this* trace. 0 = let it go.
-pub fn hold(trace: &MemoryTrace, profile: &EntityProfile) -> f32 {
-    if fading(trace) {
+/// 0 = narrator lets this trace warp. 1 = narrator holds it tightly to the core.
+pub fn grip_on_trace(trace: &MemoryTrace, profile: &EntityProfile) -> f32 {
+    if is_slipping_away(trace) {
         return 0.0;
     }
-    let importance = (0.35 * trace.permanence
+    let how_much_it_still_matters = (0.35 * trace.permanence
         + 0.25 * trace.anchor
         + 0.20 * trace.access
         + 0.20 * trace.fidelity)
         .clamp(0.0, 1.0);
-    (profile.narrator_firmness.clamp(0.0, 1.0) * importance).clamp(0.0, 1.0)
+    (profile.narrator_firmness.clamp(0.0, 1.0) * how_much_it_still_matters).clamp(0.0, 1.0)
 }
 
-pub fn strikes_needed(trace: &MemoryTrace, profile: &EntityProfile) -> usize {
-    let h = hold(trace, profile);
-    if h < 0.12 {
+/// How many consecutive misses before a rewrite. `usize::MAX` = never.
+pub fn misses_before_rewrite(trace: &MemoryTrace, profile: &EntityProfile) -> usize {
+    let grip = grip_on_trace(trace, profile);
+    if grip < 0.12 {
         return usize::MAX;
     }
     let base = profile.ground_strikes.max(1) as f32;
-    (base / h).round().clamp(1.0, 24.0) as usize
+    (base / grip).round().clamp(1.0, 24.0) as usize
 }
 
-pub fn will_correct(trace: &MemoryTrace, profile: &EntityProfile, generated: &str, core: &str) -> bool {
-    if fading(trace) || hold(trace, profile) < 0.12 {
+pub fn should_force_core_rewrite(
+    trace: &MemoryTrace,
+    profile: &EntityProfile,
+    generated: &str,
+    core: &str,
+) -> bool {
+    if is_slipping_away(trace) || grip_on_trace(trace, profile) < 0.12 {
         return false;
     }
-    overlap_with_core(generated, core) < profile.ground_min_overlap
-        && (trace.detach_strikes as usize) + 1 >= strikes_needed(trace, profile)
+    let this_is_a_miss = overlap_with_core(generated, core) < profile.ground_min_overlap;
+    let next_strike_count = (trace.detach_strikes as usize) + 1;
+    this_is_a_miss && next_strike_count >= misses_before_rewrite(trace, profile)
 }
 
-/// Mix drifted text with a core-facing rewrite. High hold → more core.
-pub fn blend(drifted: &str, toward: &str, mix: f32) -> String {
-    let mix = mix.clamp(0.0, 1.0);
-    if mix < 0.18 || toward.trim().is_empty() {
+/// Mix the drifted sentence with a core-facing rewrite.
+/// High `toward_core` keeps more of the rewrite.
+pub fn mix_drifted_with_core(drifted: &str, toward_core: &str, toward_core_amount: f32) -> String {
+    let amount = toward_core_amount.clamp(0.0, 1.0);
+    if amount < 0.18 || toward_core.trim().is_empty() {
         return drifted.to_string();
     }
-    if mix >= 0.82 {
-        return toward.chars().take(280).collect();
+    if amount >= 0.82 {
+        return toward_core.chars().take(280).collect();
     }
-    let old: Vec<&str> = drifted.split_whitespace().collect();
-    let neu: Vec<&str> = toward.split_whitespace().collect();
-    if old.is_empty() {
-        return toward.to_string();
+    let drifted_words: Vec<&str> = drifted.split_whitespace().collect();
+    let core_words: Vec<&str> = toward_core.split_whitespace().collect();
+    if drifted_words.is_empty() {
+        return toward_core.to_string();
     }
-    let keep_n = ((old.len() as f32) * (1.0 - mix)).round() as usize;
-    let take_n = ((neu.len() as f32) * mix).round().max(1.0) as usize;
-    let mut out = Vec::new();
-    out.extend(old.into_iter().take(keep_n.max(1)));
-    out.extend(neu.into_iter().take(take_n));
-    let s = out.join(" ");
-    s.chars().take(280).collect()
+    let keep_from_drift = ((drifted_words.len() as f32) * (1.0 - amount)).round() as usize;
+    let take_from_core = ((core_words.len() as f32) * amount).round().max(1.0) as usize;
+    let mut words = Vec::new();
+    words.extend(drifted_words.into_iter().take(keep_from_drift.max(1)));
+    words.extend(core_words.into_iter().take(take_from_core));
+    words.join(" ").chars().take(280).collect()
 }
 
-pub fn recontextualize_rule(core: &str, _gist: &str, profile: &EntityProfile, valence: f32, disgust: f32) -> String {
+pub fn recontextualize_rule(
+    core: &str,
+    _gist: &str,
+    profile: &EntityProfile,
+    valence: f32,
+    disgust: f32,
+) -> String {
     crate::dream::retell(core, profile, valence, disgust)
 }
 
-pub fn note(
+/// Count a miss, or rewrite the gist toward the core once the budget is spent.
+pub fn apply_grounding(
     trace: &mut MemoryTrace,
     profile: &EntityProfile,
     generated: &str,
     core: &str,
-    rewritten: Option<String>,
-) -> Check {
+    narrator_rewrite: Option<String>,
+) -> GroundingOutcome {
     if trace.channel == Channel::World {
-        return Check {
-            text: if generated.trim().is_empty() {
-                trace.gist.clone()
-            } else {
-                generated.to_string()
-            },
-            corrected: false,
-            overlap: 1.0,
+        let spoken = if generated.trim().is_empty() {
+            trace.gist.clone()
+        } else {
+            generated.to_string()
+        };
+        return GroundingOutcome {
+            spoken_text: spoken,
+            pulled_toward_core: false,
+            overlap_with_core: 1.0,
         };
     }
+
     let overlap = overlap_with_core(generated, core);
     if overlap >= profile.ground_min_overlap {
         if trace.detach_strikes > 0 {
             trace.detach_strikes -= 1;
         }
-        return Check {
-            text: generated.to_string(),
-            corrected: false,
-            overlap,
+        return GroundingOutcome {
+            spoken_text: generated.to_string(),
+            pulled_toward_core: false,
+            overlap_with_core: overlap,
         };
     }
-    let h = hold(trace, profile);
-    if h < 0.12 {
-        return Check {
-            text: generated.to_string(),
-            corrected: false,
-            overlap,
+
+    let grip = grip_on_trace(trace, profile);
+    if grip < 0.12 {
+        return GroundingOutcome {
+            spoken_text: generated.to_string(),
+            pulled_toward_core: false,
+            overlap_with_core: overlap,
         };
     }
+
     trace.detach_strikes = trace.detach_strikes.saturating_add(1);
-    let need = strikes_needed(trace, profile);
-    if (trace.detach_strikes as usize) < need {
-        return Check {
-            text: generated.to_string(),
-            corrected: false,
-            overlap,
+    let allowed_misses = misses_before_rewrite(trace, profile);
+    if (trace.detach_strikes as usize) < allowed_misses {
+        return GroundingOutcome {
+            spoken_text: generated.to_string(),
+            pulled_toward_core: false,
+            overlap_with_core: overlap,
         };
     }
-    let toward = rewritten
-        .filter(|s| !s.trim().is_empty())
+
+    let toward_core = narrator_rewrite
+        .filter(|text| !text.trim().is_empty())
         .unwrap_or_else(|| {
             recontextualize_rule(core, &trace.gist, profile, trace.valence, trace.disgust)
         });
-    let next = blend(generated, &toward, h);
-    if next.trim() == generated.trim() {
-        return Check {
-            text: generated.to_string(),
-            corrected: false,
-            overlap,
+    let spoken = mix_drifted_with_core(generated, &toward_core, grip);
+    if spoken.trim() == generated.trim() {
+        return GroundingOutcome {
+            spoken_text: generated.to_string(),
+            pulled_toward_core: false,
+            overlap_with_core: overlap,
         };
     }
-    trace.gist = next.clone();
+
+    trace.gist = spoken.clone();
     trace.detach_strikes = 0;
     trace.drifts.push(DriftEvent {
         kind: DriftKind::Ground,
         at: now_secs(),
-        note: format!("reprise hold={h:.2} need={need} overlap={overlap:.2}"),
+        note: format!("reprise grip={grip:.2} misses_allowed={allowed_misses} overlap={overlap:.2}"),
         fidelity_delta: 0.0,
         valence_delta: 0.0,
         disgust_delta: 0.0,
     });
     trace.clamp();
-    Check {
-        text: next,
-        corrected: true,
-        overlap,
+    GroundingOutcome {
+        spoken_text: spoken,
+        pulled_toward_core: true,
+        overlap_with_core: overlap,
     }
 }

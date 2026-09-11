@@ -1,2 +1,2 @@
-[build]
-rustflags = ["-L", "/tmp/selmem-libs"]
+# Link flags belong in run.sh (Linux stub / Homebrew prefix).
+# Do not hardcode /tmp/selmem-libs here — it breaks a stock macOS `cargo test`.
