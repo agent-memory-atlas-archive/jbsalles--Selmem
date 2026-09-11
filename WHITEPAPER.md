@@ -1,6 +1,6 @@
 # SelMem
 
-Selective reconstructive memory for LLM entities. v1.5
+Selective reconstructive memory for LLM entities. v0.5
 
 ---
 

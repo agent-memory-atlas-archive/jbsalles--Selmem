@@ -33,20 +33,18 @@ We have not learned these parameters. We have not run a calibration against huma
 
 ## Embellish `0.18` / disgust gain `0.05` vs `0.16`
 
-**Why drift at all.** Recall is reconstructive (Bartlett, 1932). Autobiographical memory shows a positivity bias on many pleasant events and rumination on aversive ones (Walker & Skowronski; clinical literature on reconsolidation). Direction is warranted. Magnitude is not.
+**Why drift at all.** Recall is reconstructive. Generated memory shows a positivity bias on many pleasant events and rumination on aversive ones. Direction is warranted. Magnitude is not.
 
 **Why 0.18.** Step size so that four nights move gist without erasing the core. **Contrast pair** with austere `0.05`. Not a measured gilding rate.
 
 ---
 
-## Ebbinghaus form
+## Pseudo Ebbinghaus form
 
 ```
 R(t) = exp(−t / S)
 S = S₀ · (1+α·arousal) · (1+β·permanence) · (1+γ·anchor) · (1+δ·ln(1+rehearsals))
 ```
-
-**What Ebbinghaus actually did.** 1885, himself as subject, nonsense syllables, savings method. The curve falls fast then slower. Later fits are often a **power law** `R = (1+t)^(−β)` (Wixted), sometimes a sum of exponentials. We picked a single exponential because it is one line of code and has a readable time constant `S`.
 
 **What is warranted.**
 - Detail fades faster than a stable gist — fuzzy-trace theory (Brainerd & Reyna): verbatim vs gist.

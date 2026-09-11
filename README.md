@@ -7,7 +7,7 @@ An LLM maps context to the next token. A stack of unmodified facts maximises cov
 **Manifest:** [WHITEPAPER.md](WHITEPAPER.md)  
 **Knobs:** [PARAMETERS.md](PARAMETERS.md) — exploratory, not fitted.
 
-Zero crates. Rust 1.75. SQLite via system `libsqlite3`.
+Zero crates. Rust 1.75. SQLite via system `libsqlite3` (macOS SDK or Linux).
 
 ```
 src/
@@ -54,15 +54,16 @@ Two backends, same `Snapshot` (`profile`, `mood`, `store`):
 
 IDs are `{prefix}_{pid}_{n}`. The counter is raised on load for both backends. Dropped events leave no archive. Orphans are pruned on sleep and SQLite load.
 
-Link is dynamic. If `ld` cannot find `-lsqlite3` (no `-dev` package):
+Link is dynamic against the system `libsqlite3`.
 
-```bash
-mkdir -p /tmp/selmem-libs
-ln -sfn /usr/lib/x86_64-linux-gnu/libsqlite3.so.0 /tmp/selmem-libs/libsqlite3.so
-export RUSTFLAGS="-L /tmp/selmem-libs"
-```
+| OS | What you need |
+|---|---|
+| macOS | Xcode Command Line Tools (`xcode-select --install`). The SDK already ships sqlite3. If link still fails: `brew install sqlite` — `./run.sh` adds Homebrew’s lib path. |
+| Linux | `libsqlite3` (the `.so.0` runtime is enough). `./run.sh` invents a `libsqlite3.so` stub when `-dev` is missing. |
 
-`./run.sh` does that when needed, then execs `cargo`.
+Use `./run.sh` instead of bare `cargo` so those paths are set. Flat `.selmem` files do not need SQLite at all.
+
+Apple Silicon and Intel are both fine. Bind `127.0.0.1` or `0.0.0.0` as usual.
 
 ```bash
 ./run.sh test
