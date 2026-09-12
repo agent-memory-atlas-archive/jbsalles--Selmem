@@ -4,19 +4,20 @@ Selective reconstructive memory for an LLM entity. v0.5
 
 An LLM maps context to the next token. A stack of unmodified facts maximises coverage, not deviation: more evidence, same average path. SelMem sculpts a particular past — forgotten, gilded, anchored — so two instances can diverge. The aim is a non-average, path-dependent continuation, not a taller log. Selection, reconstruction, sleep, identity.
 
-**Manifest:** [WHITEPAPER.md](WHITEPAPER.md)  
+**Manifest:** [WHITEPAPER.md](WHITEPAPER.md)\
 **Knobs:** [PARAMETERS.md](PARAMETERS.md) — exploratory, not fitted.
 
 Zero crates. Rust 1.75. SQLite via system `libsqlite3` (macOS SDK or Linux).
 
 ```
 src/
-  core/       model, profile, store
+  core/       model, profile, store, talk
   encode/     intake, scoring, embed, affect, identity
   recall/     retrieve, narrator, http
   dream/      night, drift, singularite
   persist/    file, sqlite
   net/        api, httpx, ui
+  config.rs   .selmem runtime options
   engine.rs   the loop
   bin/        selmemd, selmem-chat
 ```
@@ -28,7 +29,7 @@ experience → interpret → identity paint → gate
         ↓                         ↑
    lived book + sealed archive    |
         ↓                         |
- remember / speak (meaning can move)
+ remember / speak (meaning can move; talk frame keeps the live thread)
         ↓
       sleep
  weather · rewrite · merge · extinguish
@@ -48,7 +49,7 @@ Zero Cargo crates. Persistence is a vault, not the memory: the organ lives in RA
 Two backends, same `Snapshot` (`profile`, `mood`, `store`):
 
 | Path | Backend |
-|---|---|
+| --- | --- |
 | `.db` / `.sqlite` / `.sqlite3` | system `libsqlite3` (prepared statements, `BEGIN IMMEDIATE`) |
 | anything else | flat `SELMEM1` file |
 
@@ -57,11 +58,11 @@ IDs are `{prefix}_{pid}_{n}`. The counter is raised on load for both backends. D
 Link is dynamic against the system `libsqlite3`.
 
 | OS | What you need |
-|---|---|
+| --- | --- |
 | macOS | Xcode Command Line Tools (`xcode-select --install`). The SDK already ships sqlite3. If link still fails: `brew install sqlite` — `./run.sh` adds Homebrew’s lib path. |
 | Linux | `libsqlite3` (the `.so.0` runtime is enough). `./run.sh` invents a `libsqlite3.so` stub when `-dev` is missing. |
 
-Use `./run.sh` instead of bare `cargo` so those paths are set. Flat `.selmem` files do not need SQLite at all.
+Use `./run.sh` instead of bare `cargo` so those paths are set. A `SELMEM1` vault named `claire.selmem` does not need SQLite. A cwd `.selmem` with `key=value` lines is config, not a vault.
 
 Apple Silicon and Intel are both fine. Bind `127.0.0.1` or `0.0.0.0` as usual.
 
@@ -72,6 +73,76 @@ Apple Silicon and Intel are both fine. Bind `127.0.0.1` or `0.0.0.0` as usual.
 ./run.sh run --release --example bifurcation
 ./run.sh run --release --bin selmemd -- --help
 ```
+
+## Config
+
+Runtime options live in a `.selmem` file in the working directory. That is not the book.
+
+| File | First line | Role |
+| --- | --- | --- |
+| `.selmem` (cwd) or `selmem.conf` | `llm=…` | options |
+| `claire.selmem` / `--path` | `SELMEM1` | vault (traces, axioms, mood) |
+
+```bash
+cp data/config.example .selmem
+```
+
+```
+# .selmem
+llm=https://api.x.ai/v1/chat/completions
+model=grok-4.3
+api_key=
+reasoning=none
+temp=0
+http_timeout=60
+
+# embed=
+# embed_model=text-embedding-3-small
+
+# bind=127.0.0.1:7420
+# path=claire.db
+# name=Claire
+# profile=tender
+# token=
+
+# ground_overlap=0.18
+# ground_strikes=3
+# narrator_firmness=0.42
+
+# probes=2
+# quick=false
+```
+
+`SELMEM_LLM=` and `export SELMEM_API_KEY=` lines are accepted. Quotes are stripped.
+
+**Precedence:** `--flag` &gt; `SELMEM_*` env &gt; file &gt; default.
+
+Another file: `--config path` or `SELMEM_CONFIG`. Discovery otherwise: cwd `.selmem`, then `selmem.conf`.
+
+| Key | Env | Default | Role |
+| --- | --- | --- | --- |
+| `llm` | `SELMEM_LLM` | unset | chat completions URL; unset = `RuleNarrator` |
+| `model` | `SELMEM_MODEL` | bin: `llama3`, benches: `gpt-4o-mini` | model id |
+| `api_key` | `SELMEM_API_KEY` | unset | `Authorization: Bearer` |
+| `reasoning` | `SELMEM_REASONING` | `none` | xAI `reasoning_effort` (`none`/`low`/… or `off` to omit) |
+| `temp` | `SELMEM_TEMP` | `0` | sampling temperature |
+| `http_timeout` | `SELMEM_HTTP_TIMEOUT` | `60` | curl `--max-time` seconds |
+| `embed` | `SELMEM_EMBED` | unset | embeddings URL |
+| `embed_model` | `SELMEM_EMBED_MODEL` | `text-embedding-3-small` | embedding model id |
+| `bind` | `SELMEM_BIND` | `127.0.0.1:7420` | `selmemd` listen address |
+| `path` | `SELMEM_PATH` | `entity.db` / `claire.db` | vault path |
+| `name` | `SELMEM_NAME` | `Claire` | entity name |
+| `profile` | `SELMEM_PROFILE` | `tender` | `tender` / `austere` |
+| `token` | `SELMEM_TOKEN` | unset | HTTP bearer for the daemon |
+| `ground_overlap` | `SELMEM_GROUND_OVERLAP` | profile | Jaccard vs core |
+| `ground_strikes` | `SELMEM_GROUND_STRIKES` | profile | misses before a pull-back |
+| `narrator_firmness` | `SELMEM_NARRATOR_FIRMNESS` | profile | blend strength toward core |
+| `probes` | `SELMEM_PROBES` | all / 2 if quick | how many bench questions to speak |
+| `quick` | `SELMEM_QUICK` | unset | `1`/`true`/`yes` = salient only, 2 probes, one persist window |
+
+`selmemd`, `selmem-chat`, and the experiment examples all read this file. `selmemd` prints `config <path>` when it loaded one.
+
+Do not put `api_key` in a committed file. Copy the example, fill the key locally.
 
 ## Tests and experiments
 
@@ -91,16 +162,20 @@ Published numbers: [WHITEPAPER.md](WHITEPAPER.md) § Experiments.
 ./run.sh test --test divergence
 ./run.sh test --test erasure
 ./run.sh test --test json_parse
+./run.sh test --test talk
+./run.sh test --test config
 ```
 
 | What | File | Stimulus |
-|---|---|---|
+| --- | --- | --- |
 | Narrative scenes | `tests/scenes.rs` | `tests/cases/*.json` |
 | Decay, anchors, SQLite, Ebbinghaus | `tests/engine.rs` | inline |
 | Bifurcation A/B (rules) | `tests/bifurcation.rs` | `data/bifurcation.json` |
 | Split lives (rules) | `tests/divergence.rs` | `data/divergence.json` |
 | Erasure: trivia vs repeated aversion | `tests/erasure.rs` | `data/erasure.json` |
 | Chat JSON walker | `tests/json_parse.rs` | fixtures in the test |
+| Working talk (session frame) | `tests/talk.rs` | inline |
+| `.selmem` config parser | `tests/config.rs` | inline |
 
 These use `RuleNarrator`. They must stay green offline.
 
@@ -127,25 +202,31 @@ You should see `Compiling selmem`.
 
 Only `speak` / `reply` hits the HTTP API (`SpeakOnlyHttp`). Encode, sleep and reconstruct stay on the organ.
 
-```bash
-export SELMEM_LLM='https://api.x.ai/v1/chat/completions'
-export SELMEM_MODEL='grok-4.3'
-export SELMEM_API_KEY='xai-…'          # never commit this
-export SELMEM_REASONING=none           # skip thinking tokens on grok-4.3
-export SELMEM_TEMP=0
-export SELMEM_HTTP_TIMEOUT=60
-unset SELMEM_QUICK
+Options live in a `.selmem` file in the working directory (`data/config.example`). CLI flags and `SELMEM_*` env still override the file.
 
+```
+# .selmem  — not a SELMEM1 vault
+llm=https://api.x.ai/v1/chat/completions
+model=grok-4.3
+api_key=xai-…
+reasoning=none
+temp=0
+http_timeout=60
+```
+
+```bash
+cp data/config.example .selmem
 ./run.sh run --release --example bifurcation
 ./run.sh run --release --example divergence
 ```
 
-OpenAI-compatible endpoints work the same (`SELMEM_LLM` = `…/v1/chat/completions`). Ollama:
+`--config path` or `SELMEM_CONFIG` selects another file. A `claire.selmem` vault starts with `SELMEM1` and is never read as config.
 
-```bash
-export SELMEM_LLM='http://127.0.0.1:11434/v1/chat/completions'
-export SELMEM_MODEL='llama3'
-unset SELMEM_API_KEY
+OpenAI-compatible endpoints work the same. Ollama:
+
+```
+llm=http://127.0.0.1:11434/v1/chat/completions
+model=llama3
 ```
 
 Check the endpoint before a 100-call run:
@@ -158,7 +239,7 @@ curl -sS --max-time 30 "$SELMEM_LLM" \
 ```
 
 | Variable | Default | Role |
-|---|---|---|
+| --- | --- | --- |
 | `SELMEM_LLM` | unset | chat URL; unset = rules only |
 | `SELMEM_MODEL` | — | model id |
 | `SELMEM_API_KEY` | unset | `Authorization: Bearer` |
@@ -172,9 +253,11 @@ A line `narrator: 0/10 answers are the RuleNarrator template` means the model an
 
 Full bifurcation ≈ 100 `reply` calls (5 probes × 2 agents × 5 snapshots × 2 LLM conditions). Quick mode ≈ 12. Ablation `salient-no-consolidation` never calls the model.
 
-Fingerprint distance is on the book (0 = clones). Speak distance is wording overlap; two clones with the same book already differ under Grok (~0.7). Do not read H₁ off Δspeak alone.
+Fingerprint distance is on the book (0 = clones). Speak distance is wording overlap; two clones with the same book already differ under Grok (\~0.7). Do not read H₁ off Δspeak alone.
 
 ## Run
+
+Same keys can sit in `.selmem`. Flags still win.
 
 ```bash
 ./run.sh run --release --bin selmemd -- \
@@ -191,7 +274,7 @@ Fingerprint distance is on the book (0 = clones). Speak distance is wording over
   --api-key "$SELMEM_API_KEY"
 ```
 
-UI: `http://IP:7420/` — paste the token at the top, talk.  
+UI: `http://IP:7420/` — paste the token at the top, talk.\
 Local Ollama: `--llm http://127.0.0.1:11434/v1/chat/completions --model llama3`
 
 Behind nginx:
@@ -200,33 +283,37 @@ Behind nginx:
 location / { proxy_pass http://127.0.0.1:7420; proxy_read_timeout 90s; }
 ```
 
-```bash
-export SELMEM_LLM=https://api.openai.com/v1/chat/completions
-export SELMEM_MODEL=gpt-4o-mini
-export SELMEM_API_KEY=sk-...
-export SELMEM_EMBED=https://api.openai.com/v1/embeddings
-export SELMEM_TOKEN=secret
+Or only the file:
+
+```
+llm=https://api.openai.com/v1/chat/completions
+model=gpt-4o-mini
+api_key=sk-...
+embed=https://api.openai.com/v1/embeddings
+token=secret
 ```
 
-No endpoint: `RuleNarrator` + hashed vectors. The organ still runs.
+No `llm`: `RuleNarrator` + hashed vectors. The organ still runs.
 
 One thread per connection. `/health` and `/` do not take the memory lock. `/turn` is serialized on the organ (one writer). Auth is `Authorization: Bearer` only — not `?token=`.
 
 ## HTTP
 
 | Method | Route | Role |
-|---|---|---|
+| --- | --- | --- |
 | GET | `/health` | liveness (no token, no lock) |
-| GET | `/who` | living axioms (trait > belief > motif) |
+| GET | `/who` | living axioms (trait &gt; belief &gt; motif) |
 | GET | `/lineage?schema=` | history of a belief |
 | GET | `/mood` | mood |
 | GET | `/profile` | knobs (`τ`, embellish, ground, …) |
 | POST | `/profile` | set knobs |
 | GET | `/audit?id=` | sealed verbatim (human debug, never the model) |
+| GET | `/talk` | live thread (topic + last turns) |
 | POST | `/live` | encode |
 | POST | `/remember` | reconstruct |
-| POST | `/speak` | embodied reply |
+| POST | `/speak` | embodied reply (holds the thread) |
 | POST | `/turn` | live + reply |
+| POST | `/talk/clear` | drop the session frame |
 | POST | `/sleep` | consolidate |
 | POST | `/save` | flush |
 
@@ -262,8 +349,8 @@ singularity_distance(&fingerprint(&a), &fingerprint(&b));
 
 ## What this is not
 
-Not RAG. Not a vector database. Not a personality in a system prompt.  
-Not a neocortex and not a brain. An executive–autobiographical loop around a next-token transducer.  
+Not RAG. Not a vector database. Not a personality in a system prompt.\
+Not a neocortex and not a brain. An executive–autobiographical loop around a next-token transducer.\
 No local neural encoder ships in-tree: pass `--embed` if you have one.
 
 ## How it's built

@@ -131,11 +131,12 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             let reply = mem.speak(&text);
             let _ = mem.save();
             ok(format!(
-                "{{\"kept\":{},\"score\":{:.4},\"reason\":\"{}\",\"reply\":\"{}\",\"mood\":{{\"valence\":{:.3},\"arousal\":{:.3},\"disgust\":{:.3}}}}}",
+                "{{\"kept\":{},\"score\":{:.4},\"reason\":\"{}\",\"reply\":\"{}\",\"topic\":\"{}\",\"mood\":{{\"valence\":{:.3},\"arousal\":{:.3},\"disgust\":{:.3}}}}}",
                 if dec.kept { "true" } else { "false" },
                 dec.score,
                 json_esc(&dec.reason),
                 json_esc(&reply),
+                json_esc(mem.talk.topic.as_deref().unwrap_or("")),
                 mem.mood.valence,
                 mem.mood.arousal,
                 mem.mood.disgust
@@ -240,7 +241,35 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             }
             let reply = mem.speak(&user);
             let _ = mem.save();
-            ok(format!("{{\"reply\":\"{}\"}}", json_esc(&reply)))
+            ok(format!(
+                "{{\"reply\":\"{}\",\"topic\":\"{}\"}}",
+                json_esc(&reply),
+                json_esc(mem.talk.topic.as_deref().unwrap_or(""))
+            ))
+        }
+        ("GET", "/talk") => {
+            let turns: Vec<String> = mem
+                .talk
+                .turns
+                .iter()
+                .map(|t| {
+                    format!(
+                        "{{\"user\":\"{}\",\"reply\":\"{}\"}}",
+                        json_esc(&t.user),
+                        json_esc(&t.reply)
+                    )
+                })
+                .collect();
+            ok(format!(
+                "{{\"topic\":\"{}\",\"schema\":\"{}\",\"turns\":[{}]}}",
+                json_esc(mem.talk.topic.as_deref().unwrap_or("")),
+                json_esc(mem.talk.schema.as_deref().unwrap_or("")),
+                turns.join(",")
+            ))
+        }
+        ("POST", "/talk/clear") => {
+            mem.clear_talk();
+            ok("{\"cleared\":true}".into())
         }
         ("POST", "/save") => match mem.save() {
             Ok(()) => ok("{\"saved\":true}".into()),

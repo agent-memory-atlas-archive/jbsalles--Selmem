@@ -50,9 +50,10 @@ fn main() {
         ),
     ];
 
-    let llm = std::env::var("SELMEM_LLM").ok();
-    let model = std::env::var("SELMEM_MODEL").unwrap_or_else(|_| "gpt-4o-mini".into());
-    let key = std::env::var("SELMEM_API_KEY").ok();
+    let cfg = selmem::Config::get();
+    let llm = cfg.llm();
+    let model = cfg.model("gpt-4o-mini");
+    let key = cfg.api_key();
 
     let mut claire = SelectiveMemory::new(EntityProfile::tender("Claire"));
     let mut silas = SelectiveMemory::new(EntityProfile::austere("Silas"));
@@ -65,7 +66,7 @@ fn main() {
             silas = silas.with_narrator(Box::new(n));
         }
     } else {
-        println!("no SELMEM_LLM — RuleNarrator / retell only");
+        println!("no llm in .selmem / SELMEM_LLM — RuleNarrator / retell only");
     }
 
     let claire = ingest(claire, &events);

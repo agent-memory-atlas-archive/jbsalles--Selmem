@@ -10,6 +10,7 @@ use crate::dream::{self, DreamReport};
 use crate::encode::embed::{Embedder, HashEmbedder};
 use crate::encode::{self, EncodeDecision, EncodeInput};
 use crate::core::model::{IdentityAxiom, Mood, RecalledMemory};
+use crate::core::talk::WorkingTalk;
 use crate::recall::narrator::{Narrator, RuleNarrator};
 use crate::persist;
 use crate::core::profile::EntityProfile;
@@ -20,6 +21,8 @@ pub struct SelectiveMemory {
     pub profile: EntityProfile,
     pub store: MemoryStore,
     pub mood: Mood,
+    /// Live thread. Not a trace. Not persisted.
+    pub talk: WorkingTalk,
     pub path: Option<PathBuf>,
     narrator: Box<dyn Narrator>,
     embedder: Box<dyn Embedder>,
@@ -31,6 +34,7 @@ impl SelectiveMemory {
             profile,
             store: MemoryStore::new(),
             mood: Mood::default(),
+            talk: WorkingTalk::default(),
             path: None,
             narrator: Box::new(RuleNarrator),
             embedder: Box::new(HashEmbedder),
@@ -49,6 +53,7 @@ impl SelectiveMemory {
                 profile: snap.profile,
                 store: snap.store,
                 mood: snap.mood,
+                talk: WorkingTalk::default(),
                 path: Some(path),
                 narrator: Box::new(RuleNarrator),
                 embedder: Box::new(HashEmbedder),
@@ -58,6 +63,7 @@ impl SelectiveMemory {
                 profile,
                 store: MemoryStore::new(),
                 mood: Mood::default(),
+                talk: WorkingTalk::default(),
                 path: Some(path),
                 narrator: Box::new(RuleNarrator),
                 embedder: Box::new(HashEmbedder),
@@ -116,6 +122,7 @@ impl SelectiveMemory {
             }
         }
         encode::identity::paint(&mut self.store, &self.mood, &mut input);
+        self.talk.hear(input.event, input.schema.as_deref());
         let valence = input.valence;
         let arousal = input.arousal;
         let disgust = input.disgust;
@@ -207,15 +214,43 @@ impl SelectiveMemory {
     }
 
     pub fn speak(&mut self, user: &str) -> String {
-        let recalled = self.remember(user);
+        self.speak_inner(user, true)
+    }
+
+    /// Probe / unit test path. Does not read or write the live thread.
+    pub fn speak_isolated(&mut self, user: &str) -> String {
+        self.speak_inner(user, false)
+    }
+
+    pub fn clear_talk(&mut self) {
+        self.talk.clear();
+    }
+
+    fn speak_inner(&mut self, user: &str, hold: bool) -> String {
+        if hold {
+            self.talk.hear(user, None);
+        }
+        let query = if hold {
+            self.talk.recall_query(user)
+        } else {
+            user.to_string()
+        };
+        let recalled = self.remember(&query);
         let memories: Vec<String> = recalled.into_iter().map(|r| r.narrative).collect();
         let axioms: Vec<String> = self
             .who_am_i()
             .into_iter()
             .map(|a| a.statement.clone())
             .collect();
-        self.narrator
-            .reply(user, &memories, &axioms, &self.mood)
+        let empty = WorkingTalk::default();
+        let talk = if hold { &self.talk } else { &empty };
+        let reply = self
+            .narrator
+            .reply(user, &memories, &axioms, &self.mood, talk);
+        if hold {
+            self.talk.record(user, &reply);
+        }
+        reply
     }
 
     pub fn audit(&self, trace_id: &str) -> Option<&str> {

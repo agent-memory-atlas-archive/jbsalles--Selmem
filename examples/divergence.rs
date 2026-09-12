@@ -3,7 +3,7 @@
 //!   ./run.sh run --release --example divergence
 //!
 //! With a model on speak:
-//!   SELMEM_LLM=... SELMEM_MODEL=... SELMEM_API_KEY=... \
+//!   # or llm=/model=/api_key= in .selmem
 //!   ./run.sh run --release --example divergence
 
 use selmem::{run_split_lives, LlmSpec};
@@ -13,7 +13,7 @@ fn main() {
     if let Some(s) = llm.as_ref() {
         println!("LLM replies via {} model={}", s.url, s.model);
     } else {
-        println!("RuleNarrator (set SELMEM_LLM to speak with a model)");
+        println!("RuleNarrator (set llm in .selmem to speak with a model)");
     }
     let r = run_split_lives(llm.as_ref());
     println!(

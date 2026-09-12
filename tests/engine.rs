@@ -70,6 +70,56 @@ fn http_api_live_remember_sleep() {
 }
 
 #[test]
+fn working_talk_holds_the_thread_and_stays_off_the_book() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let mut ev = EncodeInput::new(
+        "Le projet a été annulé sans raison, on m'a volé le crédit.",
+    );
+    ev.valence = -0.8;
+    ev.arousal = 0.7;
+    ev.disgust = 0.5;
+    ev.self_relevance = 0.95;
+    ev.schema = Some("injustice".into());
+    assert!(mem.live_with(ev).kept);
+
+    let first = mem.speak("On parlait du projet annulé.");
+    assert!(!first.trim().is_empty());
+    assert!(
+        mem.talk.topic.is_some(),
+        "topic should be set after a content turn"
+    );
+    assert_eq!(mem.talk.turns.len(), 1);
+
+    let before_traces = mem.store.traces.len();
+    let _ = mem.speak("Et alors, tu en penses quoi ?");
+    assert_eq!(mem.talk.turns.len(), 2);
+    assert_eq!(
+        mem.store.traces.len(),
+        before_traces,
+        "working talk must not mint traces"
+    );
+    let topic = mem.talk.topic.as_deref().unwrap_or("");
+    assert!(
+        topic.contains("projet")
+            || topic.contains("annul")
+            || topic.contains("injustice")
+            || topic.contains("crédit")
+            || topic.contains("credit"),
+        "follow-up must not wipe the topic, got {topic:?}"
+    );
+
+    let isolated = mem.speak_isolated("couleur favorite");
+    assert!(!isolated.trim().is_empty());
+    assert_eq!(mem.talk.turns.len(), 2, "isolated speak must not record");
+
+    mem.clear_talk();
+    assert!(mem.talk.is_empty());
+
+    let listed = selmem::api::dispatch(&mut mem, "GET", "/talk", "", "");
+    assert_eq!(listed.status, 200);
+}
+
+#[test]
 fn sleep_merges_close_episodes_and_can_extinguish() {
     let mut profile = EntityProfile::tender("Claire");
     profile.encode_threshold = 0.12;

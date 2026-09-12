@@ -16,7 +16,7 @@ fn which_curl() -> bool {
 
 fn curl_post(url: &str, api_key: Option<&str>, body: &str) -> Result<String, String> {
     let mut cmd = Command::new("curl");
-    let timeout = std::env::var("SELMEM_HTTP_TIMEOUT").unwrap_or_else(|_| "60".into());
+    let timeout = crate::config::Config::get().http_timeout();
     cmd.args(["-sS", "--max-time", &timeout, "-X", "POST", url, "-H", "Content-Type: application/json"]);
     if let Some(k) = api_key {
         cmd.arg("-H").arg(format!("Authorization: Bearer {k}"));

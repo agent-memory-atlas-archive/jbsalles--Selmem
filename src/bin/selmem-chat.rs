@@ -1,18 +1,17 @@
 use std::env;
 use std::io::{self, BufRead, Write};
 
-use selmem::{EncodeInput, EntityProfile, HttpEmbedder, HttpNarrator, SelectiveMemory};
+use selmem::{Config, EncodeInput, EntityProfile, HttpEmbedder, HttpNarrator, SelectiveMemory};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let path = flag(&args, "--path").unwrap_or_else(|| "claire.db".into());
-    let name = flag(&args, "--name").unwrap_or_else(|| "Claire".into());
-    let kind = flag(&args, "--profile").unwrap_or_else(|| "tender".into());
-    let llm = flag(&args, "--llm").or_else(|| env::var("SELMEM_LLM").ok());
-    let model = flag(&args, "--model")
-        .or_else(|| env::var("SELMEM_MODEL").ok())
-        .unwrap_or_else(|| "llama3".into());
-    let key = flag(&args, "--api-key").or_else(|| env::var("SELMEM_API_KEY").ok());
+    let cfg = Config::get();
+    let path = cfg.resolve_or(flag(&args, "--path"), "path", "claire.db");
+    let name = cfg.resolve_or(flag(&args, "--name"), "name", "Claire");
+    let kind = cfg.resolve_or(flag(&args, "--profile"), "profile", "tender");
+    let llm = cfg.resolve(flag(&args, "--llm"), "llm");
+    let model = cfg.resolve_or(flag(&args, "--model"), "model", "llama3");
+    let key = cfg.resolve(flag(&args, "--api-key"), "api_key");
 
     let profile = if kind == "austere" {
         EntityProfile::austere(name)
@@ -26,14 +25,14 @@ fn main() {
             eprintln!("voix LLM branchée");
         }
     }
-    if let Some(url) = flag(&args, "--embed").or_else(|| env::var("SELMEM_EMBED").ok()) {
+    if let Some(url) = cfg.resolve(flag(&args, "--embed"), "embed") {
         if let Some(e) = HttpEmbedder::parse(&url, "text-embedding-3-small", key.clone()) {
             mem = mem.with_embedder(Box::new(e));
             eprintln!("embeddings HTTP branchés");
         }
     }
 
-    eprintln!("{} écoute. /sleep /who /mood /quit", mem.profile.name);
+    eprintln!("{} écoute. /sleep /who /mood /talk /forget /quit", mem.profile.name);
     let stdin = io::stdin();
     let mut stdout = io::stdout();
     let mut turns: u32 = 0;
@@ -69,6 +68,20 @@ fn main() {
                     "humeur v={:.2} a={:.2} d={:.2}",
                     mem.mood.valence, mem.mood.arousal, mem.mood.disgust
                 );
+            }
+            "/talk" => {
+                match mem.talk.topic.as_deref() {
+                    Some(t) => println!("fil: {t}"),
+                    None => println!("(pas de fil)"),
+                }
+                for t in &mem.talk.turns {
+                    println!("  H: {}", t.user);
+                    println!("  S: {}", t.reply);
+                }
+            }
+            "/forget" => {
+                mem.clear_talk();
+                println!("(fil oublié)");
             }
             _ => {
                 let (valence, arousal, disgust, schema) = affect(line);

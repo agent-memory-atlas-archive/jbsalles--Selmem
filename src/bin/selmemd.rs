@@ -3,19 +3,20 @@ use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::{Arc, Mutex};
 
-use selmem::{api, EntityProfile, HttpEmbedder, HttpNarrator, SelectiveMemory};
+use selmem::{api, Config, EntityProfile, HttpEmbedder, HttpNarrator, SelectiveMemory};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let bind = flag(&args, "--bind").unwrap_or_else(|| "127.0.0.1:7420".into());
-    let path = flag(&args, "--path").unwrap_or_else(|| "entity.db".into());
-    let name = flag(&args, "--name").unwrap_or_else(|| "Claire".into());
-    let kind = flag(&args, "--profile").unwrap_or_else(|| "tender".into());
-    let llm = flag(&args, "--llm").or_else(|| env::var("SELMEM_LLM").ok());
-    let model = flag(&args, "--model").unwrap_or_else(|| "llama3".into());
-    let key = flag(&args, "--api-key").or_else(|| env::var("SELMEM_API_KEY").ok());
-    let embed_url = flag(&args, "--embed").or_else(|| env::var("SELMEM_EMBED").ok());
-    let token = flag(&args, "--token").or_else(|| env::var("SELMEM_TOKEN").ok());
+    let cfg = Config::get();
+    let bind = cfg.resolve_or(flag(&args, "--bind"), "bind", "127.0.0.1:7420");
+    let path = cfg.resolve_or(flag(&args, "--path"), "path", "entity.db");
+    let name = cfg.resolve_or(flag(&args, "--name"), "name", "Claire");
+    let kind = cfg.resolve_or(flag(&args, "--profile"), "profile", "tender");
+    let llm = cfg.resolve(flag(&args, "--llm"), "llm");
+    let model = cfg.resolve_or(flag(&args, "--model"), "model", "llama3");
+    let key = cfg.resolve(flag(&args, "--api-key"), "api_key");
+    let embed_url = cfg.resolve(flag(&args, "--embed"), "embed");
+    let token = cfg.resolve(flag(&args, "--token"), "token");
 
     let profile = match kind.as_str() {
         "austere" => EntityProfile::austere(name),
@@ -23,13 +24,22 @@ fn main() {
     };
 
     let mut mem = SelectiveMemory::open(&path, profile).expect("impossible d'ouvrir la mémoire");
-    if let Some(v) = flag(&args, "--ground-overlap").and_then(|s| s.parse().ok()) {
+    if let Some(v) = cfg
+        .resolve(flag(&args, "--ground-overlap"), "ground_overlap")
+        .and_then(|s| s.parse().ok())
+    {
         mem.profile.ground_min_overlap = v;
     }
-    if let Some(v) = flag(&args, "--ground-strikes").and_then(|s| s.parse().ok()) {
+    if let Some(v) = cfg
+        .resolve(flag(&args, "--ground-strikes"), "ground_strikes")
+        .and_then(|s| s.parse().ok())
+    {
         mem.profile.ground_strikes = v;
     }
-    if let Some(v) = flag(&args, "--narrator-firmness").and_then(|s| s.parse().ok()) {
+    if let Some(v) = cfg
+        .resolve(flag(&args, "--narrator-firmness"), "narrator_firmness")
+        .and_then(|s| s.parse().ok())
+    {
         mem.profile.narrator_firmness = v;
     }
     if let Some(endpoint) = llm {
@@ -41,7 +51,7 @@ fn main() {
         }
     }
     if let Some(url) = embed_url {
-        let emodel = flag(&args, "--embed-model").unwrap_or_else(|| "text-embedding-3-small".into());
+        let emodel = cfg.resolve_or(flag(&args, "--embed-model"), "embed_model", "text-embedding-3-small");
         if let Some(e) = HttpEmbedder::parse(&url, emodel, key.clone()) {
             mem = mem.with_embedder(Box::new(e));
             eprintln!("embeddings HTTP branchés");
@@ -51,11 +61,14 @@ fn main() {
     let mem = Arc::new(Mutex::new(mem));
     let listener = TcpListener::bind(&bind).expect("bind");
     eprintln!("selmemd sur http://{bind}  fichier={path}");
+    if let Some(p) = cfg.path.as_ref() {
+        eprintln!("config {}", p.display());
+    }
     if token.is_some() {
         eprintln!("auth: Authorization: Bearer requis (sauf /health et /)");
     }
     eprintln!("UI  http://{bind}/");
-    eprintln!("POST /turn /live /remember /sleep /speak   GET /who /lineage /mood /health");
+    eprintln!("POST /turn /live /remember /sleep /speak /talk/clear   GET /who /lineage /mood /talk /health");
 
     for stream in listener.incoming() {
         match stream {

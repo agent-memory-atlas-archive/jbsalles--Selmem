@@ -1,5 +1,6 @@
 use crate::net::httpx::{extract_json_string, json_esc, post_json};
 use crate::core::model::{MemoryTrace, Mood};
+use crate::core::talk::WorkingTalk;
 use crate::recall::narrator::{Narrator, RuleNarrator};
 
 pub struct HttpNarrator {
@@ -23,8 +24,9 @@ impl HttpNarrator {
     }
 
     fn chat(&self, system: &str, user: &str) -> Result<String, String> {
-        let temp = std::env::var("SELMEM_TEMP").unwrap_or_else(|_| "0".into());
-        let effort = std::env::var("SELMEM_REASONING").unwrap_or_else(|_| "none".into());
+        let cfg = crate::config::Config::get();
+        let temp = cfg.temp();
+        let effort = cfg.reasoning();
         let extra = if effort.is_empty() || effort == "off" {
             String::new()
         } else {
@@ -183,8 +185,16 @@ impl Narrator for HttpNarrator {
         }
     }
 
-    fn reply(&self, user: &str, memories: &[String], axioms: &[String], mood: &Mood) -> String {
+    fn reply(
+        &self,
+        user: &str,
+        memories: &[String],
+        axioms: &[String],
+        mood: &Mood,
+        talk: &WorkingTalk,
+    ) -> String {
         let mut ctx = String::new();
+        ctx.push_str(&talk.render());
         for a in axioms.iter().take(4) {
             ctx.push_str("- axiome: ");
             ctx.push_str(a);
@@ -204,7 +214,7 @@ impl Narrator for HttpNarrator {
             Ok(s) => s,
             Err(e) => {
                 eprintln!("selmem LLM reply failed: {e}");
-                self.fallback.reply(user, memories, axioms, mood)
+                self.fallback.reply(user, memories, axioms, mood, talk)
             }
         }
     }
@@ -242,8 +252,15 @@ impl Narrator for SpeakOnlyHttp {
     fn distill_axiom(&self, traces: &[&MemoryTrace]) -> Option<String> {
         self.rules.distill_axiom(traces)
     }
-    fn reply(&self, user: &str, memories: &[String], axioms: &[String], mood: &Mood) -> String {
-        self.http.reply(user, memories, axioms, mood)
+    fn reply(
+        &self,
+        user: &str,
+        memories: &[String],
+        axioms: &[String],
+        mood: &Mood,
+        talk: &WorkingTalk,
+    ) -> String {
+        self.http.reply(user, memories, axioms, mood, talk)
     }
 }
 

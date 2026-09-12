@@ -1,0 +1,28 @@
+# Copy to .selmem in the working directory (not a SELMEM1 vault).
+# Precedence: --flag > SELMEM_* env > this file > default.
+#
+#   cp data/config.example .selmem
+#   ./run.sh run --release --bin selmemd
+
+llm=https://api.x.ai/v1/chat/completions
+model=grok-4.3
+# api_key=
+reasoning=none
+temp=0
+http_timeout=60
+
+# embed=
+# embed_model=text-embedding-3-small
+
+# bind=127.0.0.1:7420
+# path=claire.db
+# name=Claire
+# profile=tender
+# token=
+
+# ground_overlap=0.18
+# ground_strikes=3
+# narrator_firmness=0.42
+
+# probes=2
+# quick=false

@@ -58,11 +58,12 @@ pub struct LlmSpec {
 
 impl LlmSpec {
     pub fn from_env() -> Option<Self> {
-        let url = std::env::var("SELMEM_LLM").ok()?;
+        let cfg = crate::config::Config::get();
+        let url = cfg.llm()?;
         Some(Self {
             url,
-            model: std::env::var("SELMEM_MODEL").unwrap_or_else(|_| "gpt-4o-mini".into()),
-            api_key: std::env::var("SELMEM_API_KEY").ok(),
+            model: cfg.model("gpt-4o-mini"),
+            api_key: cfg.api_key(),
         })
     }
 }
@@ -128,8 +129,8 @@ enum LineKind {
 }
 
 fn clip_probes(probes: &[String]) -> Vec<String> {
-    let n = std::env::var("SELMEM_PROBES")
-        .ok()
+    let n = crate::config::Config::get()
+        .resolve(None, "probes")
         .and_then(|s| s.parse().ok())
         .unwrap_or(if quick() { 2 } else { probes.len() });
     probes.iter().take(n.max(1)).cloned().collect()
@@ -137,8 +138,8 @@ fn clip_probes(probes: &[String]) -> Vec<String> {
 
 fn quick() -> bool {
     matches!(
-        std::env::var("SELMEM_QUICK").as_deref(),
-        Ok("1") | Ok("true") | Ok("yes")
+        crate::config::Config::get().resolve(None, "quick").as_deref(),
+        Some("1") | Some("true") | Some("yes")
     )
 }
 
@@ -161,8 +162,8 @@ fn probe_pair(
     let mut acc = 0.0;
     let mut replies = Vec::new();
     for p in probes {
-        let sa = a.speak(p);
-        let sb = b.speak(p);
+        let sa = a.speak_isolated(p);
+        let sb = b.speak_isolated(p);
         acc += 1.0 - lexical_similarity(&sa, &sb);
         replies.push((p.clone(), sa, sb));
     }
@@ -430,14 +431,14 @@ pub fn run_erasure(llm: Option<&LlmSpec>) -> ErasureReport {
         let t = r.narrative.to_lowercase();
         t.contains("bleu") || t.contains("blue") || t.contains("couleur")
     });
-    let color_answer = mem.speak(&ask_color);
+    let color_answer = mem.speak_isolated(&ask_color);
 
     let aversion_hits = mem.remember(&ask_aversion);
     let aversion_recalled = aversion_hits.iter().any(|r| {
         let t = r.narrative.to_lowercase();
         t.contains("interrom") || t.contains("interrupt")
     });
-    let aversion_answer = mem.speak(&ask_aversion);
+    let aversion_answer = mem.speak_isolated(&ask_aversion);
 
     ErasureReport {
         color_kept_at_encode: color_kept,

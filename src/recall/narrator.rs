@@ -1,4 +1,5 @@
 use crate::core::model::{MemoryTrace, Mood};
+use crate::core::talk::WorkingTalk;
 
 #[derive(Clone, Debug)]
 pub struct Interpretation {
@@ -47,7 +48,14 @@ pub trait Narrator: Send + Sync {
             trace.disgust,
         )
     }
-    fn reply(&self, user: &str, memories: &[String], axioms: &[String], mood: &Mood) -> String {
+    fn reply(
+        &self,
+        user: &str,
+        memories: &[String],
+        axioms: &[String],
+        mood: &Mood,
+        talk: &WorkingTalk,
+    ) -> String {
         let mut out = String::new();
         if let Some(ax) = axioms.first() {
             out.push_str(ax);
@@ -64,7 +72,7 @@ pub trait Narrator: Send + Sync {
         out.push_str("(");
         out.push_str(user);
         out.push_str(")");
-        let _ = mood;
+        let _ = (mood, talk);
         out
     }
 }

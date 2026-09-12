@@ -94,7 +94,7 @@ fn main() {
             )
         }
     } else {
-        println!("no SELMEM_LLM — RuleNarrator only");
+        println!("no llm in .selmem / SELMEM_LLM — RuleNarrator only");
         (run_salient(), run_neutral(), run_salient_without_sleep())
     };
     row("salient event on A only", &salient);
