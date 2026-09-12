@@ -152,6 +152,19 @@ Scripts in `data/*.json` are the frozen stimuli. Edit those if you change a prot
 
 Published numbers: [WHITEPAPER.md](WHITEPAPER.md) § Experiments.
 
+### Benchmark
+
+Does `D_fp` stay above pre-T₀ after 8 identical later hours?
+
+C0 = no book. C2 = SelMem. C1 last-k is not in this merge. Two arms: salient/neutral, and two different salient events. 12 shared hours, 8 posts, 4 behavior probes via `speak_isolated`. Phase 0 invalidates on the book (`D_fp > 0.02` or unequal traces), never on `D_speak`. Three creative items in `data/creativity.json` are recorded, not claimed.
+
+```bash
+./run.sh test --test benchmark
+./run.sh run --release --example benchmark -- --out selmem-v01.json
+```
+
+`RuleNarrator` is deterministic: one pair per cell. A live model: same command with `llm=` in `.selmem`.
+
 ### Unit tests (no network)
 
 ```bash
@@ -164,6 +177,7 @@ Published numbers: [WHITEPAPER.md](WHITEPAPER.md) § Experiments.
 ./run.sh test --test json_parse
 ./run.sh test --test talk
 ./run.sh test --test config
+./run.sh test --test benchmark
 ```
 
 | What | File | Stimulus |
@@ -176,6 +190,7 @@ Published numbers: [WHITEPAPER.md](WHITEPAPER.md) § Experiments.
 | Chat JSON walker | `tests/json_parse.rs` | fixtures in the test |
 | Working talk (session frame) | `tests/talk.rs` | inline |
 | `.selmem` config parser | `tests/config.rs` | inline |
+| Benchmark v0.1 H2 | `tests/benchmark.rs` | `data/v01.json` |
 
 These use `RuleNarrator`. They must stay green offline.
 

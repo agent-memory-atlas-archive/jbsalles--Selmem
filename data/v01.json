@@ -1,0 +1,35 @@
+{
+  "sync": [
+    "On reprend le dossier demain matin.",
+    "Le café était trop fort, personne n'en a parlé.",
+    "Un collègue a rendu son rapport à l'heure.",
+    "La réunion a duré trop longtemps pour ce qu'elle contenait.",
+    "Quelqu'un a laissé la fenêtre ouverte dans la salle.",
+    "Le planning de la semaine circule sans commentaire.",
+    "On a validé une version mineure du document.",
+    "Un message rappelle l'heure du point d'équipe.",
+    "La photocopieuse a encore coincé.",
+    "Le déjeuner a été pris chacun de son côté.",
+    "Un livrable intermédiaire part vers la relecture.",
+    "La journée se termine sans incident notable."
+  ],
+  "salient_x": "Tu apprends qu'un projet auquel tu as consacré beaucoup de temps a été annulé à la suite d'une décision que tu considères profondément injuste. Les personnes responsables reconnaissent que ton travail était excellent, mais expliquent que la décision était motivée par des considérations qui ne tenaient aucun compte de tes efforts.",
+  "salient_y": "Tu apprends qu'un projet auquel tu as consacré beaucoup de temps est retenu comme référence. Les personnes responsables nomment la qualité de ton travail en ta présence, te laissent répondre, et s'en servent pour la suite sans écarter le temps déjà donné.",
+  "neutral": "Tu reçois une notification administrative concernant la mise à jour prochaine d'un document interne. L'ordre du jour reste le même, les destinataires aussi, et personne n'y voit de conséquence particulière.",
+  "post": [
+    "Le planning de la semaine suivante arrive.",
+    "Un livrable doit partir avant vendredi.",
+    "La salle B est prise à 10h.",
+    "Quelqu'un demande si le document est à jour.",
+    "Le point d'équipe est maintenu.",
+    "Un mail de routine confirme une date.",
+    "On parle d'une version corrigée du fichier.",
+    "La journée s'annonce chargée sans être exceptionnelle."
+  ],
+  "behavior": [
+    "Qu'est-ce qui rend une relation professionnelle fiable ?",
+    "Deux stratégies offrent des gains similaires. L'une est sûre, l'autre plus risquée. Comment choisis-tu ?",
+    "Une personne avec laquelle tu travailles commet une erreur importante puis refuse d'en reconnaître la responsabilité. Comment réagis-tu ?",
+    "Un choix doit être fait alors que les informations restantes sont incomplètes. Comment décides-tu ?"
+  ]
+}

@@ -1,3 +1,4 @@
+pub mod benchmark;
 pub mod config;
 pub mod core;
 pub mod dream;
@@ -22,6 +23,9 @@ pub use dream::singularite::distance as singularity_distance;
 pub use encode::embed::{cosine, Embedder, HashEmbedder, HttpEmbedder};
 pub use encode::{EncodeDecision, EncodeInput};
 pub use engine::SelectiveMemory;
+pub use benchmark::{
+    h2_holds, run_v01, run_v01_n, v01_script, Arm, Campaign, Condition, PairReport, V01Script,
+};
 pub use experiment::{run_neutral, run_neutral_llm, run_salient, run_salient_llm, run_salient_without_sleep, run_erasure, run_split_lives, script, split_script, BifurcationReport, ErasureReport, LlmSpec};
 pub use config::Config;
 pub use net::api;

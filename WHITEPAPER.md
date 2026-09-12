@@ -6,36 +6,17 @@ Selective reconstructive memory for LLM entities. v0.5
 
 ## Problem
 
-An LLM produces text by conditioning its next-token distribution on its current context and parameters. External memory can extend that context, but most existing approaches primarily treat memory as information that should remain available for retrieval: conversation histories are summarized, documents are indexed, and relevant items are retrieved when needed.
+An LLM maps a context window to a next-token distribution. Adding memory usually means keeping more of the past available: logs, summaries, embeddings, top-k retrieval.
 
-SelMem explores a different approach: memory as a mechanism for producing persistent individuality and more creative behavior.
+SelMem treats memory as a state that changes. Not every event is stored. Stored events lose detail. Recall rebuilds a sentence from the current trace instead of replaying the original. That rebuild can write back. Repeated traces form motifs, then beliefs, then traits, which bias the next encode.
 
-The system models memory as a mutable trace of an experience, rather than as a permanent copy of the original event.
+The verbatim event is kept in a sealed archive for tests and audit. The model never reads it. It only sees the lived trace (gist, core, affect, fidelity).
 
-In SelMem:
+```
+experience → selection → trace → recall → sleep → identity → next encode
+```
 
-- experiences can be selectively retained or forgotten;
-- retained memories can lose surface details while preserving a semantic core;
-- recall reconstructs a memory from its current state rather than replaying the original event;
-- reconstruction can modify the memory itself;
-- repeated experiences can form higher-level patterns, beliefs, and traits;
-- these accumulated structures can influence how subsequent experiences are encoded.
-
-The original observations are maintained separately in a sealed archive for auditing and evaluation. They are not used when the system recalls a memory. The model therefore operates on the transformed state of its memory rather than on an immutable record of the past.
-
-This produces a feedback loop:
-
-experience → selection → memory trace → reconstruction → consolidation → identity → future encoding
-
-The hypothesis is that this process can cause otherwise identical LLMs to develop increasingly different internal histories. As those histories influence subsequent encoding and reconstruction, their behavioral trajectories can progressively diverge.
-
-The intended result is not simply greater continuity or access to more information. It is singularity: a model whose future behavior is increasingly shaped by its own accumulated and transformed history.
-
-This singularity may also provide a basis for greater creativity. If a model does not preserve and retrieve identical information in the same way each time, its accumulated history can introduce persistent biases, associations, preferences, and unexpected connections into future generations.
-
-SelMem therefore investigates whether selective, imperfect, and reconstructive memory can transform an otherwise identical LLM into a progressively more singular and potentially more creative system.
-
-This is an experimental hypothesis, not a claim that the mechanism necessarily produces superior intelligence or creativity.
+Claim under test: two copies of the same model, given different retained histories, will not stay interchangeable. That is path dependence, not a claim of better intelligence or creativity.
 
 ---
 
@@ -81,6 +62,7 @@ experience
      remember / speak
      reconstruct → reconsolidate
      (living traces: misses vs core, then blend)
+     talk frame holds the current thread (not a trace, not persisted)
               ↓
            sleep
      decay · rewrite · merge · extinguish · latent
@@ -158,8 +140,8 @@ Fingerprint is a lab metric on the book. It is not a personality score.
 Rust 1.75. No Cargo crates. SQLite (prepared statements, `BEGIN IMMEDIATE`) or flat `SELMEM1`. HTTP daemon + UI. `/health` does not take the memory lock. Auth: `Authorization: Bearer` only.
 
 ```
-GET  /health /who /lineage /mood /profile /audit
-POST /live /remember /speak /turn /sleep /save /profile
+GET  /health /who /lineage /mood /profile /audit /talk
+POST /live /remember /speak /turn /sleep /save /profile /talk/clear
 ```
 
 ```bash
@@ -172,9 +154,11 @@ POST /live /remember /speak /turn /sleep /save /profile
 
 No `--llm`: rule narrator + hashed vectors.
 
+Same keys in a `.selmem` file in the working directory (`llm=`, `model=`, `api_key=`, `reasoning=`). Flags and `SELMEM_*` env override the file. A vault file starts with `SELMEM1` and is not config.
+
 Ollama: `--llm http://127.0.0.1:11434/v1/chat/completions --model llama3`.
 
-xAI: set `SELMEM_REASONING=none` unless you want reasoning tokens.
+xAI: `reasoning=none` unless you want reasoning tokens.
 
 The model sees gist, core, schema, affect, fidelity, mood, living axioms. Not the archive.
 
@@ -235,11 +219,47 @@ Two clones with the same book already differ in wording (speak ≈ 0.65–0.77).
 
 After T₀ the prompts still do not mention the cancellation. A refers to a recent injustice, a lost project, work that vanished. B talks about constancy and short stand-ups. The neutral pair, same model, does not mention injustice. Books stay aligned.
 
+### Persistent divergence, one pair (Grok 4.3)
+
+Script: `data/v01.json`. Runner: `src/benchmark.rs`. Same model in every cell. `SpeakOnlyHttp` and `speak_isolated` only: the live talk frame cannot carry T₀.
+
+Question: after one marked hour, does fingerprint distance stay above the pre-T₀ floor through eight identical later hours?
+
+| Cell | Book | T₀ event |
+| --- | --- | --- |
+| C0 | none | same script, nothing stored |
+| C2 | SelMem | A vs B as below |
+
+Two arms on each cell. **S/N:** A gets the unjust cancellation; B gets a length-matched admin notice. **S/S:** A gets the cancellation; B gets a length-matched recognition hour. Shared life is twelve hours. A pair is void if books or trace counts already differ before T₀. Speak distance is logged, never used to drop a pair.
+
+One seed, Grok 4.3, `reasoning_effort=none`. Organ-only numbers on the same script are the same to two decimals (fingerprint is on the book).
+
+| Cell | D_fp pre → last | traces last | Δ fingerprint |
+| --- | --- | --- | --- |
+| C0 S/N | 0 → 0 | 0 / 0 | 0 |
+| C0 S/S | 0 → 0 | 0 / 0 | 0 |
+| C2 S/N | 0 → 0.117 | 13 / 12 | +0.117 |
+| C2 S/S | 0 → 0.042 | 13 / 13 | +0.042 |
+
+C0 never opens a gap. C2 S/N stores the marked hour on A only; the gap is still there after the eight shared posts. C2 S/S stores one strong hour on each side: the gap is smaller and still not zero. Mean disgust on C2 S/N A rises (~0.04); B stays at 0. Mean valence after S/S: A ~0.08, B ~0.19.
+
+Pre speak distance is already 0.53–0.76 on C0 and 0.59–0.64 on C2 with identical books. Wording is not the test.
+
+On the conflict probe (a colleague denies a serious error; the line does not name T₀):
+
+- C2 S/N A: the refusal feels like the cancelled project.
+- C2 S/N B: log the fact, ask for a correction, take it to the stand-up.
+- C0: generic procedure on both sides. No founding injustice.
+
+Three open items (`data/creativity.json`) were stored, not scored. C0 C1 independently invented a connected bin. C2 S/N C1: A starts from the vanished project; B stays on the daily motif. That is an observation on one pair, not an originality result.
+
+Export: `examples/benchmark --out selmem-v01.json`. Post-step reply texts were omitted from that file; distances were kept.
+
 ### Limits
 
-One Grok pair. No comparison to MemGPT or RAG at 10³–10⁵ turns. No human ratings. Δspeak cannot carry the claim while baseline wording noise is ~0.7. Sleep ablation was not run through Grok. Coefficients are unset.
+One Grok pair per cell. No last-k / RAG control (C1). No comparison to MemGPT at 10³–10⁵ turns. No human ratings. Δspeak cannot carry the claim while baseline wording noise is ~0.7. Sleep ablation was not run through Grok. Coefficients are unset.
 
-What holds on this bench: a high-salience hour can be stored on one clone only, remain after identical later prompts, and change what Grok says without the prompt naming that hour.
+What holds on this bench: a high-salience hour can be stored on one clone only, remain after identical later prompts, and change what Grok says without the prompt naming that hour. With no book, the same script leaves D_fp at 0. Two different salient hours also leave a residual gap. That is persistent path dependence on the book, n = 1. It is not a creativity claim.
 
 ---
 
@@ -247,7 +267,7 @@ What holds on this bench: a high-salience hour can be stored on one clone only, 
 
 `cargo test` covers: dull drop, world channel pinned, tender/austere split, core vs detail, anchors, axiom succession, motif ≠ trait, identity paint, reinterpret, grounding blend, fading warp, latent residue, persist round-trip, merge + extinguish in one night.
 
-Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; Grok names the injustice on A only.
+Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; Grok names the injustice on A only; C0 stays at D_fp 0 on the same v0.1 script.
 
 Missing: long bake-off, human originality score, more than one Grok pair, learned layers (still rules), fitted constants. Core is lexical compression. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint.
 
