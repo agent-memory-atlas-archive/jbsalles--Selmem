@@ -262,18 +262,7 @@ fn err(status: u16, msg: &str) -> HttpResponse {
 }
 
 pub fn json_esc(s: &str) -> String {
-    let mut out = String::with_capacity(s.len());
-    for c in s.chars() {
-        match c {
-            '"' => out.push_str("\\\""),
-            '\\' => out.push_str("\\\\"),
-            '\n' => out.push_str("\\n"),
-            '\r' => out.push_str("\\r"),
-            '\t' => out.push_str("\\t"),
-            c => out.push(c),
-        }
-    }
-    out
+    crate::net::httpx::json_esc(s)
 }
 
 fn query_param<'a>(query: &'a str, key: &str) -> Option<&'a str> {
@@ -288,50 +277,11 @@ fn query_param<'a>(query: &'a str, key: &str) -> Option<&'a str> {
 }
 
 fn json_str(body: &str, key: &str) -> Option<String> {
-    let pat = format!("\"{key}\"");
-    let i = body.find(&pat)?;
-    let after = body[i + pat.len()..].trim_start();
-    let after = after.strip_prefix(':')?.trim_start();
-    if after.starts_with("null") {
-        return None;
-    }
-    if !after.starts_with('"') {
-        return None;
-    }
-    let bytes = after.as_bytes();
-    let mut out = String::new();
-    let mut j = 1;
-    while j < bytes.len() {
-        match bytes[j] {
-            b'"' => return Some(out),
-            b'\\' if j + 1 < bytes.len() => {
-                match bytes[j + 1] {
-                    b'n' => out.push('\n'),
-                    b't' => out.push('\t'),
-                    b'"' => out.push('"'),
-                    b'\\' => out.push('\\'),
-                    c => out.push(c as char),
-                }
-                j += 2;
-            }
-            c => {
-                out.push(c as char);
-                j += 1;
-            }
-        }
-    }
-    None
+    crate::net::httpx::first_string_field(body, key)
 }
 
 fn json_f32(body: &str, key: &str) -> Option<f32> {
-    let pat = format!("\"{key}\"");
-    let i = body.find(&pat)?;
-    let after = body[i + pat.len()..].trim_start().strip_prefix(':')?.trim_start();
-    let num: String = after
-        .chars()
-        .take_while(|c| c.is_ascii_digit() || *c == '.' || *c == '-' )
-        .collect();
-    num.parse().ok()
+    crate::net::httpx::first_number_field(body, key)
 }
 
 fn guess_affect(text: &str) -> (f32, f32, f32, Option<String>) {

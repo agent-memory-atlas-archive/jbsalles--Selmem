@@ -1,6 +1,6 @@
 # SelMem
 
-Selective reconstructive memory for an LLM entity.
+Selective reconstructive memory for an LLM entity. v0.5
 
 An LLM maps context to the next token. A stack of unmodified facts maximises coverage, not deviation: more evidence, same average path. SelMem sculpts a particular past — forgotten, gilded, anchored — so two instances can diverge. The aim is a non-average, path-dependent continuation, not a taller log. Selection, reconstruction, sleep, identity.
 
@@ -69,23 +69,110 @@ Apple Silicon and Intel are both fine. Bind `127.0.0.1` or `0.0.0.0` as usual.
 ./run.sh test
 ./run.sh run --release --example compare
 ./run.sh run --release --example llm_night
+./run.sh run --release --example bifurcation
 ./run.sh run --release --bin selmemd -- --help
 ```
 
-## Tests
+## Tests and experiments
 
-Rust only. No Python suite.
+Rust only. No Python suite. Always use `./run.sh` (not bare `cargo`) so sqlite link flags are set.
 
-| What | Where |
-|---|---|
-| Narrative scenes (edit these) | `tests/cases/*.json` |
-| JSON runner | `tests/scenes.rs` |
-| Physiology — decay, anchors, SQLite, Ebbinghaus | `tests/engine.rs` |
+Scripts in `data/*.json` are the frozen stimuli. Edit those if you change a protocol; do not rewrite them mid-run. Later prompts in a script never name the marked event.
+
+Published numbers: [WHITEPAPER.md](WHITEPAPER.md) § Experiments.
+
+### Unit tests (no network)
 
 ```bash
 ./run.sh test
 ./run.sh test --test scenes
+./run.sh test --test engine
+./run.sh test --test bifurcation
+./run.sh test --test divergence
+./run.sh test --test erasure
+./run.sh test --test json_parse
 ```
+
+| What | File | Stimulus |
+|---|---|---|
+| Narrative scenes | `tests/scenes.rs` | `tests/cases/*.json` |
+| Decay, anchors, SQLite, Ebbinghaus | `tests/engine.rs` | inline |
+| Bifurcation A/B (rules) | `tests/bifurcation.rs` | `data/bifurcation.json` |
+| Split lives (rules) | `tests/divergence.rs` | `data/divergence.json` |
+| Erasure: trivia vs repeated aversion | `tests/erasure.rs` | `data/erasure.json` |
+| Chat JSON walker | `tests/json_parse.rs` | fixtures in the test |
+
+These use `RuleNarrator`. They must stay green offline.
+
+### Replay a protocol (print the probes)
+
+Same scripts as the unit tests, with the full report on stdout:
+
+```bash
+./run.sh run --release --example bifurcation
+./run.sh run --release --example divergence
+./run.sh run --release --example erasure
+```
+
+`Finished in 0.00s` means Cargo reused an old binary. After pulling code:
+
+```bash
+touch src/experiment.rs examples/bifurcation.rs
+./run.sh build --release --example bifurcation
+```
+
+You should see `Compiling selmem`.
+
+### Same protocols with a live model
+
+Only `speak` / `reply` hits the HTTP API (`SpeakOnlyHttp`). Encode, sleep and reconstruct stay on the organ.
+
+```bash
+export SELMEM_LLM='https://api.x.ai/v1/chat/completions'
+export SELMEM_MODEL='grok-4.3'
+export SELMEM_API_KEY='xai-…'          # never commit this
+export SELMEM_REASONING=none           # skip thinking tokens on grok-4.3
+export SELMEM_TEMP=0
+export SELMEM_HTTP_TIMEOUT=60
+unset SELMEM_QUICK
+
+./run.sh run --release --example bifurcation
+./run.sh run --release --example divergence
+```
+
+OpenAI-compatible endpoints work the same (`SELMEM_LLM` = `…/v1/chat/completions`). Ollama:
+
+```bash
+export SELMEM_LLM='http://127.0.0.1:11434/v1/chat/completions'
+export SELMEM_MODEL='llama3'
+unset SELMEM_API_KEY
+```
+
+Check the endpoint before a 100-call run:
+
+```bash
+curl -sS --max-time 30 "$SELMEM_LLM" \
+  -H "Authorization: Bearer $SELMEM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"model\":\"$SELMEM_MODEL\",\"reasoning_effort\":\"none\",\"messages\":[{\"role\":\"user\",\"content\":\"dis: ok\"}]}"
+```
+
+| Variable | Default | Role |
+|---|---|---|
+| `SELMEM_LLM` | unset | chat URL; unset = rules only |
+| `SELMEM_MODEL` | — | model id |
+| `SELMEM_API_KEY` | unset | `Authorization: Bearer` |
+| `SELMEM_REASONING` | `none` | xAI `reasoning_effort` (`none`/`low`/… or `off` to omit) |
+| `SELMEM_TEMP` | `0` | sampling temperature |
+| `SELMEM_HTTP_TIMEOUT` | `60` | curl `--max-time` seconds |
+| `SELMEM_QUICK` | unset | `1` = salient condition only, 2 probes, one persist window |
+| `SELMEM_PROBES` | all / 2 if quick | how many probe questions to speak |
+
+A line `narrator: 0/10 answers are the RuleNarrator template` means the model answered. `Cela me revient` means the HTTP call failed and the rules ran. `selmem LLM reply failed:` prints the error.
+
+Full bifurcation ≈ 100 `reply` calls (5 probes × 2 agents × 5 snapshots × 2 LLM conditions). Quick mode ≈ 12. Ablation `salient-no-consolidation` never calls the model.
+
+Fingerprint distance is on the book (0 = clones). Speak distance is wording overlap; two clones with the same book already differ under Grok (~0.7). Do not read H₁ off Δspeak alone.
 
 ## Run
 

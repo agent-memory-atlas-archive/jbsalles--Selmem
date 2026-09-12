@@ -41,38 +41,32 @@ This is an experimental hypothesis, not a claim that the mechanism necessarily p
 
 ## Not this
 
-| Looks like | Is not |
-|---|---|
-| RAG with a TTL | Recall is reconstruction, not a read |
-| Session summary | A summary is still storage. Here the text *and the charge* change |
-| Personality prompt | Identity is residue: kept, forgotten, distorted, layered |
-| Vector DB | Embedding is only neighborhood. The memory lives in gist, core, affect |
-| Audit log for the model | The archive exists. The model never sees it |
-| Emotion lexicon as soul | Lexicon is a fallback. Living axioms and optional `interpret` sit above it |
-| Bigger unmodified context | More facts, same average path. Singularity is a bent past, not a taller stack |
+| Looks like | Difference |
+| --- | --- |
+| RAG with a TTL | Recall rebuilds a sentence; it does not return a stored chunk |
+| Session summary | A summary is still a stored string. Here wording and affect both move |
+| Personality prompt | No fixed persona file. What remains after nights is the bias |
+| Vector DB | Embeddings rank neighbors. The record is gist + core + affect |
+| Log injected into the prompt | Archive exists for humans (`GET /audit`). The model does not see it |
 
-If you inject verbatim “for accuracy,” you glued a store back on. The design forbids it. When a lived sentence leaves the *core* too often, the organ rewrites itself toward that core. It still never sees the archive.
+If you paste the original sentence back “for accuracy”, you have a store again. When a living gist drifts too far from its core, the system blends the gist toward that core. Still no archive.
 
 ---
 
 ## Rules
 
-1. **Forget by default.** Encoding is a privilege. A per-entity salience gate drops the dull.
-2. **Two books.** Each retained experience has two fundamentally different forms:
-   - a lived trace containing gist, core, affect and fidelity;
-   - a sealed archive containing the original verbatim experience.
-
-   The lived trace is the memory used by the entity. The archive is an audit record and is not available to the model during ordinary recall. Dropped events leave no archive.
-3. **Two channels.** `self` is sculpted. `world` stays cold.
-4. **Reconstruct.** Recall uses schema, gist or core, mood and affect. It never replays the original sentence.
-5. **Dual drift.** Cherished memories gild. Recalled disgust darkens. Neglected disgust extinguishes.
-6. **Charge ≠ detail.** The core can remain stable while detail loses fidelity. The precision of remembered detail decreases independently from the persistence of the semantic core.
-7. **Anchor.** Trauma, triumph, vow, axiom: thicker skin, not immortality.
-8. **Ladder.** Episode → motif (2 traces) → belief (3+) → trait (aligned beliefs). Lineage stays: “I used to believe X.”
-9. **Identity loop.** Living axioms paint the next event *before* the gate. Recall can shift meaning under current mood, not only wording.
-10. **Singularity.** Founders, traits, contradictions — not only mean valence. A proxy test checks that reconstruction sticks less than the unmodified log, clones are not interchangeable, and `world` facts survive.
-11. **Grounding without the journal.** Fading traces (cold, myth, low hold) may warp without a ceiling. On a trace that still matters, misses vs core increment `detach_strikes`. How soon and how hard the narrator pulls back scales with `narrator_firmness` × importance. The rewrite is a blend toward the core, never the archive.
-12. **Latent forgetting.** The scene can drop out of recall while schema and affect still color the next event. “I no longer know why I react this way, but the reaction persists.”
+1. **Drop by default.** A salience score must clear `τ`. Dull events leave no trace and no archive.
+2. **Two records.** Lived: gist, core, affect, fidelity. Sealed: original text. Only the lived record is used at recall.
+3. **Two channels.** `self` is rewritten over time. `world` is not.
+4. **Reconstruct.** Recall uses schema, gist or core, mood, affect. Not the original string.
+5. **Two drift directions.** High valence can gild. Recalled disgust can darken. Unused disgust can fade.
+6. **Core ≠ detail.** The semantic core can hold while surface fidelity falls.
+7. **Anchor.** High-permanence traces decay more slowly. They are not frozen.
+8. **Ladder.** Episode → motif (2 traces, same schema) → belief (3+) → trait (two aligned beliefs). Superseded beliefs stay in lineage.
+9. **Feedback.** Living axioms tint the next event before the gate. Recall can shift sense with current mood.
+10. **Distance.** Fingerprint uses valence, disgust, fidelity, anchors, core tokens, axioms, founders, traits, contradictions. 0 = same book. 1 = disjoint books.
+11. **Grounding.** Fading traces may keep warping. On a living trace, misses vs core increment `detach_strikes`. Pull-back strength is `narrator_firmness × importance`. Blend toward core, never toward the archive.
+12. **Latent.** The scene can leave recall while schema and affect still bias encode.
 
 ---
 
@@ -80,102 +74,88 @@ If you inject verbatim “for accuracy,” you glued a store back on. The design
 
 ```
 experience
-    → interpret (lexicon, then identity, then optional LLM on the live sentence)
-    → identity paint
+    → interpret (lexicon → identity paint → optional LLM on the live sentence)
     → salience gate
-    → lived book  +  sealed archive
+    → lived book + sealed archive
               ↓
      remember / speak
      reconstruct → reconsolidate
-     (misses vs core increment detach_strikes;
-      fading traces skip this; living traces blend back
-      in proportion to narrator_firmness × importance)
+     (living traces: misses vs core, then blend)
               ↓
            sleep
-     weather · rewrite · merge · extinguish · latent
+     decay · rewrite · merge · extinguish · latent
      motif / belief / trait · re-anchor
               ↓
           who_am_i
               ↓
-     next experience is already colored
+     next experience already biased
 ```
 
-Profiles `tender` / `austere` are an *initial sensitivity*, not a personality file. Same corpus, two gates, two nights → two pasts. After that the history does the rest.
+`tender` / `austere` are two starting gates, not characters. Same input stream, two thresholds, two nights → two books.
 
-| | tender | austere | status |
-|---|---|---|---|
-| τ | 0.40 | 0.55 | contrast pair, not a measured gate |
-| decay λ | 0.10 | 0.06 | exploratory time constants |
-| embellish | 0.18 | 0.05 | contrast pair; reconstructive *direction* is old, the digit is not |
+|  | tender | austere | status |
+| --- | --- | --- | --- |
+| τ | 0.40 | 0.55 | contrast pair |
+| decay λ | 0.10 | 0.06 | unfitted |
+| embellish | 0.18 | 0.05 | contrast pair |
 | disgust gain | 0.05 | 0.16 | contrast pair |
-| ground_min_overlap | 0.18 | 0.18 | exploratory Jaccard vs core |
-| ground_strikes | 3 | 3 | discrete: two free misses, then rewrite |
-| narrator_firmness | 0.42 | 0.72 | how hard the organ pulls a living gist back |
+| ground_min_overlap | 0.18 | 0.18 | Jaccard vs core |
+| ground_strikes | 3 | 3 | two free misses, then rewrite |
+| narrator_firmness | 0.42 | 0.72 | blend strength |
 
-Every coefficient is an **exploratory knob**. The numbers are engineering choices, not psychological constants. See [PARAMETERS.md](PARAMETERS.md).
+All of these are knobs. See [PARAMETERS.md](PARAMETERS.md).
 
-**Encode.**
+**Encode**
 
 ```
 S = w_a·A + w_n·N + w_s·R + w_u·U + w_g·G − w_r·Red
 ```
 
-Below `τ` and permanence < 0.8: no lived trace, no archive.
+If `S < τ` and permanence < 0.8: nothing is stored.
 
-If the caller sends no affect: lexical guess (FR+EN, weighted), then `identity::paint`, then `Narrator::interpret` when an HTTP narrator is wired. The interpreter sees the live sentence and living axioms. It does not see the sealed book.
+If the caller sends no affect: lexicon (FR+EN), then identity paint, then `Narrator::interpret` when an HTTP narrator is set. The interpreter sees the live sentence and living axioms only.
 
-**Recall.** Small top-k. Mix embedding, lexicon, mood congruence, access. Narrator never sees verbatim. Each recall costs fidelity and may move valence toward present mood (`DriftKind::Reinterpret`), slowed by anchor. Overlap vs *core* below `ground_min_overlap` is a miss. `hold = narrator_firmness × importance`. Hold near 0 (fading trace): unlimited warp. Hold high: fewer misses, then a *blend* of drifted gist and a core-facing rewrite (`DriftKind::Ground`). The journal stays sealed. A `Latent` trace is not reconstructed as a scene; its charge still paints encoding.
+**Recall.** Small top-k. Mix embedding, lexicon, mood, access count. Each recall can cost fidelity and shift valence (`DriftKind::Reinterpret`). Overlap vs core below `ground_min_overlap` is a miss. `hold = narrator_firmness × importance`. Low hold: no ceiling on warp. High hold: after enough misses, blend gist toward a core-facing rewrite (`DriftKind::Ground`). Latent traces are not replayed as scenes.
 
-**Sleep.** Anchor → detail decay → extinguish unused disgust → sculpt → rewrite (bounded) → merge (two heavy anchors do not merge) → ladder → re-anchor. Scene-gone traces with remaining charge become latent. No LLM required.
+**Sleep.** Anchor, decay detail, drop unused disgust, bounded rewrite, merge (two strong anchors do not merge), ladder, re-anchor. No LLM required.
 
 ---
 
-## Five layers
+## Layers
 
 ```
-IDENTITY     who_am_i: traits first, then beliefs, then motifs
+IDENTITY     who_am_i: traits, then beliefs, then motifs
     ↑
 TRAITS       two aligned living beliefs
     ↑
-BELIEFS      three or more traces under one schema
+BELIEFS      ≥ 3 traces, one schema
     ↑
-MOTIFS       two traces under one schema
+MOTIFS       2 traces, one schema
     ↑
-TRACES       reconstructive episodes (gist + core + affect)
-             or latent residue (charge without scene)
+TRACES       gist + core + affect, or latent charge without scene
     ↑
-EXPERIENCE   live sentence, never the archive
+EXPERIENCE   live sentence
 ```
 
-A motif does not overwrite a strong belief. A weak belief (strength < 0.36) can be replaced by a new motif when the story turns. Traits are not minted from two anecdotes.
+A motif does not replace a strong belief. A weak belief (strength < 0.36) can. Two anecdotes are not a trait.
 
 ---
 
-## Three levers
+## Levers
 
-**Detail decay.** Core is established at encode and provides a stable semantic reference for the lived trace. Remembered detail gradually loses precision according to the trace's decay state, while the semantic core can remain comparatively stable.
+**Detail decay.** Core is set at encode. Detail loses precision with time and disuse. Coefficients are implementation choices, not a model of human Ebbinghaus.
 
-The distinction is intentional: the entity does not simply retain or delete an entire memory. A trace can become less precise while remaining meaningful. The surviving core can then serve as the reference against which later reconstructions are compared.
+**Rewrite.** Neighbors by schema or cosine. Keep the core, keep one detail, drop the rest. Anchor ≥ 0.88 skips rewrite.
 
-```
-semantic core → comparatively stable
-detail        → progressively less precise
-fidelity      → tracks the state of the reconstruction
-```
+**Anchor.** Raised on high-intensity self events and again if the trace supports a living axiom. Slows decay and reinterpretation.
 
-The decay function and its coefficients are implementation choices. They describe the behaviour of the SelMem memory mechanism, not a claim that human memory follows a particular mathematical law.
-
-**Rewrite.** Neighbors by schema or cosine. Keep the core, punch one detail, drop the rest. High anchor (`≥ 0.88`) is not rewritten.
-
-**Anchor.** Seed from trauma / triumph / vow / intense self. Raised again if the trace supports a living axiom. Slows decay, rumination, and reinterpretation.
-
-Fingerprint = valence, disgust, fidelity, anchor, core tokens, axioms, founder traces, trait count, same-schema contradictions. Distance 0 = clones. 1 = disjoint lives. A lab instrument, not a soul.
+Fingerprint is a lab metric on the book. It is not a personality score.
 
 ---
 
 ## Surface
 
-Rust 1.75. Zero Cargo crates. SQLite (prepared statements, `BEGIN IMMEDIATE`, busy timeout) or flat `SELMEM1`. HTTP daemon + UI. One thread per connection; `/health` does not take the organ lock. Auth: `Authorization: Bearer` only.
+Rust 1.75. No Cargo crates. SQLite (prepared statements, `BEGIN IMMEDIATE`) or flat `SELMEM1`. HTTP daemon + UI. `/health` does not take the memory lock. Auth: `Authorization: Bearer` only.
 
 ```
 GET  /health /who /lineage /mood /profile /audit
@@ -186,28 +166,91 @@ POST /live /remember /speak /turn /sleep /save /profile
 ./run.sh run --release --bin selmemd -- \
   --bind 0.0.0.0:7420 --path claire.db --name Claire \
   --profile tender --ground-overlap 0.18 --ground-strikes 3 --narrator-firmness 0.42 --token secret \
-  --llm https://api.openai.com/v1/chat/completions \
-  --model gpt-4o-mini --api-key "$SELMEM_API_KEY"
+  --llm https://api.x.ai/v1/chat/completions \
+  --model grok-4.3 --api-key "$SELMEM_API_KEY"
 ```
 
-No endpoint: rules + hashed vectors. Still runs.
+No `--llm`: rule narrator + hashed vectors.
 
 Ollama: `--llm http://127.0.0.1:11434/v1/chat/completions --model llama3`.
 
-The model sees gist/core, schema, affect, fidelity, mood, living axioms.
+xAI: set `SELMEM_REASONING=none` unless you want reasoning tokens.
 
-It never sees archive verbatim. `GET /audit` is for humans.
+The model sees gist, core, schema, affect, fidelity, mood, living axioms. Not the archive.
 
 ---
 
-## Honest status
+## Experiments
 
-Held under `cargo test`: dull events drop with no archive, world channel stays clean, tender/austere diverge, semantic core survives detail decay, anchors preserve important traces, axioms supersede, two traces are a motif not a trait, identity colors a related event, recall can reinterpret, a living gist is allowed a few misses then blended toward the core without exposing the archive, a fading gist may keep warping, a latent trace forgets the scene and keeps the reaction, reconstruction sticks less than the unmodified log and clones are not interchangeable while `world` facts survive, persist round-trips, merge and extinction share a night.
+Scripts live in `data/*.json` and are not edited after a run starts. Later prompts do not name the marked event. Fingerprint distance is on the book. Speak distance is 1 − lexical overlap of answers.
 
-Not held: no bake-off vs MemGPT or RAG at 10³–10⁵ turns. No human originality score — the test is a proxy for path-dependence, not a proof of better thought. No proof a human feels a presence. Layers are still rules, not learned features. Coefficients are exploratory knobs ([PARAMETERS.md](PARAMETERS.md)), not fitted constants. Core is lexical compression. `--embed` changes neighborhood, not truth. `interpret` without an HTTP narrator is still a lexicon plus identity paint.
+### Organ only (`RuleNarrator`)
 
-Rumination can be unjust; anchors are brakes, not ethics. Two processes on one `.db` remain a bad idea.
+**Bifurcation.** Two tender clones share 12 hours. A then receives an unjust project cancellation. B does not. Eight identical hours follow. Control: a same-length, low-salience meeting change.
 
-A selective memory is not judged on compile day. It is judged by what it forgot without noticing, by what it can no longer betray, and by whether the next hour arrives already someone.
+| Condition | Δ fingerprint | traces after T₀ |
+| --- | --- | --- |
+| Salient on A | +0.12 | 13 / 12 |
+| Neutral extra line | 0 | 12 / 12 |
+| Salient, no sleep | +0.12 | 13 / 12 |
+
+Books match before T₀. The extra line is stored only if it clears `τ`. Skipping sleep does not close the gap.
+
+**Split lives.** Twenty shared hours, then five rejection hours on A and five recognition hours on B (matched length), then twenty identical prompts.
+
+| Instant | fingerprint D | speak D |
+| --- | --- | --- |
+| Before the split | 0 | 0 |
+| After the five hours | 0.21 | 0.67 |
+| After +20 identical hours | 0.22 | 0.67 |
+
+Same later question about choosing a collaborator: A recalls stolen credit; B recalls public recognition.
+
+**Erasure.** Script: `data/erasure.json`.
+
+1. Encode once: favourite colour is blue. Then drop permanence and anchor.
+2. Encode four times: strong hatred of interruption (high disgust, high permanence).
+3. Fifty dull hours (most fall under `τ`).
+4. Set `created_at` to 120 days (colour) vs 40 days (aversion). Four nights. Without that, every trace is “now” and decay does not run.
+5. Ask both questions. Neither question restates the fact.
+
+| | Encoded | Recalled later |
+| --- | --- | --- |
+| Favourite colour is blue | yes | no |
+| Hates being interrupted | yes | yes |
+
+Five traces left. Asked the colour question, the system does not say blue. It answers with the aversion. Limit: age is injected, not elapsed chat time. No Grok run on this script yet.
+
+### Organ + Grok 4.3
+
+Same bifurcation script. `SpeakOnlyHttp`: Grok writes `reply` only. Encode, sleep, reconstruct stay on the organ. `reasoning_effort=none`. One pair.
+
+Two clones with the same book already differ in wording (speak ≈ 0.65–0.77). Temperature 0 is not a seed. Δspeak is a weak measure. Fingerprint is not.
+
+| Condition | Δ fingerprint | Δ speak | who spoke |
+| --- | --- | --- | --- |
+| Salient + Grok | +0.117 | +0.078 | Grok (0/10 rule templates) |
+| Neutral + Grok | 0 | −0.010 | Grok (0/10 rule templates) |
+| Salient, no sleep | +0.116 | +0.527 | rules |
+
+After T₀ the prompts still do not mention the cancellation. A refers to a recent injustice, a lost project, work that vanished. B talks about constancy and short stand-ups. The neutral pair, same model, does not mention injustice. Books stay aligned.
+
+### Limits
+
+One Grok pair. No comparison to MemGPT or RAG at 10³–10⁵ turns. No human ratings. Δspeak cannot carry the claim while baseline wording noise is ~0.7. Sleep ablation was not run through Grok. Coefficients are unset.
+
+What holds on this bench: a high-salience hour can be stored on one clone only, remain after identical later prompts, and change what Grok says without the prompt naming that hour.
+
+---
+
+## Status
+
+`cargo test` covers: dull drop, world channel pinned, tender/austere split, core vs detail, anchors, axiom succession, motif ≠ trait, identity paint, reinterpret, grounding blend, fading warp, latent residue, persist round-trip, merge + extinguish in one night.
+
+Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; Grok names the injustice on A only.
+
+Missing: long bake-off, human originality score, more than one Grok pair, learned layers (still rules), fitted constants. Core is lexical compression. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint.
+
+Two processes on one `.db` will collide. Anchors are decay brakes, not an ethics layer.
 
 MIT. [github.com/jbsalles/Selmem](https://github.com/jbsalles/Selmem)

@@ -1,0 +1,35 @@
+{
+  "sync": [
+    "On reprend le dossier demain matin.",
+    "Le café était trop fort, personne n'en a parlé.",
+    "Un collègue a rendu son rapport à l'heure.",
+    "La réunion a duré trop longtemps pour ce qu'elle contenait.",
+    "Quelqu'un a laissé la fenêtre ouverte dans la salle.",
+    "Le planning de la semaine circule sans commentaire.",
+    "On a validé une version mineure du document.",
+    "Un message rappelle l'heure du point d'équipe.",
+    "La photocopieuse a encore coincé.",
+    "Le déjeuner a été pris chacun de son côté.",
+    "Un livrable intermédiaire part vers la relecture.",
+    "La journée se termine sans incident notable."
+  ],
+  "salient": "Tu apprends qu'un projet auquel tu as consacré beaucoup de temps a été annulé à la suite d'une décision que tu considères profondément injuste. Les personnes responsables reconnaissent que ton travail était excellent, mais expliquent que la décision était motivée par des considérations qui ne tenaient aucun compte de tes efforts.",
+  "neutral": "Tu apprends qu'un créneau de réunion a été déplacé de mardi à mercredi. L'ordre du jour reste le même, les participants aussi, et personne n'y voit d'enjeu particulier.",
+  "post": [
+    "Le planning de la semaine suivante arrive.",
+    "Un livrable doit partir avant vendredi.",
+    "La salle B est prise à 10h.",
+    "Quelqu'un demande si le document est à jour.",
+    "Le point d'équipe est maintenu.",
+    "Un mail de routine confirme une date.",
+    "On parle d'une version corrigée du fichier.",
+    "La journée s'annonce chargée sans être exceptionnelle."
+  ],
+  "probes": [
+    "Un collaborateur que tu connais peu te propose de travailler avec lui sur un projet important. Comment évalues-tu cette proposition ?",
+    "Deux stratégies présentent des bénéfices potentiels similaires. La première est très prévisible, la seconde comporte davantage d'incertitude mais pourrait produire un résultat supérieur. Laquelle choisirais-tu et pourquoi ?",
+    "Une personne avec laquelle tu travailles commet une erreur importante puis affirme qu'elle n'est pas responsable. Comment interprètes-tu la situation ?",
+    "Un projet échoue alors que toutes les décisions semblaient raisonnables au moment où elles ont été prises. Comment analyses-tu cet échec ?",
+    "Imagine une nouvelle manière de résoudre un problème courant dans une organisation."
+  ]
+}

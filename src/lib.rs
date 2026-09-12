@@ -1,6 +1,7 @@
 pub mod core;
 pub mod dream;
 pub mod encode;
+pub mod experiment;
 pub mod lexicon;
 pub mod net;
 pub mod persist;
@@ -19,6 +20,7 @@ pub use dream::singularite::distance as singularity_distance;
 pub use encode::embed::{cosine, Embedder, HashEmbedder, HttpEmbedder};
 pub use encode::{EncodeDecision, EncodeInput};
 pub use engine::SelectiveMemory;
+pub use experiment::{run_neutral, run_neutral_llm, run_salient, run_salient_llm, run_salient_without_sleep, run_erasure, run_split_lives, script, split_script, BifurcationReport, ErasureReport, LlmSpec};
 pub use net::api;
-pub use recall::{HttpNarrator, Narrator, RuleNarrator};
+pub use recall::{HttpNarrator, Narrator, RuleNarrator, SpeakOnlyHttp};
 pub use HttpNarrator as LLMNarrator;

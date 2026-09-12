@@ -1,6 +1,6 @@
 //! Physiology. Narrative cases live in tests/cases/*.json (runner: tests/scenes.rs).
 
-use selmem::{AxiomLayer, Embedder, EntityProfile, IdentityAxiom, SelectiveMemory};
+use selmem::{AxiomLayer, Channel, Embedder, EntityProfile, IdentityAxiom, SelectiveMemory, TraceStatus};
 use selmem::EncodeInput;
 
 #[test]
@@ -487,5 +487,151 @@ fn latent_forgets_the_scene_keeps_the_reaction() {
             t.schema
         );
     }
+}
+
+#[test]
+fn world_fact_does_not_cool_or_mythologize() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let mut ev = EncodeInput::new("Le rendez-vous est mardi 10h, salle B.");
+    ev.channel = Channel::World;
+    ev.utility = 0.95;
+    ev.permanence = 0.2;
+    ev.self_relevance = 0.1;
+    let id = mem.live_with(ev).trace_id.expect("world is kept");
+    {
+        let t = mem.store.traces.get_mut(&id).unwrap();
+        t.created_at = t.created_at.saturating_sub(86_400 * 400);
+        t.last_recalled_at = None;
+        t.access = 0.02;
+        t.fidelity = 0.2;
+    }
+    for _ in 0..4 {
+        mem.sleep();
+    }
+    let t = &mem.store.traces[&id];
+    assert_eq!(t.status, TraceStatus::Active);
+    assert!(t.access >= 0.85, "world access pinned, got {}", t.access);
+    let rec = mem.remember("rendez-vous mardi");
+    assert!(
+        rec.iter().any(|r| r.narrative.contains("mardi") || r.narrative.contains("salle")),
+        "world fact must remain recallable: {:?}",
+        rec.iter().map(|r| &r.narrative).collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn merge_keeps_the_stronger_core() {
+    let mut profile = EntityProfile::tender("Claire");
+    profile.merge_similarity = 0.1;
+    let mut mem = SelectiveMemory::new(profile);
+    let mut weak = EncodeInput::new("Une pluie banale sur la vitre.");
+    weak.schema = Some("fidélité".into());
+    weak.valence = 0.2;
+    weak.self_relevance = 0.4;
+    weak.permanence = 0.1;
+    let weak_id = mem.live_with(weak).trace_id.expect("kept");
+    let mut strong = EncodeInput::new("Tu es resté sous la pluie. Je ne t'oublierai pas.");
+    strong.schema = Some("fidélité".into());
+    strong.valence = 0.8;
+    strong.arousal = 0.7;
+    strong.self_relevance = 0.95;
+    strong.permanence = 0.9;
+    let strong_id = mem.live_with(strong).trace_id.expect("kept");
+    {
+        let w = mem.store.traces.get_mut(&weak_id).unwrap();
+        w.anchor = 0.05;
+        w.gist = "Une pluie banale.".into();
+        w.core = "pluie banale".into();
+    }
+    {
+        let s = mem.store.traces.get_mut(&strong_id).unwrap();
+        s.anchor = 0.9;
+        s.gist = "Tu es resté sous la pluie.".into();
+        s.core = "resté sous la pluie".into();
+    }
+    mem.sleep();
+    let strong = &mem.store.traces[&strong_id];
+    let weak = &mem.store.traces[&weak_id];
+    if weak.status == TraceStatus::Myth {
+        assert!(
+            strong.core.contains("resté") || strong.core.contains("pluie"),
+            "keeper core must remain the anchored episode, got {}",
+            strong.core
+        );
+        assert!(strong.anchor >= 0.9);
+    } else if strong.status == TraceStatus::Myth {
+        panic!("weak anecdote absorbed the anchored episode");
+    }
+}
+
+#[test]
+fn latent_traces_do_not_mint_a_belief() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    for event in [
+        "Première humiliation sous la pluie.",
+        "Deuxième humiliation sous la pluie.",
+        "Troisième humiliation sous la pluie.",
+    ] {
+        let mut ev = EncodeInput::new(event);
+        ev.schema = Some("humiliation".into());
+        ev.valence = -0.6;
+        ev.self_relevance = 0.9;
+        ev.permanence = 0.9;
+        let id = mem.live_with(ev).trace_id.expect("kept");
+        let t = mem.store.traces.get_mut(&id).unwrap();
+        t.status = TraceStatus::Latent;
+        t.fidelity = 0.2;
+        t.access = 0.1;
+    }
+    mem.sleep();
+    assert!(
+        !mem.store
+            .living_axioms()
+            .iter()
+            .any(|a| a.schema.as_deref() == Some("humiliation")),
+        "forgotten scenes must not mint a motif or belief: {:?}",
+        mem.store
+            .living_axioms()
+            .iter()
+            .map(|a| (&a.layer, &a.schema, &a.statement))
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn latent_can_return_as_a_cold_core_after_rehearsal() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let mut ev = EncodeInput::new("Tu as ri du parapluie-rouge que je tenais sous la pluie.");
+    ev.schema = Some("humiliation".into());
+    ev.valence = -0.7;
+    ev.self_relevance = 0.9;
+    ev.permanence = 0.5;
+    let id = mem.live_with(ev).trace_id.expect("kept");
+    {
+        let t = mem.store.traces.get_mut(&id).unwrap();
+        t.status = TraceStatus::Latent;
+        t.fidelity = 0.2;
+        t.access = 0.1;
+        t.rehearsals = 0;
+        t.core = "humiliation sous la pluie".into();
+        t.gist = "Tu as ri du parapluie-rouge.".into();
+    }
+    for _ in 0..2 {
+        let mut next = EncodeInput::new("Encore une humiliation sous la pluie.");
+        next.schema = Some("humiliation".into());
+        next.valence = -0.2;
+        next.self_relevance = 0.5;
+        mem.live_with(next);
+    }
+    assert!(mem.store.traces[&id].rehearsals >= 2);
+    mem.sleep();
+    let t = &mem.store.traces[&id];
+    assert_eq!(t.status, TraceStatus::Cold);
+    assert!(!t.gist.contains("parapluie-rouge"), "original scene must not return: {}", t.gist);
+    assert!(
+        t.gist.contains("humiliation") || t.gist.contains("pluie"),
+        "revived blur should be the core, got {}",
+        t.gist
+    );
 }
 

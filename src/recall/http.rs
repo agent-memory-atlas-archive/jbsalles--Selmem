@@ -23,14 +23,31 @@ impl HttpNarrator {
     }
 
     fn chat(&self, system: &str, user: &str) -> Result<String, String> {
+        let temp = std::env::var("SELMEM_TEMP").unwrap_or_else(|_| "0".into());
+        let effort = std::env::var("SELMEM_REASONING").unwrap_or_else(|_| "none".into());
+        let extra = if effort.is_empty() || effort == "off" {
+            String::new()
+        } else {
+            format!(",\"reasoning_effort\":\"{}\"", json_esc(&effort))
+        };
         let body = format!(
-            "{{\"model\":\"{}\",\"temperature\":0.35,\"messages\":[{{\"role\":\"system\",\"content\":\"{}\"}},{{\"role\":\"user\",\"content\":\"{}\"}}]}}",
+            "{{\"model\":\"{}\",\"temperature\":{},\"max_tokens\":280{} ,\"messages\":[{{\"role\":\"system\",\"content\":\"{}\"}},{{\"role\":\"user\",\"content\":\"{}\"}}]}}",
             json_esc(&self.model),
+            temp,
+            extra,
             json_esc(system),
             json_esc(user)
         );
         let raw = post_json(&self.url, self.api_key.as_deref(), &body)?;
-        extract_json_string(&raw, "content").ok_or_else(|| "réponse LLM illisible".into())
+        if let Some(msg) = api_error(&raw) {
+            return Err(msg);
+        }
+        extract_json_string(&raw, "content")
+            .filter(|s| !s.trim().is_empty())
+            .ok_or_else(|| {
+                let clip: String = raw.chars().take(240).collect();
+                format!("réponse LLM illisible: {clip}")
+            })
     }
 }
 
@@ -183,8 +200,50 @@ impl Narrator for HttpNarrator {
             "humeur v={:.2} a={:.2} d={:.2}\n{ctx}\nhumain: {user}",
             mood.valence, mood.arousal, mood.disgust
         );
-        self.chat(system, &user_p)
-            .unwrap_or_else(|_| self.fallback.reply(user, memories, axioms, mood))
+        match self.chat(system, &user_p) {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("selmem LLM reply failed: {e}");
+                self.fallback.reply(user, memories, axioms, mood)
+            }
+        }
+    }
+}
+
+fn api_error(raw: &str) -> Option<String> {
+    if !raw.contains("\"error\"") || raw.contains("\"choices\"") {
+        return None;
+    }
+    crate::net::httpx::first_string_field(raw, "message")
+        .or_else(|| crate::net::httpx::first_string_field(raw, "error"))
+        .or_else(|| Some(raw.chars().take(200).collect()))
+}
+
+/// LLM only writes the spoken answer. Reconstruction stays on the rules
+/// so a bifurcation run does not spend a call per trace.
+pub struct SpeakOnlyHttp {
+    pub http: HttpNarrator,
+    rules: RuleNarrator,
+}
+
+impl SpeakOnlyHttp {
+    pub fn parse(endpoint: &str, model: impl Into<String>, api_key: Option<String>) -> Option<Self> {
+        Some(Self {
+            http: HttpNarrator::parse(endpoint, model, api_key)?,
+            rules: RuleNarrator,
+        })
+    }
+}
+
+impl Narrator for SpeakOnlyHttp {
+    fn reconstruct(&self, trace: &MemoryTrace, mood: &Mood, query: &str) -> String {
+        self.rules.reconstruct(trace, mood, query)
+    }
+    fn distill_axiom(&self, traces: &[&MemoryTrace]) -> Option<String> {
+        self.rules.distill_axiom(traces)
+    }
+    fn reply(&self, user: &str, memories: &[String], axioms: &[String], mood: &Mood) -> String {
+        self.http.reply(user, memories, axioms, mood)
     }
 }
 

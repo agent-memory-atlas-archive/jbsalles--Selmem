@@ -50,7 +50,16 @@ pub fn from_store(name: &str, store: &MemoryStore, mood_valence: f32) -> Fingerp
         blob.push(' ');
     }
     let mut ranked: Vec<_> = traces.iter().copied().collect();
-    ranked.sort_by(|a, b| b.anchor.partial_cmp(&a.anchor).unwrap_or(std::cmp::Ordering::Equal));
+    ranked.sort_by(|a, b| {
+        b.anchor
+            .partial_cmp(&a.anchor)
+            .unwrap_or(std::cmp::Ordering::Equal)
+            .then_with(|| {
+                let ca = if a.core.is_empty() { &a.gist } else { &a.core };
+                let cb = if b.core.is_empty() { &b.gist } else { &b.core };
+                ca.cmp(cb)
+            })
+    });
     let founders: Vec<String> = ranked
         .iter()
         .take(3)

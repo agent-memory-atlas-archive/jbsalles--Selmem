@@ -16,7 +16,8 @@ fn which_curl() -> bool {
 
 fn curl_post(url: &str, api_key: Option<&str>, body: &str) -> Result<String, String> {
     let mut cmd = Command::new("curl");
-    cmd.args(["-sS", "--max-time", "25", "-X", "POST", url, "-H", "Content-Type: application/json"]);
+    let timeout = std::env::var("SELMEM_HTTP_TIMEOUT").unwrap_or_else(|_| "60".into());
+    cmd.args(["-sS", "--max-time", &timeout, "-X", "POST", url, "-H", "Content-Type: application/json"]);
     if let Some(k) = api_key {
         cmd.arg("-H").arg(format!("Authorization: Bearer {k}"));
     }
@@ -71,60 +72,228 @@ pub fn json_esc(s: &str) -> String {
             '\n' => out.push_str("\\n"),
             '\r' => out.push_str("\\r"),
             '\t' => out.push_str("\\t"),
+            c if (c as u32) < 0x20 => out.push_str(&format!("\\u{:04x}", c as u32)),
             c => out.push(c),
         }
     }
     out
 }
 
+/// First `"key": "…"` whose key is a real JSON key, not a substring.
+/// UTF-8 safe. Prefers `choices[0].message.content` when `key == "content"`.
 pub fn extract_json_string(body: &str, key: &str) -> Option<String> {
-    let pat = format!("\"{key}\"");
-    let mut last = None;
-    let mut best: Option<String> = None;
-    let mut search = body;
-    while let Some(i) = search.find(&pat) {
-        let abs = body.len() - search.len() + i;
-        if let Some(s) = parse_json_string_value(&body[abs + pat.len()..]) {
-            let skip = matches!(s.as_str(), "assistant" | "user" | "system" | "tool" | "model");
-            if !skip && best.as_ref().map(|b| s.len() > b.len()).unwrap_or(true) {
-                best = Some(s.clone());
-            }
-            last = Some(s);
+    if key == "content" {
+        if let Some(s) = chat_message_content(body) {
+            return Some(s);
         }
-        search = &body[abs + pat.len()..];
     }
-    best.or(last)
+    first_string_field(body, key)
 }
 
-fn parse_json_string_value(after_key: &str) -> Option<String> {
-    let after = after_key.trim_start().strip_prefix(':')?.trim_start();
-    if !after.starts_with('"') {
+pub fn first_string_field(json: &str, key: &str) -> Option<String> {
+    let mut i = 0;
+    let bytes = json.as_bytes();
+    while i < bytes.len() {
+        if bytes[i] == b'"' {
+            let (s, n) = parse_json_string(&json[i..])?;
+            let after = json[i + n..].trim_start();
+            if s == key && after.starts_with(':') {
+                let val = after[1..].trim_start();
+                if val.starts_with('"') {
+                    return parse_json_string(val).map(|(v, _)| v);
+                }
+            }
+            i += n;
+            continue;
+        }
+        i += 1;
+    }
+    None
+}
+
+pub fn first_string_array(json: &str, key: &str) -> Option<Vec<String>> {
+    let mut i = 0;
+    let bytes = json.as_bytes();
+    while i < bytes.len() {
+        if bytes[i] == b'"' {
+            let (s, n) = parse_json_string(&json[i..])?;
+            let after = json[i + n..].trim_start();
+            if s == key && after.starts_with(':') {
+                let val = after[1..].trim_start();
+                if val.starts_with('[') {
+                    return Some(parse_string_array(val));
+                }
+            }
+            i += n;
+            continue;
+        }
+        i += 1;
+    }
+    None
+}
+
+fn chat_message_content(body: &str) -> Option<String> {
+    // choices -> first object -> message -> content
+    let mut i = 0;
+    let bytes = body.as_bytes();
+    while i < bytes.len() {
+        if bytes[i] == b'"' {
+            let (s, n) = parse_json_string(&body[i..])?;
+            let after = body[i + n..].trim_start();
+            if s == "choices" && after.starts_with(':') {
+                let val = after[1..].trim_start();
+                return content_in_first_choice(val);
+            }
+            i += n;
+            continue;
+        }
+        i += 1;
+    }
+    None
+}
+
+fn content_in_first_choice(after_colon: &str) -> Option<String> {
+    let arr = after_colon.trim_start();
+    if !arr.starts_with('[') {
         return None;
     }
-    let bytes = after.as_bytes();
-    let mut out = String::new();
-    let mut j = 1;
-    while j < bytes.len() {
-        match bytes[j] {
-            b'"' => return Some(out),
-            b'\\' if j + 1 < bytes.len() => {
-                match bytes[j + 1] {
-                    b'n' => out.push('\n'),
-                    b't' => out.push('\t'),
-                    b'"' => out.push('"'),
-                    b'\\' => out.push('\\'),
-                    b'/' => out.push('/'),
-                    c => out.push(c as char),
+    let inner = arr[1..].trim_start();
+    if !inner.starts_with('{') {
+        return None;
+    }
+    // message.content — not a sibling "content" on a tool/reasoning blob.
+    if let Some(msg) = object_after_key(inner, "message") {
+        for key in ["content", "reasoning_content", "reasoning", "text", "output"] {
+            if let Some(s) = first_string_field(msg, key) {
+                if !s.trim().is_empty() {
+                    return Some(s);
                 }
-                j += 2;
             }
-            c => {
-                out.push(c as char);
-                j += 1;
+        }
+    }
+    for key in ["content", "reasoning_content", "reasoning", "text"] {
+        if let Some(s) = first_string_field(inner, key) {
+            if !s.trim().is_empty() {
+                return Some(s);
             }
         }
     }
     None
+}
+
+fn object_after_key<'a>(json: &'a str, key: &str) -> Option<&'a str> {
+    let mut i = 0;
+    let bytes = json.as_bytes();
+    while i < bytes.len() {
+        if bytes[i] == b'"' {
+            let (s, n) = parse_json_string(&json[i..])?;
+            let after = json[i + n..].trim_start();
+            if s == key && after.starts_with(':') {
+                let val = after[1..].trim_start();
+                if val.starts_with('{') {
+                    return Some(val);
+                }
+            }
+            i += n;
+            continue;
+        }
+        i += 1;
+    }
+    None
+}
+
+pub fn first_number_field(json: &str, key: &str) -> Option<f32> {
+    let mut i = 0;
+    let bytes = json.as_bytes();
+    while i < bytes.len() {
+        if bytes[i] == b'"' {
+            let (s, n) = parse_json_string(&json[i..])?;
+            let after = json[i + n..].trim_start();
+            if s == key && after.starts_with(':') {
+                let val = after[1..].trim_start();
+                let num: String = val
+                    .chars()
+                    .take_while(|c| c.is_ascii_digit() || *c == '.' || *c == '-')
+                    .collect();
+                return num.parse().ok();
+            }
+            i += n;
+            continue;
+        }
+        i += 1;
+    }
+    None
+}
+
+/// `s` starts at the opening quote. Returns (decoded, bytes consumed).
+pub fn parse_json_string(s: &str) -> Option<(String, usize)> {
+    let bytes = s.as_bytes();
+    if bytes.first() != Some(&b'"') {
+        return None;
+    }
+    let mut out = String::new();
+    let mut i = 1;
+    while i < bytes.len() {
+        match bytes[i] {
+            b'"' => return Some((out, i + 1)),
+            b'\\' if i + 1 < bytes.len() => {
+                match bytes[i + 1] {
+                    b'n' => out.push('\n'),
+                    b'r' => out.push('\r'),
+                    b't' => out.push('\t'),
+                    b'"' => out.push('"'),
+                    b'\\' => out.push('\\'),
+                    b'/' => out.push('/'),
+                    b'u' if i + 5 < bytes.len() => {
+                        let hex = s.get(i + 2..i + 6)?;
+                        if let Ok(cp) = u32::from_str_radix(hex, 16) {
+                            if let Some(ch) = char::from_u32(cp) {
+                                out.push(ch);
+                            }
+                        }
+                        i += 6;
+                        continue;
+                    }
+                    _ => {}
+                }
+                i += 2;
+            }
+            _ => {
+                let ch = s[i..].chars().next()?;
+                out.push(ch);
+                i += ch.len_utf8();
+            }
+        }
+    }
+    None
+}
+
+fn parse_string_array(s: &str) -> Vec<String> {
+    let mut body = s.trim_start();
+    if !body.starts_with('[') {
+        return Vec::new();
+    }
+    body = body[1..].trim_start();
+    let mut out = Vec::new();
+    loop {
+        body = body.trim_start();
+        if body.is_empty() || body.starts_with(']') {
+            break;
+        }
+        if body.starts_with(',') {
+            body = body[1..].trim_start();
+            continue;
+        }
+        if body.starts_with('"') {
+            if let Some((v, n)) = parse_json_string(body) {
+                out.push(v);
+                body = &body[n..];
+                continue;
+            }
+        }
+        break;
+    }
+    out
 }
 
 pub fn extract_json_array_f32(body: &str, key: &str) -> Option<Vec<f32>> {

@@ -3,11 +3,12 @@ use crate::core::store::MemoryStore;
 use crate::encode::EncodeInput;
 
 /// Living identity colors a new event before the salience gate.
-pub fn paint(store: &MemoryStore, mood: &Mood, input: &mut EncodeInput<'_>) {
+pub fn paint(store: &mut MemoryStore, mood: &Mood, input: &mut EncodeInput<'_>) {
     let axioms = store.living_axioms();
     if axioms.is_empty() {
         input.valence = (input.valence + 0.15 * mood.valence).clamp(-1.0, 1.0);
         input.arousal = (input.arousal + 0.08 * mood.arousal).clamp(0.0, 1.0);
+        paint_latent(store, input);
         return;
     }
 
@@ -59,12 +60,13 @@ pub fn paint(store: &MemoryStore, mood: &Mood, input: &mut EncodeInput<'_>) {
 }
 
 /// Scene forgotten, charge still pulls the next event.
-fn paint_latent(store: &MemoryStore, input: &mut EncodeInput<'_>) {
+fn paint_latent(store: &mut MemoryStore, input: &mut EncodeInput<'_>) {
     use crate::core::model::TraceStatus;
     let event = input.event.to_lowercase();
     let mut pull_v = 0.0;
     let mut pull_d = 0.0;
     let mut n = 0.0;
+    let mut touched: Vec<String> = Vec::new();
     for t in store.traces.values() {
         if t.status != TraceStatus::Latent {
             continue;
@@ -76,8 +78,16 @@ fn paint_latent(store: &MemoryStore, input: &mut EncodeInput<'_>) {
         n += 1.0;
         pull_v += t.valence;
         pull_d += t.disgust;
+        touched.push(t.id.clone());
         if input.schema.is_none() && !schema.is_empty() {
             input.schema = Some(schema.to_string());
+        }
+    }
+    for id in touched {
+        if let Some(t) = store.traces.get_mut(&id) {
+            t.rehearsals = t.rehearsals.saturating_add(1);
+            t.access = (t.access + 0.08).clamp(0.0, 1.0);
+            t.fidelity = (t.fidelity + 0.04).clamp(0.0, 1.0);
         }
     }
     if n > 0.0 {

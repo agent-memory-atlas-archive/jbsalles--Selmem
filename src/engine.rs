@@ -115,7 +115,7 @@ impl SelectiveMemory {
                 input.self_relevance = input.self_relevance.max(interp.self_relevance);
             }
         }
-        encode::identity::paint(&self.store, &self.mood, &mut input);
+        encode::identity::paint(&mut self.store, &self.mood, &mut input);
         let valence = input.valence;
         let arousal = input.arousal;
         let disgust = input.disgust;

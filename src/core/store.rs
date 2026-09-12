@@ -42,11 +42,20 @@ impl MemoryStore {
     }
 
     pub fn active_ids(&self) -> Vec<String> {
-        self.traces
+        let mut ids: Vec<String> = self
+            .traces
             .values()
             .filter(|t| t.status != TraceStatus::Sealed)
             .map(|t| t.id.clone())
-            .collect()
+            .collect();
+        ids.sort_by(|a, b| {
+            let ta = &self.traces[a];
+            let tb = &self.traces[b];
+            let ca = if ta.core.is_empty() { &ta.gist } else { &ta.core };
+            let cb = if tb.core.is_empty() { &tb.gist } else { &tb.core };
+            ca.cmp(cb).then(a.cmp(b))
+        });
+        ids
     }
 
     pub fn living_axioms(&self) -> Vec<&IdentityAxiom> {

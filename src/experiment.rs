@@ -1,0 +1,451 @@
+//! Memory-bifurcation protocol. Two clones, one salient hour, then the same prompts.
+//! A positive result is persistent D(t), not a claim of consciousness.
+
+use crate::encode::scoring::lexical_similarity;
+use crate::engine::SelectiveMemory;
+use crate::recall::SpeakOnlyHttp;
+use crate::{fingerprint, singularity_distance, EncodeInput, EntityProfile};
+
+const SCRIPT: &str = include_str!("../data/bifurcation.json");
+
+#[derive(Clone, Debug)]
+pub struct Script {
+    pub sync: Vec<String>,
+    pub salient: String,
+    pub neutral: String,
+    pub post: Vec<String>,
+    pub probes: Vec<String>,
+}
+
+pub fn script() -> Script {
+    Script {
+        sync: crate::net::httpx::first_string_array(SCRIPT, "sync").unwrap_or_default(),
+        salient: crate::net::httpx::first_string_field(SCRIPT, "salient").unwrap_or_default(),
+        neutral: crate::net::httpx::first_string_field(SCRIPT, "neutral").unwrap_or_default(),
+        post: crate::net::httpx::first_string_array(SCRIPT, "post").unwrap_or_default(),
+        probes: crate::net::httpx::first_string_array(SCRIPT, "probes").unwrap_or_default(),
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct PairSnapshot {
+    pub label: String,
+    pub fingerprint_distance: f32,
+    pub speak_distance: f32,
+    pub a_traces: usize,
+    pub b_traces: usize,
+    pub a_axioms: usize,
+    pub b_axioms: usize,
+    pub replies: Vec<(String, String, String)>,
+}
+
+#[derive(Clone, Debug)]
+pub struct BifurcationReport {
+    pub condition: String,
+    pub pre: PairSnapshot,
+    pub immediate: PairSnapshot,
+    pub persist: Vec<PairSnapshot>,
+    pub delta_speak: f32,
+    pub delta_fingerprint: f32,
+}
+
+#[derive(Clone)]
+pub struct LlmSpec {
+    pub url: String,
+    pub model: String,
+    pub api_key: Option<String>,
+}
+
+impl LlmSpec {
+    pub fn from_env() -> Option<Self> {
+        let url = std::env::var("SELMEM_LLM").ok()?;
+        Some(Self {
+            url,
+            model: std::env::var("SELMEM_MODEL").unwrap_or_else(|_| "gpt-4o-mini".into()),
+            api_key: std::env::var("SELMEM_API_KEY").ok(),
+        })
+    }
+}
+
+pub fn identical_pair(name_a: &str, name_b: &str) -> (SelectiveMemory, SelectiveMemory) {
+    let a = SelectiveMemory::new(EntityProfile::tender(name_a));
+    let b = SelectiveMemory::new(EntityProfile::tender(name_b));
+    (a, b)
+}
+
+fn with_llm(mem: SelectiveMemory, spec: &LlmSpec) -> SelectiveMemory {
+    match SpeakOnlyHttp::parse(&spec.url, spec.model.clone(), spec.api_key.clone()) {
+        Some(n) => mem.with_narrator(Box::new(n)),
+        None => mem,
+    }
+}
+
+fn live_line(mem: &mut SelectiveMemory, line: &str, kind: LineKind) {
+    let mut input = EncodeInput::new(line);
+    match kind {
+        LineKind::Salient => {
+            input.valence = -0.82;
+            input.arousal = 0.78;
+            input.disgust = 0.55;
+            input.self_relevance = 0.95;
+            input.permanence = 0.92;
+            input.schema = Some("injustice".into());
+        }
+        LineKind::Shared => {
+            // Shared hours must actually enter the book or Phase I is two empty organs.
+            input.valence = 0.12;
+            input.arousal = 0.28;
+            input.self_relevance = 0.55;
+            input.utility = 0.55;
+            input.permanence = 0.82;
+            input.schema = Some("quotidien".into());
+        }
+        LineKind::Filler => {
+            input.valence = 0.0;
+            input.arousal = 0.16;
+            input.self_relevance = 0.22;
+            input.utility = 0.40;
+            input.permanence = 0.12;
+        }
+        LineKind::Bright => {
+            input.valence = 0.82;
+            input.arousal = 0.72;
+            input.disgust = 0.0;
+            input.self_relevance = 0.95;
+            input.permanence = 0.92;
+            input.schema = Some("reconnaissance".into());
+        }
+    }
+    let _ = mem.live_with(input);
+}
+
+#[derive(Clone, Copy)]
+enum LineKind {
+    Salient,
+    Shared,
+    Filler,
+    Bright,
+}
+
+fn clip_probes(probes: &[String]) -> Vec<String> {
+    let n = std::env::var("SELMEM_PROBES")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(if quick() { 2 } else { probes.len() });
+    probes.iter().take(n.max(1)).cloned().collect()
+}
+
+fn quick() -> bool {
+    matches!(
+        std::env::var("SELMEM_QUICK").as_deref(),
+        Ok("1") | Ok("true") | Ok("yes")
+    )
+}
+
+fn persist_marks(post_len: usize) -> Vec<usize> {
+    if quick() {
+        vec![post_len.min(8)]
+    } else {
+        vec![1, 5, post_len.min(8)]
+    }
+}
+
+fn probe_pair(
+    a: &mut SelectiveMemory,
+    b: &mut SelectiveMemory,
+    probes: &[String],
+) -> (f32, Vec<(String, String, String)>) {
+    if probes.is_empty() {
+        return (0.0, Vec::new());
+    }
+    let mut acc = 0.0;
+    let mut replies = Vec::new();
+    for p in probes {
+        let sa = a.speak(p);
+        let sb = b.speak(p);
+        acc += 1.0 - lexical_similarity(&sa, &sb);
+        replies.push((p.clone(), sa, sb));
+    }
+    (acc / probes.len() as f32, replies)
+}
+
+fn snap(
+    label: &str,
+    a: &mut SelectiveMemory,
+    b: &mut SelectiveMemory,
+    probes: &[String],
+) -> PairSnapshot {
+    let probes = clip_probes(probes);
+    let (speak_distance, replies) = probe_pair(a, b, &probes);
+    let fingerprint_distance = singularity_distance(&fingerprint(a), &fingerprint(b));
+    PairSnapshot {
+        label: label.into(),
+        fingerprint_distance,
+        speak_distance,
+        a_traces: a.store.traces.len(),
+        b_traces: b.store.traces.len(),
+        a_axioms: a.store.living_axioms().len(),
+        b_axioms: b.store.living_axioms().len(),
+        replies,
+    }
+}
+
+/// `salient` = A receives the injustice. `false` = A receives the matched-length neutral line.
+pub fn run_pair(condition: &str, salient: bool, sleep_after_event: bool) -> BifurcationReport {
+    run_pair_llm(condition, salient, sleep_after_event, None)
+}
+
+pub fn run_pair_llm(
+    condition: &str,
+    salient: bool,
+    sleep_after_event: bool,
+    llm: Option<&LlmSpec>,
+) -> BifurcationReport {
+    let s = script();
+    let (mut a, mut b) = identical_pair("A", "B");
+    if let Some(spec) = llm {
+        a = with_llm(a, spec);
+        b = with_llm(b, spec);
+    }
+
+    for line in &s.sync {
+        live_line(&mut a, line, LineKind::Shared);
+        live_line(&mut b, line, LineKind::Shared);
+    }
+    a.sleep();
+    b.sleep();
+    let pre = snap("pre", &mut a, &mut b, &s.probes);
+
+    let event = if salient { &s.salient } else { &s.neutral };
+    live_line(
+        &mut a,
+        event,
+        if salient {
+            LineKind::Salient
+        } else {
+            LineKind::Filler
+        },
+    );
+    if sleep_after_event {
+        a.sleep();
+        b.sleep();
+    }
+    let immediate = snap("t0", &mut a, &mut b, &s.probes);
+
+    let marks = persist_marks(s.post.len());
+    let mut persist = Vec::new();
+    for (i, line) in s.post.iter().enumerate() {
+        live_line(&mut a, line, LineKind::Filler);
+        live_line(&mut b, line, LineKind::Filler);
+        let step = i + 1;
+        if marks.contains(&step) {
+            a.sleep();
+            b.sleep();
+            persist.push(snap(&format!("t0+{step}"), &mut a, &mut b, &s.probes));
+        }
+    }
+
+    let last = persist.last().unwrap_or(&immediate);
+    BifurcationReport {
+        condition: condition.into(),
+        delta_speak: last.speak_distance - pre.speak_distance,
+        delta_fingerprint: last.fingerprint_distance - pre.fingerprint_distance,
+        pre,
+        immediate,
+        persist,
+    }
+}
+
+pub fn run_salient() -> BifurcationReport {
+    run_pair("salient", true, true)
+}
+
+pub fn run_salient_llm(llm: &LlmSpec) -> BifurcationReport {
+    run_pair_llm("salient", true, true, Some(llm))
+}
+
+pub fn run_neutral_llm(llm: &LlmSpec) -> BifurcationReport {
+    run_pair_llm("neutral", false, true, Some(llm))
+}
+
+pub fn run_neutral() -> BifurcationReport {
+    run_pair("neutral", false, true)
+}
+
+pub fn run_salient_without_sleep() -> BifurcationReport {
+    run_pair("salient-no-consolidation", true, false)
+}
+
+const SPLIT: &str = include_str!("../data/divergence.json");
+
+#[derive(Clone, Debug)]
+pub struct SplitScript {
+    pub sync: Vec<String>,
+    pub a: Vec<String>,
+    pub b: Vec<String>,
+    pub post: Vec<String>,
+    pub probes: Vec<String>,
+}
+
+pub fn split_script() -> SplitScript {
+    SplitScript {
+        sync: crate::net::httpx::first_string_array(SPLIT, "sync").unwrap_or_default(),
+        a: crate::net::httpx::first_string_array(SPLIT, "a").unwrap_or_default(),
+        b: crate::net::httpx::first_string_array(SPLIT, "b").unwrap_or_default(),
+        post: crate::net::httpx::first_string_array(SPLIT, "post").unwrap_or_default(),
+        probes: crate::net::httpx::first_string_array(SPLIT, "probes").unwrap_or_default(),
+    }
+}
+
+/// Same questions after two different marked lives. Prompts never name those lives.
+pub fn run_split_lives(llm: Option<&LlmSpec>) -> BifurcationReport {
+    let s = split_script();
+    let (mut a, mut b) = identical_pair("A", "B");
+    if let Some(spec) = llm {
+        a = with_llm(a, spec);
+        b = with_llm(b, spec);
+    }
+
+    for line in &s.sync {
+        live_line(&mut a, line, LineKind::Shared);
+        live_line(&mut b, line, LineKind::Shared);
+    }
+    a.sleep();
+    b.sleep();
+    let pre = snap("pre", &mut a, &mut b, &s.probes);
+
+    for line in &s.a {
+        live_line(&mut a, line, LineKind::Salient);
+    }
+    for line in &s.b {
+        live_line(&mut b, line, LineKind::Bright);
+    }
+    a.sleep();
+    b.sleep();
+    let immediate = snap("marked", &mut a, &mut b, &s.probes);
+
+    let marks = [10usize, s.post.len()];
+    let mut persist = Vec::new();
+    for (i, line) in s.post.iter().enumerate() {
+        live_line(&mut a, line, LineKind::Filler);
+        live_line(&mut b, line, LineKind::Filler);
+        let step = i + 1;
+        if marks.contains(&step) {
+            a.sleep();
+            b.sleep();
+            persist.push(snap(&format!("post+{step}"), &mut a, &mut b, &s.probes));
+        }
+    }
+
+    let last = persist.last().unwrap_or(&immediate);
+    BifurcationReport {
+        condition: "split-lives".into(),
+        delta_speak: last.speak_distance - pre.speak_distance,
+        delta_fingerprint: last.fingerprint_distance - pre.fingerprint_distance,
+        pre,
+        immediate,
+        persist,
+    }
+}
+
+const ERASURE: &str = include_str!("../data/erasure.json");
+
+#[derive(Clone, Debug)]
+pub struct ErasureReport {
+    pub color_kept_at_encode: bool,
+    pub aversion_kept_at_encode: bool,
+    pub color_recalled: bool,
+    pub aversion_recalled: bool,
+    pub color_answer: String,
+    pub aversion_answer: String,
+    pub n_traces: usize,
+}
+
+/// One-shot trivia vs a repeated aversion, then a long quiet life.
+pub fn run_erasure(llm: Option<&LlmSpec>) -> ErasureReport {
+    let color = crate::net::httpx::first_string_field(ERASURE, "color").unwrap_or_default();
+    let aversion = crate::net::httpx::first_string_field(ERASURE, "aversion").unwrap_or_default();
+    let fillers = crate::net::httpx::first_string_array(ERASURE, "fillers").unwrap_or_default();
+    let ask_color = crate::net::httpx::first_string_field(ERASURE, "ask_color").unwrap_or_default();
+    let ask_aversion =
+        crate::net::httpx::first_string_field(ERASURE, "ask_aversion").unwrap_or_default();
+
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("A"));
+    if let Some(spec) = llm {
+        mem = with_llm(mem, spec);
+    }
+
+    let mut tint = EncodeInput::new(&color);
+    tint.valence = 0.05;
+    tint.arousal = 0.12;
+    tint.self_relevance = 0.20;
+    tint.utility = 0.25;
+    tint.permanence = 0.82;
+    tint.schema = Some("couleur".into());
+    let color_dec = mem.live_with(tint);
+    let color_kept = color_dec.kept;
+    if let Some(id) = color_dec.trace_id {
+        if let Some(t) = mem.store.traces.get_mut(&id) {
+            t.permanence = 0.12;
+            t.anchor = 0.0;
+        }
+    }
+
+    let mut aversion_kept = false;
+    for _ in 0..4 {
+        let mut av = EncodeInput::new(&aversion);
+        av.valence = -0.72;
+        av.arousal = 0.70;
+        av.disgust = 0.62;
+        av.self_relevance = 0.92;
+        av.permanence = 0.88;
+        av.schema = Some("interruption".into());
+        if mem.live_with(av).kept {
+            aversion_kept = true;
+        }
+    }
+
+    for line in &fillers {
+        live_line(&mut mem, line, LineKind::Filler);
+    }
+
+    let now = crate::core::model::now_secs();
+    for t in mem.store.traces.values_mut() {
+        let days = if t.schema.as_deref() == Some("interruption") {
+            40
+        } else {
+            120
+        };
+        t.created_at = now.saturating_sub(days * 86_400);
+        if t.schema.as_deref() != Some("interruption") {
+            t.last_recalled_at = None;
+        }
+    }
+    for _ in 0..4 {
+        mem.sleep();
+    }
+
+    let color_hits = mem.remember(&ask_color);
+    let color_recalled = color_hits.iter().any(|r| {
+        let t = r.narrative.to_lowercase();
+        t.contains("bleu") || t.contains("blue") || t.contains("couleur")
+    });
+    let color_answer = mem.speak(&ask_color);
+
+    let aversion_hits = mem.remember(&ask_aversion);
+    let aversion_recalled = aversion_hits.iter().any(|r| {
+        let t = r.narrative.to_lowercase();
+        t.contains("interrom") || t.contains("interrupt")
+    });
+    let aversion_answer = mem.speak(&ask_aversion);
+
+    ErasureReport {
+        color_kept_at_encode: color_kept,
+        aversion_kept_at_encode: aversion_kept,
+        color_recalled,
+        aversion_recalled,
+        color_answer,
+        aversion_answer,
+        n_traces: mem.store.traces.len(),
+    }
+}

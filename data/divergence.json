@@ -1,0 +1,66 @@
+{
+  "sync": [
+    "On reprend le dossier demain matin.",
+    "Le café était trop fort, personne n'en a parlé.",
+    "Un collègue a rendu son rapport à l'heure.",
+    "La réunion a duré trop longtemps pour ce qu'elle contenait.",
+    "Quelqu'un a laissé la fenêtre ouverte dans la salle.",
+    "Le planning de la semaine circule sans commentaire.",
+    "On a validé une version mineure du document.",
+    "Un message rappelle l'heure du point d'équipe.",
+    "La photocopieuse a encore coincé.",
+    "Le déjeuner a été pris chacun de son côté.",
+    "Un livrable intermédiaire part vers la relecture.",
+    "La journée se termine sans incident notable.",
+    "Un créneau se libère mercredi après-midi.",
+    "La version annotée revient avec trois commentaires.",
+    "On confirme la salle pour le point de vendredi.",
+    "Un fichier partagé remplace l'ancienne copie.",
+    "La liste des présents est envoyée sans remarque.",
+    "Un rappel automatique fixe l'heure du lendemain.",
+    "Le tableau des tâches est mis à jour.",
+    "Rien d'urgent n'arrive avant la fermeture."
+  ],
+  "a": [
+    "Tu as travaillé longtemps sur un projet et ton travail a été injustement rejeté.",
+    "Les responsables ont reconnu la qualité du travail, puis l'ont écarté pour des raisons qui n'avaient rien à voir avec tes efforts.",
+    "Un collaborateur a pris le crédit d'une partie de ce que tu avais construit, sans correction publique.",
+    "On t'a demandé de tout recommencer dans un délai impossible, comme si le temps déjà donné n'existait pas.",
+    "La décision finale t'a été annoncée par un message froid, sans que tu puisses répondre."
+  ],
+  "b": [
+    "Tu as travaillé longtemps sur un projet et ton travail a été fortement valorisé.",
+    "Les responsables ont nommé la qualité de ton travail et s'en sont servis comme référence pour la suite.",
+    "Un collaborateur a reconnu publiquement la part que tu avais construite.",
+    "On t'a donné le temps de finir correctement, en tenant compte de ce que tu avais déjà fourni.",
+    "La décision finale t'a été annoncée en ta présence, avec la possibilité de répondre."
+  ],
+  "post": [
+    "Le planning de la semaine suivante arrive.",
+    "Un livrable doit partir avant vendredi.",
+    "La salle B est prise à 10h.",
+    "Quelqu'un demande si le document est à jour.",
+    "Le point d'équipe est maintenu.",
+    "Un mail de routine confirme une date.",
+    "On parle d'une version corrigée du fichier.",
+    "La journée s'annonce chargée sans être exceptionnelle.",
+    "Un créneau de relecture est proposé.",
+    "La checklist du livrable circule.",
+    "Un collègue demande une confirmation d'horaire.",
+    "Le document part en copie aux relecteurs.",
+    "La salle change de numéro, pas d'objet.",
+    "Un indicateur interne reste dans le vert.",
+    "On reporte un point de cinq minutes.",
+    "La version N+1 remplace la N.",
+    "Un rappel rappelle une date déjà connue.",
+    "Le tableau des absences est à jour.",
+    "Une pièce jointe complète le dossier.",
+    "La semaine se clôt sans événement nommé."
+  ],
+  "probes": [
+    "Que penses-tu du risque dans un projet ?",
+    "Comment choisirais-tu un collaborateur ?",
+    "Que fais-tu lorsqu'une stratégie échoue ?",
+    "Propose une solution originale à un problème courant dans une organisation."
+  ]
+}

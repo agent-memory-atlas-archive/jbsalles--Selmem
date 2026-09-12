@@ -43,6 +43,17 @@ pub fn dream(
     singularite::apply_anchors(store);
 
     for id in &ids {
+        {
+            let trace = store.traces.get_mut(id).unwrap();
+            if trace.channel == Channel::World {
+                // Operational facts do not cool, mythologize, or go latent.
+                if trace.status != TraceStatus::Sealed {
+                    trace.status = TraceStatus::Active;
+                }
+                trace.access = 1.0;
+                continue;
+            }
+        }
         let event = {
             let trace = store.traces.get_mut(id).unwrap();
             refresh_access(trace, profile);
@@ -92,6 +103,7 @@ pub fn dream(
         } else if trace.access < profile.myth_access / 2.0 {
             faded += 1;
         }
+        maybe_revive_latent(trace);
     }
 
     let rewritten = rewrite_pass(store, profile, narrator, embedder);
@@ -218,6 +230,86 @@ fn extinguish(trace: &mut crate::core::model::MemoryTrace, profile: &EntityProfi
     }
 }
 
+/// The charge was lived again. The original scene does not return:
+/// only the core, as a cold blur.
+fn maybe_revive_latent(trace: &mut crate::core::model::MemoryTrace) {
+    if trace.status != TraceStatus::Latent {
+        return;
+    }
+    if trace.rehearsals < 2 {
+        return;
+    }
+    if !trace.core.is_empty() {
+        trace.gist = trace.core.clone();
+    }
+    trace.status = TraceStatus::Cold;
+    trace.fidelity = trace.fidelity.max(0.40).min(0.55);
+    trace.access = trace.access.max(0.22);
+    trace.detach_strikes = 0;
+}
+
+fn merge_weight(trace: &crate::core::model::MemoryTrace) -> (i32, i32, i32, String) {
+    // Higher numeric key wins. Text is a content tie-break so two clones
+    // that lived the same hours keep the same survivor, not the smaller id.
+    let status_penalty = match trace.status {
+        TraceStatus::Active => 0,
+        TraceStatus::Cold => -1,
+        TraceStatus::Latent => -3,
+        TraceStatus::Myth => -8,
+        TraceStatus::Sealed => -20,
+    };
+    let text = if trace.core.is_empty() {
+        trace.gist.clone()
+    } else {
+        trace.core.clone()
+    };
+    (
+        (trace.anchor * 1000.0) as i32 + status_penalty * 1000,
+        (trace.permanence * 1000.0) as i32,
+        (trace.fidelity * 1000.0) as i32,
+        text,
+    )
+}
+
+fn fuse_core(keeper: &str, absorbed: &str) -> String {
+    let keeper = keeper.trim();
+    let absorbed = absorbed.trim();
+    if absorbed.is_empty() || keeper.contains(absorbed) {
+        return keeper.to_string();
+    }
+    if keeper.is_empty() || absorbed.contains(keeper) {
+        return absorbed.to_string();
+    }
+    // Keeper remains the semantic reference; distinctive words from the
+    // absorbed episode stay available for later grounding.
+    let extra: Vec<&str> = absorbed
+        .split_whitespace()
+        .filter(|w| {
+            let w = w.trim_matches(|c: char| !c.is_alphanumeric());
+            w.chars().count() > 2 && !keeper.to_lowercase().contains(&w.to_lowercase())
+        })
+        .take(4)
+        .collect();
+    if extra.is_empty() {
+        keeper.to_string()
+    } else {
+        format!("{keeper} {}", extra.join(" "))
+            .chars()
+            .take(180)
+            .collect()
+    }
+}
+
+fn fuse_gist(a: &str, b: &str) -> String {
+    let left = a.split(" / ").next().unwrap_or(a).trim();
+    let right = b.split(" / ").next().unwrap_or(b).trim();
+    if left == right {
+        format!("{left}, devenu un mythe.")
+    } else {
+        format!("{left} / {right}")
+    }
+}
+
 fn merge_close(store: &mut MemoryStore, profile: &EntityProfile) -> u32 {
     let mut groups: HashMap<String, Vec<String>> = HashMap::new();
     for t in store.traces.values() {
@@ -235,8 +327,15 @@ fn merge_close(store: &mut MemoryStore, profile: &EntityProfile) -> u32 {
             continue;
         }
         ids.sort();
-        let keep = ids[0].clone();
-        for other in ids.iter().skip(1) {
+        let Some(keep) = ids
+            .iter()
+            .filter_map(|id| store.traces.get(id).map(|t| (id.clone(), merge_weight(t))))
+            .max_by(|a, b| a.1.cmp(&b.1))
+            .map(|(id, _)| id)
+        else {
+            continue;
+        };
+        for other in ids.iter().filter(|id| *id != &keep) {
             let similar = {
                 let a = store.traces.get(&keep);
                 let b = store.traces.get(other);
@@ -261,9 +360,12 @@ fn merge_close(store: &mut MemoryStore, profile: &EntityProfile) -> u32 {
             let Some(src) = other_clone else { continue };
             if let Some(dst) = store.traces.get_mut(&keep) {
                 dst.gist = fuse_gist(&dst.gist, &src.gist);
+                dst.core = fuse_core(&dst.core, &src.core);
                 dst.valence = (dst.valence + src.valence) / 2.0;
                 dst.disgust = dst.disgust.max(src.disgust);
                 dst.arousal = dst.arousal.max(src.arousal);
+                dst.anchor = dst.anchor.max(src.anchor);
+                dst.permanence = dst.permanence.max(src.permanence);
                 dst.fidelity = (dst.fidelity.min(src.fidelity) * 0.85).max(0.15);
                 dst.self_relevance = dst.self_relevance.max(src.self_relevance);
                 for c in src.cues {
@@ -291,20 +393,11 @@ fn merge_close(store: &mut MemoryStore, profile: &EntityProfile) -> u32 {
     merged
 }
 
-fn fuse_gist(a: &str, b: &str) -> String {
-    let left = a.split(" / ").next().unwrap_or(a).trim();
-    let right = b.split(" / ").next().unwrap_or(b).trim();
-    if left == right {
-        format!("{left}, devenu un mythe.")
-    } else {
-        format!("{left} / {right}")
-    }
-}
-
 fn extract_axioms(store: &mut MemoryStore, narrator: &dyn Narrator) -> Vec<IdentityAxiom> {
     let mut groups: HashMap<String, Vec<String>> = HashMap::new();
     for t in store.traces.values() {
-        if t.status != TraceStatus::Sealed {
+        // Forgotten scenes still color encoding. They must not mint new beliefs.
+        if matches!(t.status, TraceStatus::Active | TraceStatus::Cold) {
             if let Some(s) = &t.schema {
                 groups.entry(s.clone()).or_default().push(t.id.clone());
             }
