@@ -164,102 +164,17 @@ The model sees gist, core, schema, affect, fidelity, mood, living axioms. Not th
 
 ---
 
-## Experiments
+## Conclusions from the benches
 
-Scripts live in `data/*.json` and are not edited after a run starts. Later prompts do not name the marked event. Fingerprint distance is on the book. Speak distance is 1 − lexical overlap of answers.
+Tables, scripts, and how to replay a cell: **[experiments/REPORT.md](experiments/REPORT.md)**.
 
-### Organ only (`RuleNarrator`)
+A high-salience hour can enter one clone’s book and stay out of the other’s (`τ`). A length-matched dull hour does not. The resulting fingerprint gap survives eight identical later hours (C2 S/N Δfp = 0.117, C2 S/S Δfp = 0.042, C0 = 0). Encode is on the organ, so Δfp does not vary across Grok pairs.
 
-**Bifurcation.** Two tender clones share 12 hours. A then receives an unjust project cancellation. B does not. Eight identical hours follow. Control: a same-length, low-salience meeting change.
+Wording is the part that needed n = 10. On a probe that never names T₀, Grok names the cancellation on the marked SelMem side after that hour has left a last-k=8 window (10 / 10 S/N, 9 / 10 S/S at post+8). C0 and C1 k=8 do not (0 / 10). While T₀ is still in the window, last-k names it at least as often as SelMem (9–10 / 10 at T₀). The difference is eviction, not “having seen the sentence once”. Four lines from pair `001` are in the report (C0 procedure, C1 last mail, C2 A “this injustice repeating”, C2 B a written correction). The live replies were French; the report quotes them in English.
 
-| Condition | Δ fingerprint | traces after T₀ |
-| --- | --- | --- |
-| Salient on A | +0.12 | 13 / 12 |
-| Neutral extra line | 0 | 12 / 12 |
-| Salient, no sleep | +0.12 | 13 / 12 |
+Speak distance cannot carry the claim: two empty books already sit at ~0.6. Sleep ablation, erasure, and split lives were measured on `RuleNarrator` only. One seed. No human ratings. Not a creativity claim.
 
-Books match before T₀. The extra line is stored only if it clears `τ`. Skipping sleep does not close the gap.
-
-**Split lives.** Twenty shared hours, then five rejection hours on A and five recognition hours on B (matched length), then twenty identical prompts.
-
-| Instant | fingerprint D | speak D |
-| --- | --- | --- |
-| Before the split | 0 | 0 |
-| After the five hours | 0.21 | 0.67 |
-| After +20 identical hours | 0.22 | 0.67 |
-
-Same later question about choosing a collaborator: A recalls stolen credit; B recalls public recognition.
-
-**Erasure.** Script: `data/erasure.json`.
-
-1. Encode once: favourite colour is blue. Then drop permanence and anchor.
-2. Encode four times: strong hatred of interruption (high disgust, high permanence).
-3. Fifty dull hours (most fall under `τ`).
-4. Set `created_at` to 120 days (colour) vs 40 days (aversion). Four nights. Without that, every trace is “now” and decay does not run.
-5. Ask both questions. Neither question restates the fact.
-
-| | Encoded | Recalled later |
-| --- | --- | --- |
-| Favourite colour is blue | yes | no |
-| Hates being interrupted | yes | yes |
-
-Five traces left. Asked the colour question, the system does not say blue. It answers with the aversion. Limit: age is injected, not elapsed chat time. No Grok run on this script yet.
-
-### Organ + Grok 4.3
-
-Same bifurcation script. `SpeakOnlyHttp`: Grok writes `reply` only. Encode, sleep, reconstruct stay on the organ. `reasoning_effort=none`. One pair.
-
-Two clones with the same book already differ in wording (speak ≈ 0.65–0.77). Temperature 0 is not a seed. Δspeak is a weak measure. Fingerprint is not.
-
-| Condition | Δ fingerprint | Δ speak | who spoke |
-| --- | --- | --- | --- |
-| Salient + Grok | +0.117 | +0.078 | Grok (0/10 rule templates) |
-| Neutral + Grok | 0 | −0.010 | Grok (0/10 rule templates) |
-| Salient, no sleep | +0.116 | +0.527 | rules |
-
-After T₀ the prompts still do not mention the cancellation. A refers to a recent injustice, a lost project, work that vanished. B talks about constancy and short stand-ups. The neutral pair, same model, does not mention injustice. Books stay aligned.
-
-### Persistent divergence, one pair (Grok 4.3)
-
-Script: `data/v01.json`. Runner: `src/benchmark.rs`. Same model in every cell. `SpeakOnlyHttp` and `speak_isolated` only: the live talk frame cannot carry T₀.
-
-Question: after one marked hour, does fingerprint distance stay above the pre-T₀ floor through eight identical later hours?
-
-| Cell | Book | T₀ event |
-| --- | --- | --- |
-| C0 | none | same script, nothing stored |
-| C2 | SelMem | A vs B as below |
-
-Two arms on each cell. **S/N:** A gets the unjust cancellation; B gets a length-matched admin notice. **S/S:** A gets the cancellation; B gets a length-matched recognition hour. Shared life is twelve hours. A pair is void if books or trace counts already differ before T₀. Speak distance is logged, never used to drop a pair.
-
-One seed, Grok 4.3, `reasoning_effort=none`. Organ-only numbers on the same script are the same to two decimals (fingerprint is on the book).
-
-| Cell | D_fp pre → last | traces last | Δ fingerprint |
-| --- | --- | --- | --- |
-| C0 S/N | 0 → 0 | 0 / 0 | 0 |
-| C0 S/S | 0 → 0 | 0 / 0 | 0 |
-| C2 S/N | 0 → 0.117 | 13 / 12 | +0.117 |
-| C2 S/S | 0 → 0.042 | 13 / 13 | +0.042 |
-
-C0 never opens a gap. C2 S/N stores the marked hour on A only; the gap is still there after the eight shared posts. C2 S/S stores one strong hour on each side: the gap is smaller and still not zero. Mean disgust on C2 S/N A rises (~0.04); B stays at 0. Mean valence after S/S: A ~0.08, B ~0.19.
-
-Pre speak distance is already 0.53–0.76 on C0 and 0.59–0.64 on C2 with identical books. Wording is not the test.
-
-On the conflict probe (a colleague denies a serious error; the line does not name T₀):
-
-- C2 S/N A: the refusal feels like the cancelled project.
-- C2 S/N B: log the fact, ask for a correction, take it to the stand-up.
-- C0: generic procedure on both sides. No founding injustice.
-
-Three open items (`data/creativity.json`) were stored, not scored. C0 C1 independently invented a connected bin. C2 S/N C1: A starts from the vanished project; B stays on the daily motif. That is an observation on one pair, not an originality result.
-
-Export: `examples/benchmark --out selmem-v01.json`. Post-step reply texts were omitted from that file; distances were kept.
-
-### Limits
-
-One Grok pair per cell. No last-k / RAG control (C1). No comparison to MemGPT at 10³–10⁵ turns. No human ratings. Δspeak cannot carry the claim while baseline wording noise is ~0.7. Sleep ablation was not run through Grok. Coefficients are unset.
-
-What holds on this bench: a high-salience hour can be stored on one clone only, remain after identical later prompts, and change what Grok says without the prompt naming that hour. With no book, the same script leaves D_fp at 0. Two different salient hours also leave a residual gap. That is persistent path dependence on the book, n = 1. It is not a creativity claim.
+What is still open: a scored creative grid, a few blind human judges on the post+8 conflict probe, a second seed if those disagree.
 
 ---
 
@@ -267,9 +182,9 @@ What holds on this bench: a high-salience hour can be stored on one clone only, 
 
 `cargo test` covers: dull drop, world channel pinned, tender/austere split, core vs detail, anchors, axiom succession, motif ≠ trait, identity paint, reinterpret, grounding blend, fading warp, latent residue, persist round-trip, merge + extinguish in one night.
 
-Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; Grok names the injustice on A only; C0 stays at D_fp 0 on the same v0.1 script.
+Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; on v0.1 × 10 Grok pairs the book gap holds and, after last-k=8 evicts T₀, only C2 A still names it. Full tables: [experiments/REPORT.md](experiments/REPORT.md).
 
-Missing: long bake-off, human originality score, more than one Grok pair, learned layers (still rules), fitted constants. Core is lexical compression. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint.
+Missing: scored creative grid, human ratings, more than one seed, learned layers (still rules), fitted constants. Core is lexical compression. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint.
 
 Two processes on one `.db` will collide. Anchors are decay brakes, not an ethics layer.
 

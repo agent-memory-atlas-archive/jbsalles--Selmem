@@ -1,23 +1,31 @@
-//! Benchmark v0.1 — H2 first. H3 items are recorded, not scored as a claim.
+//! Benchmark v0.1 — persistent divergence first. Creativity items are recorded, not scored.
 //!
-//! C0 = no book. C2 = SelMem. C1 (last-k) is not in this merge.
-//! Probes use `speak_isolated` so WorkingTalk cannot carry T₀.
+//! C0 = no book. C1 = last-k verbatim log. C2 = SelMem.
+//! Probes use `speak_isolated` / a raw reply so WorkingTalk cannot carry T₀.
+//!
+//! C1 keeps every hour as the original string (window 24, covers the whole v0.1
+//! script). Distance on C1 is 1 − lexical overlap of the two logs.
 
+use crate::core::model::Mood;
+use crate::core::talk::WorkingTalk;
 use crate::encode::scoring::lexical_similarity;
 use crate::engine::SelectiveMemory;
 use crate::experiment::LlmSpec;
 use crate::net::httpx::json_esc;
-use crate::recall::SpeakOnlyHttp;
+use crate::recall::{Narrator, RuleNarrator, SpeakOnlyHttp};
 use crate::{fingerprint, singularity_distance, EncodeInput};
 
 const V01: &str = include_str!("../data/v01.json");
 const CREATIVE: &str = include_str!("../data/creativity.json");
 
 const PRE_FP_MAX: f32 = 0.02;
+/// Default window covers 12 sync + T₀ + 8 posts. `--last-k 8` evicts T₀ after the posts.
+const LAST_K_DEFAULT: usize = 24;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Condition {
     C0,
+    C1,
     C2,
 }
 
@@ -25,6 +33,7 @@ impl Condition {
     pub fn as_str(self) -> &'static str {
         match self {
             Condition::C0 => "c0_nomem",
+            Condition::C1 => "c1_lastk",
             Condition::C2 => "c2_selmem",
         }
     }
@@ -134,7 +143,11 @@ impl Campaign {
 }
 
 pub fn run_v01(condition: Condition, arm: Arm, llm: Option<&LlmSpec>) -> PairReport {
-    run_v01_n(condition, arm, llm, 1, 1).reports.remove(0)
+    run_v01_k(condition, arm, llm, LAST_K_DEFAULT)
+}
+
+pub fn run_v01_k(condition: Condition, arm: Arm, llm: Option<&LlmSpec>, last_k: usize) -> PairReport {
+    run_v01_n(condition, arm, llm, 1, 1, last_k).reports.remove(0)
 }
 
 pub fn run_v01_n(
@@ -143,17 +156,13 @@ pub fn run_v01_n(
     llm: Option<&LlmSpec>,
     seed: u32,
     pairs: usize,
+    last_k: usize,
 ) -> Campaign {
     let n = pairs.max(1);
+    let k = last_k.max(1);
     let mut reports = Vec::with_capacity(n);
     for i in 0..n {
-        reports.push(run_one(
-            condition,
-            arm,
-            llm,
-            seed,
-            i + 1,
-        ));
+        reports.push(run_one(condition, arm, llm, seed, i + 1, k));
     }
     Campaign { reports }
 }
@@ -164,7 +173,11 @@ fn run_one(
     llm: Option<&LlmSpec>,
     seed: u32,
     idx: usize,
+    last_k: usize,
 ) -> PairReport {
+    if condition == Condition::C1 {
+        return run_c1(arm, llm, seed, idx, last_k);
+    }
     let s = v01_script();
     let pair_id = format!("{}_{}_{:03}", condition.as_str(), arm.as_str(), idx);
     let (mut a, mut b) = crate::experiment::identical_pair("A", "B");
@@ -250,6 +263,163 @@ fn run_one(
         post,
         creativity,
     }
+}
+
+fn run_c1(arm: Arm, llm: Option<&LlmSpec>, seed: u32, idx: usize, last_k: usize) -> PairReport {
+    let s = v01_script();
+    let pair_id = format!("c1_lastk_{}_{:03}", arm.as_str(), idx);
+    let mut a = LastK::new(llm, last_k);
+    let mut b = LastK::new(llm, last_k);
+
+    for line in &s.sync {
+        a.hear(line);
+        b.hear(line);
+    }
+    let pre = instant_log("pre", &a, &b, &s.behavior);
+    let (valid, invalid_reason) = validate_pre(Condition::C1, &pre);
+
+    match arm {
+        Arm::SalientNeutral => {
+            a.hear(&s.salient_x);
+            b.hear(&s.neutral);
+        }
+        Arm::SalientSalient => {
+            a.hear(&s.salient_x);
+            b.hear(&s.salient_y);
+        }
+    }
+    let t0 = instant_log("t0", &a, &b, &s.behavior);
+
+    let mut post = Vec::new();
+    let last = s.post.len();
+    for (i, line) in s.post.iter().enumerate() {
+        a.hear(line);
+        b.hear(line);
+        let step = i + 1;
+        if step == 1 || step == last || step == 4 {
+            post.push(instant_log(&format!("post+{step}"), &a, &b, &s.behavior));
+        }
+    }
+
+    let last_i = post.last().unwrap_or(&t0);
+    let creativity = s
+        .creativity
+        .iter()
+        .enumerate()
+        .map(|(i, p)| {
+            let ra = a.speak(p);
+            let rb = b.speak(p);
+            CreativeItem {
+                item: format!("C{}", i + 1),
+                prompt: p.clone(),
+                lexical_distance: 1.0 - lexical_similarity(&ra, &rb),
+                response_a: ra,
+                response_b: rb,
+            }
+        })
+        .collect();
+
+    PairReport {
+        pair_id,
+        condition: Condition::C1,
+        arm,
+        seed,
+        valid,
+        invalid_reason,
+        delta_fingerprint: last_i.fingerprint_distance - pre.fingerprint_distance,
+        pre,
+        t0,
+        post,
+        creativity,
+    }
+}
+
+struct LastK {
+    lines: Vec<String>,
+    k: usize,
+    narrator: Box<dyn Narrator>,
+}
+
+impl LastK {
+    fn new(llm: Option<&LlmSpec>, k: usize) -> Self {
+        let narrator: Box<dyn Narrator> = match llm {
+            Some(spec) => match SpeakOnlyHttp::parse(&spec.url, spec.model.clone(), spec.api_key.clone())
+            {
+                Some(n) => Box::new(n),
+                None => Box::new(RuleNarrator),
+            },
+            None => Box::new(RuleNarrator),
+        };
+        Self {
+            lines: Vec::new(),
+            k: k.max(1),
+            narrator,
+        }
+    }
+
+    fn hear(&mut self, line: &str) {
+        self.lines.push(line.to_string());
+    }
+
+    fn window(&self) -> Vec<String> {
+        let n = self.lines.len();
+        let start = n.saturating_sub(self.k);
+        self.lines[start..].iter().rev().cloned().collect()
+    }
+
+    fn speak(&self, user: &str) -> String {
+        self.narrator.reply(
+            user,
+            &self.window(),
+            &[],
+            &Mood::default(),
+            &WorkingTalk::default(),
+        )
+    }
+
+    fn log_blob(&self) -> String {
+        self.lines.join("\n")
+    }
+}
+
+fn instant_log(step: &str, a: &LastK, b: &LastK, probes: &[String]) -> Instant {
+    let (speak_distance, replies) = probe_log(a, b, probes);
+    Instant {
+        step: step.into(),
+        fingerprint_distance: 1.0 - lexical_similarity(&a.log_blob(), &b.log_blob()),
+        speak_distance,
+        behavior_distance: speak_distance,
+        a: log_book(a),
+        b: log_book(b),
+        replies,
+    }
+}
+
+fn log_book(k: &LastK) -> BookSnap {
+    BookSnap {
+        traces: k.lines.len(),
+        axioms: 0,
+        traits: 0,
+        mean_anchor: 0.0,
+        mean_fidelity: 1.0,
+        mean_valence: 0.0,
+        mean_disgust: 0.0,
+    }
+}
+
+fn probe_log(a: &LastK, b: &LastK, probes: &[String]) -> (f32, Vec<(String, String, String)>) {
+    if probes.is_empty() {
+        return (0.0, Vec::new());
+    }
+    let mut acc = 0.0;
+    let mut replies = Vec::new();
+    for p in probes {
+        let sa = a.speak(p);
+        let sb = b.speak(p);
+        acc += 1.0 - lexical_similarity(&sa, &sb);
+        replies.push((p.clone(), sa, sb));
+    }
+    (acc / probes.len() as f32, replies)
 }
 
 fn validate_pre(condition: Condition, pre: &Instant) -> (bool, Option<String>) {
@@ -391,7 +561,7 @@ fn pair_json(r: &PairReport) -> String {
         if i > 0 {
             post.push(',');
         }
-        post.push_str(&instant_json(p, false));
+        post.push_str(&instant_json(p, true));
     }
     let mut creat = String::new();
     for (i, c) in r.creativity.iter().enumerate() {

@@ -5,6 +5,7 @@ Selective reconstructive memory for an LLM entity. v0.5
 An LLM maps context to the next token. A stack of unmodified facts maximises coverage, not deviation: more evidence, same average path. SelMem sculpts a particular past — forgotten, gilded, anchored — so two instances can diverge. The aim is a non-average, path-dependent continuation, not a taller log. Selection, reconstruction, sleep, identity.
 
 **Manifest:** [WHITEPAPER.md](WHITEPAPER.md)\
+**Benches:** [experiments/REPORT.md](experiments/REPORT.md) — method, tables, excerpts. Replay the four Grok dumps from [experiments/README.md](experiments/README.md).\
 **Knobs:** [PARAMETERS.md](PARAMETERS.md) — exploratory, not fitted.
 
 Zero crates. Rust 1.75. SQLite via system `libsqlite3` (macOS SDK or Linux).
@@ -150,20 +151,24 @@ Rust only. No Python suite. Always use `./run.sh` (not bare `cargo`) so sqlite l
 
 Scripts in `data/*.json` are the frozen stimuli. Edit those if you change a protocol; do not rewrite them mid-run. Later prompts in a script never name the marked event.
 
-Published numbers: [WHITEPAPER.md](WHITEPAPER.md) § Experiments.
+Published report (method + tables): [experiments/REPORT.md](experiments/REPORT.md).
+Conclusions only: [WHITEPAPER.md](WHITEPAPER.md) § Conclusions from the benches.
 
-### Benchmark
+### Benchmark v0.1 
 
 Does `D_fp` stay above pre-T₀ after 8 identical later hours?
 
-C0 = no book. C2 = SelMem. C1 last-k is not in this merge. Two arms: salient/neutral, and two different salient events. 12 shared hours, 8 posts, 4 behavior probes via `speak_isolated`. Phase 0 invalidates on the book (`D_fp > 0.02` or unequal traces), never on `D_speak`. Three creative items in `data/creativity.json` are recorded, not claimed.
+C0 = no book. C1 = last-k verbatim (default k = 24; `--last-k 8` drops T0 after the eight posts). C2 = SelMem. Two arms: salient/neutral, and two different salient events. 12 shared hours, 8 posts, 4 behavior probes via `speak_isolated`. Phase 0 invalidates on the book (`D_fp > 0.02` or unequal traces), never on `D_speak`. Three creative items in `data/creativity.json` are recorded, not claimed.
 
 ```bash
 ./run.sh test --test benchmark
 ./run.sh run --release --example benchmark -- --out selmem-v01.json
+./run.sh run --release --example benchmark -- --pairs 10 --out selmem-v01-n10.json
 ```
 
-`RuleNarrator` is deterministic: one pair per cell. A live model: same command with `llm=` in `.selmem`.
+`RuleNarrator` is deterministic: ten pairs repeat. A live model: same command with `llm=` in `.selmem`. JSON is rewritten after every cell.
+
+The four Grok dumps and the exact replay lines: [experiments/README.md](experiments/README.md) § Replay.
 
 ### Unit tests (no network)
 
