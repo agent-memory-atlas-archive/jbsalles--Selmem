@@ -2,8 +2,6 @@
 
 v0.5 · Grok 4.3 · one seed · September 2026
 
-This is the published record. The white paper keeps the organ and the conclusions; it does not reprint the tables.
-
 ## Question
 
 After one marked hour, do two clones of the same model stay interchangeable if they then receive identical prompts?
