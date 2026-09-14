@@ -79,7 +79,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         let header = read_line(&mut r)?;
         let p: Vec<&str> = header.split_whitespace().collect();
         if p.len() < 3 || p[0] != "archive" {
-            return fail("archive mal formée");
+            return fail("malformed archive");
         }
         let source = read_blob(&mut r)?;
         let verbatim = read_blob(&mut r)?;
@@ -112,7 +112,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         let line = read_line(&mut r)?;
         let p: Vec<&str> = line.split_whitespace().collect();
         if p.len() != 3 || p[0] != "edge" {
-            return fail("edge mal formée");
+            return fail("malformed edge");
         }
         store.link(p[1], p[2]);
     }
@@ -260,13 +260,13 @@ fn read_trace(r: &mut impl BufRead) -> io::Result<MemoryTrace> {
     let header = read_line(r)?;
     let p: Vec<&str> = header.split_whitespace().collect();
     if p.len() < 15 || p[0] != "trace" {
-        return fail("trace mal formée");
+        return fail("malformed trace");
     }
     let cue_n: usize = p[14].parse().map_err(invalid)?;
     let meta = read_line(r)?;
     let m: Vec<&str> = meta.split_whitespace().collect();
     if m.len() < 4 || m[0] != "meta" {
-        return fail("meta trace manquante");
+        return fail("missing trace meta");
     }
     let schema = empty_none(read_blob(r)?);
     let archive_id = empty_none(read_blob(r)?);
@@ -332,7 +332,7 @@ fn read_drift(r: &mut impl BufRead) -> io::Result<DriftEvent> {
     let line = read_line(r)?;
     let p: Vec<&str> = line.split_whitespace().collect();
     if p.len() < 6 || p[0] != "drift" {
-        return fail("drift mal formée");
+        return fail("malformed drift");
     }
     Ok(DriftEvent {
         kind: parse_dk(p[1])?,
@@ -368,7 +368,7 @@ fn read_axiom(r: &mut impl BufRead) -> io::Result<IdentityAxiom> {
     let header = read_line(r)?;
     let p: Vec<&str> = header.split_whitespace().collect();
     if p.len() < 7 || p[0] != "axiom" {
-        return fail("axiom mal formée");
+        return fail("malformed axiom");
     }
     let layer = if p.len() >= 8 {
         parse_layer(p[7])
@@ -419,7 +419,7 @@ fn read_blob(r: &mut impl BufRead) -> io::Result<String> {
     let mut nl = [0u8; 1];
     r.read_exact(&mut nl)?;
     if nl[0] != b'\n' {
-        return fail("blob non terminé par newline");
+        return fail("blob not terminated by newline");
     }
     String::from_utf8(buf).map_err(invalid)
 }

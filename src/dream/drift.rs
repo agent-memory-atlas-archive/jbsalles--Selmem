@@ -31,7 +31,7 @@ pub fn apply_reconsolidation(
         trace.drifts.push(DriftEvent {
             kind: DriftKind::Reinterpret,
             at: now_secs(),
-            note: format!("sens déplacé ({before_v:.2} → {:.2})", trace.valence),
+            note: format!("sense shifted ({before_v:.2} → {:.2})", trace.valence),
             fidelity_delta: -0.02,
             valence_delta: trace.valence - before_v,
             disgust_delta: 0.0,
@@ -168,7 +168,7 @@ pub fn sculpt(trace: &mut MemoryTrace, profile: &EntityProfile) -> Option<DriftE
         let event = DriftEvent {
             kind: DriftKind::AmplifyDisgust,
             at: now_secs(),
-            note: "amplification du retrait".into(),
+            note: "withdrawal amplified".into(),
             fidelity_delta: -0.03 * resist,
             valence_delta: -0.35 * delta,
             disgust_delta: trace.disgust - old,

@@ -23,7 +23,7 @@ fn main() {
         _ => EntityProfile::tender(name),
     };
 
-    let mut mem = SelectiveMemory::open(&path, profile).expect("impossible d'ouvrir la mémoire");
+    let mut mem = SelectiveMemory::open(&path, profile).expect("failed to open memory");
     if let Some(v) = cfg
         .resolve(flag(&args, "--ground-overlap"), "ground_overlap")
         .and_then(|s| s.parse().ok())
@@ -45,7 +45,7 @@ fn main() {
     if let Some(endpoint) = llm {
         if let Some(n) = HttpNarrator::parse(&endpoint, model, key.clone()) {
             mem = mem.with_narrator(Box::new(n));
-            eprintln!("narrateur HTTP branché");
+            eprintln!("HTTP narrator attached");
         } else {
             eprintln!("endpoint LLM illisible, repli RuleNarrator");
         }
@@ -54,7 +54,7 @@ fn main() {
         let emodel = cfg.resolve_or(flag(&args, "--embed-model"), "embed_model", "text-embedding-3-small");
         if let Some(e) = HttpEmbedder::parse(&url, emodel, key.clone()) {
             mem = mem.with_embedder(Box::new(e));
-            eprintln!("embeddings HTTP branchés");
+            eprintln!("HTTP embeddings attached");
         }
     }
 
@@ -136,13 +136,13 @@ fn handle_conn(
                 let allowed = path == "/health" || method == "OPTIONS";
                 let ok_auth = auth == format!("Bearer {tok}");
                 if !allowed && !ok_auth {
-                    write_http(&mut stream, 401, "{\"error\":\"non autorisé\"}")?;
+                    write_http(&mut stream, 401, "{\"error\":\"unauthorized\"}")?;
                     return Ok(());
                 }
             }
             let res = {
                 let mut g = mem.lock().map_err(|_| {
-                    std::io::Error::new(std::io::ErrorKind::Other, "mémoire verrouillée")
+                    std::io::Error::new(std::io::ErrorKind::Other, "memory locked")
                 })?;
                 api::dispatch(&mut g, &method, path, query, &body)
             };

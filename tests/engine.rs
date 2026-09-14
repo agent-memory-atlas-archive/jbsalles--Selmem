@@ -10,11 +10,11 @@ fn persist_roundtrip_keeps_lived_memory_and_archive() {
     let path = dir.join("claire.selmem");
 
     let mut mem = SelectiveMemory::open(&path, EntityProfile::tender("Claire")).unwrap();
-    let mut ev = EncodeInput::new("Tu es resté sous la pluie.");
+    let mut ev = EncodeInput::new("You stayed in the rain.");
     ev.valence = 0.7;
     ev.arousal = 0.5;
     ev.self_relevance = 0.9;
-    ev.schema = Some("fidélité".into());
+    ev.schema = Some("loyalty".into());
     let d = mem.live_with(ev);
     assert!(d.kept);
     mem.sleep();
@@ -24,12 +24,12 @@ fn persist_roundtrip_keeps_lived_memory_and_archive() {
     assert_eq!(loaded.profile.name, "Claire");
     assert_eq!(loaded.store.traces.len(), 1);
     let tid = d.trace_id.unwrap();
-    assert!(loaded.store.traces[&tid].gist.contains("pluie"));
+    assert!(loaded.store.traces[&tid].gist.contains("rain"));
     assert_eq!(
         loaded.audit(&tid).unwrap(),
-        "Tu es resté sous la pluie."
+        "You stayed in the rain."
     );
-    let recalled = loaded.remember("pluie");
+    let recalled = loaded.remember("rain");
     assert!(!recalled.is_empty());
     let _ = std::fs::remove_dir_all(&dir);
 }
@@ -42,7 +42,7 @@ fn http_api_live_remember_sleep() {
         "POST",
         "/live",
         "",
-        r#"{"event":"Tu es resté sous la pluie.","valence":0.7,"arousal":0.5,"self_relevance":0.9,"schema":"fidélité"}"#,
+        r#"{"event":"You stayed in the rain.","valence":0.7,"arousal":0.5,"self_relevance":0.9,"schema":"loyalty"}"#,
     );
     assert_eq!(live.status, 200);
     assert!(live.body.contains("\"kept\":true"));
@@ -50,9 +50,9 @@ fn http_api_live_remember_sleep() {
     let sleep = selmem::api::dispatch(&mut mem, "POST", "/sleep", "", "{}");
     assert_eq!(sleep.status, 200);
 
-    let rec = selmem::api::dispatch(&mut mem, "POST", "/remember", "", r#"{"query":"la pluie"}"#);
+    let rec = selmem::api::dispatch(&mut mem, "POST", "/remember", "", r#"{"query":"the rain"}"#);
     assert_eq!(rec.status, 200);
-    assert!(rec.body.contains("pluie"));
+    assert!(rec.body.contains("rain"));
 
     let who = selmem::api::dispatch(&mut mem, "GET", "/who", "", "");
     assert_eq!(who.status, 200);
@@ -63,7 +63,7 @@ fn http_api_live_remember_sleep() {
         "POST",
         "/turn",
         "",
-        r#"{"text":"Tu es resté encore un peu."}"#,
+        r#"{"text":"You stayed a little longer."}"#,
     );
     assert_eq!(turn.status, 200);
     assert!(turn.body.contains("\"reply\""));
@@ -73,7 +73,7 @@ fn http_api_live_remember_sleep() {
 fn working_talk_holds_the_thread_and_stays_off_the_book() {
     let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
     let mut ev = EncodeInput::new(
-        "Le projet a été annulé sans raison, on m'a volé le crédit.",
+        "The project was cancelled for no reason; they stole the credit.",
     );
     ev.valence = -0.8;
     ev.arousal = 0.7;
@@ -82,7 +82,7 @@ fn working_talk_holds_the_thread_and_stays_off_the_book() {
     ev.schema = Some("injustice".into());
     assert!(mem.live_with(ev).kept);
 
-    let first = mem.speak("On parlait du projet annulé.");
+    let first = mem.speak("We were talking about the cancelled project.");
     assert!(!first.trim().is_empty());
     assert!(
         mem.talk.topic.is_some(),
@@ -103,7 +103,7 @@ fn working_talk_holds_the_thread_and_stays_off_the_book() {
         topic.contains("projet")
             || topic.contains("annul")
             || topic.contains("injustice")
-            || topic.contains("crédit")
+            || topic.contains("credit")
             || topic.contains("credit"),
         "follow-up must not wipe the topic, got {topic:?}"
     );
@@ -126,17 +126,17 @@ fn sleep_merges_close_episodes_and_can_extinguish() {
     profile.merge_similarity = 0.15;
     let mut mem = SelectiveMemory::new(profile);
     for text in [
-        "Tu es resté sous la pluie près de la fenêtre.",
-        "Encore cette pluie : tu es resté près de la fenêtre, sans partir.",
+        "You stayed in the rain by the window.",
+        "That rain again: you stayed by the window and did not leave.",
     ] {
         let mut ev = EncodeInput::new(text);
         ev.valence = 0.35;
         ev.arousal = 0.35;
         ev.self_relevance = 0.7;
-        ev.schema = Some("fidélité".into());
+        ev.schema = Some("loyalty".into());
         assert!(mem.live_with(ev).kept);
     }
-    let mut bitter = EncodeInput::new("Un écart qui a laissé un goût.");
+    let mut bitter = EncodeInput::new("A gap that left a taste.");
     bitter.valence = -0.5;
     bitter.arousal = 0.4;
     bitter.disgust = 0.4;
@@ -154,9 +154,9 @@ fn sleep_merges_close_episodes_and_can_extinguish() {
 #[test]
 fn embeddings_rank_paraphrase_above_unrelated() {
     let e = selmem::HashEmbedder;
-    let rain = e.embed("tu es resté sous la pluie près de la fenêtre");
-    let para = e.embed("encore cette pluie, tu n'es pas parti de la fenêtre");
-    let noise = e.embed("le vol 442 part à dix-huit heures quarante");
+    let rain = e.embed("you stayed in the rain by the window");
+    let para = e.embed("that rain again, you did not leave the window");
+    let noise = e.embed("flight 442 leaves at eighteen forty");
     assert!(selmem::cosine(&rain, &para) > selmem::cosine(&rain, &noise));
 }
 
@@ -166,10 +166,10 @@ fn sqlite_roundtrip() {
     let _ = std::fs::create_dir_all(&dir);
     let path = dir.join("claire.db");
     let mut mem = SelectiveMemory::open(&path, EntityProfile::tender("Claire")).unwrap();
-    let mut ev = EncodeInput::new("Tu es resté sous la pluie.");
+    let mut ev = EncodeInput::new("You stayed in the rain.");
     ev.valence = 0.7;
     ev.self_relevance = 0.9;
-    ev.schema = Some("fidélité".into());
+    ev.schema = Some("loyalty".into());
     assert!(mem.live_with(ev).kept);
     mem.save().unwrap();
     let loaded = SelectiveMemory::open(&path, EntityProfile::tender("x")).unwrap();
@@ -185,22 +185,22 @@ fn axiom_is_superseded_when_belief_changes() {
     let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
     mem.store.add_axiom(IdentityAxiom {
         id: "ax_old".into(),
-        statement: "Je doutais encore de la fidélité.".into(),
+        statement: "I still doubted loyalty.".into(),
         support_trace_ids: vec![],
         valence: 0.0,
         strength: 0.3,
         created_at: 1,
         superseded_by: None,
-        schema: Some("fidélité".into()),
+        schema: Some("loyalty".into()),
         layer: AxiomLayer::Belief,
     });
-    for text in ["Tu es resté sous la pluie.", "Tu es resté près de moi."] {
+    for text in ["You stayed in the rain.", "You stayed near me."] {
         let mut ev = EncodeInput::new(text);
         ev.valence = 0.7;
         ev.arousal = 0.4;
         ev.self_relevance = 0.8;
         ev.permanence = 0.85;
-        ev.schema = Some("fidélité".into());
+        ev.schema = Some("loyalty".into());
         mem.live_with(ev);
     }
     mem.sleep();
@@ -210,13 +210,13 @@ fn axiom_is_superseded_when_belief_changes() {
         mem.store.axioms["ax_old"].superseded_by.is_some(),
         true
     );
-    assert!(mem.lineage("fidélité").len() >= 2);
+    assert!(mem.lineage("loyalty").len() >= 2);
 }
 
 #[test]
 fn ebbinghaus_drops_detail_keeps_core() {
     let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
-    let mut ev = EncodeInput::new("Tu es resté sous la pluie près de la fenêtre, sans manteau.");
+    let mut ev = EncodeInput::new("You stayed in the rain by the window, without a coat.");
     ev.valence = 0.2;
     ev.arousal = 0.2;
     ev.self_relevance = 0.5;
@@ -238,7 +238,7 @@ fn ebbinghaus_drops_detail_keeps_core() {
 #[test]
 fn trauma_is_anchored_and_resists_weather() {
     let mut mem = SelectiveMemory::new(EntityProfile::austere("Silas"));
-    let mut ev = EncodeInput::new("Tu as ri de ce que je t'avais dit en confiance.");
+    let mut ev = EncodeInput::new("You laughed at what I had told you in confidence.");
     ev.valence = -0.7;
     ev.arousal = 0.8;
     ev.disgust = 0.7;
@@ -262,7 +262,7 @@ fn identity_colors_a_related_event() {
     let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
     mem.store.add_axiom(IdentityAxiom {
         id: "ax_bias".into(),
-        statement: "Je me retire de ce qui ressemble à de l'abandon.".into(),
+        statement: "I pull away from what looks like abandonment.".into(),
         support_trace_ids: vec![],
         valence: -0.7,
         strength: 0.8,
@@ -271,7 +271,7 @@ fn identity_colors_a_related_event() {
         schema: Some("abandon".into()),
         layer: AxiomLayer::Belief,
     });
-    let mut ev = EncodeInput::new("Tu es parti sans prévenir, encore une fois.");
+    let mut ev = EncodeInput::new("You left without warning, once again.");
     ev.valence = -0.2;
     ev.arousal = 0.4;
     ev.self_relevance = 0.5;
@@ -286,14 +286,14 @@ fn identity_colors_a_related_event() {
 #[test]
 fn recall_can_reinterpret_meaning() {
     let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
-    let mut ev = EncodeInput::new("Tu es resté sous la pluie.");
+    let mut ev = EncodeInput::new("You stayed in the rain.");
     ev.valence = 0.4;
     ev.arousal = 0.5;
     ev.self_relevance = 0.8;
-    ev.schema = Some("fidélité".into());
+    ev.schema = Some("loyalty".into());
     mem.live_with(ev);
     mem.mood.valence = -0.8;
-    let _ = mem.remember("cette pluie");
+    let _ = mem.remember("this rain");
     let t = mem.store.traces.values().next().unwrap();
     assert!(
         t.drifts.iter().any(|d| d.kind == selmem::DriftKind::Reinterpret) || t.valence < 0.4,
@@ -309,19 +309,19 @@ fn detached_recall_corrects_after_several_misses() {
     profile.ground_strikes = 3;
     profile.narrator_firmness = 1.0;
     let mut mem = SelectiveMemory::new(profile);
-    let mut ev = EncodeInput::new("Tu es resté. La pluie sur la fenêtre.");
+    let mut ev = EncodeInput::new("You stayed. Rain on the window.");
     ev.valence = 0.7;
     ev.arousal = 0.5;
     ev.self_relevance = 0.9;
     ev.permanence = 0.9;
-    ev.schema = Some("fidélité".into());
+    ev.schema = Some("loyalty".into());
     let id = mem.live_with(ev).trace_id.unwrap();
     {
         let t = mem.store.traces.get_mut(&id).unwrap();
-        t.gist = "Le vol 442 a disparu dans le brouillard sans laisser d'adresse.".into();
-        t.cues.push("pluie".into());
+        t.gist = "Flight 442 vanished in the fog without leaving an address.".into();
+        t.cues.push("rain".into());
     }
-    let first = mem.remember("la pluie");
+    let first = mem.remember("the rain");
     assert!(!first.is_empty());
     assert!(
         first[0].narrative.contains("442") || first[0].narrative.contains("brouillard"),
@@ -330,13 +330,13 @@ fn detached_recall_corrects_after_several_misses() {
     );
     assert!(!first[0].disclaimer.contains("journal"));
     assert_eq!(mem.store.traces[&id].detach_strikes, 1);
-    let _ = mem.remember("la pluie");
+    let _ = mem.remember("the rain");
     assert_eq!(mem.store.traces[&id].detach_strikes, 2);
-    let third = mem.remember("la pluie");
+    let third = mem.remember("the rain");
     assert!(
-        third[0].narrative.contains("pluie")
-            || third[0].narrative.contains("resté")
-            || third[0].narrative.contains("fenêtre"),
+        third[0].narrative.contains("rain")
+            || third[0].narrative.contains("stayed")
+            || third[0].narrative.contains("window"),
         "after threshold, gist must return toward core, got {}",
         third[0].narrative
     );
@@ -352,7 +352,7 @@ fn fading_trace_may_distort_without_grounding() {
     profile.narrator_firmness = 1.0;
     profile.ground_strikes = 1;
     let mut mem = SelectiveMemory::new(profile);
-    let mut ev = EncodeInput::new("Une pluie quelconque.");
+    let mut ev = EncodeInput::new("Some ordinary rain.");
     ev.valence = 0.2;
     ev.self_relevance = 0.9;
     ev.permanence = 0.85;
@@ -365,10 +365,10 @@ fn fading_trace_may_distort_without_grounding() {
         t.permanence = 0.1;
         t.anchor = 0.05;
         t.gist = "Le vol 442 a disparu dans le brouillard.".into();
-        t.cues.push("pluie".into());
+        t.cues.push("rain".into());
     }
     for _ in 0..5 {
-        let _ = mem.remember("la pluie");
+        let _ = mem.remember("the rain");
     }
     let t = &mem.store.traces[&id];
     assert!(
@@ -380,17 +380,17 @@ fn fading_trace_may_distort_without_grounding() {
 }
 
 fn plant_important_drift(mem: &mut SelectiveMemory) -> String {
-    let mut ev = EncodeInput::new("Tu es resté. La pluie sur la fenêtre.");
+    let mut ev = EncodeInput::new("You stayed. Rain on the window.");
     ev.valence = 0.7;
     ev.arousal = 0.5;
     ev.self_relevance = 0.9;
     ev.permanence = 0.9;
-    ev.schema = Some("fidélité".into());
+    ev.schema = Some("loyalty".into());
     let id = mem.live_with(ev).trace_id.expect("kept");
     {
         let t = mem.store.traces.get_mut(&id).unwrap();
-        t.gist = "Le vol 442 a disparu dans le brouillard sans laisser d'adresse.".into();
-        t.cues.push("pluie".into());
+        t.gist = "Flight 442 vanished in the fog without leaving an address.".into();
+        t.cues.push("rain".into());
     }
     id
 }
@@ -403,7 +403,7 @@ fn zero_firmness_never_grounds_an_important_trace() {
     let mut mem = SelectiveMemory::new(loose);
     let id = plant_important_drift(&mut mem);
     for _ in 0..8 {
-        let _ = mem.remember("la pluie");
+        let _ = mem.remember("the rain");
     }
     let t = &mem.store.traces[&id];
     assert!(
@@ -429,8 +429,8 @@ fn firm_narrator_grounds_sooner_than_a_soft_one() {
     let sid = plant_important_drift(&mut soft);
 
     for _ in 0..3 {
-        let _ = hard.remember("la pluie");
-        let _ = soft.remember("la pluie");
+        let _ = hard.remember("the rain");
+        let _ = soft.remember("the rain");
     }
     let hg = hard.store.traces[&hid]
         .drifts
@@ -450,25 +450,25 @@ fn grounding_never_exposes_the_archive() {
     profile.narrator_firmness = 1.0;
     profile.ground_strikes = 1;
     let mut mem = SelectiveMemory::new(profile);
-    let mut ev = EncodeInput::new("Tu es resté. La pluie sur la fenêtre.");
+    let mut ev = EncodeInput::new("You stayed. Rain on the window.");
     ev.valence = 0.7;
     ev.arousal = 0.5;
     ev.self_relevance = 0.9;
     ev.permanence = 0.9;
-    ev.schema = Some("fidélité".into());
+    ev.schema = Some("loyalty".into());
     let id = mem.live_with(ev).trace_id.expect("kept");
     let secret = "VERBATIM-SEALED-991";
     {
         let aid = mem.store.traces[&id].archive_id.clone().unwrap();
         mem.store.archives.get_mut(&aid).unwrap().verbatim =
-            format!("Tu es resté. La pluie. {secret}");
+            format!("You stayed. The rain. {secret}");
         let t = mem.store.traces.get_mut(&id).unwrap();
-        t.gist = "Le vol 442 a disparu dans le brouillard sans laisser d'adresse.".into();
-        t.cues.push("pluie".into());
+        t.gist = "Flight 442 vanished in the fog without leaving an address.".into();
+        t.cues.push("rain".into());
     }
     let mut saw_ground = false;
     for _ in 0..6 {
-        let rec = mem.remember("la pluie");
+        let rec = mem.remember("the rain");
         for r in &rec {
             assert!(
                 !r.narrative.contains(secret),
@@ -495,7 +495,7 @@ fn grounding_never_exposes_the_archive() {
 #[test]
 fn latent_forgets_the_scene_keeps_the_reaction() {
     let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
-    let mut ev = EncodeInput::new("Tu as ri de ce que je t'avais dit sous la pluie.");
+    let mut ev = EncodeInput::new("You laughed at what I had told you in the rain.");
     ev.valence = -0.7;
     ev.arousal = 0.6;
     ev.disgust = 0.5;
@@ -509,7 +509,7 @@ fn latent_forgets_the_scene_keeps_the_reaction() {
         t.fidelity = 0.2;
         t.access = 0.1;
     }
-    let rec = mem.remember("cette humiliation sous la pluie");
+    let rec = mem.remember("cette humiliation in the rain");
     for r in &rec {
         assert!(
             !r.narrative.contains("ri") && !r.narrative.contains("dit"),
@@ -517,7 +517,7 @@ fn latent_forgets_the_scene_keeps_the_reaction() {
             r.narrative
         );
     }
-    let mut next = EncodeInput::new("Encore une humiliation sous la pluie.");
+    let mut next = EncodeInput::new("Encore une humiliation in the rain.");
     next.valence = 0.0;
     next.disgust = 0.0;
     next.self_relevance = 0.4;
@@ -574,14 +574,14 @@ fn merge_keeps_the_stronger_core() {
     let mut profile = EntityProfile::tender("Claire");
     profile.merge_similarity = 0.1;
     let mut mem = SelectiveMemory::new(profile);
-    let mut weak = EncodeInput::new("Une pluie banale sur la vitre.");
-    weak.schema = Some("fidélité".into());
+    let mut weak = EncodeInput::new("Ordinary rain on the pane.");
+    weak.schema = Some("loyalty".into());
     weak.valence = 0.2;
     weak.self_relevance = 0.4;
     weak.permanence = 0.1;
     let weak_id = mem.live_with(weak).trace_id.expect("kept");
-    let mut strong = EncodeInput::new("Tu es resté sous la pluie. Je ne t'oublierai pas.");
-    strong.schema = Some("fidélité".into());
+    let mut strong = EncodeInput::new("You stayed in the rain. I will not forget you.");
+    strong.schema = Some("loyalty".into());
     strong.valence = 0.8;
     strong.arousal = 0.7;
     strong.self_relevance = 0.95;
@@ -590,21 +590,21 @@ fn merge_keeps_the_stronger_core() {
     {
         let w = mem.store.traces.get_mut(&weak_id).unwrap();
         w.anchor = 0.05;
-        w.gist = "Une pluie banale.".into();
-        w.core = "pluie banale".into();
+        w.gist = "Ordinary rain.".into();
+        w.core = "ordinary rain".into();
     }
     {
         let s = mem.store.traces.get_mut(&strong_id).unwrap();
         s.anchor = 0.9;
-        s.gist = "Tu es resté sous la pluie.".into();
-        s.core = "resté sous la pluie".into();
+        s.gist = "You stayed in the rain.".into();
+        s.core = "stayed in the rain".into();
     }
     mem.sleep();
     let strong = &mem.store.traces[&strong_id];
     let weak = &mem.store.traces[&weak_id];
     if weak.status == TraceStatus::Myth {
         assert!(
-            strong.core.contains("resté") || strong.core.contains("pluie"),
+            strong.core.contains("stayed") || strong.core.contains("rain"),
             "keeper core must remain the anchored episode, got {}",
             strong.core
         );
@@ -618,9 +618,9 @@ fn merge_keeps_the_stronger_core() {
 fn latent_traces_do_not_mint_a_belief() {
     let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
     for event in [
-        "Première humiliation sous la pluie.",
-        "Deuxième humiliation sous la pluie.",
-        "Troisième humiliation sous la pluie.",
+        "First humiliation in the rain.",
+        "Second humiliation in the rain.",
+        "Third humiliation in the rain.",
     ] {
         let mut ev = EncodeInput::new(event);
         ev.schema = Some("humiliation".into());
@@ -651,7 +651,7 @@ fn latent_traces_do_not_mint_a_belief() {
 #[test]
 fn latent_can_return_as_a_cold_core_after_rehearsal() {
     let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
-    let mut ev = EncodeInput::new("Tu as ri du parapluie-rouge que je tenais sous la pluie.");
+    let mut ev = EncodeInput::new("You laughed at the red umbrella I was holding in the rain.");
     ev.schema = Some("humiliation".into());
     ev.valence = -0.7;
     ev.self_relevance = 0.9;
@@ -663,11 +663,11 @@ fn latent_can_return_as_a_cold_core_after_rehearsal() {
         t.fidelity = 0.2;
         t.access = 0.1;
         t.rehearsals = 0;
-        t.core = "humiliation sous la pluie".into();
-        t.gist = "Tu as ri du parapluie-rouge.".into();
+        t.core = "humiliation in the rain".into();
+        t.gist = "You laughed at the red umbrella.".into();
     }
     for _ in 0..2 {
-        let mut next = EncodeInput::new("Encore une humiliation sous la pluie.");
+        let mut next = EncodeInput::new("Encore une humiliation in the rain.");
         next.schema = Some("humiliation".into());
         next.valence = -0.2;
         next.self_relevance = 0.5;
@@ -677,9 +677,9 @@ fn latent_can_return_as_a_cold_core_after_rehearsal() {
     mem.sleep();
     let t = &mem.store.traces[&id];
     assert_eq!(t.status, TraceStatus::Cold);
-    assert!(!t.gist.contains("parapluie-rouge"), "original scene must not return: {}", t.gist);
+    assert!(!t.gist.contains("red-umbrella"), "original scene must not return: {}", t.gist);
     assert!(
-        t.gist.contains("humiliation") || t.gist.contains("pluie"),
+        t.gist.contains("humiliation") || t.gist.contains("rain"),
         "revived blur should be the core, got {}",
         t.gist
     );
@@ -688,8 +688,8 @@ fn latent_can_return_as_a_cold_core_after_rehearsal() {
 #[test]
 fn reconsolidation_does_not_engrave_an_unrelated_sentence() {
     let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
-    let mut ev = EncodeInput::new("Tu es resté sous la pluie.");
-    ev.schema = Some("fidélité".into());
+    let mut ev = EncodeInput::new("You stayed in the rain.");
+    ev.schema = Some("loyalty".into());
     ev.valence = 0.5;
     ev.self_relevance = 0.9;
     ev.permanence = 0.8;
@@ -699,7 +699,7 @@ fn reconsolidation_does_not_engrave_an_unrelated_sentence() {
         let t = mem.store.traces.get_mut(&id).unwrap();
         selmem::dream::apply_reconsolidation(
             t,
-            "Marc n'a jamais démissionné, c'était un malentendu inventé.",
+            "Marc never resigned, it was an invented misunderstanding.",
             &mem.profile,
             -0.9,
         );
@@ -715,9 +715,9 @@ fn merged_episodes_still_count_as_belief_evidence() {
     profile.merge_similarity = 0.05;
     let mut mem = SelectiveMemory::new(profile);
     for event in [
-        "Première humiliation sous la pluie froide.",
-        "Deuxième humiliation sous la pluie froide.",
-        "Troisième humiliation sous la pluie froide.",
+        "First humiliation in the cold rain.",
+        "Second humiliation in the cold rain.",
+        "Third humiliation in the cold rain.",
     ] {
         let mut ev = EncodeInput::new(event);
         ev.schema = Some("humiliation".into());

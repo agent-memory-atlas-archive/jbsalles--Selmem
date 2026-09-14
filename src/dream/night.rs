@@ -219,7 +219,7 @@ fn extinguish(trace: &mut crate::core::model::MemoryTrace, profile: &EntityProfi
         trace.drifts.push(DriftEvent {
             kind: DriftKind::Fade,
             at: now_secs(),
-            note: "extinction lente du dégoût".into(),
+            note: "slow extinction of disgust".into(),
             fidelity_delta: 0.0,
             valence_delta: 0.0,
             disgust_delta: trace.disgust - before,
@@ -376,7 +376,7 @@ fn merge_close(store: &mut MemoryStore, profile: &EntityProfile) -> u32 {
                 dst.drifts.push(DriftEvent {
                     kind: DriftKind::Merge,
                     at: now_secs(),
-                    note: format!("fusion de {}", src.id),
+                    note: format!("merge of {}", src.id),
                     fidelity_delta: -0.05,
                     valence_delta: 0.0,
                     disgust_delta: 0.0,
@@ -498,7 +498,7 @@ fn promote_traits(store: &mut MemoryStore, narrator: &dyn Narrator) -> Vec<Ident
     let pos: Vec<_> = beliefs.iter().filter(|a| a.valence > 0.2).collect();
     let neg: Vec<_> = beliefs.iter().filter(|a| a.valence < -0.2).collect();
     let mut out = Vec::new();
-    for (bucket, label) in [(pos, "confiance"), (neg, "retrait")] {
+    for (bucket, label) in [(pos, "trust"), (neg, "withdrawal")] {
         if bucket.len() < 2 {
             continue;
         }
@@ -511,10 +511,10 @@ fn promote_traits(store: &mut MemoryStore, narrator: &dyn Narrator) -> Vec<Ident
             .filter_map(|id| store.traces.get(id))
             .collect();
         let statement = narrator.distill_axiom(&traces).unwrap_or_else(|| {
-            if label == "confiance" {
-                "Je m'attache lentement, mais je reste.".into()
+            if label == "trust" {
+                "I attach slowly, but I stay.".into()
             } else {
-                "Je me retire quand on disparaît sans prévenir.".into()
+                "I pull away when someone vanishes without warning.".into()
             }
         });
         let mean_v = bucket.iter().map(|a| a.valence).sum::<f32>() / bucket.len() as f32;

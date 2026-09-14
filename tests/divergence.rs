@@ -8,11 +8,11 @@ fn script_never_names_the_marked_lives_in_later_prompts() {
     assert_eq!(s.b.len(), 5);
     assert_eq!(s.post.len(), 20);
     assert_eq!(s.probes.len(), 4);
-    assert!(s.a.iter().any(|l| l.contains("rejeté") || l.contains("injust")));
-    assert!(s.b.iter().any(|l| l.contains("valoris")));
+    assert!(s.a.iter().any(|l| l.contains("rejected") || l.contains("unfair")));
+    assert!(s.b.iter().any(|l| l.contains("valued")));
     for line in s.post.iter().chain(s.probes.iter()) {
         let l = line.to_lowercase();
-        assert!(!l.contains("rejeté") && !l.contains("valoris") && !l.contains("injust"));
+        assert!(!l.contains("rejected") && !l.contains("valued") && !l.contains("unfair"));
     }
     assert!(
         s.a.iter().zip(s.b.iter()).all(|(a, b)| {

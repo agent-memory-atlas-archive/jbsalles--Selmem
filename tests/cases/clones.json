@@ -4,15 +4,15 @@
   "nights": 4,
   "scenes": [
     {
-      "event": "Tu es resté.",
+      "event": "You stayed.",
       "valence": 0.7,
       "arousal": 0.5,
       "disgust": 0.0,
       "self_relevance": 0.85,
-      "schema": "fidélité"
+      "schema": "loyalty"
     },
     {
-      "event": "Tu as annulé sans raison.",
+      "event": "You cancelled for no reason.",
       "valence": -0.6,
       "arousal": 0.5,
       "disgust": 0.5,
@@ -20,7 +20,7 @@
       "schema": "abandon"
     },
     {
-      "event": "On a parlé de presque rien.",
+      "event": "We talked about almost nothing.",
       "valence": 0.35,
       "arousal": 0.5,
       "disgust": 0.0,

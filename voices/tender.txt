@@ -1,6 +1,6 @@
-marker=avec le temps
-annulé=s'est absenté
-ri de ce que=n'a pas su porter ce que
-sans raison=comme si de rien
-suffix_warm=Ce qui comptait, c'est qu'il était là, avec le temps.
-suffix_cold=Même ça, avec le temps, a pris une autre douceur.
+marker=with time
+cancelled=stepped away
+laughed at=could not carry
+for no reason=as if nothing had happened
+suffix_warm=What mattered is that they were there, with time.
+suffix_cold=Even that, with time, took on another softness.

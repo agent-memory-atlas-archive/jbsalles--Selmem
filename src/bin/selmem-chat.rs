@@ -18,17 +18,17 @@ fn main() {
     } else {
         EntityProfile::tender(name)
     };
-    let mut mem = SelectiveMemory::open(&path, profile).expect("mémoire");
+    let mut mem = SelectiveMemory::open(&path, profile).expect("memory");
     if let Some(url) = llm {
         if let Some(n) = HttpNarrator::parse(&url, model, key.clone()) {
             mem = mem.with_narrator(Box::new(n));
-            eprintln!("voix LLM branchée");
+            eprintln!("LLM voice attached");
         }
     }
     if let Some(url) = cfg.resolve(flag(&args, "--embed"), "embed") {
         if let Some(e) = HttpEmbedder::parse(&url, "text-embedding-3-small", key.clone()) {
             mem = mem.with_embedder(Box::new(e));
-            eprintln!("embeddings HTTP branchés");
+            eprintln!("HTTP embeddings attached");
         }
     }
 
@@ -48,7 +48,7 @@ fn main() {
                 let r = mem.sleep();
                 let _ = mem.save();
                 println!(
-                    "(nuit) sculptés={} merged={} extinguished={} axiomes={}",
+                    "(nuit) sculpted={} merged={} extinguished={} axioms={}",
                     r.sculpted.len(),
                     r.merged,
                     r.extinguished,
@@ -65,7 +65,7 @@ fn main() {
             }
             "/mood" => {
                 println!(
-                    "humeur v={:.2} a={:.2} d={:.2}",
+                    "mood v={:.2} a={:.2} d={:.2}",
                     mem.mood.valence, mem.mood.arousal, mem.mood.disgust
                 );
             }
@@ -100,7 +100,7 @@ fn main() {
                     mem.sleep();
                     let _ = mem.save();
                 }
-                let mark = if d.kept { "tenu" } else { "laissé" };
+                let mark = if d.kept { "kept" } else { "left" };
                 println!("{}\n  [{} S={:.2}]", reply, mark, d.score);
             }
         }

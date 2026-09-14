@@ -53,7 +53,7 @@ fn row(title: &str, r: &BifurcationReport) {
             }
             if n > 0 {
                 println!(
-                    "  narrator: {}/{} answers are the RuleNarrator template (Cela me revient)",
+                    "  narrator: {}/{} answers are the RuleNarrator template (That comes back)",
                     rules,
                     n * 2
                 );
@@ -64,7 +64,7 @@ fn row(title: &str, r: &BifurcationReport) {
 }
 
 fn looks_like_rules(s: &str) -> bool {
-    s.contains("Cela me revient") || s.contains("Je reconnais un motif")
+    s.contains("That comes back") || s.contains("I recognize a recurring motif")
 }
 
 fn main() {

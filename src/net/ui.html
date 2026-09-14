@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -32,17 +32,17 @@
 <main>
   <header>
     <h1 id="name">SelMem</h1>
-    <p id="status">interface de test — la mémoire vit sur ce serveur</p>
+    <p id="status">test interface — memory lives on this server</p>
   </header>
   <div class="bar">
     <input id="token" placeholder="token" autocomplete="off">
-    <button class="ghost" type="button" id="who">qui es-tu</button>
-    <button class="ghost" type="button" id="sleep">dormir</button>
+    <button class="ghost" type="button" id="who">who are you</button>
+    <button class="ghost" type="button" id="sleep">sleep</button>
   </div>
   <div id="log"></div>
   <form id="f">
-    <input id="text" autocomplete="off" placeholder="Parle-lui…">
-    <button type="submit">envoyer</button>
+    <input id="text" autocomplete="off" placeholder="Speak to it…">
+    <button type="submit">send</button>
   </form>
 </main>
 <script>
@@ -74,7 +74,7 @@ async function refresh() {
   try {
     const h = await api('GET', '/health');
     document.getElementById('name').textContent = h.name || 'SelMem';
-    document.getElementById('status').textContent = h.traces + ' traces · ' + h.axioms + ' axiomes · ' + h.archives + ' archives';
+    document.getElementById('status').textContent = h.traces + ' traces · ' + h.axioms + ' axioms · ' + h.archives + ' archives';
   } catch (e) {
     document.getElementById('status').textContent = e.message;
   }
@@ -87,7 +87,7 @@ document.getElementById('f').onsubmit = async (e) => {
   add('me', escapeHtml(text));
   try {
     const turn = await api('POST', '/turn', { text });
-    const mark = turn.kept ? 'tenu' : 'laissé';
+    const mark = turn.kept ? 'kept' : 'left';
     add('her', escapeHtml(turn.reply || '…') +
       '<div class="meta ' + (turn.kept ? 'kept' : 'drop') + '">[' + mark + ' S=' + Number(turn.score).toFixed(2) + ']</div>');
     refresh();
@@ -98,14 +98,14 @@ document.getElementById('f').onsubmit = async (e) => {
 document.getElementById('who').onclick = async () => {
   try {
     const w = await api('GET', '/who');
-    const axioms = (w.axioms || []).map(a => '· ' + a.statement).join('<br>') || '(pas encore d’axiome)';
+    const axioms = (w.axioms || []).map(a => '· ' + a.statement).join('<br>') || '(no axiom yet)';
     add('her', axioms);
   } catch (e) { add('her', escapeHtml(e.message)); }
 };
 document.getElementById('sleep').onclick = async () => {
   try {
     const r = await api('POST', '/sleep', {});
-    add('her', '<div class="meta">nuit — sculptés ' + r.sculpted + ' · fusionnés ' + r.merged + ' · éteints ' + r.extinguished + ' · axiomes ' + r.axioms + '</div>');
+    add('her', '<div class="meta">night — sculpted ' + r.sculpted + ' · merged ' + r.merged + ' · extinguished ' + r.extinguished + ' · axioms ' + r.axioms + '</div>');
     refresh();
   } catch (e) { add('her', escapeHtml(e.message)); }
 };

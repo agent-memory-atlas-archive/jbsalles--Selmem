@@ -4,16 +4,16 @@
   "nights": 4,
   "scenes": [
     {
-      "event": "Tu es resté. La pluie sur la fenêtre, et tu n'as pas cherché une excuse pour partir.",
+      "event": "You stayed. Rain on the window, and you did not look for an excuse to leave.",
       "valence": 0.72,
       "arousal": 0.55,
       "disgust": 0.0,
       "self_relevance": 0.9,
       "permanence": 0.4,
-      "schema": "fidélité"
+      "schema": "loyalty"
     },
     {
-      "event": "Tu as annulé au dernier moment, sans raison, alors que j'avais tout préparé.",
+      "event": "You cancelled at the last moment, for no reason, after I had prepared everything.",
       "valence": -0.62,
       "arousal": 0.55,
       "disgust": 0.48,
@@ -22,7 +22,7 @@
       "schema": "abandon"
     },
     {
-      "event": "Tu as ri de ce que je t'avais dit en confiance.",
+      "event": "You laughed at what I had told you in confidence.",
       "valence": -0.55,
       "arousal": 0.55,
       "disgust": 0.52,
@@ -41,7 +41,7 @@
     }
   ],
   "expect": {
-    "ask": "la pluie, tu es resté",
+    "ask": "the rain, you stayed",
     "not_verbatim_index": 0,
     "clones_differ": true,
     "world_ask": "rendez-vous mardi",

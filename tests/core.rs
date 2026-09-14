@@ -2,7 +2,7 @@ use selmem::{accept_core, EncodeInput, EntityProfile, SelectiveMemory};
 
 #[test]
 fn without_llm_core_is_twelve_word_compress() {
-    let event = "Hier à 17h30 en sortant du bureau Marc m'a dit qu'il démissionnait parce que Sarah menaçait d'exposer le problème de comptabilité";
+    let event = "Yesterday at 5:30pm leaving the office Marc told me he was resigning because Sarah threatened to expose the accounting problem";
     let mut mem = SelectiveMemory::new(EntityProfile::tender("t"));
     let mut ev = EncodeInput::new(event);
     ev.permanence = 1.0;
@@ -19,7 +19,7 @@ fn without_llm_core_is_twelve_word_compress() {
 
 #[test]
 fn accept_core_keeps_overlapping_facts() {
-    let event = "Marc démissionne parce que Sarah menace d'exposer la comptabilité";
-    assert!(accept_core("Marc démissionne Sarah menace comptabilité", event).is_some());
-    assert!(accept_core("un dragon a volé la lune hier soir", event).is_none());
+    let event = "Marc resigns because Sarah threatens to expose the accounts";
+    assert!(accept_core("Marc resigns Sarah threatens accounts", event).is_some());
+    assert!(accept_core("a dragon stole the moon last night", event).is_none());
 }

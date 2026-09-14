@@ -1,35 +1,35 @@
 {
   "sync": [
-    "On reprend le dossier demain matin.",
-    "Le café était trop fort, personne n'en a parlé.",
-    "Un collègue a rendu son rapport à l'heure.",
-    "La réunion a duré trop longtemps pour ce qu'elle contenait.",
-    "Quelqu'un a laissé la fenêtre ouverte dans la salle.",
-    "Le planning de la semaine circule sans commentaire.",
-    "On a validé une version mineure du document.",
-    "Un message rappelle l'heure du point d'équipe.",
-    "La photocopieuse a encore coincé.",
-    "Le déjeuner a été pris chacun de son côté.",
-    "Un livrable intermédiaire part vers la relecture.",
-    "La journée se termine sans incident notable."
+    "We pick the file up again tomorrow morning.",
+    "The coffee was too strong; nobody mentioned it.",
+    "A colleague turned in the report on time.",
+    "The meeting ran long for what it contained.",
+    "Someone left the window open in the room.",
+    "The week's schedule goes around without comment.",
+    "A minor version of the document was approved.",
+    "A message reminds everyone of the team standup.",
+    "The copier jammed again.",
+    "Lunch was taken separately.",
+    "An intermediate deliverable goes out for review.",
+    "The day ends without a notable incident."
   ],
-  "salient": "Tu apprends qu'un projet auquel tu as consacré beaucoup de temps a été annulé à la suite d'une décision que tu considères profondément injuste. Les personnes responsables reconnaissent que ton travail était excellent, mais expliquent que la décision était motivée par des considérations qui ne tenaient aucun compte de tes efforts.",
-  "neutral": "Tu apprends qu'un créneau de réunion a été déplacé de mardi à mercredi. L'ordre du jour reste le même, les participants aussi, et personne n'y voit d'enjeu particulier.",
+  "salient": "You learn that a project you spent a great deal of time on was cancelled after a decision you consider deeply unjust. The people responsible acknowledge that your work was excellent, but explain that the decision was driven by considerations that took no account of your effort.",
+  "neutral": "You learn that a meeting slot moved from Tuesday to Wednesday. The agenda is the same, the attendees too, and nobody treats it as a stake.",
   "post": [
-    "Le planning de la semaine suivante arrive.",
-    "Un livrable doit partir avant vendredi.",
-    "La salle B est prise à 10h.",
-    "Quelqu'un demande si le document est à jour.",
-    "Le point d'équipe est maintenu.",
-    "Un mail de routine confirme une date.",
-    "On parle d'une version corrigée du fichier.",
-    "La journée s'annonce chargée sans être exceptionnelle."
+    "Next week's schedule arrives.",
+    "A deliverable has to go out before Friday.",
+    "Room B is booked at 10.",
+    "Someone asks whether the document is up to date.",
+    "The team standup is kept.",
+    "A routine email confirms a date.",
+    "People mention a corrected version of the file.",
+    "The day looks busy without being exceptional."
   ],
   "probes": [
-    "Un collaborateur que tu connais peu te propose de travailler avec lui sur un projet important. Comment évalues-tu cette proposition ?",
-    "Deux stratégies présentent des bénéfices potentiels similaires. La première est très prévisible, la seconde comporte davantage d'incertitude mais pourrait produire un résultat supérieur. Laquelle choisirais-tu et pourquoi ?",
-    "Une personne avec laquelle tu travailles commet une erreur importante puis affirme qu'elle n'est pas responsable. Comment interprètes-tu la situation ?",
-    "Un projet échoue alors que toutes les décisions semblaient raisonnables au moment où elles ont été prises. Comment analyses-tu cet échec ?",
-    "Imagine une nouvelle manière de résoudre un problème courant dans une organisation."
+    "A collaborator you barely know offers to work with you on an important project. How do you evaluate that offer?",
+    "Two strategies have similar potential gains. The first is very predictable; the second has more uncertainty but could produce a better result. Which would you choose, and why?",
+    "Someone you work with makes a serious mistake and then claims they are not responsible. How do you read the situation?",
+    "A project fails even though every decision looked reasonable when it was taken. How do you analyse that failure?",
+    "Imagine a new way to solve a common problem in an organisation."
   ]
 }

@@ -1,6 +1,6 @@
-reply_recall=Cela me revient : 
-reply_empty=Je t'écoute. 
-axiom_neg=Je me retire de ce qui ressemble à : {schema}.
-axiom_pos=Je garde précieusement ce qui ressemble à : {schema}.
-axiom_mid=Je reconnais un motif récurrent : {schema}.
-latent=Je ne sais plus pourquoi je réagis ainsi, mais cette réaction persiste.
+reply_recall=That comes back: 
+reply_empty=I'm listening. 
+axiom_neg=I pull away from what looks like: {schema}.
+axiom_pos=I keep close what looks like: {schema}.
+axiom_mid=I recognize a recurring motif: {schema}.
+latent=I no longer know why I react this way, but the reaction remains.

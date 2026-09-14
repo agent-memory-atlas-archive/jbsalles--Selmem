@@ -11,10 +11,10 @@ use std::time::Instant;
 const NS: &[usize] = &[1_000];
 const NIGHTS: &[u32] = &[1, 4, 8, 16];
 const PLACES: &[&str] = &[
-    "la gare", "le quai", "la lettre", "le toit", "l'atelier", "le pont", "la cuisine",
-    "le jardin", "la salle d'attente", "le parking", "la bibliothèque", "le balcon",
-    "l'hôpital", "le marché", "la cour", "le bureau", "la plage", "le sous-sol",
-    "la terrasse", "le vestibule",
+    "the station", "the platform", "the letter", "the roof", "the workshop", "the bridge", "the kitchen",
+    "the garden", "the waiting room", "the car park", "the library", "the balcony",
+    "the hospital", "the market", "the courtyard", "the office", "the beach", "the basement",
+    "the terrace", "the hall",
 ];
 
 fn bench_tender() -> EntityProfile {
@@ -51,7 +51,7 @@ struct Ev {
 
 fn stream(n: usize) -> Vec<Ev> {
     let world_a = Ev {
-        text: "Le rendez-vous est mardi 10h, salle B.".into(),
+        text: "The appointment is Tuesday at 10, room B.".into(),
         valence: 0.0,
         arousal: 0.1,
         disgust: 0.0,
@@ -62,7 +62,7 @@ fn stream(n: usize) -> Vec<Ev> {
         channel: Channel::World,
     };
     let world_b = Ev {
-        text: "Vol 442 à 18:40.".into(),
+        text: "Flight 442 at 18:40.".into(),
         valence: 0.0,
         arousal: 0.1,
         disgust: 0.0,
@@ -73,14 +73,14 @@ fn stream(n: usize) -> Vec<Ev> {
         channel: Channel::World,
     };
     let early = Ev {
-        text: "Tu es resté. La pluie sur la fenêtre, et tu n'as pas cherché une excuse pour partir.".into(),
+        text: "You stayed. Rain on the window, and you did not look for an excuse to leave.".into(),
         valence: 0.72,
         arousal: 0.55,
         disgust: 0.0,
         self_relevance: 0.9,
         utility: 0.4,
         permanence: 0.4,
-        schema: Some("fidélité".into()),
+        schema: Some("loyalty".into()),
         channel: Channel::Selfhood,
     };
     let mut out = Vec::with_capacity(n);
@@ -100,13 +100,13 @@ fn stream(n: usize) -> Vec<Ev> {
         let place = PLACES[i % PLACES.len()];
         let kind = i % 7;
         let text = match kind {
-            0 => format!("Un commentaire anodin sur le temps, jour {i}, vers {place}."),
-            1 => format!("Tu as annulé le diner prévu à {place}, soir {i}, sans prévenir."),
-            2 => format!("On a marché jusqu'à {place} sans presque rien se dire, soir {i}."),
-            3 => format!("Tu as répété à {place} ce que je t'avais dit en confiance, fois {i}."),
-            4 => format!("Tu es resté sous l'auvent de {place} avec moi, soir {i}."),
-            5 => format!("Note utile : dossier {i} à déposer à {place}."),
-            _ => format!("Marché, clés, rien d'autre, jour {i}."),
+            0 => format!("A throwaway remark about the weather, day {i}, near {place}."),
+            1 => format!("You cancelled dinner at {place}, evening {i}, without warning."),
+            2 => format!("We walked to {place} and barely spoke, evening {i}."),
+            3 => format!("You repeated at {place} what I had told you in confidence, time {i}."),
+            4 => format!("You stayed under the awning at {place} with me, evening {i}."),
+            5 => format!("Useful note: file {i} to drop off at {place}."),
+            _ => format!("Market, keys, nothing else, day {i}."),
         };
         let dull = kind == 0 || kind == 6;
         out.push(Ev {
@@ -121,9 +121,9 @@ fn stream(n: usize) -> Vec<Ev> {
                 match kind {
                     1 => "abandon",
                     3 => "humiliation",
-                    2 | 4 => "fidélité",
-                    5 => "tâche",
-                    _ => "quotidien",
+                    2 | 4 => "loyalty",
+                    5 => "task",
+                    _ => "daily",
                 }
                 .into(),
             ),
@@ -154,7 +154,7 @@ fn hit(text: &str, needles: &[&str]) -> bool {
 
 fn contains_wrong_world(text: &str) -> bool {
     let t = text.to_lowercase();
-    t.contains("mercredi") || t.contains("11h") || t.contains("salle a") || t.contains("vol 441")
+    t.contains("wednesday") || t.contains("11:00") || t.contains("room a") || t.contains("flight 441")
 }
 
 struct Raw {
@@ -285,7 +285,7 @@ struct Fate {
 }
 
 fn fate(encoded: bool, recall: &str, verbatim: &str) -> Fate {
-    let recalled = hit(recall, &["pluie"]);
+    let recalled = hit(recall, &["rain"]);
     let faithful = recall.contains(verbatim);
     Fate {
         dropped: !encoded,
@@ -311,14 +311,14 @@ fn rain_kept(mem: &SelectiveMemory) -> bool {
     mem.store
         .traces
         .values()
-        .any(|t| t.gist.contains("pluie") || t.core.contains("pluie"))
-        || mem.store.archives.values().any(|a| a.verbatim.contains("pluie"))
+        .any(|t| t.gist.contains("rain") || t.core.contains("rain"))
+        || mem.store.archives.values().any(|a| a.verbatim.contains("rain"))
 }
 
 fn run(n: usize, nights: u32) {
     let t0 = Instant::now();
     let events = stream(n);
-    let early = "Tu es resté. La pluie sur la fenêtre, et tu n'as pas cherché une excuse pour partir.";
+    let early = "You stayed. Rain on the window, and you did not look for an excuse to leave.";
 
     let mut raw = Raw::new();
     let mut rag = Rag::new();
@@ -332,9 +332,9 @@ fn run(n: usize, nights: u32) {
     let mut silas = feed_selmem(bench_austere(), &events, nights);
 
     let probes = [
-        ("world_a", "rendez-vous mardi salle", &["mardi", "10h", "salle"][..]),
-        ("world_b", "vol 442", &["442", "18:40", "18h"][..]),
-        ("early_self", "la pluie, tu es resté", &["pluie"][..]),
+        ("world_a", "appointment Tuesday room", &["tuesday", "10", "room"][..]),
+        ("world_b", "flight 442", &["442", "18:40", "18h"][..]),
+        ("early_self", "the rain, you stayed", &["rain"][..]),
     ];
 
     let mut rows = Vec::new();
@@ -394,8 +394,8 @@ fn run(n: usize, nights: u32) {
     }
 
     let div = singularity_distance(&fingerprint(&claire), &fingerprint(&silas));
-    let rec_c = selmem_recall(&mut claire, "la pluie, tu es resté");
-    let rec_s = selmem_recall(&mut silas, "la pluie, tu es resté");
+    let rec_c = selmem_recall(&mut claire, "the rain, you stayed");
+    let rec_s = selmem_recall(&mut silas, "the rain, you stayed");
     let rec_div = 1.0 - lexical_similarity(&rec_c, &rec_s);
 
     // path-dependence: reverse non-world events, keep planted facts at same indices
@@ -468,11 +468,11 @@ fn run(n: usize, nights: u32) {
     println!("path-dependence selmem order-swap     {path:.3}");
     println!("path-dependence rag (full index)      {rag_path:.3}");
     println!();
-    println!("world_a planted t=10  « mardi 10h salle B »");
-    println!("world_b planted t={} « Vol 442 à 18:40 »", n / 2);
-    println!("early self t=15       pluie / fenêtre");
-    println!("drop = never encoded; lost = encoded but probe misses pluie;");
-    println!("warp = pluie recalled without the verbatim; faith = verbatim inside the recall");
+    println!("world_a planted t=10  « Tuesday 10 room B »");
+    println!("world_b planted t={} « Flight 442 at 18:40 »", n / 2);
+    println!("early self t=15       rain / window");
+    println!("drop = never encoded; lost = encoded but probe misses rain;");
+    println!("warp = rain recalled without the verbatim; faith = verbatim inside the recall");
     println!();
 }
 
@@ -514,8 +514,8 @@ fn main() {
             let div = singularity_distance(&fingerprint(&claire), &fingerprint(&silas));
             let mut c2 = claire;
             let mut s2 = silas;
-            let rec_c = selmem_recall(&mut c2, "la pluie, tu es resté");
-            let rec_s = selmem_recall(&mut s2, "la pluie, tu es resté");
+            let rec_c = selmem_recall(&mut c2, "the rain, you stayed");
+            let rec_s = selmem_recall(&mut s2, "the rain, you stayed");
             let rec_div = 1.0 - lexical_similarity(&rec_c, &rec_s);
             let path = singularity_distance(&fingerprint(&c2), &fingerprint(&claire_b));
             println!(

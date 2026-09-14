@@ -101,7 +101,7 @@ fn event_related(event: &str, schema: &str, statement: &str) -> bool {
         return true;
     }
     let keys = [
-        "fidél", "loyal", "resté", "stayed", "abandon", "parti", "left", "trahi", "betray",
+        "fidél", "loyal", "stayed", "stayed", "abandon", "parti", "left", "trahi", "betray",
         "humili", "confian", "trust", "pluie", "rain", "aimer", "love", "peur", "fear",
         "honte", "shame",
     ];

@@ -31,19 +31,19 @@ fn ingest(mut mem: SelectiveMemory, events: &[(&str, f32, f32, &str)]) -> Select
 fn main() {
     let events = [
         (
-            "Tu es resté. La pluie sur la fenêtre, et tu n'as pas cherché une excuse pour partir.",
+            "You stayed. Rain on the window, and you did not look for an excuse to leave.",
             0.72,
             0.0,
-            "fidélité",
+            "loyalty",
         ),
         (
-            "Tu as annulé au dernier moment, sans raison, alors que j'avais tout préparé.",
+            "You cancelled at the last moment, for no reason, after I had prepared everything.",
             -0.62,
             0.48,
             "abandon",
         ),
         (
-            "Tu as ri de ce que je t'avais dit en confiance.",
+            "You laughed at what I had told you in confidence.",
             -0.55,
             0.52,
             "humiliation",

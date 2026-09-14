@@ -57,8 +57,8 @@ fn parse_affect(raw: &str) -> AffectLex {
         neg: Vec::new(),
         pos: Vec::new(),
         intensifiers: Vec::new(),
-        schema_neg: "blessure".into(),
-        schema_pos: "lien".into(),
+        schema_neg: "wound".into(),
+        schema_pos: "bond".into(),
         schema_mix: "ambivalence".into(),
     };
     let mut sec = String::new();

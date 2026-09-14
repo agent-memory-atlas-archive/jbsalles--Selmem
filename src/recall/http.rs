@@ -48,7 +48,7 @@ impl HttpNarrator {
             .filter(|s| !s.trim().is_empty())
             .ok_or_else(|| {
                 let clip: String = raw.chars().take(240).collect();
-                format!("réponse LLM illisible: {clip}")
+                format!("unreadable LLM reply: {clip}")
             })
     }
 }
@@ -60,7 +60,7 @@ impl Narrator for HttpNarrator {
         }
         let system = &crate::lexicon::prompts().reconstruct;
         let user = format!(
-            "gist: {}\nschema: {}\nvalence: {:.2} arousal: {:.2} disgust: {:.2} fidelity: {:.2}\nhumeur actuelle: v={:.2} a={:.2} d={:.2}\nindice de rappel: {}",
+            "gist: {}\nschema: {}\nvalence: {:.2} arousal: {:.2} disgust: {:.2} fidelity: {:.2}\ncurrent mood: v={:.2} a={:.2} d={:.2}\nrecall cue: {}",
             trace.gist,
             trace.schema.as_deref().unwrap_or("-"),
             trace.valence,
@@ -127,7 +127,7 @@ impl Narrator for HttpNarrator {
     ) -> Option<crate::recall::narrator::Interpretation> {
         let system = &crate::lexicon::prompts().interpret;
         let user = format!(
-            "événement: {}\nhumeur: v={:.2} a={:.2} d={:.2}\naxiomes: {}",
+            "event: {}\nmood: v={:.2} a={:.2} d={:.2}\naxioms: {}",
             event,
             mood.valence,
             mood.arousal,
@@ -219,13 +219,13 @@ impl Narrator for HttpNarrator {
             ctx.push('\n');
         }
         for m in memories.iter().take(4) {
-            ctx.push_str("- souvenir: ");
+            ctx.push_str("- memory: ");
             ctx.push_str(m);
             ctx.push('\n');
         }
         let system = &crate::lexicon::prompts().reply;
         let user_p = format!(
-            "humeur v={:.2} a={:.2} d={:.2}\n{ctx}\nhumain: {user}",
+            "mood v={:.2} a={:.2} d={:.2}\n{ctx}\nhuman: {user}",
             mood.valence, mood.arousal, mood.disgust
         );
         match self.chat(system, &user_p) {

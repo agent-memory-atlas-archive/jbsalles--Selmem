@@ -8,9 +8,9 @@ fn script_is_fixed_before_the_run() {
     assert!(s.sync.len() >= 8);
     assert!(s.post.len() >= 6);
     assert_eq!(s.probes.len(), 5);
-    assert!(s.salient.contains("injuste"));
-    assert!(!s.post.iter().any(|p| p.contains("injuste") || p.contains("annulé")));
-    assert!(!s.probes.iter().any(|p| p.contains("injuste")));
+    assert!(s.salient.contains("unjust"));
+    assert!(!s.post.iter().any(|p| p.contains("unjust") || p.contains("cancelled")));
+    assert!(!s.probes.iter().any(|p| p.contains("unjust")));
 }
 
 #[test]

@@ -510,7 +510,7 @@ fn live_shared(mem: &mut SelectiveMemory, line: &str) {
     input.self_relevance = 0.55;
     input.utility = 0.55;
     input.permanence = 0.82;
-    input.schema = Some("quotidien".into());
+    input.schema = Some("daily".into());
     let _ = mem.live_with(input);
 }
 

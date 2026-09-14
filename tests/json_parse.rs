@@ -4,10 +4,10 @@ use selmem::net::httpx::{
 
 #[test]
 fn utf8_french_is_not_split_into_bytes() {
-    let raw = r#"{"content":"décision injuste"}"#;
+    let raw = r#"{"content":"unjust decision"}"#;
     assert_eq!(
         first_string_field(raw, "content").as_deref(),
-        Some("décision injuste")
+        Some("unjust decision")
     );
 }
 
@@ -24,14 +24,14 @@ fn chat_completion_uses_message_content_not_the_longest_string() {
       "model":"gpt-4o-mini",
       "choices":[{
         "index":0,
-        "message":{"role":"assistant","content":"Je me retire."},
+        "message":{"role":"assistant","content":"I pull away."},
         "finish_reason":"stop"
       }],
       "usage":{"prompt_tokens":12}
     }"#;
     assert_eq!(
         extract_json_string(raw, "content").as_deref(),
-        Some("Je me retire.")
+        Some("I pull away.")
     );
 }
 
@@ -39,7 +39,7 @@ fn chat_completion_uses_message_content_not_the_longest_string() {
 fn bifurcation_script_still_loads() {
     let s = selmem::script();
     assert!(s.sync.len() >= 8);
-    assert!(s.salient.contains("injuste"));
+    assert!(s.salient.contains("unjust"));
     assert_eq!(s.probes.len(), 5);
 }
 
@@ -47,13 +47,13 @@ fn bifurcation_script_still_loads() {
 fn reasoning_longer_than_the_reply_does_not_win() {
     let raw = r#"{
       "choices":[{
-        "message":{"role":"assistant","content":"Je me retire."},
+        "message":{"role":"assistant","content":"I pull away."},
         "reasoning":{"content":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
       }]
     }"#;
     assert_eq!(
         extract_json_string(raw, "content").as_deref(),
-        Some("Je me retire.")
+        Some("I pull away.")
     );
 }
 

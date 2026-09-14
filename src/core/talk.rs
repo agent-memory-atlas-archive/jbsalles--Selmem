@@ -173,7 +173,7 @@ impl WorkingTalk {
         if !self.turns.is_empty() {
             out.push_str("conversation en cours:\n");
             for t in &self.turns {
-                out.push_str("- humain: ");
+                out.push_str("- human: ");
                 out.push_str(&t.user);
                 out.push('\n');
                 out.push_str("- soi: ");

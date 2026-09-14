@@ -87,7 +87,7 @@ pub fn encode(
         return EncodeDecision {
             kept: false,
             score,
-            reason: format!("sous le seuil ({score:.2} < {threshold:.2})"),
+            reason: format!("below threshold ({score:.2} < {threshold:.2})"),
             trace_id: None,
             archive_id: String::new(),
         };
@@ -133,7 +133,7 @@ pub fn encode(
     EncodeDecision {
         kept: true,
         score,
-        reason: "encodé".into(),
+        reason: "encoded".into(),
         trace_id: Some(tid),
         archive_id,
     }

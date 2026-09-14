@@ -99,7 +99,7 @@ fn live_line(mem: &mut SelectiveMemory, line: &str, kind: LineKind) {
             input.self_relevance = 0.55;
             input.utility = 0.55;
             input.permanence = 0.82;
-            input.schema = Some("quotidien".into());
+            input.schema = Some("daily".into());
         }
         LineKind::Filler => {
             input.valence = 0.0;
@@ -429,7 +429,7 @@ pub fn run_erasure(llm: Option<&LlmSpec>) -> ErasureReport {
     let color_hits = mem.remember(&ask_color);
     let color_recalled = color_hits.iter().any(|r| {
         let t = r.narrative.to_lowercase();
-        t.contains("bleu") || t.contains("blue") || t.contains("couleur")
+        t.contains("blue") || t.contains("colour") || t.contains("color")
     });
     let color_answer = mem.speak_isolated(&ask_color);
 
