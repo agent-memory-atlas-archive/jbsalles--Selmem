@@ -23,8 +23,9 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             mem.store.axioms.len()
         )),
         ("GET", "/profile") => ok(format!(
-            "{{\"name\":\"{}\",\"encode_threshold\":{:.4},\"embellish_gain\":{:.4},\"disgust_gain\":{:.4},\"decay_lambda\":{:.4},\"ground_min_overlap\":{:.4},\"ground_strikes\":{},\"narrator_firmness\":{:.4}}}",
+            "{{\"name\":\"{}\",\"voice\":\"{}\",\"encode_threshold\":{:.4},\"embellish_gain\":{:.4},\"disgust_gain\":{:.4},\"decay_lambda\":{:.4},\"ground_min_overlap\":{:.4},\"ground_strikes\":{},\"narrator_firmness\":{:.4}}}",
             json_esc(&mem.profile.name),
+            mem.profile.voice_kind(),
             mem.profile.encode_threshold,
             mem.profile.embellish_gain,
             mem.profile.disgust_gain,
@@ -55,7 +56,14 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             if let Some(v) = json_f32(body, "narrator_firmness") {
                 mem.profile.narrator_firmness = v.clamp(0.0, 1.0);
             }
-            ok("{\"ok\":true}".into())
+            if let Some(v) = json_str(body, "voice") {
+                mem.profile.set_voice(&v);
+            }
+            let _ = mem.save();
+            ok(format!(
+                "{{\"ok\":true,\"voice\":\"{}\"}}",
+                mem.profile.voice_kind()
+            ))
         }
         ("GET", "/mood") => ok(format!(
             "{{\"valence\":{:.4},\"arousal\":{:.4},\"disgust\":{:.4}}}",

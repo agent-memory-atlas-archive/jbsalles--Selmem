@@ -144,4 +144,35 @@ impl EntityProfile {
             ..Self::new(name)
         }
     }
+
+    pub fn voice_kind(&self) -> &'static str {
+        let g = self.embellish_gain - self.disgust_gain;
+        if g >= 0.04 {
+            "tender"
+        } else if g <= -0.04 {
+            "austere"
+        } else {
+            "neutral"
+        }
+    }
+
+    pub fn set_voice(&mut self, kind: &str) {
+        match kind.trim().to_ascii_lowercase().as_str() {
+            "tender" => {
+                self.embellish_gain = 0.18;
+                self.disgust_gain = 0.05;
+                self.voice = Voice::tender();
+            }
+            "austere" => {
+                self.embellish_gain = 0.05;
+                self.disgust_gain = 0.16;
+                self.voice = Voice::austere();
+            }
+            _ => {
+                self.embellish_gain = 0.10;
+                self.disgust_gain = 0.10;
+                self.voice = Voice::default();
+            }
+        }
+    }
 }

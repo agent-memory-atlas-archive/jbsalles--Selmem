@@ -25,7 +25,8 @@
   button { background:#3a342c; color:var(--ink); border:0; border-radius:10px; padding:10px 14px; cursor:pointer; }
   button.ghost { background:transparent; color:var(--muted); }
   .bar { display:flex; gap:8px; padding:8px 20px 0; }
-  .bar input { width: 140px; background:transparent; border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:6px 8px; font-size:.85rem; }
+  .bar input, .bar select { background:transparent; border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:6px 8px; font-size:.85rem; }
+  .bar input { width: 140px; }
   .spin { width:16px; height:16px; border:2px solid var(--line); border-top-color:var(--kept); border-radius:50%; align-self:center; flex-shrink:0; opacity:0; visibility:hidden; animation:spin .7s linear infinite; }
   .spin.on { opacity:1; visibility:visible; }
   button:disabled { opacity:.5; cursor:wait; }
@@ -40,6 +41,11 @@
   </header>
   <div class="bar">
     <input id="token" placeholder="token" autocomplete="off">
+    <select id="voice" title="voice">
+      <option value="tender">tender</option>
+      <option value="austere">austere</option>
+      <option value="neutral">neutral</option>
+    </select>
     <button class="ghost" type="button" id="who">who are you</button>
     <button class="ghost" type="button" id="pin">pin</button>
     <button class="ghost" type="button" id="sleep">sleep</button>
@@ -82,6 +88,10 @@ async function refresh() {
     const h = await api('GET', '/health');
     document.getElementById('name').textContent = h.name || 'SelMem';
     document.getElementById('status').textContent = h.traces + ' traces · ' + h.axioms + ' axioms · ' + h.archives + ' archives';
+    try {
+      const p = await api('GET', '/profile');
+      if (p.voice) document.getElementById('voice').value = p.voice;
+    } catch (e) {}
   } catch (e) {
     document.getElementById('status').textContent = e.message;
   }
@@ -89,7 +99,7 @@ async function refresh() {
 function busy(where, on) {
   const bar = where === 'bar';
   document.getElementById(bar ? 'spin-bar' : 'spin').classList.toggle('on', on);
-  const ids = bar ? ['who', 'pin', 'sleep'] : ['send', 'text'];
+  const ids = bar ? ['who', 'pin', 'sleep', 'voice'] : ['send', 'text'];
   ids.forEach(id => { document.getElementById(id).disabled = on; });
 }
 document.getElementById('f').onsubmit = async (e) => {
@@ -110,6 +120,18 @@ document.getElementById('f').onsubmit = async (e) => {
   } finally {
     busy('send', false);
     document.getElementById('text').focus();
+  }
+};
+document.getElementById('voice').onchange = async () => {
+  const voice = document.getElementById('voice').value;
+  busy('bar', true);
+  try {
+    await api('POST', '/profile', { voice });
+    add('her', '<div class="meta">voice — ' + escapeHtml(voice) + '</div>');
+  } catch (e) {
+    add('her', '<span class="drop">' + escapeHtml(e.message) + '</span>');
+  } finally {
+    busy('bar', false);
   }
 };
 document.getElementById('pin').onclick = async () => {

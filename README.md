@@ -303,6 +303,7 @@ The composer (field, spinner, **send**) stays pinned to the bottom.
 | Control | What it does |
 | --- | --- |
 | **token** | Bearer for this tab (`localStorage`). Empty if the daemon has no token. |
+| **tender / austere / neutral** | Sleep-time voice. Sets embellish vs disgust and the retell table. Does not wipe the book. |
 | **who are you** | Living axioms (`GET /who`). Empty until sleep minted a belief. |
 | **pin** | Force the current thread into the book (`POST /pin`): last human line, or the topic. Raises self-relevance / permanence so a salon subject (a name, Villepin) can pass the gate. Still a gist, not the verbatim log. One click ≠ an axiom. |
 | **sleep** | One night (`POST /sleep`): sculpt, merge, extinguish, maybe mint axioms. Then the salon thread is dropped. Click once. |
@@ -310,6 +311,21 @@ The composer (field, spinner, **send**) stays pinned to the bottom.
 | `kept` / `left` + S | Gate score. `left` is not amnesia until you sleep. |
 
 Do not sleep to “refresh.” Sleep ends the sitting. Pin first if tomorrow should still know the subject.
+
+### Why the chat can feel weird
+
+This is not a chatbot with extra context. `/turn` asks the model to continue from two short piles: the live thread (WorkingTalk) and a few recalled gists. The reply prompt is four lines. There is no persona script.
+
+What that produces:
+
+- **`left` is not forgetting.** The line stayed in the salon. It dies when you sleep, unless you pin it or it already passed the gate.
+- **`kept` is not “it understood you`.** It means a trace was written. The next sentence still comes from Grok looking at that gist, not from a stored Q&A.
+- **Empty book + “hello”** → the model fills the hole. Velvet greetings, “I know your name” without saying it, a politician who “never quite landed.” That is the prior, not SelMem.
+- **Sleep wipes the thread.** “What did we talk about yesterday?” only sees what survived the night. A pinned name can come back; small talk cannot.
+- **Sleep also retells.** Tender can soften a fact (“JB became quieter”). Austere can harden it. The organ is allowed to warp; the UI will look inconsistent if you expect a CRM.
+- **Two clocks.** The salon lasts ten minutes. A “day” is one Sleep click, not 24 hours.
+
+If the replies feel like a well-prompted Grok, the book is thin. Pin the hour that should last, sleep once, ask again. If they still feel like theater, the model is padding an empty recall — that is expected, not a bug in the buttons.
 
 Local Ollama: `--llm http://127.0.0.1:11434/v1/chat/completions --model llama3`
 
