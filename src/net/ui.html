@@ -9,23 +9,27 @@
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font: 16px/1.45 Georgia, serif; }
   main { max-width: 720px; margin: 0 auto; min-height: 100vh; display:flex; flex-direction:column; }
-  header { padding: 20px 20px 8px; border-bottom:1px solid var(--line); }
+  header { padding: 20px 20px 8px; border-bottom:1px solid var(--line); flex-shrink:0; }
   header h1 { font-size: 1.15rem; font-weight: normal; margin:0; }
   header p { margin: 4px 0 0; color:var(--muted); font-size:.9rem; }
-  #log { flex:1; overflow-y:auto; padding: 16px 20px 8px; display:flex; flex-direction:column; gap:12px; }
+  #log { flex:1; overflow-y:auto; padding: 16px 20px 88px; display:flex; flex-direction:column; gap:12px; }
   .msg { max-width: 92%; }
   .me { align-self:flex-end; background:#2a2430; padding:10px 14px; border-radius:14px 14px 4px 14px; }
   .her { align-self:flex-start; background:var(--card); padding:10px 14px; border-radius:14px 14px 14px 4px; }
   .meta { font-size:.78rem; color:var(--muted); margin-top:4px; }
   .kept { color:var(--kept); }
   .drop { color:var(--drop); }
-  form { display:flex; gap:8px; padding:12px 20px 20px; border-top:1px solid var(--line); }
+  form { position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:100%; max-width:720px; display:flex; gap:8px; padding:12px 20px 20px; border-top:1px solid var(--line); background:var(--bg); }
   input, button { font: inherit; }
   #text { flex:1; background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
   button { background:#3a342c; color:var(--ink); border:0; border-radius:10px; padding:10px 14px; cursor:pointer; }
   button.ghost { background:transparent; color:var(--muted); }
   .bar { display:flex; gap:8px; padding:8px 20px 0; }
   .bar input { width: 140px; background:transparent; border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:6px 8px; font-size:.85rem; }
+  .spin { width:16px; height:16px; border:2px solid var(--line); border-top-color:var(--kept); border-radius:50%; align-self:center; flex-shrink:0; opacity:0; visibility:hidden; animation:spin .7s linear infinite; }
+  .spin.on { opacity:1; visibility:visible; }
+  button:disabled { opacity:.5; cursor:wait; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -37,12 +41,15 @@
   <div class="bar">
     <input id="token" placeholder="token" autocomplete="off">
     <button class="ghost" type="button" id="who">who are you</button>
+    <button class="ghost" type="button" id="pin">pin</button>
     <button class="ghost" type="button" id="sleep">sleep</button>
+    <span class="spin" id="spin-bar" aria-hidden="true"></span>
   </div>
   <div id="log"></div>
   <form id="f">
     <input id="text" autocomplete="off" placeholder="Speak to it…">
-    <button type="submit">send</button>
+    <span class="spin" id="spin" aria-hidden="true"></span>
+    <button type="submit" id="send">send</button>
   </form>
 </main>
 <script>
@@ -79,12 +86,19 @@ async function refresh() {
     document.getElementById('status').textContent = e.message;
   }
 }
+function busy(where, on) {
+  const bar = where === 'bar';
+  document.getElementById(bar ? 'spin-bar' : 'spin').classList.toggle('on', on);
+  const ids = bar ? ['who', 'pin', 'sleep'] : ['send', 'text'];
+  ids.forEach(id => { document.getElementById(id).disabled = on; });
+}
 document.getElementById('f').onsubmit = async (e) => {
   e.preventDefault();
   const text = document.getElementById('text').value.trim();
   if (!text) return;
   document.getElementById('text').value = '';
   add('me', escapeHtml(text));
+  busy('send', true);
   try {
     const turn = await api('POST', '/turn', { text });
     const mark = turn.kept ? 'kept' : 'left';
@@ -93,21 +107,47 @@ document.getElementById('f').onsubmit = async (e) => {
     refresh();
   } catch (err) {
     add('her', '<span class="drop">' + escapeHtml(err.message) + '</span>');
+  } finally {
+    busy('send', false);
+    document.getElementById('text').focus();
+  }
+};
+document.getElementById('pin').onclick = async () => {
+  busy('bar', true);
+  try {
+    const r = await api('POST', '/pin', {});
+    const mark = r.kept ? 'kept' : 'left';
+    add('her', '<div class="meta ' + (r.kept ? 'kept' : 'drop') + '">pin — ' + mark + ' S=' + Number(r.score).toFixed(2) + ' · ' + escapeHtml(r.pinned || '') + '</div>');
+    refresh();
+  } catch (e) {
+    add('her', '<span class="drop">' + escapeHtml(e.message) + '</span>');
+  } finally {
+    busy('bar', false);
   }
 };
 document.getElementById('who').onclick = async () => {
+  busy('bar', true);
   try {
     const w = await api('GET', '/who');
     const axioms = (w.axioms || []).map(a => '· ' + a.statement).join('<br>') || '(no axiom yet)';
     add('her', axioms);
-  } catch (e) { add('her', escapeHtml(e.message)); }
+  } catch (e) {
+    add('her', '<span class="drop">' + escapeHtml(e.message) + '</span>');
+  } finally {
+    busy('bar', false);
+  }
 };
 document.getElementById('sleep').onclick = async () => {
+  busy('bar', true);
   try {
     const r = await api('POST', '/sleep', {});
     add('her', '<div class="meta">night — sculpted ' + r.sculpted + ' · merged ' + r.merged + ' · extinguished ' + r.extinguished + ' · axioms ' + r.axioms + '</div>');
     refresh();
-  } catch (e) { add('her', escapeHtml(e.message)); }
+  } catch (e) {
+    add('her', '<span class="drop">' + escapeHtml(e.message) + '</span>');
+  } finally {
+    busy('bar', false);
+  }
 };
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

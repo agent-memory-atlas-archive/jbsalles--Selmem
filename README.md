@@ -294,7 +294,23 @@ Same keys can sit in `.selmem`. Flags still win.
   --api-key "$SELMEM_API_KEY"
 ```
 
-UI: `http://IP:7420/` — paste the token at the top, talk.\
+UI: `http://IP:7420/` — paste the token at the top, talk.
+
+### UI controls
+
+The composer (field, spinner, **send**) stays pinned to the bottom.
+
+| Control | What it does |
+| --- | --- |
+| **token** | Bearer for this tab (`localStorage`). Empty if the daemon has no token. |
+| **who are you** | Living axioms (`GET /who`). Empty until sleep minted a belief. |
+| **pin** | Force the current thread into the book (`POST /pin`): last human line, or the topic. Raises self-relevance / permanence so a salon subject (a name, Villepin) can pass the gate. Still a gist, not the verbatim log. One click ≠ an axiom. |
+| **sleep** | One night (`POST /sleep`): sculpt, merge, extinguish, maybe mint axioms. Then the salon thread is dropped. Click once. |
+| **Speak to it… / send** | One turn (`POST /turn`): encode attempt + reply. Spinner while the model runs. `kept` = wrote a trace; `left` = stayed in the thread only. |
+| `kept` / `left` + S | Gate score. `left` is not amnesia until you sleep. |
+
+Do not sleep to “refresh.” Sleep ends the sitting. Pin first if tomorrow should still know the subject.
+
 Local Ollama: `--llm http://127.0.0.1:11434/v1/chat/completions --model llama3`
 
 Behind nginx:
@@ -333,6 +349,7 @@ One thread per connection. `/health` and `/` do not take the memory lock. `/turn
 | POST | `/remember` | reconstruct |
 | POST | `/speak` | embodied reply (holds the thread) |
 | POST | `/turn` | live + reply |
+| POST | `/pin` | keep the current thread topic as a lived trace |
 | POST | `/talk/clear` | drop the session frame |
 | POST | `/sleep` | consolidate |
 | POST | `/save` | flush |

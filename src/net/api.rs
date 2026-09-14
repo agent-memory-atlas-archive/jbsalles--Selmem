@@ -142,6 +142,40 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 mem.mood.disgust
             ))
         }
+        ("POST", "/pin") => {
+            let from_body = json_str(body, "text").or_else(|| json_str(body, "event"));
+            let from_talk = mem
+                .talk
+                .turns
+                .last()
+                .map(|t| t.user.clone())
+                .or_else(|| mem.talk.topic.clone())
+                .unwrap_or_default();
+            let text = from_body.filter(|s| !s.trim().is_empty()).unwrap_or(from_talk);
+            if text.trim().is_empty() {
+                return err(400, "nothing to pin");
+            }
+            let (v, a, d, schema) = guess_affect(&text);
+            let mut input = EncodeInput::new(&text);
+            input.valence = v;
+            input.arousal = a.max(0.45);
+            input.disgust = d;
+            input.self_relevance = 1.0;
+            input.utility = 0.75;
+            input.permanence = 0.85;
+            input.schema = mem.talk.schema.clone().or(schema).or(Some("pinned".into()));
+            input.channel = Channel::Selfhood;
+            let dec = mem.live_with(input);
+            let _ = mem.save();
+            ok(format!(
+                "{{\"kept\":{},\"score\":{:.4},\"reason\":\"{}\",\"pinned\":\"{}\",\"topic\":\"{}\"}}",
+                if dec.kept { "true" } else { "false" },
+                dec.score,
+                json_esc(&dec.reason),
+                json_esc(&text),
+                json_esc(mem.talk.topic.as_deref().unwrap_or(""))
+            ))
+        }
         ("POST", "/live") => {
             let event = json_str(body, "event").unwrap_or_default();
             if event.trim().is_empty() {

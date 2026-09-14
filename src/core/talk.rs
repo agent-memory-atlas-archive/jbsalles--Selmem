@@ -171,12 +171,12 @@ impl WorkingTalk {
             out.push('\n');
         }
         if !self.turns.is_empty() {
-            out.push_str("conversation en cours:\n");
+            out.push_str("current conversation:\n");
             for t in &self.turns {
                 out.push_str("- human: ");
                 out.push_str(&t.user);
                 out.push('\n');
-                out.push_str("- soi: ");
+                out.push_str("- you: ");
                 out.push_str(&t.reply);
                 out.push('\n');
             }
