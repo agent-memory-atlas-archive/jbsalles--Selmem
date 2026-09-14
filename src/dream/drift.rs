@@ -13,7 +13,13 @@ pub fn apply_reconsolidation(
     let resist = 1.0 - 0.75 * trace.anchor;
     let eta = profile.reconsolidation_eta * (0.5 + 0.5 * trace.arousal) * resist;
     if !narrative.is_empty() && narrative != trace.gist && eta >= 0.15 {
-        trace.gist = blend_text(&trace.gist, narrative, eta);
+        // Spoken recall may wander. The book only moves if the sentence
+        // still talks about this hour. Core is never written here.
+        if crate::encode::accept_core(narrative, &trace.core).is_some()
+            || crate::encode::accept_core(narrative, &trace.gist).is_some()
+        {
+            trace.gist = blend_text(&trace.gist, narrative, eta);
+        }
     }
     let before_v = trace.valence;
     let pull = eta * 0.32 * resist * (mood_valence - trace.valence);

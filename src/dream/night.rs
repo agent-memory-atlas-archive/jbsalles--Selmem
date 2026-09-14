@@ -394,13 +394,21 @@ fn merge_close(store: &mut MemoryStore, profile: &EntityProfile) -> u32 {
 }
 
 fn extract_axioms(store: &mut MemoryStore, narrator: &dyn Narrator) -> Vec<IdentityAxiom> {
-    let mut groups: HashMap<String, Vec<String>> = HashMap::new();
+    let mut evidence: HashMap<String, Vec<String>> = HashMap::new();
+    let mut living: HashMap<String, Vec<String>> = HashMap::new();
     for t in store.traces.values() {
-        // Forgotten scenes still color encoding. They must not mint new beliefs.
-        if matches!(t.status, TraceStatus::Active | TraceStatus::Cold) {
-            if let Some(s) = &t.schema {
-                groups.entry(s.clone()).or_default().push(t.id.clone());
+        let Some(s) = t.schema.as_ref() else { continue };
+        match t.status {
+            // Merged siblings stay Myth; they still count as episodes.
+            TraceStatus::Active | TraceStatus::Cold => {
+                evidence.entry(s.clone()).or_default().push(t.id.clone());
+                living.entry(s.clone()).or_default().push(t.id.clone());
             }
+            TraceStatus::Myth => {
+                evidence.entry(s.clone()).or_default().push(t.id.clone());
+            }
+            // Latent / sealed must not mint a belief.
+            _ => {}
         }
     }
     let existing: Vec<String> = store
@@ -410,14 +418,18 @@ fn extract_axioms(store: &mut MemoryStore, narrator: &dyn Narrator) -> Vec<Ident
         .collect();
 
     let mut created = Vec::new();
-    for (schema, ids) in groups {
+    for (schema, ids) in evidence {
         if ids.len() < 2 {
             continue;
         }
+        let Some(live_ids) = living.get(&schema) else {
+            continue;
+        };
         let traces: Vec<&crate::core::model::MemoryTrace> = ids
             .iter()
             .filter_map(|id| store.traces.get(id))
             .collect();
+        let _ = live_ids;
         let Some(statement) = narrator.distill_axiom(&traces) else {
             continue;
         };
@@ -429,10 +441,10 @@ fn extract_axioms(store: &mut MemoryStore, narrator: &dyn Narrator) -> Vec<Ident
             .into_iter()
             .find(|a| a.schema.as_deref() == Some(schema.as_str()))
             .map(|a| a.id.clone());
-        let n = traces.len() as f32;
-        let mean_v = traces.iter().map(|t| t.valence).sum::<f32>() / n;
-        let mean_a = traces.iter().map(|t| t.arousal).sum::<f32>() / n;
-        let layer = if traces.len() >= 3 {
+        let n = ids.len() as f32;
+        let mean_v = traces.iter().map(|t| t.valence).sum::<f32>() / n.max(1.0);
+        let mean_a = traces.iter().map(|t| t.arousal).sum::<f32>() / n.max(1.0);
+        let layer = if ids.len() >= 3 {
             AxiomLayer::Belief
         } else {
             AxiomLayer::Motif

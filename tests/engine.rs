@@ -685,3 +685,71 @@ fn latent_can_return_as_a_cold_core_after_rehearsal() {
     );
 }
 
+#[test]
+fn reconsolidation_does_not_engrave_an_unrelated_sentence() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let mut ev = EncodeInput::new("Tu es resté sous la pluie.");
+    ev.schema = Some("fidélité".into());
+    ev.valence = 0.5;
+    ev.self_relevance = 0.9;
+    ev.permanence = 0.8;
+    let id = mem.live_with(ev).trace_id.unwrap();
+    let before = mem.store.traces[&id].gist.clone();
+    {
+        let t = mem.store.traces.get_mut(&id).unwrap();
+        selmem::dream::apply_reconsolidation(
+            t,
+            "Marc n'a jamais démissionné, c'était un malentendu inventé.",
+            &mem.profile,
+            -0.9,
+        );
+    }
+    let t = &mem.store.traces[&id];
+    assert_eq!(t.gist, before, "poisoned reconstruct must not become the book");
+    assert!(!t.core.contains("Marc"));
+}
+
+#[test]
+fn merged_episodes_still_count_as_belief_evidence() {
+    let mut profile = EntityProfile::tender("Claire");
+    profile.merge_similarity = 0.05;
+    let mut mem = SelectiveMemory::new(profile);
+    for event in [
+        "Première humiliation sous la pluie froide.",
+        "Deuxième humiliation sous la pluie froide.",
+        "Troisième humiliation sous la pluie froide.",
+    ] {
+        let mut ev = EncodeInput::new(event);
+        ev.schema = Some("humiliation".into());
+        ev.valence = -0.6;
+        ev.arousal = 0.6;
+        ev.self_relevance = 0.9;
+        ev.permanence = 0.8;
+        assert!(mem.live_with(ev).kept);
+    }
+    mem.sleep();
+    let myths = mem
+        .store
+        .traces
+        .values()
+        .filter(|t| t.status == TraceStatus::Myth && t.schema.as_deref() == Some("humiliation"))
+        .count();
+    let living = mem
+        .store
+        .living_axioms()
+        .into_iter()
+        .filter(|a| a.schema.as_deref() == Some("humiliation"))
+        .collect::<Vec<_>>();
+    assert!(
+        !living.is_empty(),
+        "merge must not wipe the identity ladder, myths={myths}"
+    );
+    if myths >= 1 {
+        assert!(
+            living.iter().any(|a| a.layer == AxiomLayer::Belief || a.support_trace_ids.len() >= 2),
+            "merged siblings should still support a motif/belief: {:?}",
+            living.iter().map(|a| (&a.layer, a.support_trace_ids.len())).collect::<Vec<_>>()
+        );
+    }
+}
+
