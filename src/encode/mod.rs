@@ -4,4 +4,4 @@ pub mod identity;
 pub mod intake;
 pub mod scoring;
 
-pub use intake::{encode, EncodeDecision, EncodeInput};
+pub use intake::{accept_core, encode, EncodeDecision, EncodeInput};

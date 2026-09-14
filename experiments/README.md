@@ -1,6 +1,6 @@
 # Experiments
 
-Published report: **[REPORT.md](REPORT.md)** (method, tables, four excerpts from pair `001`).
+Published report: [**REPORT.md**](REPORT.md) (method, tables, four excerpts from pair `001`).
 
 This folder is the public record of the SelMem benches. The white paper states the organ and the conclusions. Numbers, scripts, and how to replay a cell live here.
 
@@ -13,7 +13,7 @@ This folder is the public record of the SelMem benches. The white paper states t
 
 ## Replay the four Grok dumps
 
-Not committed (large). Same `.selmem` for all four:
+Same `.selmem` for all four:
 
 ```
 llm=https://api.x.ai/v1/chat/completions

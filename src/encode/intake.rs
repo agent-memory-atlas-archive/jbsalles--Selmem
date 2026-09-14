@@ -160,6 +160,39 @@ fn associate(store: &mut MemoryStore, trace: &MemoryTrace) {
     }
 }
 
+/// LLM may propose a core. Accept only if it still talks about this event.
+pub fn accept_core(proposed: &str, event: &str) -> Option<String> {
+    let p = proposed.trim();
+    if p.is_empty() || p.chars().count() < 8 {
+        return None;
+    }
+    let p: String = p.chars().take(500).collect();
+    let ev: Vec<String> = event
+        .split_whitespace()
+        .map(|w| {
+            w.trim_matches(|c: char| !c.is_alphanumeric())
+                .to_lowercase()
+        })
+        .filter(|w| w.chars().count() > 2)
+        .collect();
+    let pr: Vec<String> = p
+        .split_whitespace()
+        .map(|w| {
+            w.trim_matches(|c: char| !c.is_alphanumeric())
+                .to_lowercase()
+        })
+        .filter(|w| w.chars().count() > 2)
+        .collect();
+    if pr.is_empty() {
+        return None;
+    }
+    let hit = pr.iter().filter(|w| ev.iter().any(|e| e == *w)).count();
+    if hit * 4 < pr.len() && hit < 2 {
+        return None;
+    }
+    Some(p)
+}
+
 fn compress(event: &str, max_words: usize) -> String {
     let words: Vec<&str> = event.split_whitespace().collect();
     if words.len() <= max_words {

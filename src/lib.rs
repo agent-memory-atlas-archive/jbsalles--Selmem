@@ -15,13 +15,13 @@ pub use core::model::{
     ArchiveRecord, AxiomLayer, Channel, DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood,
     RecalledMemory, TraceStatus,
 };
-pub use core::talk::{TalkTurn, WorkingTalk};
+pub use core::talk::{TalkTurn, WorkingTalk, ACTIVE_GAP_SECS, MAX_SESSION_SECS};
 pub use core::profile::{EntityProfile, Voice};
 pub use core::store::MemoryStore;
 pub use dream::{detail_retention, fingerprint, seed_anchor, stability_days, DreamReport, Fingerprint};
 pub use dream::singularite::distance as singularity_distance;
 pub use encode::embed::{cosine, Embedder, HashEmbedder, HttpEmbedder};
-pub use encode::{EncodeDecision, EncodeInput};
+pub use encode::{accept_core, EncodeDecision, EncodeInput};
 pub use engine::SelectiveMemory;
 pub use benchmark::{
     h2_holds, run_v01, run_v01_k, run_v01_n, v01_script, Arm, Campaign, Condition, PairReport, V01Script,

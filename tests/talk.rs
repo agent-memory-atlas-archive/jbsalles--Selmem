@@ -58,14 +58,61 @@ fn new_content_can_replace_the_topic() {
 }
 
 #[test]
-fn frame_caps_at_six_turns() {
+fn frame_keeps_the_active_conversation() {
     let mut talk = WorkingTalk::default();
+    let t0 = 1_700_000_000;
     for i in 0..9 {
-        talk.record(&format!("user {i} projet"), &format!("reply {i}"));
+        talk.record_at(t0 + i * 30, &format!("user {i} projet"), &format!("reply {i}"));
     }
-    assert_eq!(talk.turns.len(), 6);
-    assert!(talk.turns[0].user.contains("user 3"));
-    assert!(talk.turns[5].user.contains("user 8"));
+    assert_eq!(talk.turns.len(), 9);
+    assert!(talk.turns[0].user.contains("user 0"));
+    assert!(talk.turns[8].user.contains("user 8"));
+    assert!(talk.active_at(t0 + 8 * 30));
+}
+
+#[test]
+fn silence_over_ten_minutes_ends_the_thread() {
+    let mut talk = WorkingTalk::default();
+    let t0 = 1_700_000_000;
+    talk.hear_at(t0, "Le projet a été annulé sans raison", Some("injustice"));
+    talk.record_at(t0, "on en parlait", "je m'en souviens");
+    assert!(!talk.is_empty());
+    talk.refresh_at(t0 + selmem::ACTIVE_GAP_SECS);
+    assert!(!talk.is_empty(), "exactly 10 min still counts as active");
+    talk.refresh_at(t0 + selmem::ACTIVE_GAP_SECS + 1);
+    assert!(talk.is_empty(), "a gap over 10 min drops the session");
+}
+
+#[test]
+fn reply_within_ten_minutes_keeps_the_thread() {
+    let mut talk = WorkingTalk::default();
+    let t0 = 1_700_000_000;
+    talk.record_at(t0, "projet annulé", "je m'en souviens");
+    talk.record_at(t0 + selmem::ACTIVE_GAP_SECS - 1, "et alors ?", "toujours ça");
+    assert_eq!(talk.turns.len(), 2);
+    assert!(talk.active_at(t0 + selmem::ACTIVE_GAP_SECS - 1));
+}
+
+#[test]
+fn two_hours_is_the_hard_cap() {
+    let mut talk = WorkingTalk::default();
+    let t0 = 1_700_000_000;
+    let mut t = t0;
+    talk.record_at(t, "projet annulé", "oui");
+    while t + 300 <= t0 + selmem::MAX_SESSION_SECS {
+        t += 300;
+        talk.record_at(t, "toujours là", "oui");
+    }
+    let kept = talk.turns.len();
+    assert!(kept > 2, "an active sitting keeps its turns, got {kept}");
+    assert!(talk.active_at(t));
+    talk.record_at(t0 + selmem::MAX_SESSION_SECS + 1, "encore là", "plafond");
+    assert_eq!(
+        talk.turns.len(),
+        1,
+        "crossing 2 h starts a new thread on the late turn"
+    );
+    assert!(talk.turns[0].user.contains("encore"));
 }
 
 #[test]
@@ -105,14 +152,148 @@ fn speak_followup_still_recalls_the_marked_hour() {
 }
 
 #[test]
-fn sleep_does_not_clear_the_thread() {
+fn sleep_clears_the_thread() {
     let mut mem = seed_injustice();
     let _ = mem.speak("On parlait du projet annulé.");
     assert!(!mem.talk.is_empty());
     let _ = mem.sleep();
     assert!(
-        mem.talk.topic.is_some() && !mem.talk.turns.is_empty(),
-        "night weathers the book, not the live thread"
+        mem.talk.is_empty(),
+        "night ends the sitting; the book keeps what the gate kept"
+    );
+}
+
+#[test]
+fn sleep_after_chat_writes_the_book_not_the_frame() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let _ = mem.speak("On m'a volé le crédit du projet, c'est une injustice crasse.");
+    let _ = mem.speak("Et alors, tu en penses quoi ?");
+    assert!(
+        !mem.talk.is_empty() && !mem.talk.turns.is_empty(),
+        "chat lives in the frame until sleep"
+    );
+    let frame_turns = mem.talk.turns.len();
+
+    let _ = mem.sleep();
+
+    assert!(mem.talk.is_empty(), "sleep ends the sitting");
+    assert!(
+        !mem.store.traces.is_empty(),
+        "the sitting must become hours in the book"
+    );
+
+    let talk_hours: Vec<_> = mem
+        .store
+        .traces
+        .values()
+        .filter(|t| {
+            t.archive_id
+                .as_ref()
+                .and_then(|id| mem.store.archives.get(id))
+                .map(|a| a.source == "talk")
+                .unwrap_or(false)
+        })
+        .collect();
+    assert!(
+        !talk_hours.is_empty(),
+        "commit source=talk must mint at least one lived trace"
+    );
+    assert!(
+        talk_hours.len() <= frame_turns,
+        "one recorded turn is one hour, not a second book"
+    );
+
+    let hour = talk_hours[0];
+    assert!(!hour.gist.is_empty(), "book is gist");
+    assert!(!hour.core.is_empty(), "book is core");
+    let aid = hour.archive_id.as_ref().expect("kept hour has a sealed archive");
+    let verbatim = mem.store.archives[aid].verbatim.to_lowercase();
+    assert!(
+        verbatim.contains("projet")
+            || verbatim.contains("crédit")
+            || verbatim.contains("credit")
+            || verbatim.contains("injust"),
+        "archive holds the sitting, got {:?}",
+        mem.store.archives[aid].verbatim
+    );
+    assert_eq!(
+        mem.audit(&hour.id).map(str::to_lowercase).as_deref(),
+        Some(verbatim.as_str()),
+        "audit is the journal; the model does not read it"
+    );
+
+    let hits = mem.remember("crédit projet injustice");
+    let blob = hits
+        .iter()
+        .map(|h| h.narrative.to_lowercase())
+        .collect::<Vec<_>>()
+        .join(" ");
+    assert!(
+        !hits.is_empty()
+            && (blob.contains("projet")
+                || blob.contains("crédit")
+                || blob.contains("credit")
+                || blob.contains("injust")),
+        "continuity after sleep is recall from the book, got {blob:?}"
+    );
+
+    let _ = mem.speak_isolated("Et le projet ?");
+    assert!(
+        mem.talk.is_empty(),
+        "probes must not resurrect the frame"
+    );
+}
+
+#[test]
+fn live_then_sleep_does_not_mint_topic_hours() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("A"));
+    let mut ev = EncodeInput::new("On a partagé un café ce matin sous la pluie.");
+    ev.valence = 0.12;
+    ev.arousal = 0.28;
+    ev.self_relevance = 0.55;
+    ev.utility = 0.55;
+    ev.permanence = 0.82;
+    ev.schema = Some("quotidien".into());
+    assert!(mem.live_with(ev).kept);
+    assert!(
+        mem.talk.topic.is_some(),
+        "live hears the line into the frame"
+    );
+    let n = mem.store.traces.len();
+    let _ = mem.sleep();
+    assert!(mem.talk.is_empty());
+    assert_eq!(
+        mem.store.traces.len(),
+        n,
+        "experiments live then sleep; the topic is not a second hour"
+    );
+}
+
+#[test]
+fn sleep_right_after_chat_leaves_the_hours() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let _ = mem.speak("On m'a volé le crédit du projet, c'est une injustice crasse.");
+    let _ = mem.speak("Et alors, tu en penses quoi ?");
+    assert!(!mem.talk.is_empty());
+    let _ = mem.sleep();
+    assert!(mem.talk.is_empty(), "the frame dies");
+    assert!(
+        !mem.store.traces.is_empty(),
+        "sleep right after chat must leave hours in the book"
+    );
+    let hits = mem.remember("crédit projet injustice");
+    let blob = hits
+        .iter()
+        .map(|h| h.narrative.to_lowercase())
+        .collect::<Vec<_>>()
+        .join(" ");
+    assert!(
+        !hits.is_empty()
+            && (blob.contains("projet")
+                || blob.contains("crédit")
+                || blob.contains("credit")
+                || blob.contains("injust")),
+        "the sitting must be recallable after the night, got {blob:?}"
     );
 }
 

@@ -1,12 +1,24 @@
 //! Working conversation frame. Not the lived book.
 //!
 //! The LLM call is stateless. This frame is what lets the next turn
-//! still know what the last turns were about. Sleep does not clear it.
-//! Persist does not write it: a session, not a sculpture.
+//! still know what the last turns were about. Persist does not write it:
+//! a session, not a sculpture. Sleep commits the sitting through the
+//! encode gate into the book, then drops the frame. Continuity after
+//! night is recall, not this buffer.
+//!
+//! Lifetime is the active conversation, not a fixed turn count.
+//! Active = last hear or reply within [`ACTIVE_GAP_SECS`] (10 min).
+//! Hard cap [`MAX_SESSION_SECS`] (2 h) from the first pulse.
 
+use crate::core::model::now_secs;
 use crate::encode::scoring::{lexical_similarity, token_set};
 
-const MAX_TURNS: usize = 6;
+/// Silence longer than this ends the conversation.
+pub const ACTIVE_GAP_SECS: u64 = 10 * 60;
+/// A single thread never outlives this, even if still talking.
+pub const MAX_SESSION_SECS: u64 = 2 * 60 * 60;
+/// Flood cap inside one session. Not the lifetime.
+const MAX_TURNS: usize = 80;
 const MAX_LINE: usize = 220;
 
 const LIGHT: &[&str] = &[
@@ -30,6 +42,10 @@ pub struct WorkingTalk {
     pub topic: Option<String>,
     pub schema: Option<String>,
     pub turns: Vec<TalkTurn>,
+    /// First pulse of this thread.
+    pub opened_at: Option<u64>,
+    /// Last hear or reply. Gap vs now decides activity.
+    pub last_active_at: Option<u64>,
 }
 
 impl WorkingTalk {
@@ -41,6 +57,46 @@ impl WorkingTalk {
         *self = Self::default();
     }
 
+    pub fn refresh(&mut self) {
+        self.refresh_at(now_secs());
+    }
+
+    pub fn refresh_at(&mut self, now: u64) {
+        if self.is_empty() {
+            return;
+        }
+        if !self.active_at(now) {
+            self.clear();
+        }
+    }
+
+    pub fn active(&self) -> bool {
+        self.active_at(now_secs())
+    }
+
+    /// Live iff last answer/reply (or hear) is within 10 min
+    /// and the thread is younger than 2 h.
+    pub fn active_at(&self, now: u64) -> bool {
+        if self.is_empty() {
+            return false;
+        }
+        let last = match self.last_active_at.or(self.opened_at) {
+            Some(t) => t,
+            None => return false,
+        };
+        let open = self.opened_at.unwrap_or(last);
+        now.saturating_sub(last) <= ACTIVE_GAP_SECS
+            && now.saturating_sub(open) <= MAX_SESSION_SECS
+    }
+
+    fn pulse_at(&mut self, now: u64) {
+        self.refresh_at(now);
+        if self.opened_at.is_none() {
+            self.opened_at = Some(now);
+        }
+        self.last_active_at = Some(now);
+    }
+
     /// Cue mixed into recall so "et alors ?" can still find the thread.
     pub fn recall_query(&self, user: &str) -> String {
         match self.topic.as_deref() {
@@ -50,6 +106,19 @@ impl WorkingTalk {
     }
 
     pub fn hear(&mut self, user: &str, schema: Option<&str>) {
+        self.hear_at(now_secs(), user, schema);
+    }
+
+    pub fn hear_at(&mut self, now: u64, user: &str, schema: Option<&str>) {
+        // Expire a dead thread first. A hear opens the session;
+        // only a reply (record) counts as activity for the 10 min window.
+        self.refresh_at(now);
+        if self.opened_at.is_none() {
+            self.opened_at = Some(now);
+        }
+        if self.last_active_at.is_none() {
+            self.last_active_at = Some(now);
+        }
         if let Some(s) = schema.map(str::trim).filter(|s| !s.is_empty() && *s != "-") {
             self.schema = Some(s.to_string());
             if self.topic.is_none() {
@@ -71,6 +140,11 @@ impl WorkingTalk {
     }
 
     pub fn record(&mut self, user: &str, reply: &str) {
+        self.record_at(now_secs(), user, reply);
+    }
+
+    pub fn record_at(&mut self, now: u64, user: &str, reply: &str) {
+        self.pulse_at(now);
         self.turns.push(TalkTurn {
             user: clip(user, MAX_LINE),
             reply: clip(reply, MAX_LINE),

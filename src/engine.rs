@@ -21,7 +21,7 @@ pub struct SelectiveMemory {
     pub profile: EntityProfile,
     pub store: MemoryStore,
     pub mood: Mood,
-    /// Live thread. Not a trace. Not persisted.
+    /// Live thread. Not a trace. Not persisted. Sleep commits then clears it.
     pub talk: WorkingTalk,
     pub path: Option<PathBuf>,
     narrator: Box<dyn Narrator>,
@@ -96,7 +96,12 @@ impl SelectiveMemory {
         self.live_with(EncodeInput::new(event))
     }
 
-    pub fn live_with(&mut self, mut input: EncodeInput<'_>) -> EncodeDecision {
+    pub fn live_with(&mut self, input: EncodeInput<'_>) -> EncodeDecision {
+        self.ingest(input, true)
+    }
+
+    /// Same gate as `live_with`. `hold` writes the live thread; sleep commit does not.
+    fn ingest(&mut self, mut input: EncodeInput<'_>, hold: bool) -> EncodeDecision {
         let uninterpreted =
             input.schema.is_none() && input.valence.abs() < 0.08 && input.disgust < 0.08;
         if uninterpreted {
@@ -122,12 +127,24 @@ impl SelectiveMemory {
             }
         }
         encode::identity::paint(&mut self.store, &self.mood, &mut input);
-        self.talk.hear(input.event, input.schema.as_deref());
+        if hold {
+            self.talk.hear(input.event, input.schema.as_deref());
+        }
         let valence = input.valence;
         let arousal = input.arousal;
         let disgust = input.disgust;
+        let event_owned = input.event.to_string();
         let decision = encode::encode(&mut self.store, &self.profile, input, self.embedder.as_ref());
         if decision.kept {
+            if let Some(tid) = decision.trace_id.as_deref() {
+                if let Some(raw) = self.narrator.extract_core(&event_owned) {
+                    if let Some(ok) = encode::accept_core(&raw, &event_owned) {
+                        if let Some(t) = self.store.traces.get_mut(tid) {
+                            t.core = ok;
+                        }
+                    }
+                }
+            }
             self.mood.blend(
                 &Mood {
                     valence,
@@ -138,6 +155,41 @@ impl SelectiveMemory {
             );
         }
         decision
+    }
+
+    /// The sitting becomes hours, then the frame dies.
+    ///
+    /// Sleep right after a chat must not wipe the conversation: each recorded
+    /// turn is one live event (affect → paint → gate). Topic-only is still
+    /// not an episode — experiments live then sleep and must not grow extra traces.
+    fn commit_talk(&mut self) {
+        self.talk.refresh();
+        let schema = self.talk.schema.clone();
+        let turns = std::mem::take(&mut self.talk.turns);
+        self.talk.clear();
+        for t in turns {
+            let event = if t.reply.trim().is_empty() {
+                t.user.clone()
+            } else if t.user.trim().is_empty() {
+                t.reply.clone()
+            } else {
+                format!("{}\n{}", t.user.trim(), t.reply.trim())
+            };
+            if event.trim().is_empty() {
+                continue;
+            }
+            let (v, a, d, guessed) = encode::affect::guess(&event);
+            let mut ev = EncodeInput::new(&event);
+            ev.source = "talk";
+            ev.valence = v;
+            ev.arousal = a.max(0.28);
+            ev.disgust = d;
+            ev.self_relevance = 0.78;
+            ev.utility = 0.55;
+            ev.permanence = 0.40;
+            ev.schema = schema.clone().or(guessed);
+            let _ = self.ingest(ev, false);
+        }
     }
 
     pub fn remember(&mut self, query: &str) -> Vec<RecalledMemory> {
@@ -174,6 +226,7 @@ impl SelectiveMemory {
     }
 
     pub fn sleep(&mut self) -> DreamReport {
+        self.commit_talk();
         crate::persist::prune_orphaned_archives(&mut self.store);
         dream::dream(
             &mut self.store,
@@ -224,6 +277,11 @@ impl SelectiveMemory {
 
     pub fn clear_talk(&mut self) {
         self.talk.clear();
+    }
+
+    /// Drop the frame if the conversation went idle (10 min) or hit 2 h.
+    pub fn refresh_talk(&mut self) {
+        self.talk.refresh();
     }
 
     fn speak_inner(&mut self, user: &str, hold: bool) -> String {

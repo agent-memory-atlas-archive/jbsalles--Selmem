@@ -30,9 +30,9 @@ experience → interpret → identity paint → gate
         ↓                         ↑
    lived book + sealed archive    |
         ↓                         |
- remember / speak (meaning can move; talk frame keeps the live thread)
+ remember / speak (meaning can move; talk frame keeps the live sitting)
         ↓
-      sleep
+      sleep (talk goes through the gate, then the frame dies)
  weather · rewrite · merge · extinguish
  motif → belief → trait → who_am_i
         ↓
@@ -154,7 +154,7 @@ Scripts in `data/*.json` are the frozen stimuli. Edit those if you change a prot
 Published report (method + tables): [experiments/REPORT.md](experiments/REPORT.md).
 Conclusions only: [WHITEPAPER.md](WHITEPAPER.md) § Conclusions from the benches.
 
-### Benchmark v0.1 
+### Benchmark v0.1 (H2)
 
 Does `D_fp` stay above pre-T₀ after 8 identical later hours?
 
@@ -328,7 +328,7 @@ One thread per connection. `/health` and `/` do not take the memory lock. `/turn
 | GET | `/profile` | knobs (`τ`, embellish, ground, …) |
 | POST | `/profile` | set knobs |
 | GET | `/audit?id=` | sealed verbatim (human debug, never the model) |
-| GET | `/talk` | live thread (topic + last turns) |
+| GET | `/talk` | live thread (topic + turns of the active conversation) |
 | POST | `/live` | encode |
 | POST | `/remember` | reconstruct |
 | POST | `/speak` | embodied reply (holds the thread) |

@@ -101,6 +101,24 @@ impl Narrator for HttpNarrator {
         }
     }
 
+    fn extract_core(&self, event: &str) -> Option<String> {
+        let system = &crate::lexicon::prompts().extract_core;
+        if system.is_empty() {
+            return None;
+        }
+        match self.chat(system, event) {
+            Ok(s) => {
+                let s = s.trim().to_string();
+                if s.is_empty() {
+                    None
+                } else {
+                    Some(s)
+                }
+            }
+            Err(_) => None,
+        }
+    }
+
     fn interpret(
         &self,
         event: &str,

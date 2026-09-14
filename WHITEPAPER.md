@@ -62,7 +62,7 @@ experience
      remember / speak
      reconstruct → reconsolidate
      (living traces: misses vs core, then blend)
-     talk frame holds the current thread (not a trace, not persisted)
+     talk frame holds the current thread (active ≤ 10 min gap, ≤ 2 h; sleep commits it through the gate, then drops it)
               ↓
            sleep
      decay · rewrite · merge · extinguish · latent
@@ -184,7 +184,7 @@ What is still open: a scored creative grid, a few blind human judges on the post
 
 Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; on v0.1 × 10 Grok pairs the book gap holds and, after last-k=8 evicts T₀, only C2 A still names it. Full tables: [experiments/REPORT.md](experiments/REPORT.md).
 
-Missing: scored creative grid, human ratings, more than one seed, learned layers (still rules), fitted constants. Core is lexical compression. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint.
+Missing: scored creative grid, human ratings, more than one seed, learned layers (still rules), fitted constants. Core is a 12-word compress unless an HTTP narrator proposes one after the gate and a lexical filter accepts it. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint.
 
 Two processes on one `.db` will collide. Anchors are decay brakes, not an ethics layer.
 

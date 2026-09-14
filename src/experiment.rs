@@ -450,3 +450,4 @@ pub fn run_erasure(llm: Option<&LlmSpec>) -> ErasureReport {
         n_traces: mem.store.traces.len(),
     }
 }
+

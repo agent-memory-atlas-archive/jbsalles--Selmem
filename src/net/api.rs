@@ -248,6 +248,7 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             ))
         }
         ("GET", "/talk") => {
+            mem.refresh_talk();
             let turns: Vec<String> = mem
                 .talk
                 .turns

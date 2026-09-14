@@ -18,6 +18,11 @@ pub trait Narrator: Send + Sync {
         let _ = (event, mood, axioms);
         None
     }
+    /// After the gate only. Propose a fact-core. Default: none (caller keeps fact_core).
+    fn extract_core(&self, event: &str) -> Option<String> {
+        let _ = event;
+        None
+    }
     /// Réécriture de consolidation : garder la charge, accentuer, jeter le superflu.
     fn rewrite(
         &self,

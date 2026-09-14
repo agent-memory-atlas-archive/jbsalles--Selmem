@@ -70,6 +70,7 @@ fn main() {
                 );
             }
             "/talk" => {
+                mem.refresh_talk();
                 match mem.talk.topic.as_deref() {
                     Some(t) => println!("fil: {t}"),
                     None => println!("(pas de fil)"),

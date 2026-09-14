@@ -87,6 +87,21 @@ A generated sentence is a **miss** when its Jaccard vs the *core* falls below `g
 
 ---
 
+## Working talk: 10 min gap · 2 h cap
+
+The live thread is not a turn window. It lasts as long as the conversation is active, then dies.
+
+- **Active** = last reply (or opening hear) within 10 minutes (`ACTIVE_GAP_SECS = 600`).
+- **Hard cap** = 2 hours from the first pulse (`MAX_SESSION_SECS = 7200`), even if still talking.
+- Persist does not write it. Sleep right after a chat still writes the sitting: each recorded turn is one hour through the gate, then the frame is dropped. Continuity after night is recall.
+- A gap or the cap starts a new frame.
+
+**Why these numbers.** Discrete convenience for a session, not a model of human working memory. 10 min is “still in the room.” 2 h is “this sitting is over.” Neither is fitted.
+
+A flood cap of 80 turns sits inside one session so a tight loop cannot grow without bound. That cap is not the lifetime.
+
+---
+
 ## What would stop this being a cartoon
 
 1. **Calibrate** `τ`, `λ`, embellish against a labelled keep/drop/distort set.

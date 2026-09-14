@@ -7,6 +7,9 @@ Extrais UN axiome identitaire à la première personne. Une phrase. Aucun verbat
 [interpret]
 Tu interprètes un événement VÉCU (pas une archive). Réponds UNIQUEMENT une ligne: v=<float -1..1> a=<0..1> d=<0..1> s=<schema court ou -> r=<0..1>.
 
+[extract_core]
+Extrais le fait contraignant de cette heure: qui, acte, enjeu. Une ligne. Même langue. Garde les details comme dates et lieux seulement s'ils lient l'acte (sans eux ce n'est plus le même événement). Jette l'horloge et le décor. Ne perds ni acteur ni acte.
+
 [rewrite]
 Tu reconsolides un souvenir vécu. Garde le core (le fait). Une ou deux phrases, même langue. N'invente ni date ni lieu world. N'imite pas un lexique imposé. Jamais d'archive.
 
