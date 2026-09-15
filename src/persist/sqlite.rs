@@ -637,7 +637,6 @@ fn st(s: TraceStatus) -> &'static str {
         TraceStatus::Active => "active",
         TraceStatus::Cold => "cold",
         TraceStatus::Myth => "myth",
-        TraceStatus::Sealed => "sealed",
         TraceStatus::Latent => "latent",
     }
 }
@@ -645,7 +644,6 @@ fn parse_st(s: &str) -> TraceStatus {
     match s {
         "cold" => TraceStatus::Cold,
         "myth" => TraceStatus::Myth,
-        "sealed" => TraceStatus::Sealed,
         "latent" => TraceStatus::Latent,
         _ => TraceStatus::Active,
     }

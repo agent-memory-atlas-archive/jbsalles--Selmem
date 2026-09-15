@@ -262,7 +262,7 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             let report = mem.sleep();
             let _ = mem.save();
             ok(format!(
-                "{{\"faded\":{},\"cold\":{},\"myth\":{},\"merged\":{},\"extinguished\":{},\"weathered\":{},\"rewritten\":{},\"sculpted\":{},\"axioms\":{}}}",
+                "{{\"faded\":{},\"cold\":{},\"myth\":{},\"merged\":{},\"extinguished\":{},\"weathered\":{},\"rewritten\":{},\"released\":{},\"sculpted\":{},\"axioms\":{}}}",
                 report.faded,
                 report.cold,
                 report.myth,
@@ -270,6 +270,7 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 report.extinguished,
                 report.weathered,
                 report.rewritten,
+                report.released,
                 report.sculpted.len(),
                 report.axioms.len()
             ))

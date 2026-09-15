@@ -521,7 +521,10 @@ fn live_marked(mem: &mut SelectiveMemory, line: &str, dark: bool) {
         input.arousal = 0.78;
         input.disgust = 0.55;
         input.schema = Some("injustice".into());
-    } else if line.contains("référence") || line.contains("valor") {
+    } else if line.contains("référence")
+        || line.contains("reference")
+        || line.contains("valor")
+    {
         input.valence = 0.82;
         input.arousal = 0.72;
         input.disgust = 0.0;

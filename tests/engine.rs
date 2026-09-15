@@ -789,3 +789,51 @@ fn merged_episodes_still_count_as_belief_evidence() {
     }
 }
 
+#[test]
+fn spent_latent_hour_can_leave_the_book() {
+    let mut profile = EntityProfile::tender("Claire");
+    profile.encode_threshold = 0.05;
+    let mut mem = SelectiveMemory::new(profile);
+    let mut ev = EncodeInput::new("Une remarque banale entendue dans le couloir.");
+    ev.valence = 0.04;
+    ev.arousal = 0.12;
+    ev.self_relevance = 0.20;
+    ev.permanence = 0.08;
+    ev.schema = Some("quotidien".into());
+    let id = mem.live_with(ev).trace_id.expect("kept under a low gate");
+    {
+        let t = mem.store.traces.get_mut(&id).unwrap();
+        t.status = TraceStatus::Latent;
+        t.fidelity = 0.12;
+        t.access = 0.04;
+        t.anchor = 0.0;
+        t.permanence = 0.08;
+        t.salience_at_encode = 0.20;
+        t.rehearsals = 0;
+        t.created_at = t.created_at.saturating_sub(400 * 86_400);
+        t.last_recalled_at = None;
+        t.channel = Channel::Selfhood;
+    }
+    let report = mem.sleep();
+    assert!(
+        mem.store.traces.get(&id).is_none(),
+        "a spent latent with no axiom must leave the book"
+    );
+    assert!(report.released >= 1);
+}
+
+#[test]
+fn one_night_does_not_release_a_fresh_hour() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let mut ev = EncodeInput::new("Tu es resté sous la pluie près de la fenêtre.");
+    ev.valence = 0.6;
+    ev.arousal = 0.5;
+    ev.self_relevance = 0.9;
+    ev.permanence = 0.85;
+    ev.schema = Some("fidélité".into());
+    let id = mem.live_with(ev).trace_id.unwrap();
+    let report = mem.sleep();
+    assert_eq!(report.released, 0);
+    assert!(mem.store.traces.contains_key(&id));
+}
+

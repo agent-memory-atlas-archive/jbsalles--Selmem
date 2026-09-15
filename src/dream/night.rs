@@ -23,6 +23,7 @@ pub struct DreamReport {
     pub extinguished: u32,
     pub weathered: u32,
     pub rewritten: u32,
+    pub released: u32,
     pub sculpted: Vec<DriftEvent>,
     pub axioms: Vec<IdentityAxiom>,
 }
@@ -39,6 +40,12 @@ pub fn dream(
     let mut sculpted = Vec::new();
     let mut extinguished = 0;
     let mut weathered = 0;
+    let previously_latent: std::collections::HashSet<String> = store
+        .traces
+        .values()
+        .filter(|t| t.status == TraceStatus::Latent)
+        .map(|t| t.id.clone())
+        .collect();
     let ids = store.active_ids();
     singularite::apply_anchors(store);
 
@@ -47,9 +54,7 @@ pub fn dream(
             let trace = store.traces.get_mut(id).unwrap();
             if trace.channel == Channel::World {
                 // Operational facts do not cool, mythologize, or go latent.
-                if trace.status != TraceStatus::Sealed {
-                    trace.status = TraceStatus::Active;
-                }
+                trace.status = TraceStatus::Active;
                 trace.access = 1.0;
                 continue;
             }
@@ -86,7 +91,6 @@ pub fn dream(
             continue;
         }
         if trace.channel != Channel::World
-            && trace.status != TraceStatus::Sealed
             && trace.fidelity < 0.34
             && trace.access < 0.26
             && (trace.valence.abs() > 0.25 || trace.disgust > 0.22 || trace.schema.is_some())
@@ -110,6 +114,7 @@ pub fn dream(
     let merged = merge_close(store, profile);
     let mut axioms = extract_axioms(store, narrator);
     axioms.extend(promote_traits(store, narrator));
+    let released = release_spent(store, &previously_latent);
     singularite::apply_anchors(store);
     DreamReport {
         faded,
@@ -119,6 +124,7 @@ pub fn dream(
         extinguished,
         weathered,
         rewritten,
+        released,
         sculpted,
         axioms,
     }
@@ -248,6 +254,38 @@ fn maybe_revive_latent(trace: &mut crate::core::model::MemoryTrace) {
     trace.detach_strikes = 0;
 }
 
+/// Scene already gone, charge unused, no living axiom leans on it → leave the book.
+/// Not a cap. Benches never reach this state.
+fn release_spent(
+    store: &mut MemoryStore,
+    previously_latent: &std::collections::HashSet<String>,
+) -> u32 {
+    let supported: std::collections::HashSet<String> = store
+        .living_axioms()
+        .into_iter()
+        .flat_map(|a| a.support_trace_ids.iter().cloned())
+        .collect();
+    let drop: Vec<String> = store
+        .traces
+        .values()
+        .filter(|t| {
+            previously_latent.contains(&t.id)
+                && t.channel != Channel::World
+                && t.status == TraceStatus::Latent
+                && t.access < 0.10
+                && t.anchor < 0.50
+                && t.permanence < 0.80
+                && !supported.contains(&t.id)
+        })
+        .map(|t| t.id.clone())
+        .collect();
+    let n = drop.len() as u32;
+    for id in drop {
+        store.release_trace(&id);
+    }
+    n
+}
+
 fn merge_weight(trace: &crate::core::model::MemoryTrace) -> (i32, i32, i32, String) {
     // Higher numeric key wins. Text is a content tie-break so two clones
     // that lived the same hours keep the same survivor, not the smaller id.
@@ -256,7 +294,6 @@ fn merge_weight(trace: &crate::core::model::MemoryTrace) -> (i32, i32, i32, Stri
         TraceStatus::Cold => -1,
         TraceStatus::Latent => -3,
         TraceStatus::Myth => -8,
-        TraceStatus::Sealed => -20,
     };
     let text = if trace.core.is_empty() {
         trace.gist.clone()
@@ -313,7 +350,7 @@ fn fuse_gist(a: &str, b: &str) -> String {
 fn merge_close(store: &mut MemoryStore, profile: &EntityProfile) -> u32 {
     let mut groups: HashMap<String, Vec<String>> = HashMap::new();
     for t in store.traces.values() {
-        if t.channel != Channel::Selfhood || t.status == TraceStatus::Sealed {
+        if t.channel != Channel::Selfhood {
             continue;
         }
         if let Some(s) = &t.schema {
@@ -407,7 +444,7 @@ fn extract_axioms(store: &mut MemoryStore, narrator: &dyn Narrator) -> Vec<Ident
             TraceStatus::Myth => {
                 evidence.entry(s.clone()).or_default().push(t.id.clone());
             }
-            // Latent / sealed must not mint a belief.
+            // Latent must not mint a belief.
             _ => {}
         }
     }

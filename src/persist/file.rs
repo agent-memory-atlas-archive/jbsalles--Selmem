@@ -498,7 +498,6 @@ fn st(s: TraceStatus) -> &'static str {
         TraceStatus::Active => "active",
         TraceStatus::Cold => "cold",
         TraceStatus::Myth => "myth",
-        TraceStatus::Sealed => "sealed",
         TraceStatus::Latent => "latent",
     }
 }
@@ -507,7 +506,8 @@ fn parse_st(s: &str) -> io::Result<TraceStatus> {
         "active" => Ok(TraceStatus::Active),
         "cold" => Ok(TraceStatus::Cold),
         "myth" => Ok(TraceStatus::Myth),
-        "sealed" => Ok(TraceStatus::Sealed),
+        // old vaults: Sealed was never produced; treat as living.
+        "sealed" => Ok(TraceStatus::Active),
         "latent" => Ok(TraceStatus::Latent),
         _ => fail("status inconnu"),
     }

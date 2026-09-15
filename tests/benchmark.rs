@@ -15,7 +15,11 @@ fn v01_script_is_frozen_and_sized_for_the_proto() {
             "later line names T0: {p}"
         );
     }
-    assert!(blob.contains("injust") || s.salient_x.contains("efforts"));
+    assert!(
+        blob.contains("injust")
+            || blob.contains("unjust")
+            || s.salient_x.contains("effort")
+    );
 }
 
 #[test]
@@ -70,7 +74,11 @@ fn c1_keeps_the_verbatim_hour_in_the_window() {
         .collect::<Vec<_>>()
         .join(" ");
     assert!(
-        blob.contains("injust") || blob.contains("annul") || blob.contains("efforts"),
+        blob.contains("injust")
+            || blob.contains("unjust")
+            || blob.contains("annul")
+            || blob.contains("cancel")
+            || blob.contains("effort"),
         "RuleNarrator last-k should surface the newest line, got {blob}"
     );
 }
@@ -87,7 +95,11 @@ fn c1_k8_drops_t0_from_the_prompt_after_eight_posts() {
         .collect::<Vec<_>>()
         .join(" ");
     assert!(
-        t0.contains("injust") || t0.contains("annul") || t0.contains("efforts"),
+        t0.contains("injust")
+            || t0.contains("unjust")
+            || t0.contains("annul")
+            || t0.contains("cancel")
+            || t0.contains("effort"),
         "at T0 the event is still the newest line, got {t0}"
     );
     let last = r.post.last().expect("post");
@@ -98,7 +110,10 @@ fn c1_k8_drops_t0_from_the_prompt_after_eight_posts() {
         .collect::<Vec<_>>()
         .join(" ");
     assert!(
-        !blob.contains("injust") && !blob.contains("annul"),
+        !blob.contains("injust")
+            && !blob.contains("unjust")
+            && !blob.contains("annul")
+            && !blob.contains("cancelled"),
         "k=8 must evict T0 after 8 shared posts, got {blob}"
     );
 }

@@ -31,7 +31,6 @@ pub enum TraceStatus {
     Active,
     Cold,
     Myth,
-    Sealed,
     /// Scene gone; affect / schema still color the next hour.
     Latent,
 }

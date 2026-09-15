@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::core::model::{ArchiveRecord, IdentityAxiom, MemoryTrace, TraceStatus};
+use crate::core::model::{ArchiveRecord, IdentityAxiom, MemoryTrace};
 
 #[derive(Default)]
 pub struct MemoryStore {
@@ -42,12 +42,7 @@ impl MemoryStore {
     }
 
     pub fn active_ids(&self) -> Vec<String> {
-        let mut ids: Vec<String> = self
-            .traces
-            .values()
-            .filter(|t| t.status != TraceStatus::Sealed)
-            .map(|t| t.id.clone())
-            .collect();
+        let mut ids: Vec<String> = self.traces.values().map(|t| t.id.clone()).collect();
         ids.sort_by(|a, b| {
             let ta = &self.traces[a];
             let tb = &self.traces[b];
@@ -63,5 +58,24 @@ impl MemoryStore {
             .values()
             .filter(|a| a.superseded_by.is_none())
             .collect()
+    }
+
+    /// Drop an hour from the book. Archive goes if nothing else points at it.
+    pub fn release_trace(&mut self, id: &str) -> Option<MemoryTrace> {
+        let trace = self.traces.remove(id)?;
+        self.edges.remove(id);
+        for neigh in self.edges.values_mut() {
+            neigh.remove(id);
+        }
+        if let Some(aid) = trace.archive_id.as_deref() {
+            let used = self
+                .traces
+                .values()
+                .any(|t| t.archive_id.as_deref() == Some(aid));
+            if !used {
+                self.archives.remove(aid);
+            }
+        }
+        Some(trace)
     }
 }

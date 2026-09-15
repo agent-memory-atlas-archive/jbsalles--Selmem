@@ -104,6 +104,21 @@ A flood cap of 80 turns sits inside one session so a tight loop cannot grow with
 
 ---
 
+## Release of a spent hour
+
+The book is not a cap. An hour may *leave* when it already does no work:
+
+- status `Latent` (scene gone)
+- `access < 0.10` and `anchor < 0.50` and `permanence < 0.80`
+- no living axiom lists it as support
+- not `Channel::World`
+
+Then the trace is removed and its archive if orphaned. Not the night it first becomes latent — the charge gets one more sitting. `extinguish` still only decays disgust. After axiom mint, so a new belief protects its evidence for that night.
+
+**Why these cuts.** Discrete convenience so v0.1 nights do not delete T₀. Not a model of human forgetting rates.
+
+---
+
 ## What would stop this being a cartoon
 
 1. **Calibrate** `τ`, `λ`, embellish against a labelled keep/drop/distort set.
