@@ -305,12 +305,12 @@ The composer (field, spinner, **send**) stays pinned to the bottom.
 | **token** | Bearer for this tab (`localStorage`). Empty if the daemon has no token. |
 | **tender / austere / neutral** | Sleep-time voice. Sets embellish vs disgust and the retell table. Does not wipe the book. |
 | **who are you** | Living axioms (`GET /who`). Empty until sleep minted a belief. |
-| **pin** | Force the current thread into the book (`POST /pin`): last human line, or the topic. Raises self-relevance / permanence so a salon subject (a name, Villepin) can pass the gate. Still a gist, not the verbatim log. One click ≠ an axiom. |
+| **pin** | Test comfort only (`POST /pin`). Forces the current line into the book. **Avoid it.** The organ should keep or drop on its own (gate + salience-weighted night). Pin is so someone can try the UI without waiting for a charged hour — not how a deployed instance should live. |
 | **sleep** | One night (`POST /sleep`): sculpt, merge, extinguish, maybe mint axioms. Then the salon thread is dropped. Click once. |
 | **Speak to it… / send** | One turn (`POST /turn`): encode attempt + reply. Spinner while the model runs. `kept` = wrote a trace; `left` = stayed in the thread only. |
 | `kept` / `left` + S | Gate score. `left` is not amnesia until you sleep. |
 
-Do not sleep to “refresh.” Sleep ends the sitting. Pin first if tomorrow should still know the subject.
+Do not sleep to “refresh.” Sleep ends the sitting. Prefer a charged hour over **pin**. Pin is a debug override.
 
 ### Why the chat can feel weird
 

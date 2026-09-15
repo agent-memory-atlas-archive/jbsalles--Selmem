@@ -69,7 +69,10 @@ pub fn encode_score(
 pub fn refresh_access(trace: &mut MemoryTrace, profile: &EntityProfile) -> f32 {
     let origin = trace.last_recalled_at.unwrap_or(trace.created_at);
     let age_days = (now_secs().saturating_sub(origin) as f32) / 86_400.0;
+    // Low salience at the gate → faster access decay. High salience holds.
+    let forget = 0.45 + 1.55 * (1.0 - trace.salience_at_encode.clamp(0.0, 1.0));
     let lam = profile.decay_lambda
+        * forget
         * (1.0 - 0.7 * trace.arousal)
         * (1.0 - trace.permanence)
         * (1.0 - 0.85 * trace.anchor);

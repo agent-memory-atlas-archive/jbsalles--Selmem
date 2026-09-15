@@ -21,11 +21,13 @@ We have not learned these parameters. We have not run a calibration against huma
 
 ## Encoding gate
 
-`τ_tender = 0.40` · `τ_austere = 0.55` · default `0.45`
+`τ_tender = 0.28` · `τ_austere = 0.40` · default `0.32`
+
+The gate is lower than v0.5 so more hours enter. Compensation is not a second human vote: access decay and Ebbinghaus stability scale with `salience_at_encode`. A weak keep (`S` just above τ) cools and weathers faster than a charged one.
 
 **Why a gate at all.** Encoding is selective. Arousal, self-relevance and novelty raise the chance that an episode is stored (Cahill & McGaugh; flashbulb work is contested in detail, not in the coarse claim). A linear score `S` with a cut is a cartoon of that gate.
 
-**Why 0.40.** No paper gives a threshold on *our* `S`. `S` is an invented 0–1 mix. `0.40` vs `0.55` is a **contrast pair**: one profile keeps more of the dull-but-warm, the other drops it. Swap the two numbers and the clone test still works if the gap remains.
+**Why 0.28.** No paper gives a threshold on *our* `S`. `S` is an invented 0–1 mix. `0.28` vs `0.40` is a **contrast pair**: one profile keeps more of the dull-but-warm, the other drops it. The pair used to be 0.40 / 0.55 when the only lever was the cut. Swap the two numbers and the clone test still works if the gap remains.
 
 **What would justify a number.** Fit `τ` so that a labelled corpus (“keep / drop”) matches human or experimenter tags. Or let `τ` be a percentile of recent `S`, not a constant.
 

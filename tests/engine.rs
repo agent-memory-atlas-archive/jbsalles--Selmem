@@ -236,6 +236,42 @@ fn ebbinghaus_drops_detail_keeps_core() {
 }
 
 #[test]
+fn weak_keeps_cool_faster_than_charged_ones() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let mut dull = EncodeInput::new("The copier jammed again.");
+    dull.self_relevance = 0.55;
+    dull.arousal = 0.2;
+    dull.permanence = 0.0;
+    let weak_id = mem.live_with(dull).trace_id.expect("lower τ still keeps a weak hour");
+    let mut hot = EncodeInput::new("You stayed in the rain. I will not forget you.");
+    hot.valence = 0.7;
+    hot.arousal = 0.6;
+    hot.self_relevance = 0.95;
+    hot.permanence = 0.4;
+    let strong_id = mem.live_with(hot).trace_id.expect("charged hour kept");
+    {
+        let t = mem.store.traces.get_mut(&weak_id).unwrap();
+        t.salience_at_encode = 0.22;
+        t.anchor = 0.0;
+        t.created_at = t.created_at.saturating_sub(20 * 86_400);
+    }
+    {
+        let t = mem.store.traces.get_mut(&strong_id).unwrap();
+        t.salience_at_encode = 0.82;
+        t.created_at = t.created_at.saturating_sub(20 * 86_400);
+    }
+    mem.sleep();
+    let weak = &mem.store.traces[&weak_id];
+    let strong = &mem.store.traces[&strong_id];
+    assert!(
+        weak.access < strong.access,
+        "low salience must cool faster: weak={} strong={}",
+        weak.access,
+        strong.access
+    );
+}
+
+#[test]
 fn trauma_is_anchored_and_resists_weather() {
     let mut mem = SelectiveMemory::new(EntityProfile::austere("Silas"));
     let mut ev = EncodeInput::new("You laughed at what I had told you in confidence.");

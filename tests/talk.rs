@@ -122,7 +122,7 @@ fn render_exposes_fil_not_archive() {
     talk.record("on en parlait", "I remember it");
     let r = talk.render();
     assert!(r.contains("fil:"));
-    assert!(r.contains("conversation en cours"));
+    assert!(r.contains("current conversation"));
     assert!(r.contains("on en parlait"));
     assert!(!r.contains("archive"));
 }

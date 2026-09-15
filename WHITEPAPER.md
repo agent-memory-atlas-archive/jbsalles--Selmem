@@ -36,7 +36,7 @@ If you paste the original sentence back “for accuracy”, you have a store aga
 
 ## Rules
 
-1. **Drop by default.** A salience score must clear `τ`. Dull events leave no trace and no archive.
+1. **Drop by default, forget by salience.** A score must still clear `τ` (now lower: 0.28 / 0.40). Weak keeps cool and weather faster than charged ones.
 2. **Two records.** Lived: gist, core, affect, fidelity. Sealed: original text. Only the lived record is used at recall.
 3. **Two channels.** `self` is rewritten over time. `world` is not.
 4. **Reconstruct.** Recall uses schema, gist or core, mood, affect. Not the original string.
@@ -77,7 +77,7 @@ experience
 
 |  | tender | austere | status |
 | --- | --- | --- | --- |
-| τ | 0.40 | 0.55 | contrast pair |
+| τ | 0.28 | 0.40 | contrast pair |
 | decay λ | 0.10 | 0.06 | unfitted |
 | embellish | 0.18 | 0.05 | contrast pair |
 | disgust gain | 0.05 | 0.16 | contrast pair |

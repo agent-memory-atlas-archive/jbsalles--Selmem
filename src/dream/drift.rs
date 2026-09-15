@@ -45,7 +45,9 @@ pub fn apply_reconsolidation(
 /// Stabilité S en jours. Plus S est grand, plus le détail tient.
 pub fn stability_days(trace: &MemoryTrace, profile: &EntityProfile) -> f32 {
     let base = 1.0 / profile.decay_lambda.max(0.02);
-    base * (1.0 + 0.8 * trace.arousal)
+    let hold = 0.28 + 0.72 * trace.salience_at_encode.clamp(0.0, 1.0);
+    base * hold
+        * (1.0 + 0.8 * trace.arousal)
         * (1.0 + 2.2 * trace.permanence)
         * (1.0 + 5.0 * trace.anchor)
         * (1.0 + 0.35 * (1.0 + trace.rehearsals as f32).ln())

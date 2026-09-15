@@ -93,7 +93,7 @@ impl EntityProfile {
     pub fn new(name: impl Into<String>) -> Self {
         Self {
             name: name.into(),
-            encode_threshold: 0.45,
+            encode_threshold: 0.32,
             w_arousal: 0.25,
             w_novelty: 0.15,
             w_self: 0.25,
@@ -122,7 +122,7 @@ impl EntityProfile {
 
     pub fn tender(name: impl Into<String>) -> Self {
         Self {
-            encode_threshold: 0.40,
+            encode_threshold: 0.28,
             embellish_gain: 0.18,
             disgust_gain: 0.05,
             decay_lambda: 0.10,
@@ -134,7 +134,7 @@ impl EntityProfile {
 
     pub fn austere(name: impl Into<String>) -> Self {
         Self {
-            encode_threshold: 0.55,
+            encode_threshold: 0.40,
             narrator_firmness: 0.72,
             embellish_gain: 0.05,
             disgust_gain: 0.16,
