@@ -136,11 +136,13 @@ impl SelectiveMemory {
         let event_owned = input.event.to_string();
         let decision = encode::encode(&mut self.store, &self.profile, input, self.embedder.as_ref());
         if decision.kept {
-            if let Some(tid) = decision.trace_id.as_deref() {
-                if let Some(raw) = self.narrator.extract_core(&event_owned) {
-                    if let Some(ok) = encode::accept_core(&raw, &event_owned) {
-                        if let Some(t) = self.store.traces.get_mut(tid) {
-                            t.core = ok;
+            if decision.parts <= 1 {
+                if let Some(tid) = decision.trace_id.as_deref() {
+                    if let Some(raw) = self.narrator.extract_core(&event_owned) {
+                        if let Some(ok) = encode::accept_core(&raw, &event_owned) {
+                            if let Some(t) = self.store.traces.get_mut(tid) {
+                                t.core = ok;
+                            }
                         }
                     }
                 }

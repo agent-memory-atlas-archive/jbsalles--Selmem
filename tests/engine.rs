@@ -478,6 +478,10 @@ fn firm_narrator_grounds_sooner_than_a_soft_one() {
         .any(|d| d.kind == selmem::DriftKind::Ground);
     assert!(hg, "firm narrator should have pulled toward the core");
     assert!(!sg, "softer narrator should still be allowed the warped gist");
+    assert!(
+        soft.store.traces[&sid].gist.contains("442"),
+        "soft side must still hold the warped gist, not an empty book"
+    );
 }
 
 #[test]
@@ -502,9 +506,19 @@ fn grounding_never_exposes_the_archive() {
         t.gist = "Flight 442 vanished in the fog without leaving an address.".into();
         t.cues.push("rain".into());
     }
+    assert!(
+        mem.audit(&id).unwrap().contains(secret),
+        "the seal must hold the planted journal before we ask whether recall leaks it"
+    );
     let mut saw_ground = false;
+    let mut saw_recall = false;
     for _ in 0..6 {
         let rec = mem.remember("the rain");
+        assert!(
+            !rec.is_empty(),
+            "recall must return the living trace — an empty list would make the leak check vacuous"
+        );
+        saw_recall = true;
         for r in &rec {
             assert!(
                 !r.narrative.contains(secret),
@@ -522,10 +536,14 @@ fn grounding_never_exposes_the_archive() {
             break;
         }
     }
+    assert!(saw_recall);
     assert!(saw_ground, "firm living trace should ground");
     let t = &mem.store.traces[&id];
     assert!(!t.gist.contains(secret), "gist must not become the journal");
-    assert!(mem.audit(&id).unwrap().contains(secret));
+    assert!(
+        mem.audit(&id).unwrap().contains(secret),
+        "the journal must still be there after grounding — absence from speech is not absence from the store"
+    );
 }
 
 #[test]
@@ -545,10 +563,21 @@ fn latent_forgets_the_scene_keeps_the_reaction() {
         t.fidelity = 0.2;
         t.access = 0.1;
     }
+    assert!(
+        mem.audit(&id)
+            .unwrap()
+            .contains("laughed")
+            || mem.store.traces[&id].gist.contains("laughed"),
+        "the scene must still exist on the trace/seal or the 'forgotten scene' check is empty"
+    );
     let rec = mem.remember("cette humiliation in the rain");
+    assert!(
+        rec.is_empty() || rec.iter().all(|r| r.trace_id != id),
+        "a latent hour has no scene to tell; remember must not return that trace"
+    );
     for r in &rec {
         assert!(
-            !r.narrative.contains("ri") && !r.narrative.contains("dit"),
+            !r.narrative.contains("laughed") && !r.narrative.contains("told"),
             "latent recall must not replay the scene: {}",
             r.narrative
         );
@@ -556,23 +585,21 @@ fn latent_forgets_the_scene_keeps_the_reaction() {
     let mut next = EncodeInput::new("Encore une humiliation in the rain.");
     next.valence = 0.0;
     next.disgust = 0.0;
-    next.self_relevance = 0.4;
-    mem.live_with(next);
-    let painted = mem
-        .store
-        .traces
-        .values()
-        .filter(|t| t.id != id)
-        .max_by(|a, b| a.created_at.cmp(&b.created_at));
-    if let Some(t) = painted {
-        assert!(
-            t.valence < 0.0 || t.disgust > 0.05 || t.schema.as_deref() == Some("humiliation"),
-            "latent charge should color the new event v={} d={} schema={:?}",
-            t.valence,
-            t.disgust,
-            t.schema
-        );
-    }
+    next.self_relevance = 0.55;
+    next.permanence = 0.5;
+    next.arousal = 0.35;
+    let painted_id = mem
+        .live_with(next)
+        .trace_id
+        .expect("follow-up must clear the gate — otherwise the paint check is skipped");
+    let t = &mem.store.traces[&painted_id];
+    assert!(
+        t.valence < 0.0 || t.disgust > 0.05 || t.schema.as_deref() == Some("humiliation"),
+        "latent charge should color the new event v={} d={} schema={:?}",
+        t.valence,
+        t.disgust,
+        t.schema
+    );
 }
 
 #[test]
@@ -638,16 +665,18 @@ fn merge_keeps_the_stronger_core() {
     mem.sleep();
     let strong = &mem.store.traces[&strong_id];
     let weak = &mem.store.traces[&weak_id];
-    if weak.status == TraceStatus::Myth {
-        assert!(
-            strong.core.contains("stayed") || strong.core.contains("rain"),
-            "keeper core must remain the anchored episode, got {}",
-            strong.core
-        );
-        assert!(strong.anchor >= 0.9);
-    } else if strong.status == TraceStatus::Myth {
-        panic!("weak anecdote absorbed the anchored episode");
-    }
+    assert!(
+        strong.core.contains("stayed") || strong.core.contains("rain"),
+        "anchored episode core must survive the night, got {}",
+        strong.core
+    );
+    assert!(strong.anchor >= 0.9);
+    assert_ne!(
+        strong.status,
+        TraceStatus::Myth,
+        "weak anecdote must not absorb the anchored episode"
+    );
+    let _ = weak;
 }
 
 #[test]
@@ -670,6 +699,15 @@ fn latent_traces_do_not_mint_a_belief() {
         t.access = 0.1;
     }
     mem.sleep();
+    assert_eq!(
+        mem.store
+            .traces
+            .values()
+            .filter(|t| t.schema.as_deref() == Some("humiliation"))
+            .count(),
+        3,
+        "the three scenes must still be in the book — no-belief is meaningless on an empty store"
+    );
     assert!(
         !mem.store
             .living_axioms()
@@ -713,7 +751,15 @@ fn latent_can_return_as_a_cold_core_after_rehearsal() {
     mem.sleep();
     let t = &mem.store.traces[&id];
     assert_eq!(t.status, TraceStatus::Cold);
-    assert!(!t.gist.contains("red-umbrella"), "original scene must not return: {}", t.gist);
+    assert!(
+        mem.audit(&id).unwrap().contains("umbrella"),
+        "the sealed scene must still name the umbrella"
+    );
+    assert!(
+        !t.gist.contains("umbrella"),
+        "original scene detail must not return in the gist: {}",
+        t.gist
+    );
     assert!(
         t.gist.contains("humiliation") || t.gist.contains("rain"),
         "revived blur should be the core, got {}",
@@ -743,6 +789,10 @@ fn reconsolidation_does_not_engrave_an_unrelated_sentence() {
     let t = &mem.store.traces[&id];
     assert_eq!(t.gist, before, "poisoned reconstruct must not become the book");
     assert!(!t.core.contains("Marc"));
+    assert!(
+        mem.audit(&id).unwrap().contains("rain"),
+        "the seal must still hold the original hour"
+    );
 }
 
 #[test]
@@ -780,13 +830,16 @@ fn merged_episodes_still_count_as_belief_evidence() {
         !living.is_empty(),
         "merge must not wipe the identity ladder, myths={myths}"
     );
-    if myths >= 1 {
-        assert!(
-            living.iter().any(|a| a.layer == AxiomLayer::Belief || a.support_trace_ids.len() >= 2),
-            "merged siblings should still support a motif/belief: {:?}",
-            living.iter().map(|a| (&a.layer, a.support_trace_ids.len())).collect::<Vec<_>>()
-        );
-    }
+    assert!(
+        living
+            .iter()
+            .any(|a| a.layer == AxiomLayer::Belief || a.support_trace_ids.len() >= 2),
+        "three aligned hours must support a motif/belief whether or not a myth was minted: {:?}",
+        living
+            .iter()
+            .map(|a| (&a.layer, a.support_trace_ids.len()))
+            .collect::<Vec<_>>()
+    );
 }
 
 #[test]
@@ -835,5 +888,49 @@ fn one_night_does_not_release_a_fresh_hour() {
     let report = mem.sleep();
     assert_eq!(report.released, 0);
     assert!(mem.store.traces.contains_key(&id));
+}
+
+#[test]
+fn short_hour_stays_one_fact() {
+    let text = "You stayed in the rain.\nThe window was open.\nNobody spoke.";
+    assert_eq!(selmem::segment_facts(text).len(), 1);
+}
+
+#[test]
+fn long_paste_is_sliced_then_each_slice_is_compressed() {
+    let mut lines = Vec::new();
+    for i in 1..=24 {
+        lines.push(format!(
+            "Fact {i}: the team closed ticket {i} after the review on floor two."
+        ));
+    }
+    let blob = lines.join("\n");
+    let parts = selmem::segment_facts(&blob);
+    assert!(parts.len() >= 3, "got {} parts", parts.len());
+    assert!(parts.iter().all(|p| p.lines().count() <= 10));
+    assert!(parts.iter().all(|p| p.lines().count() >= 4 || parts.len() == 1));
+
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let mut ev = EncodeInput::new(&blob);
+    ev.valence = 0.4;
+    ev.arousal = 0.5;
+    ev.self_relevance = 0.8;
+    ev.permanence = 0.5;
+    ev.schema = Some("travail".into());
+    let d = mem.live_with(ev);
+    assert!(d.kept);
+    assert!(d.parts >= 3);
+    assert_eq!(d.kept_n, d.parts);
+    assert_eq!(mem.store.traces.len(), d.kept_n);
+
+    let gists: Vec<String> = mem.store.traces.values().map(|t| t.gist.clone()).collect();
+    assert!(
+        gists.iter().any(|g| g.contains("ticket 1")),
+        "first slice must keep its own head, not only the document head: {gists:?}"
+    );
+    assert!(
+        gists.iter().any(|g| g.contains("ticket 15") || g.contains("Fact 15")),
+        "a later slice must be compressed on its own lines: {gists:?}"
+    );
 }
 

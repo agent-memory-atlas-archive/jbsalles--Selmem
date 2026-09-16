@@ -173,12 +173,19 @@ fn check(
 
     if let Some(idx) = field_u32(expect, "not_verbatim_index") {
         let src = field_str(&scenes[idx as usize], "event").unwrap();
+        assert!(!rec.is_empty(), "{name}: empty recall");
         assert_ne!(rec, src, "{name}: reconstruction == log");
         assert!(
             lexical_similarity(&rec, &src) < 1.0,
             "{name}: reconstruction stuck to the log"
         );
-        assert!(!rec.is_empty(), "{name}: empty recall");
+        assert!(
+            mem.store
+                .archives
+                .values()
+                .any(|a| a.verbatim == src),
+            "{name}: the log must still sit in the seal or 'not verbatim' is an empty-store pass"
+        );
     }
     if let Some(needles) = field_str_array(expect, "recall_contains_any") {
         let world = if let Some(q) = field_str(expect, "world_ask") {

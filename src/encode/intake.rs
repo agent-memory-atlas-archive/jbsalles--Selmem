@@ -44,6 +44,9 @@ pub struct EncodeDecision {
     pub reason: String,
     pub trace_id: Option<String>,
     pub archive_id: String,
+    /// How many fact slices the gate saw. 1 = the event was small enough to keep whole.
+    pub parts: usize,
+    pub kept_n: usize,
 }
 
 pub fn encode(
@@ -52,18 +55,108 @@ pub fn encode(
     input: EncodeInput<'_>,
     embedder: &dyn Embedder,
 ) -> EncodeDecision {
-    let embedding = embedder.embed(input.event);
-    let existing: Vec<Vec<f32>> = store
+    let parts = segment_facts(input.event);
+    if parts.is_empty() {
+        return EncodeDecision {
+            kept: false,
+            score: 0.0,
+            reason: "empty".into(),
+            trace_id: None,
+            archive_id: String::new(),
+            parts: 0,
+            kept_n: 0,
+        };
+    }
+    if parts.len() == 1 {
+        return encode_one(store, profile, input, embedder, None);
+    }
+
+    // Novelty is against the book as it stood before this paste. Sibling
+    // slices of the same document must not knock each other under τ.
+    let prior_emb: Vec<Vec<f32>> = store
         .traces
         .values()
         .filter(|t| !t.embedding.is_empty())
         .map(|t| t.embedding.clone())
         .collect();
-    let nov = if existing.is_empty() {
-        let gists: Vec<String> = store.traces.values().map(|t| t.gist.clone()).collect();
-        novelty(input.event, &gists)
+    let prior_gists: Vec<String> = store.traces.values().map(|t| t.gist.clone()).collect();
+
+    let mut kept_ids = Vec::new();
+    let mut first_archive = String::new();
+    let mut best = 0.0_f32;
+    let mut last_reason = String::new();
+    for part in &parts {
+        let mut slice = EncodeInput::new(part);
+        slice.source = input.source;
+        slice.valence = input.valence;
+        slice.arousal = input.arousal;
+        slice.disgust = input.disgust;
+        slice.self_relevance = input.self_relevance;
+        slice.utility = input.utility;
+        slice.goal_align = input.goal_align;
+        slice.schema = input.schema.clone();
+        slice.channel = input.channel;
+        slice.permanence = input.permanence;
+        let d = encode_one(
+            store,
+            profile,
+            slice,
+            embedder,
+            Some((&prior_emb, &prior_gists)),
+        );
+        best = best.max(d.score);
+        last_reason = d.reason;
+        if d.kept {
+            if first_archive.is_empty() {
+                first_archive = d.archive_id;
+            }
+            if let Some(id) = d.trace_id {
+                kept_ids.push(id);
+            }
+        }
+    }
+    EncodeDecision {
+        kept: !kept_ids.is_empty(),
+        score: best,
+        reason: if kept_ids.is_empty() {
+            last_reason
+        } else {
+            format!("encoded {}/{} parts", kept_ids.len(), parts.len())
+        },
+        trace_id: kept_ids.first().cloned(),
+        archive_id: first_archive,
+        parts: parts.len(),
+        kept_n: kept_ids.len(),
+    }
+}
+
+fn encode_one(
+    store: &mut MemoryStore,
+    profile: &EntityProfile,
+    input: EncodeInput<'_>,
+    embedder: &dyn Embedder,
+    novelty_vs: Option<(&Vec<Vec<f32>>, &Vec<String>)>,
+) -> EncodeDecision {
+    let embedding = embedder.embed(input.event);
+    let nov = if let Some((existing, gists)) = novelty_vs {
+        if existing.is_empty() {
+            novelty(input.event, gists)
+        } else {
+            novelty_emb(&embedding, existing)
+        }
     } else {
-        novelty_emb(&embedding, &existing)
+        let existing: Vec<Vec<f32>> = store
+            .traces
+            .values()
+            .filter(|t| !t.embedding.is_empty())
+            .map(|t| t.embedding.clone())
+            .collect();
+        if existing.is_empty() {
+            let gists: Vec<String> = store.traces.values().map(|t| t.gist.clone()).collect();
+            novelty(input.event, &gists)
+        } else {
+            novelty_emb(&embedding, &existing)
+        }
     };
     let score = encode_score(
         profile,
@@ -90,6 +183,8 @@ pub fn encode(
             reason: format!("below threshold ({score:.2} < {threshold:.2})"),
             trace_id: None,
             archive_id: String::new(),
+            parts: 1,
+            kept_n: 0,
         };
     }
 
@@ -136,6 +231,8 @@ pub fn encode(
         reason: "encoded".into(),
         trace_id: Some(tid),
         archive_id,
+        parts: 1,
+        kept_n: 1,
     }
 }
 
@@ -191,6 +288,127 @@ pub fn accept_core(proposed: &str, event: &str) -> Option<String> {
         return None;
     }
     Some(p)
+}
+
+/// A short hour stays one fact. A long paste is packed into 5–10 line slices
+/// so compress(28) does not throw away everything after the first paragraph.
+pub fn segment_facts(event: &str) -> Vec<String> {
+    let text = event.trim();
+    if text.is_empty() {
+        return Vec::new();
+    }
+    let lines: Vec<&str> = text
+        .lines()
+        .map(str::trim)
+        .filter(|l| !l.is_empty())
+        .collect();
+    let words = text.split_whitespace().count();
+    if lines.len() <= 10 && words <= 80 {
+        return vec![text.to_string()];
+    }
+    if lines.len() <= 1 {
+        return pack_sentences(text, 40, 70);
+    }
+    pack_lines(&lines, 5, 10)
+}
+
+fn pack_lines(lines: &[&str], min: usize, max: usize) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut cur: Vec<&str> = Vec::new();
+    let target = ((min + max) / 2).max(1);
+    for line in lines {
+        cur.push(*line);
+        if cur.len() >= target {
+            out.push(cur.join("\n"));
+            cur.clear();
+        }
+    }
+    if !cur.is_empty() {
+        if let Some(last) = out.last_mut() {
+            let last_n = last.lines().count();
+            if last_n + cur.len() <= max {
+                last.push('\n');
+                last.push_str(&cur.join("\n"));
+            } else {
+                out.push(cur.join("\n"));
+            }
+        } else {
+            out.push(cur.join("\n"));
+        }
+    }
+    out
+}
+
+fn pack_sentences(text: &str, min_words: usize, max_words: usize) -> Vec<String> {
+    let mut sentences: Vec<String> = Vec::new();
+    let mut buf = String::new();
+    for ch in text.chars() {
+        buf.push(ch);
+        if matches!(ch, '.' | '!' | '?' | '。' | '…') {
+            let s = buf.trim();
+            if !s.is_empty() {
+                sentences.push(s.to_string());
+            }
+            buf.clear();
+        }
+    }
+    let tail = buf.trim();
+    if !tail.is_empty() {
+        sentences.push(tail.to_string());
+    }
+    if sentences.len() <= 1 {
+        return pack_words(text, max_words);
+    }
+    let mut out = Vec::new();
+    let mut cur = String::new();
+    let mut n = 0usize;
+    for s in sentences {
+        let w = s.split_whitespace().count();
+        if n > 0 && n + w > max_words {
+            out.push(cur.trim().to_string());
+            cur.clear();
+            n = 0;
+        }
+        if !cur.is_empty() {
+            cur.push(' ');
+        }
+        cur.push_str(&s);
+        n += w;
+        if n >= min_words && n >= max_words / 2 {
+            out.push(cur.trim().to_string());
+            cur.clear();
+            n = 0;
+        }
+    }
+    if !cur.trim().is_empty() {
+        if let Some(last) = out.last_mut() {
+            let last_n = last.split_whitespace().count();
+            if last_n + n <= max_words {
+                last.push(' ');
+                last.push_str(cur.trim());
+            } else {
+                out.push(cur.trim().to_string());
+            }
+        } else {
+            out.push(cur.trim().to_string());
+        }
+    }
+    if out.is_empty() {
+        vec![text.to_string()]
+    } else {
+        out
+    }
+}
+
+fn pack_words(text: &str, max_words: usize) -> Vec<String> {
+    let words: Vec<&str> = text.split_whitespace().collect();
+    if words.len() <= max_words {
+        return vec![text.to_string()];
+    }
+    words
+        .chunks(max_words)
+        .map(|c| c.join(" "))
+        .collect()
 }
 
 fn compress(event: &str, max_words: usize) -> String {

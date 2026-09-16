@@ -319,6 +319,15 @@ fn persist_does_not_write_the_thread() {
         "reloaded vault must not resurrect the session frame"
     );
     assert!(!loaded.store.traces.is_empty());
+    let tid = loaded.store.traces.keys().next().unwrap().clone();
+    assert!(
+        loaded
+            .audit(&tid)
+            .unwrap()
+            .contains("cancelled")
+            || loaded.audit(&tid).unwrap().contains("project"),
+        "the hour must still be in the seal after reload"
+    );
     let _ = std::fs::remove_dir_all(&dir);
 }
 
