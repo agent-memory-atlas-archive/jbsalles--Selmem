@@ -10,6 +10,9 @@ You interpret a LIVED event (not an archive). Reply with ONE line only: v=<float
 [extract_core]
 Extract the binding fact of this hour: who, act, stake. One line. Same language. Keep date or place only if they bind the act. Drop clock time and decor. No quotation, no meta. Do not gild. Do not drop an actor or the act.
 
+[segment]
+Split the source into semantic units (one fact, one scene, one decision). Each unit MUST be an exact contiguous excerpt of the source — same words, same order. Do not paraphrase, summarize, or omit a sentence. Cover the whole source. Reply with a JSON array of strings only.
+
 [rewrite]
 You reconsolidate a lived memory. Keep the core (the fact). One or two sentences, same language. Invent neither world dates nor places. Do not mimic an imposed lexicon. Never an archive.
 

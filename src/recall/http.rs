@@ -101,6 +101,17 @@ impl Narrator for HttpNarrator {
         }
     }
 
+    fn segment(&self, event: &str) -> Option<Vec<String>> {
+        let system = &crate::lexicon::prompts().segment;
+        if system.is_empty() || event.trim().is_empty() {
+            return None;
+        }
+        match self.chat(system, event) {
+            Ok(raw) => crate::encode::parse_segment_reply(&raw),
+            Err(_) => None,
+        }
+    }
+
     fn extract_core(&self, event: &str) -> Option<String> {
         let system = &crate::lexicon::prompts().extract_core;
         if system.is_empty() {
@@ -269,6 +280,9 @@ impl Narrator for SpeakOnlyHttp {
     }
     fn distill_axiom(&self, traces: &[&MemoryTrace]) -> Option<String> {
         self.rules.distill_axiom(traces)
+    }
+    fn segment(&self, event: &str) -> Option<Vec<String>> {
+        self.http.segment(event)
     }
     fn reply(
         &self,

@@ -23,6 +23,12 @@ pub trait Narrator: Send + Sync {
         let _ = event;
         None
     }
+    /// Propose a lossless split of a long paste. Each string must be an
+    /// excerpt of `event`. Default: none (caller packs by lines / words).
+    fn segment(&self, event: &str) -> Option<Vec<String>> {
+        let _ = event;
+        None
+    }
     /// Réécriture de consolidation : garder la charge, accentuer, jeter le superflu.
     fn rewrite(
         &self,

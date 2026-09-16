@@ -134,7 +134,18 @@ impl SelectiveMemory {
         let arousal = input.arousal;
         let disgust = input.disgust;
         let event_owned = input.event.to_string();
-        let decision = encode::encode(&mut self.store, &self.profile, input, self.embedder.as_ref());
+        let proposed = if encode::needs_split(&event_owned) {
+            self.narrator.segment(&event_owned)
+        } else {
+            None
+        };
+        let decision = encode::encode_with_parts(
+            &mut self.store,
+            &self.profile,
+            input,
+            self.embedder.as_ref(),
+            proposed.as_deref(),
+        );
         if decision.kept {
             if decision.parts <= 1 {
                 if let Some(tid) = decision.trace_id.as_deref() {

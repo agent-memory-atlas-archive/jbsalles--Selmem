@@ -21,7 +21,10 @@ pub use core::store::MemoryStore;
 pub use dream::{detail_retention, fingerprint, seed_anchor, stability_days, DreamReport, Fingerprint};
 pub use dream::singularite::distance as singularity_distance;
 pub use encode::embed::{cosine, Embedder, HashEmbedder, HttpEmbedder};
-pub use encode::{accept_core, segment_facts, EncodeDecision, EncodeInput};
+pub use encode::{
+    accept_core, encode_with_parts, lossless_parts, needs_split, parse_segment_reply, segment_facts,
+    split_event, EncodeDecision, EncodeInput,
+};
 pub use engine::SelectiveMemory;
 pub use benchmark::{
     h2_holds, run_v01, run_v01_k, run_v01_n, v01_script, Arm, Campaign, Condition, PairReport, V01Script,

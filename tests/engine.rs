@@ -934,3 +934,38 @@ fn long_paste_is_sliced_then_each_slice_is_compressed() {
     );
 }
 
+#[test]
+fn semantic_split_keeps_verbatim_excerpts() {
+    let src = "The board cancelled the project on Monday.\nThe team kept the prototype in the drawer.\nNobody wrote the lesson down.";
+    let proposed = vec![
+        "The board cancelled the project on Monday.".into(),
+        "The team kept the prototype in the drawer.".into(),
+        "Nobody wrote the lesson down.".into(),
+    ];
+    let parts = selmem::lossless_parts(src, &proposed).expect("excerpts must pass");
+    assert_eq!(parts.len(), 3);
+    assert!(src.contains(&parts[0]));
+    assert!(src.contains(&parts[1]));
+}
+
+#[test]
+fn paraphrased_split_falls_back_to_word_pack() {
+    let src = "The board cancelled the project on Monday.\nThe team kept the prototype in the drawer.\nNobody wrote the lesson down.\nA fourth line about the budget review.\nA fifth line about the corridor.\nA sixth line about the kettle.\nA seventh line about the stand-up.\nAn eighth line about the mail.\nA ninth line about the badge.\nA tenth line about the rain.\nAn eleventh line about the copier.";
+    let proposed = vec![
+        "Leadership axed the initiative.".into(),
+        "Staff hid a mock-up.".into(),
+    ];
+    assert!(selmem::lossless_parts(src, &proposed).is_none());
+    let parts = selmem::split_event(src, Some(&proposed));
+    assert_eq!(parts, selmem::segment_facts(src));
+}
+
+#[test]
+fn segment_reply_must_be_a_json_array() {
+    let raw = "Here you go:\n[\"Alpha fact one.\", \"Beta fact two.\"]\n";
+    let got = selmem::parse_segment_reply(raw).unwrap();
+    assert_eq!(got, ["Alpha fact one.", "Beta fact two."]);
+    assert!(selmem::parse_segment_reply("the project was cancelled").is_none());
+}
+
+
