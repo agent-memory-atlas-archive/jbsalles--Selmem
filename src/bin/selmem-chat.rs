@@ -1,7 +1,7 @@
 use std::env;
 use std::io::{self, BufRead, Write};
 
-use selmem::{Config, EncodeInput, EntityProfile, HttpEmbedder, HttpNarrator, SelectiveMemory};
+use selmem::{Config, EntityProfile, HttpEmbedder, HttpNarrator, SelectiveMemory};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -35,7 +35,6 @@ fn main() {
     eprintln!("{} écoute. /sleep /who /mood /talk /forget /quit", mem.profile.name);
     let stdin = io::stdin();
     let mut stdout = io::stdout();
-    let mut turns: u32 = 0;
     for line in stdin.lock().lines() {
         let line = line.expect("stdin");
         let line = line.trim();
@@ -45,8 +44,18 @@ fn main() {
         match line {
             "/quit" | "/exit" => break,
             "/sleep" => {
+                let snap = mem.talk.turns.clone();
+                let topic = mem.talk.topic.clone();
+                let (kept, _) = mem.keep_sitting();
+                mem.clear_talk();
                 let r = mem.sleep();
+                mem.fade_sitting();
+                for t in &snap {
+                    mem.talk.record(&t.user, &t.reply);
+                }
+                mem.talk.topic = topic;
                 let _ = mem.save();
+                println!("(kept sitting {})", kept);
                 println!(
                     "(nuit) sculpted={} merged={} extinguished={} axioms={}",
                     r.sculpted.len(),
@@ -85,31 +94,13 @@ fn main() {
                 println!("(fil oublié)");
             }
             _ => {
-                let (valence, arousal, disgust, schema) = affect(line);
-                let mut ev = EncodeInput::new(line);
-                ev.valence = valence;
-                ev.arousal = arousal;
-                ev.disgust = disgust;
-                ev.self_relevance = 0.75;
-                ev.schema = schema;
-                let d = mem.live_with(ev);
                 let reply = mem.speak(line);
                 let _ = mem.save();
-                turns += 1;
-                if turns % 5 == 0 {
-                    mem.sleep();
-                    let _ = mem.save();
-                }
-                let mark = if d.kept { "kept" } else { "left" };
-                println!("{}\n  [{} S={:.2}]", reply, mark, d.score);
+                println!("{reply}");
             }
         }
         let _ = stdout.flush();
     }
-}
-
-fn affect(text: &str) -> (f32, f32, f32, Option<String>) {
-    selmem::encode::affect::guess(text)
 }
 
 fn flag(args: &[String], name: &str) -> Option<String> {

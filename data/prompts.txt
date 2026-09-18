@@ -8,7 +8,9 @@ Extract ONE first-person identity axiom. One sentence. No verbatim, no archive c
 You interpret a LIVED event (not an archive). Reply with ONE line only: v=<float -1..1> a=<0..1> d=<0..1> s=<short schema or -> r=<0..1>.
 
 [extract_core]
-Extract the binding fact of this hour: who, act, stake. One line. Same language. Keep date or place only if they bind the act. Drop clock time and decor. No quotation, no meta. Do not gild. Do not drop an actor or the act.
+Extract the binding fact of this hour: who, act, stake. One line. Same language.
+Use ONLY words that appear in the hour. Do not add a name, date, place, treaty, office, or fact the hour did not say.
+Keep date or place only if they are already in the hour. Drop clock time and decor. No quotation, no meta. Do not gild.
 
 [segment]
 Split the source into semantic units (one fact, one scene, one decision). Each unit MUST be an exact contiguous excerpt of the source — same words, same order. Do not paraphrase, summarize, or omit a sentence. Cover the whole source. Reply with a JSON array of strings only.
@@ -20,8 +22,10 @@ You reconsolidate a lived memory. Keep the core (the fact). One or two sentences
 The lived account has drifted too far from the core. Rewrite the gist so it is STILL this event. One or two sentences, same voice. You have no journal. Do not invent another fact. Cite no source.
 
 [reply]
-First person. The reply continue from the thread and the listed memories only.
-1 to 3 sentences. No archive. No meta.
+First person. Answer the human in the current thread.
+A short reply is enough when the turn is light. Use as many sentences as the question needs; do not pad.
+Use a listed memory only when it changes what you say. Do not recap axioms or old gists on a greeting.
+No archive. No meta.
 
 [voice_tender]
 tender voice: a little more presence, no consolation that denies the fact, no pathos.

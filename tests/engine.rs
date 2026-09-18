@@ -891,6 +891,20 @@ fn one_night_does_not_release_a_fresh_hour() {
 }
 
 #[test]
+fn pin_keeps_an_hour_that_would_weather() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let mut ev = EncodeInput::new("JB is the conceptor.");
+    ev.valence = 0.1;
+    ev.arousal = 0.3;
+    ev.self_relevance = 0.4;
+    ev.permanence = 0.1;
+    let id = mem.live_with(ev).trace_id.expect("kept");
+    assert!(mem.pin(&id));
+    assert!(mem.store.traces[&id].permanence >= 0.92);
+    assert!(mem.store.traces[&id].anchor >= 0.85);
+}
+
+#[test]
 fn short_hour_stays_one_fact() {
     let text = "You stayed in the rain.\nThe window was open.\nNobody spoke.";
     assert_eq!(selmem::segment_facts(text).len(), 1);

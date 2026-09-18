@@ -22,4 +22,12 @@ fn accept_core_keeps_overlapping_facts() {
     let event = "Marc resigns because Sarah threatens to expose the accounts";
     assert!(accept_core("Marc resigns Sarah threatens accounts", event).is_some());
     assert!(accept_core("a dragon stole the moon last night", event).is_none());
+    assert!(
+        accept_core(
+            "Trump signed the Abraham Accords normalizing Israel-Arab ties",
+            "you know donald trump? why former?"
+        )
+        .is_none(),
+        "pretrained world knowledge must not become the core"
+    );
 }

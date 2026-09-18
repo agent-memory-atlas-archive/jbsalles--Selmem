@@ -117,6 +117,8 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 None => err(404, "archive introuvable"),
             }
         }
+        ("GET", "/book") => ok(book_json(mem)),
+        ("GET", "/events") => ok(events_json(mem)),
         ("POST", "/turn") => {
             let text = json_str(body, "text")
                 .or_else(|| json_str(body, "event"))
@@ -124,25 +126,11 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             if text.trim().is_empty() {
                 return err(400, "text requis");
             }
-            let mut input = EncodeInput::new(&text);
-            let (v, a, d, schema) = guess_affect(&text);
-            input.valence = json_f32(body, "valence").unwrap_or(v);
-            input.arousal = json_f32(body, "arousal").unwrap_or(a);
-            input.disgust = json_f32(body, "disgust").unwrap_or(d);
-            input.self_relevance = json_f32(body, "self_relevance").unwrap_or(0.75);
-            if let Some(s) = json_str(body, "schema") {
-                input.schema = Some(s);
-            } else {
-                input.schema = schema;
-            }
-            let dec = mem.live_with(input);
+            // Chat stays in the sitting. The gate runs at sleep (or pin).
             let reply = mem.speak(&text);
             let _ = mem.save();
             ok(format!(
-                "{{\"kept\":{},\"score\":{:.4},\"reason\":\"{}\",\"reply\":\"{}\",\"topic\":\"{}\",\"mood\":{{\"valence\":{:.3},\"arousal\":{:.3},\"disgust\":{:.3}}}}}",
-                if dec.kept { "true" } else { "false" },
-                dec.score,
-                json_esc(&dec.reason),
+                "{{\"reply\":\"{}\",\"topic\":\"{}\",\"mood\":{{\"valence\":{:.3},\"arousal\":{:.3},\"disgust\":{:.3}}}}}",
                 json_esc(&reply),
                 json_esc(mem.talk.topic.as_deref().unwrap_or("")),
                 mem.mood.valence,
@@ -259,10 +247,19 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             ok(format!("{{\"memories\":[{}]}}", items.join(",")))
         }
         ("POST", "/sleep") => {
+            let snap = mem.talk.turns.clone();
+            let topic = mem.talk.topic.clone();
+            let (sitting, _) = mem.keep_sitting();
+            mem.clear_talk();
             let report = mem.sleep();
+            mem.fade_sitting();
+            for t in &snap {
+                mem.talk.record(&t.user, &t.reply);
+            }
+            mem.talk.topic = topic;
             let _ = mem.save();
             ok(format!(
-                "{{\"faded\":{},\"cold\":{},\"myth\":{},\"merged\":{},\"extinguished\":{},\"weathered\":{},\"rewritten\":{},\"released\":{},\"sculpted\":{},\"axioms\":{}}}",
+                "{{\"faded\":{},\"cold\":{},\"myth\":{},\"merged\":{},\"extinguished\":{},\"weathered\":{},\"rewritten\":{},\"released\":{},\"sculpted\":{},\"axioms\":{},\"sitting\":{}}}",
                 report.faded,
                 report.cold,
                 report.myth,
@@ -272,7 +269,8 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 report.rewritten,
                 report.released,
                 report.sculpted.len(),
-                report.axioms.len()
+                report.axioms.len(),
+                sitting
             ))
         }
         ("POST", "/speak") => {
@@ -315,6 +313,13 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             mem.clear_talk();
             ok("{\"cleared\":true}".into())
         }
+        ("POST", "/reset") => {
+            mem.reset();
+            match mem.save() {
+                Ok(()) => ok("{\"reset\":true}".into()),
+                Err(e) => err(500, &e.to_string()),
+            }
+        }
         ("POST", "/save") => match mem.save() {
             Ok(()) => ok("{\"saved\":true}".into()),
             Err(e) => err(500, &e.to_string()),
@@ -336,6 +341,153 @@ fn err(status: u16, msg: &str) -> HttpResponse {
 
 pub fn json_esc(s: &str) -> String {
     crate::net::httpx::json_esc(s)
+}
+
+fn status_name(s: crate::core::model::TraceStatus) -> &'static str {
+    use crate::core::model::TraceStatus::*;
+    match s {
+        Active => "active",
+        Cold => "cold",
+        Myth => "myth",
+        Latent => "latent",
+    }
+}
+
+fn drift_name(k: crate::core::model::DriftKind) -> &'static str {
+    use crate::core::model::DriftKind::*;
+    match k {
+        Embellish => "embellish",
+        AmplifyDisgust => "amplify",
+        Fade => "fade",
+        Merge => "merge",
+        Weather => "weather",
+        Rewrite => "rewrite",
+        Reinterpret => "reinterpret",
+        Ground => "ground",
+    }
+}
+
+fn book_json(mem: &SelectiveMemory) -> String {
+    let mut traces: Vec<_> = mem.store.traces.values().collect();
+    traces.sort_by_key(|t| std::cmp::Reverse(t.created_at));
+    let tjson: Vec<String> = traces
+        .into_iter()
+        .map(|t| {
+            format!(
+                "{{\"id\":\"{}\",\"status\":\"{}\",\"channel\":\"{}\",\"schema\":\"{}\",\"gist\":\"{}\",\"core\":\"{}\",\"fidelity\":{:.3},\"anchor\":{:.3},\"valence\":{:.3},\"created_at\":{},\"archive_id\":\"{}\"}}",
+                json_esc(&t.id),
+                status_name(t.status),
+                if matches!(t.channel, Channel::World) { "world" } else { "self" },
+                json_esc(t.schema.as_deref().unwrap_or("")),
+                json_esc(&t.gist),
+                json_esc(&t.core),
+                t.fidelity,
+                t.anchor,
+                t.valence,
+                t.created_at,
+                json_esc(t.archive_id.as_deref().unwrap_or(""))
+            )
+        })
+        .collect();
+    let mut axioms: Vec<_> = mem.store.axioms.values().collect();
+    axioms.sort_by_key(|a| std::cmp::Reverse(a.created_at));
+    let ajson: Vec<String> = axioms
+        .into_iter()
+        .map(|a| {
+            format!(
+                "{{\"id\":\"{}\",\"layer\":\"{}\",\"strength\":{:.3},\"valence\":{:.3},\"statement\":\"{}\",\"schema\":\"{}\",\"superseded\":{},\"created_at\":{}}}",
+                json_esc(&a.id),
+                match a.layer {
+                    crate::core::model::AxiomLayer::Motif => "motif",
+                    crate::core::model::AxiomLayer::Belief => "belief",
+                    crate::core::model::AxiomLayer::Trait => "trait",
+                },
+                a.strength,
+                a.valence,
+                json_esc(&a.statement),
+                json_esc(a.schema.as_deref().unwrap_or("")),
+                if a.superseded_by.is_some() { "true" } else { "false" },
+                a.created_at
+            )
+        })
+        .collect();
+    let mut archives: Vec<_> = mem.store.archives.values().collect();
+    archives.sort_by_key(|a| std::cmp::Reverse(a.created_at));
+    let rjson: Vec<String> = archives
+        .into_iter()
+        .map(|a| {
+            format!(
+                "{{\"id\":\"{}\",\"source\":\"{}\",\"created_at\":{},\"verbatim\":\"{}\"}}",
+                json_esc(&a.id),
+                json_esc(&a.source),
+                a.created_at,
+                json_esc(&a.verbatim)
+            )
+        })
+        .collect();
+    format!(
+        "{{\"traces\":[{}],\"axioms\":[{}],\"archives\":[{}]}}",
+        tjson.join(","),
+        ajson.join(","),
+        rjson.join(",")
+    )
+}
+
+fn events_json(mem: &SelectiveMemory) -> String {
+    struct Ev {
+        at: u64,
+        kind: &'static str,
+        title: String,
+        detail: String,
+    }
+    let mut evs: Vec<Ev> = Vec::new();
+    for t in mem.store.traces.values() {
+        evs.push(Ev {
+            at: t.created_at,
+            kind: "encode",
+            title: t.id.clone(),
+            detail: t.gist.clone(),
+        });
+        for d in &t.drifts {
+            evs.push(Ev {
+                at: d.at,
+                kind: drift_name(d.kind),
+                title: t.id.clone(),
+                detail: d.note.clone(),
+            });
+        }
+    }
+    for a in mem.store.axioms.values() {
+        evs.push(Ev {
+            at: a.created_at,
+            kind: "axiom",
+            title: a.id.clone(),
+            detail: a.statement.clone(),
+        });
+    }
+    for a in mem.store.archives.values() {
+        evs.push(Ev {
+            at: a.created_at,
+            kind: "archive",
+            title: a.id.clone(),
+            detail: a.source.clone(),
+        });
+    }
+    evs.sort_by(|x, y| y.at.cmp(&x.at).then(x.kind.cmp(y.kind)));
+    evs.truncate(200);
+    let items: Vec<String> = evs
+        .into_iter()
+        .map(|e| {
+            format!(
+                "{{\"at\":{},\"kind\":\"{}\",\"title\":\"{}\",\"detail\":\"{}\"}}",
+                e.at,
+                e.kind,
+                json_esc(&e.title),
+                json_esc(&e.detail)
+            )
+        })
+        .collect();
+    format!("{{\"events\":[{}]}}", items.join(","))
 }
 
 fn query_param<'a>(query: &'a str, key: &str) -> Option<&'a str> {

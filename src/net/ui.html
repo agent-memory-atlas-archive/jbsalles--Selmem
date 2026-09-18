@@ -5,13 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SelMem</title>
 <style>
-  :root { --bg:#111114; --card:#1b1b22; --ink:#eee8e0; --muted:#8a847c; --line:#2c2c36; --kept:#c9b27a; --drop:#7a6f68; }
+  :root { --bg:#111114; --card:#1b1b22; --ink:#eee8e0; --muted:#8a847c; --line:#2c2c36; --kept:#c9b27a; --drop:#7a6f68; --panel:420px; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font: 16px/1.45 Georgia, serif; }
-  main { max-width: 720px; margin: 0 auto; min-height: 100vh; display:flex; flex-direction:column; }
+  main { max-width: 720px; margin: 0 auto; min-height: 100vh; display:flex; flex-direction:column; transition: margin-right .2s ease; }
+  body.book-open main { margin-right: min(var(--panel), 100vw); }
   header { padding: 20px 20px 8px; border-bottom:1px solid var(--line); flex-shrink:0; }
   header h1 { font-size: 1.15rem; font-weight: normal; margin:0; }
   header p { margin: 4px 0 0; color:var(--muted); font-size:.9rem; }
+  .head-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
   #log { flex:1; overflow-y:auto; padding: 16px 20px 88px; display:flex; flex-direction:column; gap:12px; }
   .msg { max-width: 92%; }
   .me { align-self:flex-end; background:#2a2430; padding:10px 14px; border-radius:14px 14px 4px 14px; }
@@ -20,24 +22,68 @@
   .kept { color:var(--kept); }
   .drop { color:var(--drop); }
   form { position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:100%; max-width:720px; display:flex; gap:8px; padding:12px 20px 20px; border-top:1px solid var(--line); background:var(--bg); }
+  body.book-open form { left: calc(50% - var(--panel) / 2); }
   input, button { font: inherit; }
   #text { flex:1; background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
   button { background:#3a342c; color:var(--ink); border:0; border-radius:10px; padding:10px 14px; cursor:pointer; }
   button.ghost { background:transparent; color:var(--muted); }
-  .bar { display:flex; gap:8px; padding:8px 20px 0; }
+  button.ghost.on { color:var(--kept); }
+  .bar { display:flex; gap:8px; padding:8px 20px 0; flex-wrap:wrap; }
   .bar input, .bar select { background:transparent; border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:6px 8px; font-size:.85rem; }
   .bar input { width: 140px; }
   .spin { width:16px; height:16px; border:2px solid var(--line); border-top-color:var(--kept); border-radius:50%; align-self:center; flex-shrink:0; opacity:0; visibility:hidden; animation:spin .7s linear infinite; }
   .spin.on { opacity:1; visibility:visible; }
   button:disabled { opacity:.5; cursor:wait; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  #book {
+    position:fixed; top:0; right:0; width:var(--panel); max-width:100vw; height:100vh;
+    background:#16161c; border-left:1px solid var(--line);
+    transform:translateX(100%); transition:transform .2s ease;
+    display:flex; flex-direction:column; z-index:5;
+  }
+  body.book-open #book { transform:none; }
+  #book header { display:flex; align-items:baseline; justify-content:space-between; }
+  #book h2 { font-size:1rem; font-weight:normal; margin:0; }
+  .tabs { display:flex; gap:0; border-bottom:1px solid var(--line); flex-shrink:0; }
+  .tabs button { flex:1; border-radius:0; background:transparent; color:var(--muted); padding:10px 6px; font-size:.82rem; }
+  .tabs button.on { color:var(--ink); border-bottom:1px solid var(--kept); }
+  #book-body { flex:1; overflow-y:auto; padding:10px 14px 24px; font-size:.86rem; }
+  .row { border-bottom:1px solid var(--line); padding:10px 0; }
+  .row .id { color:var(--muted); font-size:.72rem; font-family:ui-monospace,monospace; }
+  .row .tag { display:inline-block; font-size:.7rem; color:var(--kept); margin-right:6px; letter-spacing:.04em; }
+  .row .tag.cold { color:#8a9; }
+  .row .tag.myth { color:#678; }
+  .row .tag.latent { color:#a86; }
+  .row .tag.drop { color:var(--drop); }
+  .row p { margin:4px 0 0; white-space:pre-wrap; }
+  .empty { color:var(--muted); padding:16px 0; }
+  time { color:var(--muted); font-size:.72rem; }
+  .book-actions { display:flex; gap:8px; padding:8px 14px; border-top:1px solid var(--line); flex-shrink:0; }
+  button.danger { background:#3a2424; color:#e8c4c0; }
+  #confirm {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.55);
+    z-index:20; align-items:center; justify-content:center; padding:24px;
+  }
+  #confirm.show { display:flex; }
+  #confirm .box {
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:18px 18px 14px; max-width:360px; width:100%;
+  }
+  #confirm .box p { margin:0 0 14px; }
+  #confirm .actions { display:flex; gap:8px; justify-content:flex-end; }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1 id="name">SelMem</h1>
-    <p id="status">test interface — memory lives on this server</p>
+    <div class="head-row">
+      <div>
+        <h1 id="name">SelMem</h1>
+        <p id="status">test interface — memory lives on this server</p>
+      </div>
+      <button class="ghost" type="button" id="toggle-book">book</button>
+    </div>
   </header>
   <div class="bar">
     <input id="token" placeholder="token" autocomplete="off">
@@ -58,10 +104,38 @@
     <button type="submit" id="send">send</button>
   </form>
 </main>
+<aside id="book" hidden>
+  <header>
+    <h2>book</h2>
+    <button class="ghost" type="button" id="close-book">close</button>
+  </header>
+  <div class="tabs">
+    <button type="button" class="on" data-tab="events">log</button>
+    <button type="button" data-tab="traces">traces</button>
+    <button type="button" data-tab="axioms">axioms</button>
+    <button type="button" data-tab="archives">archives</button>
+  </div>
+  <div id="book-body"></div>
+  <div class="book-actions">
+    <button class="danger" type="button" id="reset-book">reset memory</button>
+  </div>
+</aside>
+<div id="confirm">
+  <div class="box">
+    <p>Erase the book, the seal, the axioms and the sitting? This cannot be undone.</p>
+    <div class="actions">
+      <button class="ghost" type="button" id="reset-no">cancel</button>
+      <button class="danger" type="button" id="reset-yes">erase</button>
+    </div>
+  </div>
+</div>
 <script>
 const log = document.getElementById('log');
 const tokenEl = document.getElementById('token');
 tokenEl.value = localStorage.getItem('selmem_token') || '';
+let bookTab = 'events';
+let bookCache = { traces: [], axioms: [], archives: [], events: [] };
+
 function headers() {
   const h = { 'Content-Type': 'application/json' };
   const t = tokenEl.value.trim();
@@ -83,6 +157,78 @@ async function api(method, path, body) {
   if (!r.ok) throw new Error(j.error || r.status);
   return j;
 }
+function when(sec) {
+  if (!sec) return '';
+  const d = new Date(sec * 1000);
+  return d.toISOString().replace('T', ' ').slice(0, 19);
+}
+function setBookOpen(on) {
+  document.body.classList.toggle('book-open', on);
+  document.getElementById('book').hidden = !on;
+  document.getElementById('toggle-book').classList.toggle('on', on);
+  if (on) loadBook();
+}
+function renderBook() {
+  const body = document.getElementById('book-body');
+  const rows = [];
+  if (bookTab === 'traces') {
+    if (!bookCache.traces.length) rows.push('<div class="empty">no traces</div>');
+    bookCache.traces.forEach(t => {
+      rows.push(
+        '<div class="row"><span class="tag ' + escapeHtml(t.status) + '">' + escapeHtml(t.status) +
+        '</span><span class="tag">' + escapeHtml(t.channel) + '</span>' +
+        '<div class="id">' + escapeHtml(t.id) + '</div>' +
+        '<p>' + escapeHtml(t.gist || t.core || '') + '</p>' +
+        '<time>' + when(t.created_at) + ' · f=' + Number(t.fidelity).toFixed(2) +
+        ' a=' + Number(t.anchor).toFixed(2) + '</time></div>'
+      );
+    });
+  } else if (bookTab === 'axioms') {
+    if (!bookCache.axioms.length) rows.push('<div class="empty">no axioms</div>');
+    bookCache.axioms.forEach(a => {
+      rows.push(
+        '<div class="row"><span class="tag">' + escapeHtml(a.layer) + '</span>' +
+        (a.superseded ? '<span class="tag drop">superseded</span>' : '') +
+        '<div class="id">' + escapeHtml(a.id) + '</div>' +
+        '<p>' + escapeHtml(a.statement) + '</p>' +
+        '<time>' + when(a.created_at) + ' · s=' + Number(a.strength).toFixed(2) + '</time></div>'
+      );
+    });
+  } else if (bookTab === 'archives') {
+    if (!bookCache.archives.length) rows.push('<div class="empty">no archives</div>');
+    bookCache.archives.forEach(a => {
+      rows.push(
+        '<div class="row"><span class="tag">' + escapeHtml(a.source || 'seal') + '</span>' +
+        '<div class="id">' + escapeHtml(a.id) + '</div>' +
+        '<p>' + escapeHtml(a.verbatim) + '</p>' +
+        '<time>' + when(a.created_at) + '</time></div>'
+      );
+    });
+  } else {
+    if (!bookCache.events.length) rows.push('<div class="empty">no events</div>');
+    bookCache.events.forEach(e => {
+      rows.push(
+        '<div class="row"><span class="tag">' + escapeHtml(e.kind) + '</span>' +
+        '<div class="id">' + escapeHtml(e.title) + '</div>' +
+        '<p>' + escapeHtml(e.detail) + '</p>' +
+        '<time>' + when(e.at) + '</time></div>'
+      );
+    });
+  }
+  body.innerHTML = rows.join('');
+}
+async function loadBook() {
+  try {
+    const [b, e] = await Promise.all([api('GET', '/book'), api('GET', '/events')]);
+    bookCache.traces = b.traces || [];
+    bookCache.axioms = b.axioms || [];
+    bookCache.archives = b.archives || [];
+    bookCache.events = e.events || [];
+    renderBook();
+  } catch (err) {
+    document.getElementById('book-body').innerHTML = '<div class="empty">' + escapeHtml(err.message) + '</div>';
+  }
+}
 async function refresh() {
   try {
     const h = await api('GET', '/health');
@@ -92,6 +238,7 @@ async function refresh() {
       const p = await api('GET', '/profile');
       if (p.voice) document.getElementById('voice').value = p.voice;
     } catch (e) {}
+    if (document.body.classList.contains('book-open')) loadBook();
   } catch (e) {
     document.getElementById('status').textContent = e.message;
   }
@@ -99,9 +246,37 @@ async function refresh() {
 function busy(where, on) {
   const bar = where === 'bar';
   document.getElementById(bar ? 'spin-bar' : 'spin').classList.toggle('on', on);
-  const ids = bar ? ['who', 'pin', 'sleep', 'voice'] : ['send', 'text'];
+  const ids = bar ? ['who', 'pin', 'sleep', 'voice', 'toggle-book', 'reset-book'] : ['send', 'text'];
   ids.forEach(id => { document.getElementById(id).disabled = on; });
 }
+document.getElementById('toggle-book').onclick = () => {
+  setBookOpen(!document.body.classList.contains('book-open'));
+};
+document.getElementById('close-book').onclick = () => setBookOpen(false);
+const confirmEl = document.getElementById('confirm');
+document.getElementById('reset-book').onclick = () => confirmEl.classList.add('show');
+document.getElementById('reset-no').onclick = () => confirmEl.classList.remove('show');
+document.getElementById('reset-yes').onclick = async () => {
+  confirmEl.classList.remove('show');
+  busy('bar', true);
+  try {
+    await api('POST', '/reset', {});
+    log.innerHTML = '';
+    add('her', '<div class="meta">memory erased</div>');
+    refresh();
+  } catch (e) {
+    add('her', '<span class="drop">' + escapeHtml(e.message) + '</span>');
+  } finally {
+    busy('bar', false);
+  }
+};
+document.querySelectorAll('.tabs button').forEach(btn => {
+  btn.onclick = () => {
+    bookTab = btn.dataset.tab;
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b === btn));
+    renderBook();
+  };
+});
 document.getElementById('f').onsubmit = async (e) => {
   e.preventDefault();
   const text = document.getElementById('text').value.trim();
@@ -111,9 +286,7 @@ document.getElementById('f').onsubmit = async (e) => {
   busy('send', true);
   try {
     const turn = await api('POST', '/turn', { text });
-    const mark = turn.kept ? 'kept' : 'left';
-    add('her', escapeHtml(turn.reply || '…') +
-      '<div class="meta ' + (turn.kept ? 'kept' : 'drop') + '">[' + mark + ' S=' + Number(turn.score).toFixed(2) + ']</div>');
+    add('her', escapeHtml(turn.reply || '…'));
     refresh();
   } catch (err) {
     add('her', '<span class="drop">' + escapeHtml(err.message) + '</span>');

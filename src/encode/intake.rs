@@ -267,34 +267,30 @@ fn associate(store: &mut MemoryStore, trace: &MemoryTrace) {
     }
 }
 
-/// LLM may propose a core. Accept only if it still talks about this event.
+fn content_tokens(s: &str) -> Vec<String> {
+    s.split_whitespace()
+        .map(|w| {
+            w.trim_matches(|c: char| !c.is_alphanumeric())
+                .to_lowercase()
+        })
+        .filter(|w| w.chars().count() > 2)
+        .collect()
+}
+
+/// The core may drop words. It may not introduce any.
+/// That blocks pretrained "past" the hour never said.
 pub fn accept_core(proposed: &str, event: &str) -> Option<String> {
     let p = proposed.trim();
     if p.is_empty() || p.chars().count() < 8 {
         return None;
     }
     let p: String = p.chars().take(500).collect();
-    let ev: Vec<String> = event
-        .split_whitespace()
-        .map(|w| {
-            w.trim_matches(|c: char| !c.is_alphanumeric())
-                .to_lowercase()
-        })
-        .filter(|w| w.chars().count() > 2)
-        .collect();
-    let pr: Vec<String> = p
-        .split_whitespace()
-        .map(|w| {
-            w.trim_matches(|c: char| !c.is_alphanumeric())
-                .to_lowercase()
-        })
-        .filter(|w| w.chars().count() > 2)
-        .collect();
+    let ev = content_tokens(event);
+    let pr = content_tokens(&p);
     if pr.is_empty() {
         return None;
     }
-    let hit = pr.iter().filter(|w| ev.iter().any(|e| e == *w)).count();
-    if hit * 4 < pr.len() && hit < 2 {
+    if pr.iter().any(|w| !ev.iter().any(|e| e == w)) {
         return None;
     }
     Some(p)
