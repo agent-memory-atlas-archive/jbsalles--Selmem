@@ -96,6 +96,8 @@ A generated sentence is a **miss** when `judge_against_core` returns a kind the 
 
 Embeddings still rank recall. They do not judge grounding.
 
+The check lives in `recall/judge.rs` (pure). Grip, strikes and the blend live in `recall/pull.rs`. Night uses the same miss test on a rewrite (`dream/rewrite.rs`). Pass order is `weather → rewrite → merge → ladder → release` (`dream/night.rs`, pinned by `tests/dream_order.rs`).
+
 **Why 0.18 and 3.** Same status as `τ`. **Exploratory.** The kinds are the mechanism; the cut is not.
 
 `narrator_firmness` default `0.55` (tender `0.42`, austere `0.72`). CLI `--narrator-firmness`. `GET|POST /profile`.

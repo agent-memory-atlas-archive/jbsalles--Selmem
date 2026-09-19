@@ -65,8 +65,8 @@ experience
      talk frame holds the current thread (active ≤ 10 min gap, ≤ 2 h; sleep commits it through the gate, then drops it)
               ↓
            sleep
-     decay · rewrite · merge · extinguish · latent
-     motif / belief / trait · re-anchor
+     weather → rewrite → merge → ladder → release
+     (anchors before weather and after release)
               ↓
           who_am_i
               ↓
@@ -99,7 +99,9 @@ If the caller sends no affect: lexicon (FR+EN), then identity paint, then `Narra
 
 **Recall.** Small top-k. Mix embedding, lexicon, mood, access count. Each recall can cost fidelity and shift valence (`DriftKind::Reinterpret`). A miss is a kind the core does not authorize (`Elaborate` / `Reframe` / `Contradict` / `Depart`); `ground_min_overlap` is only the identity gate on `Hold`. `hold = narrator_firmness × importance`. Low hold: no ceiling on warp. High hold: after enough misses, blend gist toward a core-facing rewrite (`DriftKind::Ground`). Latent traces are not replayed as scenes.
 
-**Sleep.** Anchor, decay detail, drop unused disgust, bounded rewrite, merge (two strong anchors do not merge), ladder, re-anchor. No LLM required.
+**Sleep.** Five passes, in this order: weather (decay, unused disgust, status) → rewrite → merge → ladder (motif / belief / trait) → release of spent latent hours. Anchors run before weather and after release. No LLM required. The judge of a night rewrite is the same `DetachKind` check as recall.
+
+**Layout.** Files follow those questions: `encode/` (enter), `recall/judge` + `recall/pull` (tell and license), `dream/*` (weather through time), `persist/snapshot.rs` (one field list, two containers). Map: [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
@@ -137,7 +139,7 @@ Fingerprint is a lab metric on the book. It is not a personality score.
 
 ## Surface
 
-Rust 1.75. No Cargo crates. SQLite (prepared statements, `BEGIN IMMEDIATE`) or flat `SELMEM1`. HTTP daemon + UI. `/health` does not take the memory lock. Auth: `Authorization: Bearer` only.
+Rust 1.75. No Cargo crates. Two vault containers, one `Snapshot` field list (`persist/snapshot.rs`): SQLite (prepared statements, `BEGIN IMMEDIATE`) or flat `SELMEM1`. HTTP daemon + UI. `/health` does not take the memory lock. Auth: `Authorization: Bearer` only.
 
 ```
 GET  /health /who /lineage /mood /profile /audit /talk
@@ -180,7 +182,7 @@ What is still open: a scored creative grid, a few blind human judges on the post
 
 ## Status
 
-`cargo test` covers: dull drop, world channel pinned, tender/austere split, core vs detail, anchors, axiom succession, motif ≠ trait, identity paint, reinterpret, grounding blend, fading warp, latent residue, persist round-trip, merge + extinguish in one night.
+`cargo test` covers: dull drop, world channel pinned, tender/austere split, core vs detail, anchors, axiom succession, motif ≠ trait, identity paint, reinterpret, DetachKind misses, grounding blend, fading warp, latent residue, night pass order, persist round-trip (file and sqlite), merge + extinguish in one night.
 
 Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; on v0.1 × 10 Grok pairs the book gap holds and, after last-k=8 evicts T₀, only C2 A still names it. Full tables: [experiments/REPORT.md](experiments/REPORT.md).
 

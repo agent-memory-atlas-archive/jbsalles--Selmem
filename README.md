@@ -2,39 +2,41 @@
 
 Selective reconstructive memory for an LLM entity. v0.5
 
-An LLM maps context to the next token. A stack of unmodified facts maximises coverage, not deviation: more evidence, same average path. SelMem sculpts a particular past — forgotten, gilded, anchored — so two instances can diverge. The aim is a non-average, path-dependent continuation, not a taller log. Selection, reconstruction, sleep, identity.
+An LLM maps context to the next token. A stack of unmodified facts maximises coverage, not deviation: more evidence, same average path. SelMem sculpts a particular past so two instances can diverge. The aim is a non-average, path-dependent continuation, not a taller log. Selection, reconstruction, sleep, identity.
 
 **Manifest:** [WHITEPAPER.md](WHITEPAPER.md)\
-**Benches:** [experiments/REPORT.md](experiments/REPORT.md) — method, tables, excerpts. Replay the four Grok dumps from [experiments/README.md](experiments/README.md).\
+**Layout:** [ARCHITECTURE.md](ARCHITECTURE.md) — encode / judge / night / snapshot.\
+**Benches:** experiments/REPORT.md — method, tables, excerpts. Replay the four Grok dumps from experiments/README.md.\
 **Knobs:** [PARAMETERS.md](PARAMETERS.md) — exploratory, not fitted.
 
-Zero crates. Rust 1.75. SQLite via system `libsqlite3` (macOS SDK or Linux).
+Rust 1.75. SQLite via system `libsqlite3` (macOS SDK or Linux).
 
 ```
 src/
   core/       model, profile, store, talk
-  encode/     intake, scoring, embed, affect, identity
-  recall/     retrieve, narrator, http
-  dream/      night, drift, singularite
-  persist/    file, sqlite
+  encode/     interpret, paint, split, gate, core, intake, scoring, embed, affect
+  recall/     retrieve, judge, pull, narrator, http
+  dream/      weather, rewrite, merge, ladder, release, night, drift, singularite
+  persist/    snapshot (field list), file (SELMEM1), sqlite
   net/        api, httpx, ui
   config.rs   .selmem runtime options
-  engine.rs   the loop
+  engine.rs   the loop only
   bin/        selmemd, selmem-chat
 ```
 
 ## Loop
 
 ```
-experience → interpret → identity paint → gate
+experience → interpret → paint → split → gate → core
         ↓                         ↑
    lived book + sealed archive    |
         ↓                         |
- remember / speak (meaning can move; talk frame keeps the live sitting)
+ remember / speak
+ retrieve → reconstruct → judge (DetachKind) → pull
+ talk frame keeps the live sitting
         ↓
       sleep (talk goes through the gate, then the frame dies)
- weather · rewrite · merge · extinguish
- motif → belief → trait → who_am_i
+ weather → rewrite → merge → ladder → release
         ↓
    next experience is already colored
 ```
@@ -47,7 +49,7 @@ Claire and Silas are not characters. They are two sensitivities (`tender` / `aus
 
 Zero Cargo crates. Persistence is a vault, not the memory: the organ lives in RAM (`MemoryStore`); on `save` it is dumped, on `open` it is reloaded. The model never talks to the vault.
 
-Two backends, same `Snapshot` (`profile`, `mood`, `store`):
+Two backends, same `Snapshot` (`profile`, `mood`, `store`). The field list lives once in `persist/snapshot.rs` so SELMEM1 and sqlite cannot drift:
 
 | Path | Backend |
 | --- | --- |
@@ -135,7 +137,7 @@ Another file: `--config path` or `SELMEM_CONFIG`. Discovery otherwise: cwd `.sel
 | `name` | `SELMEM_NAME` | `Claire` | entity name |
 | `profile` | `SELMEM_PROFILE` | `tender` | `tender` / `austere` |
 | `token` | `SELMEM_TOKEN` | unset | HTTP bearer for the daemon |
-| `ground_overlap` | `SELMEM_GROUND_OVERLAP` | profile | Jaccard vs core |
+| `ground_overlap` | `SELMEM_GROUND_OVERLAP` | profile | identity gate on `Hold` only |
 | `ground_strikes` | `SELMEM_GROUND_STRIKES` | profile | misses before a pull-back |
 | `narrator_firmness` | `SELMEM_NARRATOR_FIRMNESS` | profile | blend strength toward core |
 | `probes` | `SELMEM_PROBES` | all / 2 if quick | how many bench questions to speak |
@@ -151,8 +153,7 @@ Rust only. No Python suite. Always use `./run.sh` (not bare `cargo`) so sqlite l
 
 Scripts in `data/*.json` are the frozen stimuli. Edit those if you change a protocol; do not rewrite them mid-run. Later prompts in a script never name the marked event.
 
-Published report (method + tables): [experiments/REPORT.md](experiments/REPORT.md).
-Conclusions only: [WHITEPAPER.md](WHITEPAPER.md) § Conclusions from the benches.
+Published report (method + tables): experiments/REPORT.md. Conclusions only: [WHITEPAPER.md](WHITEPAPER.md) § Conclusions from the benches.
 
 ### Benchmark v0.1 (H2)
 
@@ -168,7 +169,7 @@ C0 = no book. C1 = last-k verbatim (default k = 24; `--last-k 8` drops T0 after 
 
 `RuleNarrator` is deterministic: ten pairs repeat. A live model: same command with `llm=` in `.selmem`. JSON is rewritten after every cell.
 
-The four Grok dumps and the exact replay lines: [experiments/README.md](experiments/README.md) § Replay.
+The four Grok dumps and the exact replay lines: experiments/README.md § Replay.
 
 ### Unit tests (no network)
 
@@ -176,6 +177,8 @@ The four Grok dumps and the exact replay lines: [experiments/README.md](experime
 ./run.sh test
 ./run.sh test --test scenes
 ./run.sh test --test engine
+./run.sh test --test ground
+./run.sh test --test dream_order
 ./run.sh test --test bifurcation
 ./run.sh test --test divergence
 ./run.sh test --test erasure
@@ -189,6 +192,8 @@ The four Grok dumps and the exact replay lines: [experiments/README.md](experime
 | --- | --- | --- |
 | Narrative scenes | `tests/scenes.rs` | `tests/cases/*.json` |
 | Decay, anchors, SQLite, Ebbinghaus | `tests/engine.rs` | inline |
+| DetachKind vs core | `tests/ground.rs` | inline |
+| Night pass order | `tests/dream_order.rs` | `NIGHT_PASSES` |
 | Bifurcation A/B (rules) | `tests/bifurcation.rs` | `data/bifurcation.json` |
 | Split lives (rules) | `tests/divergence.rs` | `data/divergence.json` |
 | Erasure: trivia vs repeated aversion | `tests/erasure.rs` | `data/erasure.json` |
@@ -318,8 +323,8 @@ This is not a chatbot with extra context. `/turn` asks the model to continue fro
 
 What that produces:
 
-- **`left` is not forgetting.** The line stayed in the salon. It dies when you sleep, unless you pin it or it already passed the gate.
-- **`kept` is not “it understood you`.** It means a trace was written. The next sentence still comes from Grok looking at that gist, not from a stored Q&A.
+- `left` **is not forgetting.** The line stayed in the salon. It dies when you sleep, unless you pin it or it already passed the gate.
+- `kept` **is not “it understood you\`.** It means a trace was written. The next sentence still comes from Grok looking at that gist, not from a stored Q&A.
 - **Empty book + “hello”** → the model fills the hole. Velvet greetings, “I know your name” without saying it, a politician who “never quite landed.” That is the prior, not SelMem.
 - **Sleep wipes the thread.** “What did we talk about yesterday?” only sees what survived the night. A pinned name can come back; small talk cannot.
 - **Sleep also retells.** Tender can soften a fact (“JB became quieter”). Austere can harden it. The organ is allowed to warp; the UI will look inconsistent if you expect a CRM.
