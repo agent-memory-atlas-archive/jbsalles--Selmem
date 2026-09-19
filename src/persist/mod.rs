@@ -1,7 +1,9 @@
 pub mod file;
+pub mod snapshot;
 pub mod sqlite;
 
-pub use file::{load, save, Snapshot};
+pub use file::{load, save};
+pub use snapshot::Snapshot;
 
 use crate::core::model;
 use crate::core::store::MemoryStore;

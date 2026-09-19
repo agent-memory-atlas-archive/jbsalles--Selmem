@@ -3,19 +3,17 @@ use std::io::{self, BufRead, BufReader, Write};
 use std::path::Path;
 
 use crate::core::model::{
-    ArchiveRecord, AxiomLayer, Channel, DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood,
-    TraceStatus,
+    AxiomLayer, Channel, DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood, TraceStatus,
 };
 use crate::core::profile::EntityProfile;
 use crate::core::store::MemoryStore;
+use crate::persist::snapshot::{
+    assemble_archive, assemble_axiom, assemble_drift, assemble_mood, assemble_trace,
+    channel_token, drift_token, layer_token, parse_layer_token, profile_from_params,
+    profile_params_line, status_token, Snapshot,
+};
 
 const MAGIC: &str = "SELMEM1";
-
-pub struct Snapshot {
-    pub profile: EntityProfile,
-    pub mood: Mood,
-    pub store: MemoryStore,
-}
 
 pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemoryStore) -> io::Result<()> {
     if let Some(parent) = path.parent() {
@@ -86,12 +84,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         let id = p[1].to_string();
         store.archives.insert(
             id.clone(),
-            ArchiveRecord {
-                id,
-                created_at: parse_u64(p[2])?,
-                source,
-                verbatim,
-            },
+            assemble_archive(id, parse_u64(p[2])?, source, verbatim),
         );
     }
 
@@ -127,33 +120,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
 
 fn write_profile(w: &mut impl Write, p: &EntityProfile) -> io::Result<()> {
     writeln!(w, "profile {}", p.name.replace(' ', "_"))?;
-    writeln!(
-        w,
-        "params {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}",
-        p.encode_threshold,
-        p.w_arousal,
-        p.w_novelty,
-        p.w_self,
-        p.w_utility,
-        p.w_goal,
-        p.w_redundancy,
-        p.decay_lambda,
-        p.rehearsal_boost,
-        p.embellish_gain,
-        p.disgust_gain,
-        p.disgust_cap,
-        p.fidelity_loss_on_recall,
-        p.reconsolidation_eta,
-        p.mood_blend,
-        p.cold_access,
-        p.myth_access,
-        p.max_recall,
-        p.extinction_rate,
-        p.merge_similarity,
-        p.ground_min_overlap,
-        p.ground_strikes,
-        p.narrator_firmness
-    )
+    writeln!(w, "params {}", profile_params_line(p))
 }
 
 fn read_profile(r: &mut impl BufRead) -> io::Result<EntityProfile> {
@@ -172,33 +139,7 @@ fn read_profile(r: &mut impl BufRead) -> io::Result<EntityProfile> {
     if n.len() < 18 {
         return fail("params incomplets");
     }
-    Ok(EntityProfile {
-        name,
-        encode_threshold: n[0],
-        w_arousal: n[1],
-        w_novelty: n[2],
-        w_self: n[3],
-        w_utility: n[4],
-        w_goal: n[5],
-        w_redundancy: n[6],
-        decay_lambda: n[7],
-        rehearsal_boost: n[8],
-        embellish_gain: n[9],
-        disgust_gain: n[10],
-        disgust_cap: n[11],
-        fidelity_loss_on_recall: n[12],
-        reconsolidation_eta: n[13],
-        mood_blend: n[14],
-        cold_access: n[15],
-        myth_access: n[16],
-        max_recall: n[17] as usize,
-        extinction_rate: n.get(18).copied().unwrap_or(0.06),
-        merge_similarity: n.get(19).copied().unwrap_or(0.32),
-        ground_min_overlap: n.get(20).copied().unwrap_or(0.18),
-        ground_strikes: n.get(21).copied().unwrap_or(3.0) as usize,
-        narrator_firmness: n.get(22).copied().unwrap_or(0.55),
-        voice: crate::core::profile::Voice::from_gains(n[9], n[10]),
-    })
+    profile_from_params(name, &n).ok_or_else(|| invalid("params incomplets"))
 }
 
 fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
@@ -206,8 +147,8 @@ fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
         w,
         "trace {} {} {} {} {} {} {} {} {} {} {} {} {} {}",
         t.id,
-        ch(t.channel),
-        st(t.status),
+        channel_token(t.channel),
+        status_token(t.status),
         t.valence,
         t.arousal,
         t.disgust,
@@ -237,7 +178,7 @@ fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
         writeln!(
             w,
             "drift {} {} {} {} {}",
-            dk(d.kind),
+            drift_token(d.kind),
             d.at,
             d.fidelity_delta,
             d.valence_delta,
@@ -280,52 +221,56 @@ fn read_trace(r: &mut impl BufRead) -> io::Result<MemoryTrace> {
     for _ in 0..drift_n {
         drifts.push(read_drift(r)?);
     }
-    Ok(MemoryTrace {
-        id: p[1].to_string(),
-        channel: parse_ch(p[2])?,
-        status: parse_st(p[3])?,
-        valence: parse_f(p[4])?,
-        arousal: parse_f(p[5])?,
-        disgust: parse_f(p[6])?,
-        self_relevance: parse_f(p[7])?,
-        fidelity: parse_f(p[8])?,
-        permanence: parse_f(p[9])?,
-        rehearsals: p[10].parse().map_err(invalid)?,
-        access: parse_f(p[11])?,
-        salience_at_encode: parse_f(p[12])?,
-        created_at: parse_u64(p[13])?,
-        last_recalled_at: parse_opt(m[1])?,
-        last_consolidated_at: parse_opt(m[2])?,
-        schema,
-        archive_id,
+    let embedding = {
+        let line = read_line(r).unwrap_or_default();
+        if let Some(rest) = line.strip_prefix("embed ") {
+            rest.split_whitespace()
+                .skip(1)
+                .filter_map(|s| s.parse().ok())
+                .collect()
+        } else {
+            Vec::new()
+        }
+    };
+    let core = read_blob(r).unwrap_or_default();
+    let anchor = {
+        let line = read_line(r).unwrap_or_default();
+        line.strip_prefix("anchor ")
+            .and_then(|s| s.trim().parse().ok())
+            .unwrap_or(0.0)
+    };
+    let detach_strikes = {
+        let line = read_line(r).unwrap_or_default();
+        line.strip_prefix("detach ")
+            .and_then(|s| s.trim().parse().ok())
+            .unwrap_or(0)
+    };
+    Ok(assemble_trace(
+        p[1].to_string(),
         gist,
+        core,
+        parse_f(p[4])?,
+        parse_f(p[5])?,
+        parse_f(p[6])?,
+        parse_f(p[7])?,
+        schema,
+        parse_ch(p[2])?,
+        archive_id,
+        parse_u64(p[13])?,
+        parse_opt(m[1])?,
+        parse_opt(m[2])?,
+        parse_f(p[8])?,
+        parse_f(p[9])?,
+        p[10].parse().map_err(invalid)?,
+        parse_f(p[11])?,
+        parse_st(p[3])?,
+        parse_f(p[12])?,
+        embedding,
+        anchor,
+        detach_strikes,
         cues,
         drifts,
-        embedding: {
-            let line = read_line(r).unwrap_or_default();
-            if let Some(rest) = line.strip_prefix("embed ") {
-                rest.split_whitespace()
-                    .skip(1)
-                    .filter_map(|s| s.parse().ok())
-                    .collect()
-            } else {
-                Vec::new()
-            }
-        },
-        core: read_blob(r).unwrap_or_default(),
-        anchor: {
-            let line = read_line(r).unwrap_or_default();
-            line.strip_prefix("anchor ")
-                .and_then(|s| s.trim().parse().ok())
-                .unwrap_or(0.0)
-        },
-        detach_strikes: {
-            let line = read_line(r).unwrap_or_default();
-            line.strip_prefix("detach ")
-                .and_then(|s| s.trim().parse().ok())
-                .unwrap_or(0)
-        },
-    })
+    ))
 }
 
 fn read_drift(r: &mut impl BufRead) -> io::Result<DriftEvent> {
@@ -334,14 +279,14 @@ fn read_drift(r: &mut impl BufRead) -> io::Result<DriftEvent> {
     if p.len() < 6 || p[0] != "drift" {
         return fail("malformed drift");
     }
-    Ok(DriftEvent {
-        kind: parse_dk(p[1])?,
-        at: parse_u64(p[2])?,
-        fidelity_delta: parse_f(p[3])?,
-        valence_delta: parse_f(p[4])?,
-        disgust_delta: parse_f(p[5])?,
-        note: read_blob(r)?,
-    })
+    Ok(assemble_drift(
+        parse_dk(p[1])?,
+        parse_u64(p[2])?,
+        read_blob(r)?,
+        parse_f(p[3])?,
+        parse_f(p[4])?,
+        parse_f(p[5])?,
+    ))
 }
 
 fn write_axiom(w: &mut impl Write, a: &IdentityAxiom) -> io::Result<()> {
@@ -354,7 +299,7 @@ fn write_axiom(w: &mut impl Write, a: &IdentityAxiom) -> io::Result<()> {
         a.strength,
         a.support_trace_ids.len(),
         a.superseded_by.as_deref().unwrap_or("-"),
-        layer_name(a.layer)
+        layer_token(a.layer)
     )?;
     write_blob(w, &a.statement)?;
     write_blob(w, a.schema.as_deref().unwrap_or(""))?;
@@ -371,7 +316,7 @@ fn read_axiom(r: &mut impl BufRead) -> io::Result<IdentityAxiom> {
         return fail("malformed axiom");
     }
     let layer = if p.len() >= 8 {
-        parse_layer(p[7])
+        parse_layer_token(p[7])
     } else {
         AxiomLayer::Belief
     };
@@ -387,21 +332,21 @@ fn read_axiom(r: &mut impl BufRead) -> io::Result<IdentityAxiom> {
                 .to_string(),
         );
     }
-    Ok(IdentityAxiom {
-        id: p[1].to_string(),
-        created_at: parse_u64(p[2])?,
-        valence: parse_f(p[3])?,
-        strength: parse_f(p[4])?,
-        superseded_by: if p[6] == "-" {
+    Ok(assemble_axiom(
+        p[1].to_string(),
+        statement,
+        parse_f(p[3])?,
+        parse_f(p[4])?,
+        parse_u64(p[2])?,
+        if p[6] == "-" {
             None
         } else {
             Some(p[6].to_string())
         },
-        statement,
         schema,
-        support_trace_ids: support,
         layer,
-    })
+        support,
+    ))
 }
 
 fn write_blob(w: &mut impl Write, s: &str) -> io::Result<()> {
@@ -453,11 +398,7 @@ fn parse_mood(line: &str) -> io::Result<Mood> {
     if p.len() < 3 {
         return fail("mood incomplet");
     }
-    Ok(Mood {
-        valence: parse_f(p[0])?,
-        arousal: parse_f(p[1])?,
-        disgust: parse_f(p[2])?,
-    })
+    Ok(assemble_mood(parse_f(p[0])?, parse_f(p[1])?, parse_f(p[2])?))
 }
 
 fn opt(v: Option<u64>) -> String {
@@ -480,25 +421,11 @@ fn empty_none(s: String) -> Option<String> {
     }
 }
 
-fn ch(c: Channel) -> &'static str {
-    match c {
-        Channel::Selfhood => "self",
-        Channel::World => "world",
-    }
-}
 fn parse_ch(s: &str) -> io::Result<Channel> {
     match s {
         "self" => Ok(Channel::Selfhood),
         "world" => Ok(Channel::World),
         _ => fail("channel inconnu"),
-    }
-}
-fn st(s: TraceStatus) -> &'static str {
-    match s {
-        TraceStatus::Active => "active",
-        TraceStatus::Cold => "cold",
-        TraceStatus::Myth => "myth",
-        TraceStatus::Latent => "latent",
     }
 }
 fn parse_st(s: &str) -> io::Result<TraceStatus> {
@@ -510,18 +437,6 @@ fn parse_st(s: &str) -> io::Result<TraceStatus> {
         "sealed" => Ok(TraceStatus::Active),
         "latent" => Ok(TraceStatus::Latent),
         _ => fail("status inconnu"),
-    }
-}
-fn dk(k: DriftKind) -> &'static str {
-    match k {
-        DriftKind::Embellish => "embellish",
-        DriftKind::AmplifyDisgust => "disgust",
-        DriftKind::Fade => "fade",
-        DriftKind::Merge => "merge",
-        DriftKind::Weather => "weather",
-        DriftKind::Rewrite => "rewrite",
-        DriftKind::Reinterpret => "reinterpret",
-        DriftKind::Ground => "ground",
     }
 }
 fn parse_dk(s: &str) -> io::Result<DriftKind> {
@@ -537,21 +452,6 @@ fn parse_dk(s: &str) -> io::Result<DriftKind> {
         _ => fail("drift inconnue"),
     }
 }
-fn layer_name(l: AxiomLayer) -> &'static str {
-    match l {
-        AxiomLayer::Motif => "motif",
-        AxiomLayer::Belief => "belief",
-        AxiomLayer::Trait => "trait",
-    }
-}
-fn parse_layer(s: &str) -> AxiomLayer {
-    match s {
-        "motif" => AxiomLayer::Motif,
-        "trait" => AxiomLayer::Trait,
-        _ => AxiomLayer::Belief,
-    }
-}
-
 fn parse_f(s: &str) -> io::Result<f32> {
     s.parse().map_err(invalid)
 }

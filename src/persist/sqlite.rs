@@ -4,11 +4,12 @@ use std::os::raw::{c_char, c_int, c_void};
 use std::path::Path;
 use std::ptr;
 
-use crate::core::model::{
-    ArchiveRecord, AxiomLayer, Channel, DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood,
-    TraceStatus,
+use crate::core::model::{Channel, DriftKind, Mood, TraceStatus};
+use crate::persist::snapshot::{
+    assemble_archive, assemble_axiom, assemble_drift, assemble_mood, assemble_trace,
+    channel_token, drift_token, layer_token, parse_layer_token, profile_from_params,
+    profile_params_line, status_token, Snapshot,
 };
-use crate::persist::Snapshot;
 use crate::core::profile::EntityProfile;
 use crate::core::store::MemoryStore;
 
@@ -221,7 +222,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         let st = db.prepare("INSERT INTO meta(k,v) VALUES (?1,?2)")?;
         for (k, v) in [
             ("name", profile.name.as_str()),
-            ("params", &params_line(profile)),
+            ("params", &profile_params_line(profile)),
             ("mood", &format!("{} {} {}", mood.valence, mood.arousal, mood.disgust)),
         ] {
             st.bind_text(1, k)?;
@@ -256,7 +257,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         q_tr.bind_f64(6, t.disgust as f64)?;
         q_tr.bind_f64(7, t.self_relevance as f64)?;
         q_tr.bind_opt_text(8, t.schema.as_deref())?;
-        q_tr.bind_text(9, ch(t.channel))?;
+        q_tr.bind_text(9, channel_token(t.channel))?;
         q_tr.bind_opt_text(10, t.archive_id.as_deref())?;
         q_tr.bind_i64(11, t.created_at as i64)?;
         match t.last_recalled_at {
@@ -271,7 +272,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         q_tr.bind_f64(15, t.permanence as f64)?;
         q_tr.bind_i64(16, t.rehearsals as i64)?;
         q_tr.bind_f64(17, t.access as f64)?;
-        q_tr.bind_text(18, st(t.status))?;
+        q_tr.bind_text(18, status_token(t.status))?;
         q_tr.bind_f64(19, t.salience_at_encode as f64)?;
         q_tr.bind_text(20, &pack_emb(&t.embedding))?;
         q_tr.bind_f64(21, t.anchor as f64)?;
@@ -284,7 +285,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         }
         for d in &t.drifts {
             q_dr.bind_text(1, &t.id)?;
-            q_dr.bind_text(2, dk(d.kind))?;
+            q_dr.bind_text(2, drift_token(d.kind))?;
             q_dr.bind_i64(3, d.at as i64)?;
             q_dr.bind_text(4, &d.note)?;
             q_dr.bind_f64(5, d.fidelity_delta as f64)?;
@@ -305,7 +306,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         q_ax.bind_i64(5, a.created_at as i64)?;
         q_ax.bind_opt_text(6, a.superseded_by.as_deref())?;
         q_ax.bind_opt_text(7, a.schema.as_deref())?;
-        q_ax.bind_text(8, layer_name(a.layer))?;
+        q_ax.bind_text(8, layer_token(a.layer))?;
         q_ax.step_done()?;
         for tid in &a.support_trace_ids {
             q_sup.bind_text(1, &a.id)?;
@@ -402,12 +403,12 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         if row.len() < 4 {
             continue;
         }
-        let a = ArchiveRecord {
-            id: row[0].clone(),
-            created_at: row[1].parse().unwrap_or(0),
-            source: row[2].clone(),
-            verbatim: row[3].clone(),
-        };
+        let a = assemble_archive(
+            row[0].clone(),
+            row[1].parse().unwrap_or(0),
+            row[2].clone(),
+            row[3].clone(),
+        );
         store.archives.insert(a.id.clone(), a);
     }
 
@@ -418,32 +419,32 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         if row.len() < 20 {
             continue;
         }
-        let t = MemoryTrace {
-            id: row[0].clone(),
-            gist: row[1].clone(),
-            core: row[2].clone(),
-            valence: row[3].parse().unwrap_or(0.0),
-            arousal: row[4].parse().unwrap_or(0.0),
-            disgust: row[5].parse().unwrap_or(0.0),
-            self_relevance: row[6].parse().unwrap_or(0.0),
-            schema: empty_none(&row[7]),
-            channel: parse_ch(&row[8]),
-            archive_id: empty_none(&row[9]),
-            created_at: row[10].parse().unwrap_or(0),
-            last_recalled_at: parse_opt_u64(&row[11]),
-            last_consolidated_at: parse_opt_u64(&row[12]),
-            fidelity: row[13].parse().unwrap_or(1.0),
-            permanence: row[14].parse().unwrap_or(0.0),
-            rehearsals: row[15].parse().unwrap_or(0),
-            access: row[16].parse().unwrap_or(1.0),
-            status: parse_st(&row[17]),
-            salience_at_encode: row[18].parse().unwrap_or(0.0),
-            embedding: unpack_emb(&row[19]),
-            anchor: row.get(20).and_then(|s| s.parse().ok()).unwrap_or(0.0),
-            detach_strikes: row.get(21).and_then(|s| s.parse().ok()).unwrap_or(0),
-            cues: Vec::new(),
-            drifts: Vec::new(),
-        };
+        let t = assemble_trace(
+            row[0].clone(),
+            row[1].clone(),
+            row[2].clone(),
+            row[3].parse().unwrap_or(0.0),
+            row[4].parse().unwrap_or(0.0),
+            row[5].parse().unwrap_or(0.0),
+            row[6].parse().unwrap_or(0.0),
+            empty_none(&row[7]),
+            parse_ch(&row[8]),
+            empty_none(&row[9]),
+            row[10].parse().unwrap_or(0),
+            parse_opt_u64(&row[11]),
+            parse_opt_u64(&row[12]),
+            row[13].parse().unwrap_or(1.0),
+            row[14].parse().unwrap_or(0.0),
+            row[15].parse().unwrap_or(0),
+            row[16].parse().unwrap_or(1.0),
+            parse_st(&row[17]),
+            row[18].parse().unwrap_or(0.0),
+            unpack_emb(&row[19]),
+            row.get(20).and_then(|s| s.parse().ok()).unwrap_or(0.0),
+            row.get(21).and_then(|s| s.parse().ok()).unwrap_or(0),
+            Vec::new(),
+            Vec::new(),
+        );
         store.traces.insert(t.id.clone(), t);
     }
 
@@ -463,14 +464,14 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
             continue;
         }
         if let Some(t) = store.traces.get_mut(&row[0]) {
-            t.drifts.push(DriftEvent {
-                kind: parse_dk(&row[1]),
-                at: row[2].parse().unwrap_or(0),
-                note: row[3].clone(),
-                fidelity_delta: row[4].parse().unwrap_or(0.0),
-                valence_delta: row[5].parse().unwrap_or(0.0),
-                disgust_delta: row[6].parse().unwrap_or(0.0),
-            });
+            t.drifts.push(assemble_drift(
+                parse_dk(&row[1]),
+                row[2].parse().unwrap_or(0),
+                row[3].clone(),
+                row[4].parse().unwrap_or(0.0),
+                row[5].parse().unwrap_or(0.0),
+                row[6].parse().unwrap_or(0.0),
+            ));
         }
     }
     for row in query(
@@ -480,17 +481,17 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         if row.len() < 6 {
             continue;
         }
-        let a = IdentityAxiom {
-            id: row[0].clone(),
-            statement: row[1].clone(),
-            valence: row[2].parse().unwrap_or(0.0),
-            strength: row[3].parse().unwrap_or(0.0),
-            created_at: row[4].parse().unwrap_or(0),
-            superseded_by: empty_none(&row[5]),
-            schema: row.get(6).and_then(|s| empty_none(s)),
-            layer: parse_layer(row.get(7).map(|s| s.as_str()).unwrap_or("belief")),
-            support_trace_ids: Vec::new(),
-        };
+        let a = assemble_axiom(
+            row[0].clone(),
+            row[1].clone(),
+            row[2].parse().unwrap_or(0.0),
+            row[3].parse().unwrap_or(0.0),
+            row[4].parse().unwrap_or(0),
+            empty_none(&row[5]),
+            row.get(6).and_then(|s| empty_none(s)),
+            parse_layer_token(row.get(7).map(|s| s.as_str()).unwrap_or("belief")),
+            Vec::new(),
+        );
         store.axioms.insert(a.id.clone(), a);
     }
     for row in query(&db, "SELECT axiom_id,trace_id FROM axiom_support")? {
@@ -517,67 +518,10 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
     })
 }
 
-fn params_line(p: &EntityProfile) -> String {
-    format!(
-        "{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}",
-        p.encode_threshold,
-        p.w_arousal,
-        p.w_novelty,
-        p.w_self,
-        p.w_utility,
-        p.w_goal,
-        p.w_redundancy,
-        p.decay_lambda,
-        p.rehearsal_boost,
-        p.embellish_gain,
-        p.disgust_gain,
-        p.disgust_cap,
-        p.fidelity_loss_on_recall,
-        p.reconsolidation_eta,
-        p.mood_blend,
-        p.cold_access,
-        p.myth_access,
-        p.max_recall,
-        p.extinction_rate,
-        p.merge_similarity,
-        p.ground_min_overlap,
-        p.ground_strikes,
-        p.narrator_firmness
-    )
-}
-
 fn parse_profile(name: &str, rest: &str) -> io::Result<EntityProfile> {
     let n: Vec<f32> = rest.split_whitespace().filter_map(|s| s.parse().ok()).collect();
-    if n.len() < 18 {
-        return Err(io::Error::new(io::ErrorKind::InvalidData, "params sqlite incomplets"));
-    }
-    Ok(EntityProfile {
-        name: name.to_string(),
-        encode_threshold: n[0],
-        w_arousal: n[1],
-        w_novelty: n[2],
-        w_self: n[3],
-        w_utility: n[4],
-        w_goal: n[5],
-        w_redundancy: n[6],
-        decay_lambda: n[7],
-        rehearsal_boost: n[8],
-        embellish_gain: n[9],
-        disgust_gain: n[10],
-        disgust_cap: n[11],
-        fidelity_loss_on_recall: n[12],
-        reconsolidation_eta: n[13],
-        mood_blend: n[14],
-        cold_access: n[15],
-        myth_access: n[16],
-        max_recall: n[17] as usize,
-        extinction_rate: n.get(18).copied().unwrap_or(0.06),
-        merge_similarity: n.get(19).copied().unwrap_or(0.32),
-        ground_min_overlap: n.get(20).copied().unwrap_or(0.18),
-        ground_strikes: n.get(21).copied().unwrap_or(3.0) as usize,
-        narrator_firmness: n.get(22).copied().unwrap_or(0.55),
-        voice: crate::core::profile::Voice::from_gains(n[9], n[10]),
-    })
+    profile_from_params(name, &n)
+        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "params sqlite incomplets"))
 }
 
 fn parse_mood(s: &str) -> io::Result<Mood> {
@@ -585,11 +529,7 @@ fn parse_mood(s: &str) -> io::Result<Mood> {
     if p.len() < 3 {
         return Err(io::Error::new(io::ErrorKind::InvalidData, "mood sqlite"));
     }
-    Ok(Mood {
-        valence: p[0],
-        arousal: p[1],
-        disgust: p[2],
-    })
+    Ok(assemble_mood(p[0], p[1], p[2]))
 }
 
 fn pack_emb(v: &[f32]) -> String {
@@ -619,25 +559,11 @@ fn parse_opt_u64(s: &str) -> Option<u64> {
     }
 }
 
-fn ch(c: Channel) -> &'static str {
-    match c {
-        Channel::Selfhood => "self",
-        Channel::World => "world",
-    }
-}
 fn parse_ch(s: &str) -> Channel {
     if s == "world" {
         Channel::World
     } else {
         Channel::Selfhood
-    }
-}
-fn st(s: TraceStatus) -> &'static str {
-    match s {
-        TraceStatus::Active => "active",
-        TraceStatus::Cold => "cold",
-        TraceStatus::Myth => "myth",
-        TraceStatus::Latent => "latent",
     }
 }
 fn parse_st(s: &str) -> TraceStatus {
@@ -646,18 +572,6 @@ fn parse_st(s: &str) -> TraceStatus {
         "myth" => TraceStatus::Myth,
         "latent" => TraceStatus::Latent,
         _ => TraceStatus::Active,
-    }
-}
-fn dk(k: DriftKind) -> &'static str {
-    match k {
-        DriftKind::Embellish => "embellish",
-        DriftKind::AmplifyDisgust => "disgust",
-        DriftKind::Fade => "fade",
-        DriftKind::Merge => "merge",
-        DriftKind::Weather => "weather",
-        DriftKind::Rewrite => "rewrite",
-        DriftKind::Reinterpret => "reinterpret",
-        DriftKind::Ground => "ground",
     }
 }
 fn parse_dk(s: &str) -> DriftKind {
@@ -672,17 +586,4 @@ fn parse_dk(s: &str) -> DriftKind {
         _ => DriftKind::Embellish,
     }
 }
-fn layer_name(l: AxiomLayer) -> &'static str {
-    match l {
-        AxiomLayer::Motif => "motif",
-        AxiomLayer::Belief => "belief",
-        AxiomLayer::Trait => "trait",
-    }
-}
-fn parse_layer(s: &str) -> AxiomLayer {
-    match s {
-        "motif" => AxiomLayer::Motif,
-        "trait" => AxiomLayer::Trait,
-        _ => AxiomLayer::Belief,
-    }
-}
+
