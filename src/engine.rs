@@ -101,32 +101,18 @@ impl SelectiveMemory {
     }
 
     /// Same gate as `live_with`. `hold` writes the live thread; sleep commit does not.
+    ///
+    /// Order is the organ: interpret → paint → maybe hear → split → gate →
+    /// maybe accept_core → blend mood. `commit_talk` calls this with `hold = false`.
     fn ingest(&mut self, mut input: EncodeInput<'_>, hold: bool) -> EncodeDecision {
-        let uninterpreted =
-            input.schema.is_none() && input.valence.abs() < 0.08 && input.disgust < 0.08;
-        if uninterpreted {
-            let (v, a, d, s) = encode::affect::guess(input.event);
-            input.valence = v;
-            input.arousal = a;
-            input.disgust = d;
-            input.schema = s;
-            let axioms: Vec<String> = self
-                .store
-                .living_axioms()
-                .into_iter()
-                .map(|ax| ax.statement.clone())
-                .collect();
-            if let Some(interp) = self.narrator.interpret(input.event, &self.mood, &axioms) {
-                input.valence = interp.valence;
-                input.arousal = interp.arousal;
-                input.disgust = interp.disgust;
-                if input.schema.is_none() {
-                    input.schema = interp.schema;
-                }
-                input.self_relevance = input.self_relevance.max(interp.self_relevance);
-            }
-        }
-        encode::identity::paint(&mut self.store, &self.mood, &mut input);
+        let axioms: Vec<String> = self
+            .store
+            .living_axioms()
+            .into_iter()
+            .map(|ax| ax.statement.clone())
+            .collect();
+        encode::interpret(&mut input, &self.mood, &axioms, self.narrator.as_ref());
+        encode::paint(&mut self.store, &self.mood, &mut input);
         if hold {
             self.talk.hear(input.event, input.schema.as_deref());
         }
@@ -135,11 +121,7 @@ impl SelectiveMemory {
         let disgust = input.disgust;
         let input_source = input.source;
         let event_owned = input.event.to_string();
-        let proposed = if encode::needs_split(&event_owned) {
-            self.narrator.segment(&event_owned)
-        } else {
-            None
-        };
+        let proposed = encode::propose_split(&event_owned, self.narrator.as_ref());
         let decision = encode::encode_with_parts(
             &mut self.store,
             &self.profile,
@@ -147,18 +129,14 @@ impl SelectiveMemory {
             self.embedder.as_ref(),
             proposed.as_deref(),
         );
+        encode::maybe_set_core(
+            &mut self.store,
+            self.narrator.as_ref(),
+            &decision,
+            input_source,
+            &event_owned,
+        );
         if decision.kept {
-            if decision.parts <= 1 && input_source != "talk" {
-                if let Some(tid) = decision.trace_id.as_deref() {
-                    if let Some(raw) = self.narrator.extract_core(&event_owned) {
-                        if let Some(ok) = encode::accept_core(&raw, &event_owned) {
-                            if let Some(t) = self.store.traces.get_mut(tid) {
-                                t.core = ok;
-                            }
-                        }
-                    }
-                }
-            }
             self.mood.blend(
                 &Mood {
                     valence,
