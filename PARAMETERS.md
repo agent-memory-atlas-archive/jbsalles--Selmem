@@ -81,9 +81,22 @@ Qualitative order is defensible (self and arousal first). The six numbers are a 
 
 `ground_min_overlap = 0.18` · `ground_strikes = 3` · firmness tender `0.42` / austere `0.72`
 
-A generated sentence is a **miss** when its Jaccard vs the *core* falls below `ground_min_overlap`. Misses increment `detach_strikes`. How soon a rewrite fires, and how hard, is `narrator_firmness` × importance (permanence, anchor, access, fidelity). Cold/myth and slipping traces have hold = 0 and may warp without a ceiling. The rewrite is a blend, never the archive.
+A generated sentence is a **miss** when `judge_against_core` returns a kind the core does not authorize:
 
-**Why 0.18 and 3.** Same status as `τ`. **Exploratory.**
+| kind | meaning | miss? |
+|---|---|---|
+| `Hold` | same claim | only if Jaccard `< ground_min_overlap` |
+| `Compress` | detail fell off, core still entails the sentence | no |
+| `Elaborate` | cause / stake the core never licensed | yes |
+| `Reframe` | same event, other speech act (left → abandoned) | yes |
+| `Contradict` | spoken sentence denies the core | yes |
+| `Depart` | not the same event | yes |
+
+`ground_min_overlap` is the identity gate for `Hold`, not the whole test. Misses increment `detach_strikes`. How soon a rewrite fires, and how hard, is `narrator_firmness` × importance (permanence, anchor, access, fidelity). Cold/myth and slipping traces have hold = 0 and may warp without a ceiling. The rewrite is a blend, never the archive.
+
+Embeddings still rank recall. They do not judge grounding.
+
+**Why 0.18 and 3.** Same status as `τ`. **Exploratory.** The kinds are the mechanism; the cut is not.
 
 `narrator_firmness` default `0.55` (tender `0.42`, austere `0.72`). CLI `--narrator-firmness`. `GET|POST /profile`.
 

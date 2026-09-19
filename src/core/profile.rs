@@ -80,7 +80,7 @@ pub struct EntityProfile {
     pub max_recall: usize,
     pub extinction_rate: f32,
     pub merge_similarity: f32,
-    /// Below this Jaccard vs core, the sentence counts as a miss (not a correction yet).
+    /// Identity-gate cut for `DetachKind::Hold`. Causal / frame / contradiction misses ignore it.
     pub ground_min_overlap: f32,
     /// Misses allowed before the organ rewrites its gist toward the core.
     pub ground_strikes: usize,

@@ -46,7 +46,7 @@ If you paste the original sentence back “for accuracy”, you have a store aga
 8. **Ladder.** Episode → motif (2 traces, same schema) → belief (3+) → trait (two aligned beliefs). Superseded beliefs stay in lineage.
 9. **Feedback.** Living axioms tint the next event before the gate. Recall can shift sense with current mood.
 10. **Distance.** Fingerprint uses valence, disgust, fidelity, anchors, core tokens, axioms, founders, traits, contradictions. 0 = same book. 1 = disjoint books.
-11. **Grounding.** Fading traces may keep warping. On a living trace, misses vs core increment `detach_strikes`. Pull-back strength is `narrator_firmness × importance`. Blend toward core, never toward the archive.
+11. **Grounding.** Fading traces may keep warping. A miss is a kind the core does not authorize (`Elaborate` / `Reframe` / `Contradict` / `Depart`), not a low Jaccard. On a living trace, misses increment `detach_strikes`. Pull-back strength is `narrator_firmness × importance`. Blend toward core, never toward the archive. Jaccard is only the identity gate.
 12. **Latent.** The scene can leave recall while schema and affect still bias encode.
 
 ---
@@ -81,7 +81,7 @@ experience
 | decay λ | 0.10 | 0.06 | unfitted |
 | embellish | 0.18 | 0.05 | contrast pair |
 | disgust gain | 0.05 | 0.16 | contrast pair |
-| ground_min_overlap | 0.18 | 0.18 | Jaccard vs core |
+| ground_min_overlap | 0.18 | 0.18 | identity gate on `Hold` |
 | ground_strikes | 3 | 3 | two free misses, then rewrite |
 | narrator_firmness | 0.42 | 0.72 | blend strength |
 
@@ -97,7 +97,7 @@ If `S < τ` and permanence < 0.8: nothing is stored.
 
 If the caller sends no affect: lexicon (FR+EN), then identity paint, then `Narrator::interpret` when an HTTP narrator is set. The interpreter sees the live sentence and living axioms only.
 
-**Recall.** Small top-k. Mix embedding, lexicon, mood, access count. Each recall can cost fidelity and shift valence (`DriftKind::Reinterpret`). Overlap vs core below `ground_min_overlap` is a miss. `hold = narrator_firmness × importance`. Low hold: no ceiling on warp. High hold: after enough misses, blend gist toward a core-facing rewrite (`DriftKind::Ground`). Latent traces are not replayed as scenes.
+**Recall.** Small top-k. Mix embedding, lexicon, mood, access count. Each recall can cost fidelity and shift valence (`DriftKind::Reinterpret`). A miss is a kind the core does not authorize (`Elaborate` / `Reframe` / `Contradict` / `Depart`); `ground_min_overlap` is only the identity gate on `Hold`. `hold = narrator_firmness × importance`. Low hold: no ceiling on warp. High hold: after enough misses, blend gist toward a core-facing rewrite (`DriftKind::Ground`). Latent traces are not replayed as scenes.
 
 **Sleep.** Anchor, decay detail, drop unused disgust, bounded rewrite, merge (two strong anchors do not merge), ladder, re-anchor. No LLM required.
 

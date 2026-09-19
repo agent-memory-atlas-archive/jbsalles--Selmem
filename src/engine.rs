@@ -133,6 +133,7 @@ impl SelectiveMemory {
         let valence = input.valence;
         let arousal = input.arousal;
         let disgust = input.disgust;
+        let input_source = input.source;
         let event_owned = input.event.to_string();
         let proposed = if encode::needs_split(&event_owned) {
             self.narrator.segment(&event_owned)
@@ -147,7 +148,7 @@ impl SelectiveMemory {
             proposed.as_deref(),
         );
         if decision.kept {
-            if decision.parts <= 1 {
+            if decision.parts <= 1 && input_source != "talk" {
                 if let Some(tid) = decision.trace_id.as_deref() {
                     if let Some(raw) = self.narrator.extract_core(&event_owned) {
                         if let Some(ok) = encode::accept_core(&raw, &event_owned) {
@@ -181,24 +182,20 @@ impl SelectiveMemory {
         let turns = std::mem::take(&mut self.talk.turns);
         self.talk.clear();
         for t in turns {
-            let event = if t.reply.trim().is_empty() {
-                t.user.clone()
-            } else if t.user.trim().is_empty() {
-                t.reply.clone()
-            } else {
-                format!("{}\n{}", t.user.trim(), t.reply.trim())
-            };
-            if event.trim().is_empty() {
+            // The sitting is the other voice. Glueing the reply in made the
+            // entity's words count as what happened to it.
+            let event = t.user.trim();
+            if event.is_empty() {
                 continue;
             }
-            let (v, a, d, guessed) = encode::affect::guess(&event);
-            let mut ev = EncodeInput::new(&event);
+            let (v, a, d, guessed) = encode::affect::guess(event);
+            let mut ev = EncodeInput::new(event);
             ev.source = "talk";
             ev.valence = v;
-            ev.arousal = a.max(0.28);
+            ev.arousal = a;
             ev.disgust = d;
-            ev.self_relevance = 0.78;
-            ev.utility = 0.55;
+            ev.self_relevance = 0.35;
+            ev.utility = 0.45;
             ev.permanence = 0.40;
             ev.schema = schema.clone().or(guessed);
             let _ = self.ingest(ev, false);
@@ -292,6 +289,95 @@ impl SelectiveMemory {
         self.talk.clear();
     }
 
+    /// Chat only. Pin the sitting's content lines so sleep can clear the
+    /// frame without dropping what was just said. Does not change the gate.
+    pub fn keep_sitting(&mut self) -> (usize, Option<String>) {
+        self.talk.refresh();
+        let lines: Vec<String> = self
+            .talk
+            .turns
+            .iter()
+            .map(|t| t.user.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect();
+        let cue = self.talk.topic.clone();
+        let mut chunks: Vec<String> = Vec::new();
+        for line in lines {
+            let short = line.split_whitespace().count() <= 2;
+            if short {
+                if let Some(prev) = chunks.last_mut() {
+                    prev.push('\n');
+                    prev.push_str(&line);
+                    continue;
+                }
+            }
+            chunks.push(line);
+        }
+        let mut kept = 0usize;
+        for chunk in &chunks {
+            if chunk.split_whitespace().count() <= 2 {
+                continue;
+            }
+            if self
+                .store
+                .archives
+                .values()
+                .any(|a| a.source == "talk" && a.verbatim == *chunk)
+            {
+                continue;
+            }
+            let (v, a, d, schema) = encode::affect::guess(chunk);
+            let mut ev = EncodeInput::new(chunk);
+            ev.source = "talk";
+            ev.channel = crate::core::model::Channel::World;
+            ev.valence = v;
+            ev.arousal = a;
+            ev.disgust = d;
+            ev.self_relevance = 0.55;
+            ev.utility = 0.55;
+            ev.permanence = 0.35;
+            ev.schema = schema;
+            if self.ingest(ev, false).kept {
+                kept += 1;
+            }
+        }
+        (kept, cue)
+    }
+
+    /// Sitting hours are not vows. Each chat-night they lose a little;
+    /// after about 20, recall no longer finds them.
+    pub fn fade_sitting(&mut self) {
+        let talk_ids: Vec<String> = self
+            .store
+            .traces
+            .values()
+            .filter(|t| {
+                t.permanence < 0.80
+                    && t.archive_id
+                        .as_ref()
+                        .and_then(|id| self.store.archives.get(id))
+                        .map(|a| a.source == "talk")
+                        .unwrap_or(false)
+            })
+            .map(|t| t.id.clone())
+            .collect();
+        for id in talk_ids {
+            let Some(t) = self.store.traces.get_mut(&id) else {
+                continue;
+            };
+            t.fidelity = (t.fidelity - 0.04).max(0.15);
+            t.access = (t.access - 0.05).max(0.0);
+            t.permanence = (t.permanence - 0.01).max(0.0);
+        }
+    }
+
+    /// Empty the book, the seal, axioms, mood and the sitting. Profile stays.
+    pub fn reset(&mut self) {
+        self.store = MemoryStore::new();
+        self.mood = Mood::default();
+        self.talk.clear();
+    }
+
     /// Drop the frame if the conversation went idle (10 min) or hit 2 h.
     pub fn refresh_talk(&mut self) {
         self.talk.refresh();
@@ -307,14 +393,29 @@ impl SelectiveMemory {
             user.to_string()
         };
         let recalled = self.remember(&query);
-        let memories: Vec<String> = recalled.into_iter().map(|r| r.narrative).collect();
-        let axioms: Vec<String> = self
-            .who_am_i()
-            .into_iter()
-            .map(|a| a.statement.clone())
-            .collect();
         let empty = WorkingTalk::default();
         let talk = if hold { &self.talk } else { &empty };
+        // Sitting: answer the human. The book stays a book — sleep, /who,
+        // isolated probes. A thin greeting must not recite axioms.
+        let (memories, axioms) = if hold {
+            let memories: Vec<String> = recalled
+                .into_iter()
+                .take(1)
+                .map(|r| r.narrative)
+                .collect();
+            (
+                memories,
+                vec![format!("Your name is {}.", self.profile.name)],
+            )
+        } else {
+            (
+                recalled.into_iter().map(|r| r.narrative).collect(),
+                self.who_am_i()
+                    .into_iter()
+                    .map(|a| a.statement.clone())
+                    .collect(),
+            )
+        };
         let reply = self
             .narrator
             .reply(user, &memories, &axioms, &self.mood, talk);
@@ -328,6 +429,19 @@ impl SelectiveMemory {
         let trace = self.store.traces.get(trace_id)?;
         let aid = trace.archive_id.as_ref()?;
         self.store.archives.get(aid).map(|a| a.verbatim.as_str())
+    }
+
+    /// Keep this hour. Does not open the archive. Next nights decay it more slowly.
+    pub fn pin(&mut self, trace_id: &str) -> bool {
+        let Some(t) = self.store.traces.get_mut(trace_id) else {
+            return false;
+        };
+        t.permanence = t.permanence.max(0.92);
+        t.self_relevance = t.self_relevance.max(0.9);
+        t.anchor = t.anchor.max(0.85);
+        t.status = crate::core::model::TraceStatus::Active;
+        t.access = t.access.max(0.7);
+        true
     }
 }
 

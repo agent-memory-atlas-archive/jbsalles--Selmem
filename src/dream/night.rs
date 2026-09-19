@@ -180,7 +180,7 @@ fn rewrite_pass(
             continue;
         }
         let core = t.core.clone();
-        if crate::recall::ground::overlap_with_core(&text, &core) < profile.ground_min_overlap {
+        if crate::recall::ground::is_grounding_miss(&text, &core, profile.ground_min_overlap) {
             let rewrite = narrator.recontextualize(t, &core, profile);
             if let Some(tr) = store.traces.get_mut(&id) {
                 crate::recall::ground::apply_grounding(tr, profile, &text, &core, Some(rewrite));
