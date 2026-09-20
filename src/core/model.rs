@@ -163,6 +163,58 @@ impl Mood {
     }
 }
 
+/// Runtime cuts for P0 ablations. Not persisted. Default is the full organ.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct OrganCut {
+    pub reconsolidate: bool,
+    pub ground: bool,
+    pub ladder: bool,
+}
+
+impl Default for OrganCut {
+    fn default() -> Self {
+        Self::full()
+    }
+}
+
+impl OrganCut {
+    pub fn full() -> Self {
+        Self {
+            reconsolidate: true,
+            ground: true,
+            ladder: true,
+        }
+    }
+
+    pub fn no_recon() -> Self {
+        Self {
+            reconsolidate: false,
+            ..Self::full()
+        }
+    }
+
+    pub fn no_ground() -> Self {
+        Self {
+            ground: false,
+            ..Self::full()
+        }
+    }
+
+    pub fn no_ladder() -> Self {
+        Self {
+            ladder: false,
+            ..Self::full()
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+pub struct RecallTally {
+    pub n: u32,
+    pub pulled: u32,
+    pub reconsolidated: u32,
+}
+
 #[derive(Clone, Debug)]
 pub struct RecalledMemory {
     pub trace_id: String,
@@ -171,4 +223,6 @@ pub struct RecalledMemory {
     pub schema: Option<String>,
     pub channel: Channel,
     pub disclaimer: String,
+    pub pulled_toward_core: bool,
+    pub reconsolidated: bool,
 }

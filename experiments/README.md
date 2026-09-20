@@ -10,10 +10,34 @@ This folder is the public record of the SelMem benches. The white paper states t
 | Split lives (five hours each side) | `data/divergence.json` | `examples/divergence` | yes | not run |
 | Erasure (trivia vs aversion) | `data/erasure.json` | `examples/erasure` | yes | not run |
 | v0.1 C0 / C1 / C2 | `data/v01.json` | `examples/benchmark` | yes | 10 pairs × k=24 and k=8 |
-| Persist, one hour then five same-schema | `data/v01_persist.json` | `examples/persist` | yes | Grok, n=1 each protocol |
-| Persist rumination (same meeting ×5, pinned) | `data/v01_ruminate.json` | `examples/persist --ruminate` | yes | Grok, n=1 |
+| Persist, one hour then five same-schema | `data/v01_persist.json` | `examples/persist` | yes | Grok n=1, then P0 n=5 |
+| Persist rumination (same meeting ×5, pinned) | `data/v01_ruminate.json` | `examples/persist --ruminate` | yes | Grok n=1, then P0 n=5 |
+| P0 ablations (C1, C3, C2, C2−S/R/L/G) | persist + ruminate scripts | `examples/persist` | yes | n=5 each, seed 1, S/N |
 
 C3 is a last-k summary plus **one** profile line (not the five T₀ paragraphs). Persist script: 12 dull days, five same-schema hours, 8 posts. Sparse probes: t0 and post+8 only. Does not rewrite `data/v01.json`.
+
+**P0 cells.** Same scripts, isolated probes. `OrganCut` is runtime-only (not in the vault).
+
+| Cell | What is cut |
+| --- | --- |
+| C0 | no book |
+| C1 | last-k verbatim |
+| C3 | rolling summary + one profile line |
+| C2 | full organ |
+| C2NoSleep (`c2_nosleep`) | every `sleep()` skipped |
+| C2NoRecon (`c2_norecon`) | `apply_reconsolidation` skipped |
+| C2NoLadder (`c2_noladder`) | night does not mint motif / belief / trait |
+| C2NoGround (`c2_noground`) | no pull toward core at recall or night rewrite |
+
+JSON now logs `pulled_*`, `recon_*`, `marker_a` / `marker_b` per instant, and `marker_last_*` on the pair. `D_speak` stays a log. `h2_holds` is still book-only. `marker_holds` is A naming T₀ after the shared posts.
+
+```bash
+./run.sh test --test benchmark
+./run.sh run --release --example persist -- --pairs 5 --seed 1 --last-k 8 --out selmem-persist-p0-n5.json
+./run.sh run --release --example persist -- --ruminate --pairs 5 --seed 1 --last-k 8 --out selmem-ruminate-p0-n5.json
+```
+
+`benchmark --p0` on v0.1 was not run. Persist + ruminate already isolate the cuts. Official `marker_last` under-counts C2 once sleep has replaced T₀ words with *wound / presence*; read the late-probe replies. Tables: [REPORT.md](REPORT.md) §7.
 
 Isolated `speak` is the pre-stance path again (retrieved scenes + living axioms). `recall/stance.rs` stays as the ablation that showed A≈B once the scene is withheld.
 

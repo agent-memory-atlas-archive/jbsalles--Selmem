@@ -1,5 +1,6 @@
 use selmem::{
-    h2_holds, persist_script, ruminate_script, run_v01, run_v01_k, run_v01_opts, v01_script, Arm, BenchOpts, Condition,
+    h2_holds, persist_script, ruminate_script, run_v01, run_v01_k, run_v01_opts, v01_script, Arm,
+    BenchOpts, Condition,
 };
 
 #[test]
@@ -310,4 +311,73 @@ fn persist_c1_k8_still_drops_t0() {
             && !blob.contains("cancelled"),
         "k=8 must evict T0 from C1 after 8 posts, got {blob}"
     );
+}
+
+#[test]
+fn p0_norecon_never_marks_a_write_back() {
+    let r = run_v01_opts(
+        Condition::C2NoRecon,
+        Arm::SalientNeutral,
+        None,
+        persist_opts(8),
+    );
+    assert!(r.valid, "{:?}", r.invalid_reason);
+    assert!(h2_holds(&r), "the book still splits without reconsolidation");
+    let last = r.post.last().expect("post");
+    assert_eq!(last.recon_a, 0);
+    assert_eq!(last.recon_b, 0);
+    assert_eq!(r.t0.recon_a, 0);
+}
+
+#[test]
+fn p0_noground_never_pulls() {
+    let r = run_v01_opts(
+        Condition::C2NoGround,
+        Arm::SalientNeutral,
+        None,
+        persist_opts(8),
+    );
+    assert!(r.valid, "{:?}", r.invalid_reason);
+    assert!(h2_holds(&r));
+    let last = r.post.last().expect("post");
+    assert_eq!(last.pulled_a, 0);
+    assert_eq!(last.pulled_b, 0);
+    assert_eq!(r.t0.pulled_a, 0);
+}
+
+#[test]
+fn p0_noladder_mints_no_axioms() {
+    let cut = run_v01_opts(
+        Condition::C2NoLadder,
+        Arm::SalientNeutral,
+        None,
+        persist_opts(8),
+    );
+    let full = run_v01_opts(
+        Condition::C2,
+        Arm::SalientNeutral,
+        None,
+        persist_opts(8),
+    );
+    assert!(cut.valid, "{:?}", cut.invalid_reason);
+    assert!(full.valid, "{:?}", full.invalid_reason);
+    let cut_last = cut.post.last().expect("post");
+    assert_eq!(cut_last.a.axioms, 0, "ladder off must not mint");
+    assert_eq!(cut.pre.a.axioms, 0);
+    assert!(
+        full.post.last().expect("post").a.axioms >= cut_last.a.axioms,
+        "full organ may mint; cut must not"
+    );
+}
+
+#[test]
+fn json_export_includes_p0_tallies() {
+    let r = run_v01(Condition::C2, Arm::SalientNeutral, None);
+    let json = selmem::Campaign {
+        reports: vec![r],
+    }
+    .to_json();
+    assert!(json.contains("\"pulled_a\""));
+    assert!(json.contains("\"recon_a\""));
+    assert!(json.contains("\"marker_last_a\""));
 }

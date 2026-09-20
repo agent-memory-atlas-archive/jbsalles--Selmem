@@ -12,6 +12,7 @@ fn main() {
     let seed = arg_u32("--seed").unwrap_or(1);
     let last_k = arg_u32("--last-k").unwrap_or(24).max(1) as usize;
     let out = arg_str("--out").unwrap_or_else(|| "selmem-v01.json".into());
+    let p0 = flag("--p0");
 
     let llm = LlmSpec::from_env();
     if let Some(s) = llm.as_ref() {
@@ -22,7 +23,10 @@ fn main() {
 
     let mut reports = Vec::new();
     for i in 1..=pairs {
-        for cond in [Condition::C0, Condition::C1, Condition::C2] {
+        let p0_conds = Condition::p0_grid();
+        let v01_conds = Condition::v01_grid();
+        let conds: &[Condition] = if p0 { &p0_conds } else { &v01_conds };
+        for cond in conds.iter().copied() {
             for arm in [Arm::SalientNeutral, Arm::SalientSalient] {
                 println!("--- pair {i}/{pairs} {} {} ---", cond.as_str(), arm.as_str());
                 let mut r = run_v01_k(cond, arm, llm.as_ref(), last_k);
@@ -34,7 +38,7 @@ fn main() {
             }
         }
     }
-    println!("wrote {out} ({} pairs × 6 cells)", pairs);
+    println!("wrote {out} ({} rows)", reports.len());
 }
 
 fn flush(path: &str, reports: &[PairReport]) {
@@ -83,4 +87,8 @@ fn arg_str(flag: &str) -> Option<String> {
 
 fn arg_u32(flag: &str) -> Option<u32> {
     arg_str(flag)?.parse().ok()
+}
+
+fn flag(name: &str) -> bool {
+    std::env::args().any(|a| a == name)
 }

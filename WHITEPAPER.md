@@ -174,11 +174,17 @@ Tables, scripts, and how to replay a cell: **[experiments/REPORT.md](experiments
 
 **Retention after eviction (v0.1 × 10).** On a probe that never names T₀, Grok still *names the cancellation* on C2 after last-k=8 has dropped that hour (10 / 10 S/N, 9 / 10 S/S). C0 and C1 k=8 do not (0 / 10). While T₀ is still in the window, last-k names it at least as often as SelMem. That cell is eviction, not interpretation.
 
-**Interpretation (persist, Grok, n = 1).** One public-betrayal hour is enough for the book and for citing T₀ on nearby probes. It is not enough to colour an unrelated probe (a colleague late without explanation). Five *different* hours of the same schema mint a second axiom; after eight shared posts C2 A answers the late probe as distance / “wound”, C2 without sleep does not, C1 collapses, and a one-line C3 profile does not force the model. Five *passes on the same meeting*, pinned so merge cannot collapse them, also split the book — but the late answers name the cancellation. That arm is retrieve, kept as an ablation (`--ruminate`), not as default sleep behaviour.
+**Interpretation (persist / ruminate P0, Grok, n = 5).** One public-betrayal hour splits the book and can be cited on nearby probes. It does not colour an unrelated probe. Five *different* hours of the same schema mint a second axiom. After eight shared posts, C2 A answers the late probe as distance / “wound”; C2 without sleep or without ladder does not; C1 collapses; a one-line C3 profile talks about Friday / Room B. Cutting reconsolidation or grounding does not remove that transfer.
 
-Speak distance cannot carry the claim: two empty books already sit at ~0.6. Persist Grok cells are one pair each. No human ratings. Not a creativity or identity claim.
+Five *passes on the same meeting*, pinned so merge cannot collapse them, also split the book. Here the late probe is coloured even without sleep or ladder: retrieve of five near-duplicate gists, not a minted belief. That arm stays an ablation (`--ruminate`), not default sleep.
 
-What is still open: persist n = 3 on the five-schema script; a few blind judges on the late probe; a second seed.
+The published lexical marker counts T₀ words. Sleep replaces those words with *wound / presence*, so the boolean under-counts full C2 and over-counts no-sleep. Read the late replies.
+
+What the cuts isolate: the book gap is selection; nearby probes are scene retrieve; a distant probe needs either a minted motif (diverse hours + ladder) or redundant traces (ruminate). Reconsolidation write-back and pull-to-core are not load-bearing on these scripts.
+
+Speak distance cannot carry the claim: two empty books already sit at ~0.6. No human ratings. Not a creativity or identity claim.
+
+What is still open: a second seed; blind judges on the late probe; a stronger C3 (summary of the five hours, not one profile line).
 
 ---
 
@@ -186,9 +192,9 @@ What is still open: persist n = 3 on the five-schema script; a few blind judges 
 
 `cargo test` covers: dull drop, world channel pinned, tender/austere split, core vs detail, anchors, axiom succession, motif ≠ trait, identity paint, reinterpret, DetachKind misses, grounding blend, fading warp, latent residue, night pass order, persist round-trip (file and sqlite), merge + extinguish in one night.
 
-Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; on v0.1 × 10 Grok pairs the book gap holds and, after last-k=8 evicts T₀, only C2 A still names it. Persist Grok n = 1: five same-schema hours plus a night move the late probe on C2; one hour and rumination-of-one-meeting do not do that cleanly. Full tables: [experiments/REPORT.md](experiments/REPORT.md).
+Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; on v0.1 × 10 Grok pairs the book gap holds and, after last-k=8 evicts T₀, only C2 A still names it. Persist / ruminate P0 n = 5: five same-schema hours plus a night move the late probe on C2; cutting recon or ground does not; cutting sleep or ladder does, unless the five hours are pinned copies of one meeting. Full tables: [experiments/REPORT.md](experiments/REPORT.md) §7.
 
-Missing: persist n > 1, scored creative grid, human ratings, more than one seed, learned layers (still rules), fitted constants. Core is a 12-word compress unless an HTTP narrator proposes one after the gate and a lexical filter accepts it. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint.
+Missing: second seed, scored creative grid, human ratings, learned layers (still rules), fitted constants, a C3 that actually summarises the five hours. Core is a 12-word compress unless an HTTP narrator proposes one after the gate and a lexical filter accepts it. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint. Reconsolidation and grounding remain in the loop; the P0 mouth does not depend on them.
 
 Two processes on one `.db` will collide. Anchors are decay brakes, not an ethics layer.
 

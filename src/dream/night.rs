@@ -1,7 +1,7 @@
 //! One night: the five passes, in this order.
 //! No LLM is required. A narrator, if present, only rewrites gists.
 
-use crate::core::model::{DriftEvent, IdentityAxiom, TraceStatus};
+use crate::core::model::{DriftEvent, IdentityAxiom, OrganCut, TraceStatus};
 use crate::core::profile::EntityProfile;
 use crate::core::store::MemoryStore;
 use crate::dream::{ladder, merge, release, rewrite, singularite, weather};
@@ -30,6 +30,16 @@ pub fn dream(
     narrator: &dyn Narrator,
     embedder: &dyn Embedder,
 ) -> DreamReport {
+    dream_cut(store, profile, narrator, embedder, OrganCut::full())
+}
+
+pub fn dream_cut(
+    store: &mut MemoryStore,
+    profile: &EntityProfile,
+    narrator: &dyn Narrator,
+    embedder: &dyn Embedder,
+    cut: OrganCut,
+) -> DreamReport {
     let previously_latent: std::collections::HashSet<String> = store
         .traces
         .values()
@@ -39,9 +49,13 @@ pub fn dream(
 
     singularite::apply_anchors(store);
     let w = weather::run(store, profile);
-    let rewritten = rewrite::run(store, profile, narrator, embedder);
+    let rewritten = rewrite::run(store, profile, narrator, embedder, cut.ground);
     let merged = merge::run(store, profile);
-    let axioms = ladder::run(store, narrator);
+    let axioms = if cut.ladder {
+        ladder::run(store, narrator)
+    } else {
+        Vec::new()
+    };
     let released = release::run(store, &previously_latent);
     singularite::apply_anchors(store);
 

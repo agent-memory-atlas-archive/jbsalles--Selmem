@@ -6,7 +6,7 @@ An LLM maps context to the next token. A stack of unmodified facts maximises cov
 
 **Manifest:** [WHITEPAPER.md](WHITEPAPER.md)\
 **Layout:** [ARCHITECTURE.md](ARCHITECTURE.md) — encode / judge / night / snapshot.\
-**Benches:** experiments/REPORT.md — method, tables, excerpts. Replay the four Grok dumps from experiments/README.md.\
+**Benches:** experiments/REPORT.md — method, tables, excerpts, P0 n=5. Replay from experiments/README.md.\
 **Knobs:** [PARAMETERS.md](PARAMETERS.md) — exploratory, not fitted.
 
 Rust 1.75. SQLite via system `libsqlite3` (macOS SDK or Linux).

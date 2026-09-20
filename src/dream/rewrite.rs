@@ -11,6 +11,7 @@ pub fn run(
     profile: &EntityProfile,
     narrator: &dyn Narrator,
     embedder: &dyn Embedder,
+    ground: bool,
 ) -> u32 {
     let ids = store.active_ids();
     let mut rewritten = 0u32;
@@ -56,7 +57,9 @@ pub fn run(
             continue;
         }
         let core = t.core.clone();
-        if crate::recall::ground::is_grounding_miss(&text, &core, profile.ground_min_overlap) {
+        if ground
+            && crate::recall::ground::is_grounding_miss(&text, &core, profile.ground_min_overlap)
+        {
             let rewrite = narrator.recontextualize(t, &core, profile);
             if let Some(tr) = store.traces.get_mut(&id) {
                 crate::recall::ground::apply_grounding(tr, profile, &text, &core, Some(rewrite));

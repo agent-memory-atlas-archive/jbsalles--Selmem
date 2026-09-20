@@ -12,4 +12,4 @@ pub use judge::{
 pub use pull::{apply_grounding, recontextualize_rule, GroundingOutcome};
 pub use http::{HttpNarrator, SpeakOnlyHttp};
 pub use narrator::{Narrator, RuleNarrator};
-pub use retrieve::recall;
+pub use retrieve::{recall, recall_cut};

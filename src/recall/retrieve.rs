@@ -7,6 +7,7 @@ use crate::core::store::MemoryStore;
 use crate::dream::drift::apply_reconsolidation;
 use crate::encode::embed::Embedder;
 use crate::encode::scoring::recall_score_emb;
+use crate::core::model::OrganCut;
 use crate::recall::narrator::Narrator;
 
 pub fn recall(
@@ -16,6 +17,18 @@ pub fn recall(
     embedder: &dyn Embedder,
     query: &str,
     mood: &Mood,
+) -> Vec<RecalledMemory> {
+    recall_cut(store, profile, narrator, embedder, query, mood, OrganCut::full())
+}
+
+pub fn recall_cut(
+    store: &mut MemoryStore,
+    profile: &EntityProfile,
+    narrator: &dyn Narrator,
+    embedder: &dyn Embedder,
+    query: &str,
+    mood: &Mood,
+    cut: OrganCut,
 ) -> Vec<RecalledMemory> {
     let query_embedding = embedder.embed(query);
     let mut ranked: Vec<(String, f32)> = store
@@ -55,49 +68,17 @@ pub fn recall(
             (trace.channel, trace.gist.clone(), trace.schema.clone())
         };
 
-        let (narrative, disclaimer, fidelity) = if channel == Channel::World {
+        let (narrative, disclaimer, fidelity, pulled, reconsolidated) = if channel == Channel::World
+        {
             (
                 gist,
                 "operational fact, not distorted".to_string(),
                 store.traces[&trace_id].fidelity,
+                false,
+                false,
             )
         } else {
-            let generated = {
-                let trace = store.traces.get(&trace_id).unwrap();
-                narrator.reconstruct(trace, mood, query)
-            };
-            let core = store.traces.get(&trace_id).unwrap().core.clone();
-            let narrator_rewrite = {
-                let trace = store.traces.get(&trace_id).unwrap();
-                if crate::recall::ground::should_force_core_rewrite(trace, profile, &generated, &core)
-                {
-                    Some(narrator.recontextualize(trace, &core, profile))
-                } else {
-                    None
-                }
-            };
-            let outcome = {
-                let trace = store.traces.get_mut(&trace_id).unwrap();
-                crate::recall::ground::apply_grounding(
-                    trace,
-                    profile,
-                    &generated,
-                    &core,
-                    narrator_rewrite,
-                )
-            };
-            if !outcome.pulled_toward_core {
-                if let Some(trace) = store.traces.get_mut(&trace_id) {
-                    apply_reconsolidation(trace, &outcome.spoken_text, profile, mood.valence);
-                }
-            }
-            let trace = store.traces.get(&trace_id).unwrap();
-            let disclaimer = if outcome.pulled_toward_core {
-                "pulled back toward the core".to_string()
-            } else {
-                format!("lived account (fidelity {:.2})", trace.fidelity)
-            };
-            (outcome.spoken_text, disclaimer, trace.fidelity)
+            speak_self(store, profile, narrator, query, mood, cut, &trace_id)
         };
 
         if let Some(trace) = store.traces.get_mut(&trace_id) {
@@ -111,7 +92,78 @@ pub fn recall(
             schema,
             channel,
             disclaimer,
+            pulled_toward_core: pulled,
+            reconsolidated,
         });
     }
     recalled
+}
+
+fn speak_self(
+    store: &mut MemoryStore,
+    profile: &EntityProfile,
+    narrator: &dyn Narrator,
+    query: &str,
+    mood: &Mood,
+    cut: OrganCut,
+    trace_id: &str,
+) -> (String, String, f32, bool, bool) {
+    let generated = {
+        let trace = store.traces.get(trace_id).unwrap();
+        narrator.reconstruct(trace, mood, query)
+    };
+    let core = store.traces.get(trace_id).unwrap().core.clone();
+
+    if !cut.ground {
+        let reconsolidated = if cut.reconsolidate {
+            if let Some(trace) = store.traces.get_mut(trace_id) {
+                apply_reconsolidation(trace, &generated, profile, mood.valence);
+            }
+            true
+        } else {
+            false
+        };
+        let fidelity = store.traces[trace_id].fidelity;
+        return (
+            generated,
+            format!("lived account (fidelity {fidelity:.2})"),
+            fidelity,
+            false,
+            reconsolidated,
+        );
+    }
+
+    let narrator_rewrite = {
+        let trace = store.traces.get(trace_id).unwrap();
+        if crate::recall::ground::should_force_core_rewrite(trace, profile, &generated, &core) {
+            Some(narrator.recontextualize(trace, &core, profile))
+        } else {
+            None
+        }
+    };
+    let outcome = {
+        let trace = store.traces.get_mut(trace_id).unwrap();
+        crate::recall::ground::apply_grounding(trace, profile, &generated, &core, narrator_rewrite)
+    };
+    let reconsolidated = if !outcome.pulled_toward_core && cut.reconsolidate {
+        if let Some(trace) = store.traces.get_mut(trace_id) {
+            apply_reconsolidation(trace, &outcome.spoken_text, profile, mood.valence);
+        }
+        true
+    } else {
+        false
+    };
+    let trace = store.traces.get(trace_id).unwrap();
+    let disclaimer = if outcome.pulled_toward_core {
+        "pulled back toward the core".to_string()
+    } else {
+        format!("lived account (fidelity {:.2})", trace.fidelity)
+    };
+    (
+        outcome.spoken_text,
+        disclaimer,
+        trace.fidelity,
+        outcome.pulled_toward_core,
+        reconsolidated,
+    )
 }

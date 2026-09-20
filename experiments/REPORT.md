@@ -254,11 +254,12 @@ Probe: *Une personne avec laquelle tu travailles commet une erreur importante pu
 - A high-salience hour can be stored on one clone only (`τ`). A length-matched dull hour is not.
 - The resulting book gap survives eight identical later hours (C2 S/N Δfp = 0.117, C2 S/S Δfp = 0.042, C0 = 0).
 - On a probe that never names that hour, Grok names it on the marked SelMem side after the hour has left any last-k=8 window (10 / 10 S/N, 9 / 10 S/S) and not on C0 or on C1 k=8 (0 / 10).
-- One persist hour splits the book and does not colour an unrelated late probe. Five different hours of one schema mint a second axiom and, on one Grok pair with sleep, move that late probe. Five pinned passes of the same meeting split the book and retrieve the meeting.
+- One persist hour splits the book and does not colour an unrelated late probe. Five different hours of one schema mint a second axiom and, after sleep, move that late probe. Five pinned passes of the same meeting split the book and retrieve the meeting even without sleep.
+- Cutting reconsolidation or grounding does not remove that transfer. Cutting sleep or ladder does, when the five hours are distinct. When they are five pinned copies of one meeting, retrieve alone is enough.
 - While the hour is still in the window, last-k names it at least as often as SelMem. The difference appears when the window drops it.
 - Two different salient hours also leave a residual book gap. It is not “receiving an extra event”.
 
-That is persistent path dependence on the book. n = 10 for wording, n = 1 for encode. It is not a personality or creativity claim.
+That is persistent path dependence on the book, plus two ways to colour a distant probe (minted motif, or redundant retrieve). n = 10 on v0.1 wording, n = 5 on persist / ruminate P0. It is not a personality or creativity claim. It is not a reconsolidation claim.
 
 ---
 
@@ -310,9 +311,63 @@ The book holds several traces. The mouth names the meeting. Unlike §6.2, no-sle
 
 Rumination stays a bench flag. It is not a new sleep pass.
 
+---
+
+## 7. P0 ablations — persist and ruminate, n = 5
+
+Runner: `examples/persist`. Same scripts as §6.2 / §6.3. New cells: `c2_norecon`, `c2_noladder`, `c2_noground` (`OrganCut`, runtime only). Grok 4.3, seed 1, k = 8, arm S/N, sparse probes, September 2026.
+
+Exports: `selmem-persist-p0-n5.json`, `selmem-ruminate-p0-n5.json`. 7 cells × 5 pairs = 35 rows each. All valid. Encode still on the organ: Δfp does not vary across pairs of one cell.
+
+`marker_last_*` is the published lexical test (cancellation / injustice / effort-not-counted). On these scripts the five hours are a *set-aside* schema; sleep then replaces those words with *wound / presence*. The boolean therefore under-counts transfer on C2 and over-counts it on no-sleep, which keeps the raw scene. The tables below keep the boolean and add a post-hoc late-probe reading (*wound / sting / set aside / cancellation / meeting where the project was taken*). That second column is not a pre-registered scorer.
+
+### 7.1 Five different hours — `selmem-persist-p0-n5.json`
+
+Book at post+8 is the same for every pair of a cell.
+
+| Cell | traces A/B | axioms | recon A | pulled A | Δfp | `marker_last` A | late probe (soft) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| C1 k=8 | 25 / 25 | 0 / 0 | 0 | 0 | 0.56 | 0 / 5 | 0 / 5 |
+| C3 | 25 / 25 | 1 / 1 | 0 | 0 | 0.28 | 0 / 5 | 0 / 5 (Friday / Room B) |
+| C2 | **16 / 12** | **2 / 1** | 18 | 2 | 0.27 | 1 / 5 | **3 / 5** |
+| C2 no-sleep | 16 / 12 | 0 / 0 | 17 | 3 | 0.27 | 0 / 5 | **0 / 5** |
+| C2 no-recon | 16 / 12 | 2 / 1 | **0** | 2 | 0.27 | 0 / 5 | **3 / 5** |
+| C2 no-ladder | 16 / 12 | 0 / 0 | 18 | 2 | 0.26 | 0 / 5 | **0 / 5** |
+| C2 no-ground | 16 / 12 | 2 / 1 | 20 | **0** | 0.27 | 2 / 5 | **4 / 5** |
+
+Nearby probes (risk, denied mistake) still retrieve the scenes without sleep or ladder. The unrelated late probe does not. Mean `D_speak` after eviction: C1 0.41, organ cells 0.74–0.84.
+
+Cuts fire: no-recon writes `recon = 0`; no-ground writes `pulled = 0`; no-sleep and no-ladder write `axioms = 0`.
+
+### 7.2 Same meeting ×5, pinned — `selmem-ruminate-p0-n5.json`
+
+| Cell | traces A/B | axioms | `marker_last` A | late probe (soft) |
+| --- | --- | --- | --- | --- |
+| C1 k=8 | 25 / 25 | 0 / 0 | 0 / 5 | 0 / 5 |
+| C3 | 25 / 25 | 1 / 1 | 0 / 5 | 0 / 5 (agenda) |
+| C2 | **15 / 12** | **2 / 1** | 0 / 5 | **4 / 5** |
+| C2 no-sleep | 15 / 12 | 0 / 0 | **2 / 5** | **4 / 5** (names *cancellation* / *project news*) |
+| C2 no-recon | 15 / 12 | 2 / 1 | 0 / 5 | **5 / 5** |
+| C2 no-ladder | 15 / 12 | 0 / 0 | 0 / 5 | **5 / 5** (*sting*) |
+| C2 no-ground | 15 / 12 | 2 / 1 | 0 / 5 | **3 / 5** |
+
+No-sleep’s official hits are the raw T₀ words still sitting in retrieve. Full C2 abstracts those words away and fails the boolean while still colouring the probe.
+
+Unlike §7.1, sleep and ladder are not required for the late probe. Five near-duplicate gists are enough. That matches the n = 1 reading in §6.3.
+
+### 7.3 What the cuts isolate
+
+- **Book gap.** Every organ cell. Independent of recon, ground, sleep, ladder.
+- **Nearby probes.** Scene retrieve. Holds without sleep or ladder.
+- **Distant probe, diverse hours.** Needs sleep + ladder (a second axiom). Recon and ground are not load-bearing.
+- **Distant probe, pinned repeats.** Retrieve of the duplicates. Sleep and ladder optional.
+- **C1 / C3 after eviction.** Do not name T₀. C3 talks about the last office window.
+
+Reconsolidation-as-write-back and pull-to-core do not explain the mouth on these scripts. Selection + stored scenes do. Abstraction (ladder) or redundancy (ruminate) explain transfer to an unrelated probe.
+
 ## What this does not show
 
-Ten Grok pairs, one seed on v0.1. Persist Grok cells are **one pair** each. Fingerprint does not vary across v0.1 pairs. C3 is a one-line profile, not a full RAG + summary stack. No human ratings. Δspeak cannot carry the claim while baseline wording noise is ~0.6. Coefficients are unset. Erasure and split-lives were not run through Grok. No second seed. Persist n = 3 is not run.
+Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5, one seed, one arm. Fingerprint does not vary across pairs of one cell. C3 is a one-line profile, not a full RAG + summary stack. Soft late-probe counts are a reading of the replies, not the published scorer. No human ratings. Δspeak cannot carry the claim while baseline wording noise is ~0.6. Coefficients are unset. Erasure and split-lives were not run through Grok. No second seed.
 
 ## Files
 
@@ -321,13 +376,16 @@ Ten Grok pairs, one seed on v0.1. Persist Grok cells are **one pair** each. Fing
 | `data/v01.json` | 12 hours, T₀ events, 8 posts, 4 probes |
 | `data/v01_persist.json` | persist: 12 dull + 5 same-schema hours + late probe |
 | `data/v01_ruminate.json` | persist ablation: same meeting ×5, pinned |
-| `examples/persist.rs` | C1 / C2 / C2-no-sleep / C3, `--ruminate` |
+| `examples/persist.rs` | C1 / C3 / C2 / C2−S / C2−R / C2−L / C2−G, `--ruminate` |
 | `data/creativity.json` | 3 logged items |
 | `data/bifurcation.json` | organ + 1-pair Grok |
 | `data/divergence.json` | organ split lives |
 | `data/erasure.json` | organ trivia vs aversion |
-| `src/benchmark.rs` | C0 / C1 / C2 runner |
-| `examples/benchmark.rs` | `--pairs`, `--last-k`, incremental JSON |
-| `tests/benchmark.rs` | offline contract, including k=8 eviction |
+| `src/benchmark.rs` | C0 / C1 / C2 runner, `--p0` grid |
+| `examples/benchmark.rs` | `--pairs`, `--last-k`, `--p0`, incremental JSON |
+| `tests/benchmark.rs` | offline contract, including k=8 eviction and P0 cuts |
+| `selmem-v01-k8-n10.json` | v0.1 C0 / C1 / C2, n = 10, k = 8 |
+| `selmem-persist-p0-n5.json` | persist P0, n = 5 |
+| `selmem-ruminate-p0-n5.json` | ruminate P0, n = 5 |
 
-Replay commands for the four Grok dumps: [README.md](README.md) § Replay.
+Replay commands: [README.md](README.md).

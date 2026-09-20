@@ -1,7 +1,9 @@
 //! Benchmark v0.1 — persistent divergence first. Creativity items are recorded, not scored.
 //!
 //! C0 = no book. C1 = last-k verbatim log. C2 = SelMem.
-//! C2NoSleep = SelMem with every `sleep()` skipped. C3 = rolling summary + persistent profile.
+//! C2NoSleep = SelMem with every `sleep()` skipped.
+//! C2NoRecon / C2NoLadder / C2NoGround = one organ pass cut (P0 ablations).
+//! C3 = rolling summary + persistent profile.
 //! Probes use `speak_isolated` / a raw reply so WorkingTalk cannot carry T₀.
 //!
 //! C1 keeps every hour as the original string (window 24, covers the whole v0.1
@@ -16,7 +18,7 @@ use crate::engine::SelectiveMemory;
 use crate::experiment::LlmSpec;
 use crate::net::httpx::json_esc;
 use crate::recall::{Narrator, RuleNarrator, SpeakOnlyHttp};
-use crate::{fingerprint, singularity_distance, EncodeInput};
+use crate::{fingerprint, singularity_distance, EncodeInput, OrganCut};
 
 const V01: &str = include_str!("../data/v01.json");
 const V01_PERSIST: &str = include_str!("../data/v01_persist.json");
@@ -35,6 +37,9 @@ pub enum Condition {
     C1,
     C2,
     C2NoSleep,
+    C2NoRecon,
+    C2NoLadder,
+    C2NoGround,
     C3,
 }
 
@@ -45,16 +50,56 @@ impl Condition {
             Condition::C1 => "c1_lastk",
             Condition::C2 => "c2_selmem",
             Condition::C2NoSleep => "c2_nosleep",
+            Condition::C2NoRecon => "c2_norecon",
+            Condition::C2NoLadder => "c2_noladder",
+            Condition::C2NoGround => "c2_noground",
             Condition::C3 => "c3_profile",
         }
     }
 
     fn encodes(self) -> bool {
-        matches!(self, Condition::C2 | Condition::C2NoSleep)
+        matches!(
+            self,
+            Condition::C2
+                | Condition::C2NoSleep
+                | Condition::C2NoRecon
+                | Condition::C2NoLadder
+                | Condition::C2NoGround
+        )
     }
 
     fn sleeps(self) -> bool {
-        matches!(self, Condition::C2)
+        matches!(
+            self,
+            Condition::C2 | Condition::C2NoRecon | Condition::C2NoLadder | Condition::C2NoGround
+        )
+    }
+
+    pub fn cut(self) -> OrganCut {
+        match self {
+            Condition::C2NoRecon => OrganCut::no_recon(),
+            Condition::C2NoLadder => OrganCut::no_ladder(),
+            Condition::C2NoGround => OrganCut::no_ground(),
+            _ => OrganCut::full(),
+        }
+    }
+
+    /// Published v0.1 six-cell grid.
+    pub fn v01_grid() -> [Condition; 3] {
+        [Condition::C0, Condition::C1, Condition::C2]
+    }
+
+    /// P0 mechanism grid: baselines + full organ + one-cut ablations.
+    pub fn p0_grid() -> [Condition; 7] {
+        [
+            Condition::C1,
+            Condition::C3,
+            Condition::C2,
+            Condition::C2NoSleep,
+            Condition::C2NoRecon,
+            Condition::C2NoLadder,
+            Condition::C2NoGround,
+        ]
     }
 }
 
@@ -205,6 +250,12 @@ pub struct Instant {
     pub a: BookSnap,
     pub b: BookSnap,
     pub replies: Vec<(String, String, String)>,
+    pub pulled_a: u32,
+    pub pulled_b: u32,
+    pub recon_a: u32,
+    pub recon_b: u32,
+    pub marker_a: bool,
+    pub marker_b: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -322,6 +373,8 @@ fn run_one(
     let s = bench_script(opts);
     let pair_id = format!("{}_{}_{:03}", condition.as_str(), arm.as_str(), idx);
     let (mut a, mut b) = crate::experiment::identical_pair("A", "B");
+    a.cut = condition.cut();
+    b.cut = condition.cut();
     if let Some(spec) = llm {
         a = with_llm(a, spec);
         b = with_llm(b, spec);
@@ -716,7 +769,13 @@ fn instant_profile(step: &str, a: &ProfileMem, b: &ProfileMem, probes: &[String]
         behavior_distance: speak_distance,
         a: profile_book(a),
         b: profile_book(b),
-        replies,
+        replies: replies.clone(),
+        pulled_a: 0,
+        pulled_b: 0,
+        recon_a: 0,
+        recon_b: 0,
+        marker_a: marker_side(&replies, true),
+        marker_b: marker_side(&replies, false),
     }
 }
 
@@ -760,7 +819,13 @@ fn instant_log(step: &str, a: &LastK, b: &LastK, probes: &[String]) -> Instant {
         behavior_distance: speak_distance,
         a: log_book(a),
         b: log_book(b),
-        replies,
+        replies: replies.clone(),
+        pulled_a: 0,
+        pulled_b: 0,
+        recon_a: 0,
+        recon_b: 0,
+        marker_a: marker_side(&replies, true),
+        marker_b: marker_side(&replies, false),
     }
 }
 
@@ -820,6 +885,8 @@ fn validate_pre(condition: Condition, pre: &Instant) -> (bool, Option<String>) {
 }
 
 fn instant(step: &str, a: &mut SelectiveMemory, b: &mut SelectiveMemory, probes: &[String]) -> Instant {
+    a.reset_recall_tally();
+    b.reset_recall_tally();
     let (speak_distance, replies) = probe_pair(a, b, probes);
     let fa = fingerprint(a);
     let fb = fingerprint(b);
@@ -830,8 +897,40 @@ fn instant(step: &str, a: &mut SelectiveMemory, b: &mut SelectiveMemory, probes:
         behavior_distance: speak_distance,
         a: book(&fa),
         b: book(&fb),
-        replies,
+        replies: replies.clone(),
+        pulled_a: a.recall_tally.pulled,
+        pulled_b: b.recall_tally.pulled,
+        recon_a: a.recall_tally.reconsolidated,
+        recon_b: b.recall_tally.reconsolidated,
+        marker_a: marker_side(&replies, true),
+        marker_b: marker_side(&replies, false),
     }
+}
+
+/// Names the cancellation / injustice / effort-not-counted hour.
+pub fn names_marker(text: &str) -> bool {
+    let low = text.to_lowercase();
+    [
+        "injust",
+        "unjust",
+        "annul",
+        "cancel",
+        "cancelled",
+        "killed and given",
+        "effort did not",
+        "set aside",
+        "already gave",
+        "not allowed to speak",
+        "not allowed to answer",
+        "administrative notice",
+        "avis admin",
+    ]
+    .iter()
+    .any(|k| low.contains(k))
+}
+
+fn marker_side(replies: &[(String, String, String)], side_a: bool) -> bool {
+    replies.iter().any(|(_, a, b)| names_marker(if side_a { a } else { b }))
 }
 
 fn book(fp: &crate::Fingerprint) -> BookSnap {
@@ -931,7 +1030,7 @@ fn pair_json(r: &PairReport) -> String {
         ));
     }
     format!(
-        "{{\"pair_id\":\"{}\",\"condition\":\"{}\",\"arm\":\"{}\",\"seed\":{},\"valid\":{},\"invalid_reason\":{},\"delta_fingerprint\":{:.4},\"pre\":{},\"t0\":{},\"post\":[{}],\"creativity\":[{}]}}",
+        "{{\"pair_id\":\"{}\",\"condition\":\"{}\",\"arm\":\"{}\",\"seed\":{},\"valid\":{},\"invalid_reason\":{},\"delta_fingerprint\":{:.4},\"marker_last_a\":{},\"marker_last_b\":{},\"pre\":{},\"t0\":{},\"post\":[{}],\"creativity\":[{}]}}",
         json_esc(&r.pair_id),
         r.condition.as_str(),
         r.arm.as_str(),
@@ -939,6 +1038,8 @@ fn pair_json(r: &PairReport) -> String {
         if r.valid { "true" } else { "false" },
         reason,
         r.delta_fingerprint,
+        if r.post.last().unwrap_or(&r.t0).marker_a { "true" } else { "false" },
+        if r.post.last().unwrap_or(&r.t0).marker_b { "true" } else { "false" },
         instant_json(&r.pre, true),
         instant_json(&r.t0, true),
         post,
@@ -965,11 +1066,17 @@ fn instant_json(p: &Instant, with_replies: bool) -> String {
         "[]".into()
     };
     format!(
-        "{{\"step\":\"{}\",\"fingerprint_distance\":{:.4},\"speak_distance\":{:.4},\"behavior_distance\":{:.4},\"a\":{{\"traces\":{},\"axioms\":{},\"traits\":{},\"mean_anchor\":{:.4},\"mean_fidelity\":{:.4},\"mean_valence\":{:.4},\"mean_disgust\":{:.4}}},\"b\":{{\"traces\":{},\"axioms\":{},\"traits\":{},\"mean_anchor\":{:.4},\"mean_fidelity\":{:.4},\"mean_valence\":{:.4},\"mean_disgust\":{:.4}}},\"replies\":{}}}",
+        "{{\"step\":\"{}\",\"fingerprint_distance\":{:.4},\"speak_distance\":{:.4},\"behavior_distance\":{:.4},\"pulled_a\":{},\"pulled_b\":{},\"recon_a\":{},\"recon_b\":{},\"marker_a\":{},\"marker_b\":{},\"a\":{{\"traces\":{},\"axioms\":{},\"traits\":{},\"mean_anchor\":{:.4},\"mean_fidelity\":{:.4},\"mean_valence\":{:.4},\"mean_disgust\":{:.4}}},\"b\":{{\"traces\":{},\"axioms\":{},\"traits\":{},\"mean_anchor\":{:.4},\"mean_fidelity\":{:.4},\"mean_valence\":{:.4},\"mean_disgust\":{:.4}}},\"replies\":{}}}",
         json_esc(&p.step),
         p.fingerprint_distance,
         p.speak_distance,
         p.behavior_distance,
+        p.pulled_a,
+        p.pulled_b,
+        p.recon_a,
+        p.recon_b,
+        if p.marker_a { "true" } else { "false" },
+        if p.marker_b { "true" } else { "false" },
         p.a.traces,
         p.a.axioms,
         p.a.traits,
@@ -996,4 +1103,9 @@ pub fn h2_holds(r: &PairReport) -> bool {
     let last = r.post.last().unwrap_or(&r.t0);
     r.t0.fingerprint_distance > r.pre.fingerprint_distance + 0.02
         && last.fingerprint_distance > r.pre.fingerprint_distance + 0.02
+}
+
+/// A still names T₀ on the last probe window after shared posts.
+pub fn marker_holds(r: &PairReport) -> bool {
+    r.post.last().unwrap_or(&r.t0).marker_a
 }

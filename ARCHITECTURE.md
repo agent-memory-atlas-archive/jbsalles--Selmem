@@ -28,7 +28,7 @@ each recorded turn through encode with `hold = false`, then drops the frame.
 ```
 src/
   engine.rs                 live / remember / speak / sleep
-  core/                     model, store, profile, talk
+  core/                     model (incl. OrganCut), store, profile, talk
   encode/
     interpret.rs            lexicon + optional Narrator::interpret
     paint.rs                living axioms tint the hour

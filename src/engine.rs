@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use crate::dream::{self, DreamReport};
 use crate::encode::embed::{Embedder, HashEmbedder};
 use crate::encode::{self, EncodeDecision, EncodeInput};
-use crate::core::model::{IdentityAxiom, Mood, RecalledMemory};
+use crate::core::model::{IdentityAxiom, Mood, OrganCut, RecallTally, RecalledMemory};
 use crate::core::talk::WorkingTalk;
 use crate::recall::narrator::{Narrator, RuleNarrator};
 use crate::persist;
@@ -24,6 +24,8 @@ pub struct SelectiveMemory {
     /// Live thread. Not a trace. Not persisted. Sleep commits then clears it.
     pub talk: WorkingTalk,
     pub path: Option<PathBuf>,
+    pub cut: OrganCut,
+    pub recall_tally: RecallTally,
     narrator: Box<dyn Narrator>,
     embedder: Box<dyn Embedder>,
 }
@@ -36,6 +38,8 @@ impl SelectiveMemory {
             mood: Mood::default(),
             talk: WorkingTalk::default(),
             path: None,
+            cut: OrganCut::full(),
+            recall_tally: RecallTally::default(),
             narrator: Box::new(RuleNarrator),
             embedder: Box::new(HashEmbedder),
         }
@@ -55,6 +59,8 @@ impl SelectiveMemory {
                 mood: snap.mood,
                 talk: WorkingTalk::default(),
                 path: Some(path),
+                cut: OrganCut::full(),
+                recall_tally: RecallTally::default(),
                 narrator: Box::new(RuleNarrator),
                 embedder: Box::new(HashEmbedder),
             })
@@ -65,6 +71,8 @@ impl SelectiveMemory {
                 mood: Mood::default(),
                 talk: WorkingTalk::default(),
                 path: Some(path),
+                cut: OrganCut::full(),
+                recall_tally: RecallTally::default(),
                 narrator: Box::new(RuleNarrator),
                 embedder: Box::new(HashEmbedder),
             })
@@ -74,6 +82,15 @@ impl SelectiveMemory {
     pub fn with_narrator(mut self, narrator: Box<dyn Narrator>) -> Self {
         self.narrator = narrator;
         self
+    }
+
+    pub fn with_cut(mut self, cut: OrganCut) -> Self {
+        self.cut = cut;
+        self
+    }
+
+    pub fn reset_recall_tally(&mut self) {
+        self.recall_tally = RecallTally::default();
     }
 
     pub fn with_embedder(mut self, embedder: Box<dyn Embedder>) -> Self {
@@ -190,14 +207,24 @@ impl SelectiveMemory {
     }
 
     pub fn remember(&mut self, query: &str) -> Vec<RecalledMemory> {
-        let recalled = recall::recall(
+        let recalled = recall::recall_cut(
             &mut self.store,
             &self.profile,
             self.narrator.as_ref(),
             self.embedder.as_ref(),
             query,
             &self.mood,
+            self.cut,
         );
+        self.recall_tally.n += recalled.len() as u32;
+        for r in &recalled {
+            if r.pulled_toward_core {
+                self.recall_tally.pulled += 1;
+            }
+            if r.reconsolidated {
+                self.recall_tally.reconsolidated += 1;
+            }
+        }
         if !recalled.is_empty() {
             let mut v = 0.0;
             let mut a = 0.0;
@@ -225,11 +252,12 @@ impl SelectiveMemory {
     pub fn sleep(&mut self) -> DreamReport {
         self.commit_talk();
         crate::persist::prune_orphaned_archives(&mut self.store);
-        dream::dream(
+        dream::dream_cut(
             &mut self.store,
             &self.profile,
             self.narrator.as_ref(),
             self.embedder.as_ref(),
+            self.cut,
         )
     }
 

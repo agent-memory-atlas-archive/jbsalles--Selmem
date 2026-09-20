@@ -1,4 +1,4 @@
-//! Persist: C1 k=8 vs C2 vs C2-no-sleep vs C3 (one-line profile).
+//! Persist P0: C1 k=8 vs C3 vs C2 vs one-cut ablations (no-sleep / no-recon / no-ladder / no-ground).
 //! Stimulus: 12 dull days, five same-schema hours, 8 posts. `data/v01_persist.json`.
 //!
 //!   ./run.sh run --release --example persist -- --pairs 1 --out selmem-persist.json
@@ -6,7 +6,7 @@
 //! Default arm is salient/neutral. Sparse probes: t0 + post+8 only. No creativity.
 
 use selmem::{
-    h2_holds, run_v01_opts, Arm, BenchOpts, Campaign, Condition, LlmSpec, PairReport,
+    h2_holds, marker_holds, run_v01_opts, Arm, BenchOpts, Campaign, Condition, LlmSpec, PairReport,
 };
 
 fn main() {
@@ -41,12 +41,7 @@ fn main() {
     } else {
         &[Arm::SalientNeutral]
     };
-    let conds = [
-        Condition::C1,
-        Condition::C2,
-        Condition::C2NoSleep,
-        Condition::C3,
-    ];
+    let conds = Condition::p0_grid();
 
     let mut reports = Vec::new();
     for i in 1..=pairs {
@@ -79,10 +74,11 @@ fn flush(path: &str, reports: &[PairReport]) {
 fn row(r: &PairReport) {
     let last = r.post.last().unwrap_or(&r.t0);
     println!(
-        "{} valid={} persist={}  pre_fp={:.3} t0_fp={:.3} last_fp={:.3} Δfp={:+.3}  traces {}/{}→{}/{} axioms {}/{}",
+        "{} valid={} persist={} marker={}  pre_fp={:.3} t0_fp={:.3} last_fp={:.3} Δfp={:+.3}  traces {}/{}→{}/{} axioms {}/{} pulled {}/{} recon {}/{}",
         r.pair_id,
         r.valid,
         h2_holds(r),
+        marker_holds(r),
         r.pre.fingerprint_distance,
         r.t0.fingerprint_distance,
         last.fingerprint_distance,
@@ -92,7 +88,11 @@ fn row(r: &PairReport) {
         last.a.traces,
         last.b.traces,
         last.a.axioms,
-        last.b.axioms
+        last.b.axioms,
+        last.pulled_a,
+        last.pulled_b,
+        last.recon_a,
+        last.recon_b
     );
     if let Some(why) = &r.invalid_reason {
         println!("  invalid: {why}");
