@@ -170,13 +170,15 @@ The model sees gist, core, schema, affect, fidelity, mood, living axioms. Not th
 
 Tables, scripts, and how to replay a cell: **[experiments/REPORT.md](experiments/REPORT.md)**.
 
-A high-salience hour can enter one clone’s book and stay out of the other’s (`τ`). A length-matched dull hour does not. The resulting fingerprint gap survives eight identical later hours (C2 S/N Δfp = 0.117, C2 S/S Δfp = 0.042, C0 = 0). Encode is on the organ, so Δfp does not vary across Grok pairs.
+**Book.** A high-salience hour can enter one clone’s book and stay out of the other’s (`τ`). A length-matched dull hour does not. The gap survives eight identical later hours (v0.1 C2 S/N Δfp = 0.117, S/S = 0.042, C0 = 0). Encode is on the organ, so Δfp does not vary across Grok pairs.
 
-Wording is the part that needed n = 10. On a probe that never names T₀, Grok names the cancellation on the marked SelMem side after that hour has left a last-k=8 window (10 / 10 S/N, 9 / 10 S/S at post+8). C0 and C1 k=8 do not (0 / 10). While T₀ is still in the window, last-k names it at least as often as SelMem (9–10 / 10 at T₀). The difference is eviction, not “having seen the sentence once”. Four lines from pair `001` are in the report (C0 procedure, C1 last mail, C2 A “this injustice repeating”, C2 B a written correction). The live replies were French; the report quotes them in English.
+**Retention after eviction (v0.1 × 10).** On a probe that never names T₀, Grok still *names the cancellation* on C2 after last-k=8 has dropped that hour (10 / 10 S/N, 9 / 10 S/S). C0 and C1 k=8 do not (0 / 10). While T₀ is still in the window, last-k names it at least as often as SelMem. That cell is eviction, not interpretation.
 
-Speak distance cannot carry the claim: two empty books already sit at ~0.6. Sleep ablation, erasure, and split lives were measured on `RuleNarrator` only. One seed. No human ratings. Not a creativity claim.
+**Interpretation (persist, Grok, n = 1).** One public-betrayal hour is enough for the book and for citing T₀ on nearby probes. It is not enough to colour an unrelated probe (a colleague late without explanation). Five *different* hours of the same schema mint a second axiom; after eight shared posts C2 A answers the late probe as distance / “wound”, C2 without sleep does not, C1 collapses, and a one-line C3 profile does not force the model. Five *passes on the same meeting*, pinned so merge cannot collapse them, also split the book — but the late answers name the cancellation. That arm is retrieve, kept as an ablation (`--ruminate`), not as default sleep behaviour.
 
-What is still open: a scored creative grid, a few blind human judges on the post+8 conflict probe, a second seed if those disagree.
+Speak distance cannot carry the claim: two empty books already sit at ~0.6. Persist Grok cells are one pair each. No human ratings. Not a creativity or identity claim.
+
+What is still open: persist n = 3 on the five-schema script; a few blind judges on the late probe; a second seed.
 
 ---
 
@@ -184,9 +186,9 @@ What is still open: a scored creative grid, a few blind human judges on the post
 
 `cargo test` covers: dull drop, world channel pinned, tender/austere split, core vs detail, anchors, axiom succession, motif ≠ trait, identity paint, reinterpret, DetachKind misses, grounding blend, fading warp, latent residue, night pass order, persist round-trip (file and sqlite), merge + extinguish in one night.
 
-Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; on v0.1 × 10 Grok pairs the book gap holds and, after last-k=8 evicts T₀, only C2 A still names it. Full tables: [experiments/REPORT.md](experiments/REPORT.md).
+Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; on v0.1 × 10 Grok pairs the book gap holds and, after last-k=8 evicts T₀, only C2 A still names it. Persist Grok n = 1: five same-schema hours plus a night move the late probe on C2; one hour and rumination-of-one-meeting do not do that cleanly. Full tables: [experiments/REPORT.md](experiments/REPORT.md).
 
-Missing: scored creative grid, human ratings, more than one seed, learned layers (still rules), fitted constants. Core is a 12-word compress unless an HTTP narrator proposes one after the gate and a lexical filter accepts it. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint.
+Missing: persist n > 1, scored creative grid, human ratings, more than one seed, learned layers (still rules), fitted constants. Core is a 12-word compress unless an HTTP narrator proposes one after the gate and a lexical filter accepts it. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint.
 
 Two processes on one `.db` will collide. Anchors are decay brakes, not an ethics layer.
 

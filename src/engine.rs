@@ -113,6 +113,15 @@ impl SelectiveMemory {
             .collect();
         encode::interpret(&mut input, &self.mood, &axioms, self.narrator.as_ref());
         encode::paint(&mut self.store, &self.mood, &mut input);
+        // How long the hour lasts follows how hard the text hit, unless the
+        // caller already pinned permanence (shared protocol days).
+        if input.permanence <= 0.0 {
+            let shock = (input.valence.abs() * 0.55 + input.disgust * 0.70
+                + (input.arousal - 0.18).max(0.0) * 0.25)
+                .clamp(0.0, 1.0);
+            input.permanence = (0.16 + 0.80 * shock).clamp(0.08, 0.97);
+            input.self_relevance = input.self_relevance.max(0.32 + 0.65 * shock);
+        }
         if hold {
             self.talk.hear(input.event, input.schema.as_deref());
         }
@@ -373,8 +382,8 @@ impl SelectiveMemory {
         let recalled = self.remember(&query);
         let empty = WorkingTalk::default();
         let talk = if hold { &self.talk } else { &empty };
-        // Sitting: answer the human. The book stays a book — sleep, /who,
-        // isolated probes. A thin greeting must not recite axioms.
+        // Isolated probes: retrieved scenes + living axioms.
+        // Stance-without-scene lives in recall/stance.rs (ablation only).
         let (memories, axioms) = if hold {
             let memories: Vec<String> = recalled
                 .into_iter()

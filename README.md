@@ -155,6 +155,17 @@ Scripts in `data/*.json` are the frozen stimuli. Edit those if you change a prot
 
 Published report (method + tables): experiments/REPORT.md. Conclusions only: [WHITEPAPER.md](WHITEPAPER.md) § Conclusions from the benches.
 
+### Persist (interpretation after last-k eviction)
+
+C1 k=8 vs C2 vs C2-no-sleep vs C3 (one-line profile). Default script: 12 dull days, five same-schema hours, late probe. `--ruminate` is the same-meeting ablation (hours pinned so merge cannot collapse them).
+
+```bash
+./run.sh run --release --example persist -- --pairs 1 --last-k 8 --out selmem-persist-repeat.json
+./run.sh run --release --example persist -- --ruminate --pairs 1 --last-k 8 --out selmem-persist-ruminate.json
+```
+
+Grok persist cells so far are n = 1. See experiments/REPORT.md §6.
+
 ### Benchmark v0.1 (H2)
 
 Does `D_fp` stay above pre-T₀ after 8 identical later hours?

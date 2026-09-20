@@ -4,6 +4,7 @@ pub mod judge;
 pub mod narrator;
 pub mod pull;
 pub mod retrieve;
+pub mod stance;
 
 pub use judge::{
     is_grounding_miss, judge_against_core, overlap_with_core, CoreJudgement, DetachKind,

@@ -10,6 +10,18 @@ This folder is the public record of the SelMem benches. The white paper states t
 | Split lives (five hours each side) | `data/divergence.json` | `examples/divergence` | yes | not run |
 | Erasure (trivia vs aversion) | `data/erasure.json` | `examples/erasure` | yes | not run |
 | v0.1 C0 / C1 / C2 | `data/v01.json` | `examples/benchmark` | yes | 10 pairs × k=24 and k=8 |
+| Persist, one hour then five same-schema | `data/v01_persist.json` | `examples/persist` | yes | Grok, n=1 each protocol |
+| Persist rumination (same meeting ×5, pinned) | `data/v01_ruminate.json` | `examples/persist --ruminate` | yes | Grok, n=1 |
+
+C3 is a last-k summary plus **one** profile line (not the five T₀ paragraphs). Persist script: 12 dull days, five same-schema hours, 8 posts. Sparse probes: t0 and post+8 only. Does not rewrite `data/v01.json`.
+
+Isolated `speak` is the pre-stance path again (retrieved scenes + living axioms). `recall/stance.rs` stays as the ablation that showed A≈B once the scene is withheld.
+
+```bash
+./run.sh test --test benchmark
+./run.sh run --release --example persist -- --pairs 1 --last-k 8 --out selmem-persist-repeat.json
+./run.sh run --release --example persist -- --ruminate --pairs 1 --last-k 8 --out selmem-persist-ruminate.json
+```
 
 ## Replay the four Grok dumps
 

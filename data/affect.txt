@@ -21,7 +21,16 @@ cruel=0.7
 hurt=0.6
 pain=0.5
 unjust=0.8
+unfair=0.8
 reject=0.7
+took credit=0.85
+cold message=0.55
+killed=0.95
+given to someone=0.85
+not allowed=0.75
+nobody stays=0.8
+decision is final=0.55
+handed over=0.7
 
 [pos]
 thank=0.7
@@ -41,6 +50,13 @@ hope=0.5
 proud=0.6
 joy=0.7
 happy=0.7
+kept as the reference=0.75
+kept as a reference=0.75
+as a reference=0.7
+as the reference=0.7
+quality of your work=0.65
+let you answer=0.55
+name the quality=0.6
 
 [intensifiers]
 very

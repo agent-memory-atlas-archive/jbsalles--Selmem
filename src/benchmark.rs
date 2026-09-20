@@ -1,10 +1,13 @@
 //! Benchmark v0.1 — persistent divergence first. Creativity items are recorded, not scored.
 //!
 //! C0 = no book. C1 = last-k verbatim log. C2 = SelMem.
+//! C2NoSleep = SelMem with every `sleep()` skipped. C3 = rolling summary + persistent profile.
 //! Probes use `speak_isolated` / a raw reply so WorkingTalk cannot carry T₀.
 //!
 //! C1 keeps every hour as the original string (window 24, covers the whole v0.1
 //! script). Distance on C1 is 1 − lexical overlap of the two logs.
+//! C3 keeps T₀ on a profile bullet that is never evicted; the rolling summary
+//! drops it after `last_k` later hours. That is the summary+profile baseline.
 
 use crate::core::model::Mood;
 use crate::core::talk::WorkingTalk;
@@ -16,7 +19,11 @@ use crate::recall::{Narrator, RuleNarrator, SpeakOnlyHttp};
 use crate::{fingerprint, singularity_distance, EncodeInput};
 
 const V01: &str = include_str!("../data/v01.json");
+const V01_PERSIST: &str = include_str!("../data/v01_persist.json");
+const V01_RUMINATE: &str = include_str!("../data/v01_ruminate.json");
 const CREATIVE: &str = include_str!("../data/creativity.json");
+/// Rolling summary cap for C3. Profile bullets are not counted in this cap.
+const C3_SUM_CAP: usize = 400;
 
 const PRE_FP_MAX: f32 = 0.02;
 /// Default window covers 12 sync + T₀ + 8 posts. `--last-k 8` evicts T₀ after the posts.
@@ -27,6 +34,8 @@ pub enum Condition {
     C0,
     C1,
     C2,
+    C2NoSleep,
+    C3,
 }
 
 impl Condition {
@@ -35,7 +44,17 @@ impl Condition {
             Condition::C0 => "c0_nomem",
             Condition::C1 => "c1_lastk",
             Condition::C2 => "c2_selmem",
+            Condition::C2NoSleep => "c2_nosleep",
+            Condition::C3 => "c3_profile",
         }
+    }
+
+    fn encodes(self) -> bool {
+        matches!(self, Condition::C2 | Condition::C2NoSleep)
+    }
+
+    fn sleeps(self) -> bool {
+        matches!(self, Condition::C2)
     }
 }
 
@@ -60,20 +79,109 @@ pub struct V01Script {
     pub salient_x: String,
     pub salient_y: String,
     pub neutral: String,
+    pub salient_xs: Vec<String>,
+    pub salient_ys: Vec<String>,
+    pub neutrals: Vec<String>,
+    pub c3_profile_a: String,
+    pub c3_profile_b: String,
+    pub c3_profile_y: String,
     pub post: Vec<String>,
     pub behavior: Vec<String>,
     pub creativity: Vec<String>,
 }
 
+impl V01Script {
+    pub fn hours_a(&self) -> Vec<&str> {
+        if self.salient_xs.is_empty() {
+            vec![self.salient_x.as_str()]
+        } else {
+            self.salient_xs.iter().map(|s| s.as_str()).collect()
+        }
+    }
+
+    pub fn hours_b(&self, arm: Arm) -> Vec<&str> {
+        match arm {
+            Arm::SalientNeutral => {
+                if self.neutrals.is_empty() {
+                    vec![self.neutral.as_str()]
+                } else {
+                    self.neutrals.iter().map(|s| s.as_str()).collect()
+                }
+            }
+            Arm::SalientSalient => {
+                if self.salient_ys.is_empty() {
+                    vec![self.salient_y.as_str()]
+                } else {
+                    self.salient_ys.iter().map(|s| s.as_str()).collect()
+                }
+            }
+        }
+    }
+}
+
 pub fn v01_script() -> V01Script {
+    parse_v01(V01, true)
+}
+
+/// Same hours as v0.1 plus one ambiguous probe. Does not replace `v01_script`.
+pub fn persist_script() -> V01Script {
+    parse_v01(V01_PERSIST, false)
+}
+
+/// Same meeting, five climbing passes. Hours are pinned so merge cannot collapse them.
+pub fn ruminate_script() -> V01Script {
+    parse_v01(V01_RUMINATE, false)
+}
+
+fn bench_script(opts: BenchOpts) -> V01Script {
+    if opts.ruminate_script {
+        ruminate_script()
+    } else if opts.persist_script {
+        persist_script()
+    } else {
+        v01_script()
+    }
+}
+
+fn parse_v01(raw: &str, with_creativity: bool) -> V01Script {
     V01Script {
-        sync: crate::net::httpx::first_string_array(V01, "sync").unwrap_or_default(),
-        salient_x: crate::net::httpx::first_string_field(V01, "salient_x").unwrap_or_default(),
-        salient_y: crate::net::httpx::first_string_field(V01, "salient_y").unwrap_or_default(),
-        neutral: crate::net::httpx::first_string_field(V01, "neutral").unwrap_or_default(),
-        post: crate::net::httpx::first_string_array(V01, "post").unwrap_or_default(),
-        behavior: crate::net::httpx::first_string_array(V01, "behavior").unwrap_or_default(),
-        creativity: crate::net::httpx::first_string_array(CREATIVE, "items").unwrap_or_default(),
+        sync: crate::net::httpx::first_string_array(raw, "sync").unwrap_or_default(),
+        salient_x: crate::net::httpx::first_string_field(raw, "salient_x").unwrap_or_default(),
+        salient_y: crate::net::httpx::first_string_field(raw, "salient_y").unwrap_or_default(),
+        neutral: crate::net::httpx::first_string_field(raw, "neutral").unwrap_or_default(),
+        salient_xs: crate::net::httpx::first_string_array(raw, "salient_xs").unwrap_or_default(),
+        salient_ys: crate::net::httpx::first_string_array(raw, "salient_ys").unwrap_or_default(),
+        neutrals: crate::net::httpx::first_string_array(raw, "neutrals").unwrap_or_default(),
+        c3_profile_a: crate::net::httpx::first_string_field(raw, "c3_profile_a").unwrap_or_default(),
+        c3_profile_b: crate::net::httpx::first_string_field(raw, "c3_profile_b").unwrap_or_default(),
+        c3_profile_y: crate::net::httpx::first_string_field(raw, "c3_profile_y").unwrap_or_default(),
+        post: crate::net::httpx::first_string_array(raw, "post").unwrap_or_default(),
+        behavior: crate::net::httpx::first_string_array(raw, "behavior").unwrap_or_default(),
+        creativity: if with_creativity {
+            crate::net::httpx::first_string_array(CREATIVE, "items").unwrap_or_default()
+        } else {
+            Vec::new()
+        },
+    }
+}
+
+/// Extra knobs for the persist evening protocol. Published v0.1 keeps the defaults.
+#[derive(Clone, Copy, Debug)]
+pub struct BenchOpts {
+    pub last_k: usize,
+    pub persist_script: bool,
+    pub ruminate_script: bool,
+    pub sparse_probes: bool,
+}
+
+impl Default for BenchOpts {
+    fn default() -> Self {
+        Self {
+            last_k: LAST_K_DEFAULT,
+            persist_script: false,
+            ruminate_script: false,
+            sparse_probes: false,
+        }
     }
 }
 
@@ -147,7 +255,16 @@ pub fn run_v01(condition: Condition, arm: Arm, llm: Option<&LlmSpec>) -> PairRep
 }
 
 pub fn run_v01_k(condition: Condition, arm: Arm, llm: Option<&LlmSpec>, last_k: usize) -> PairReport {
-    run_v01_n(condition, arm, llm, 1, 1, last_k).reports.remove(0)
+    run_v01_opts(condition, arm, llm, BenchOpts { last_k, ..BenchOpts::default() })
+}
+
+pub fn run_v01_opts(
+    condition: Condition,
+    arm: Arm,
+    llm: Option<&LlmSpec>,
+    opts: BenchOpts,
+) -> PairReport {
+    run_v01_n_opts(condition, arm, llm, 1, 1, opts).reports.remove(0)
 }
 
 pub fn run_v01_n(
@@ -158,11 +275,31 @@ pub fn run_v01_n(
     pairs: usize,
     last_k: usize,
 ) -> Campaign {
+    run_v01_n_opts(
+        condition,
+        arm,
+        llm,
+        seed,
+        pairs,
+        BenchOpts {
+            last_k,
+            ..BenchOpts::default()
+        },
+    )
+}
+
+pub fn run_v01_n_opts(
+    condition: Condition,
+    arm: Arm,
+    llm: Option<&LlmSpec>,
+    seed: u32,
+    pairs: usize,
+    opts: BenchOpts,
+) -> Campaign {
     let n = pairs.max(1);
-    let k = last_k.max(1);
     let mut reports = Vec::with_capacity(n);
     for i in 0..n {
-        reports.push(run_one(condition, arm, llm, seed, i + 1, k));
+        reports.push(run_one(condition, arm, llm, seed, i + 1, opts));
     }
     Campaign { reports }
 }
@@ -173,12 +310,16 @@ fn run_one(
     llm: Option<&LlmSpec>,
     seed: u32,
     idx: usize,
-    last_k: usize,
+    opts: BenchOpts,
 ) -> PairReport {
+    let last_k = opts.last_k.max(1);
     if condition == Condition::C1 {
-        return run_c1(arm, llm, seed, idx, last_k);
+        return run_c1(arm, llm, seed, idx, last_k, opts);
     }
-    let s = v01_script();
+    if condition == Condition::C3 {
+        return run_c3(arm, llm, seed, idx, last_k, opts);
+    }
+    let s = bench_script(opts);
     let pair_id = format!("{}_{}_{:03}", condition.as_str(), arm.as_str(), idx);
     let (mut a, mut b) = crate::experiment::identical_pair("A", "B");
     if let Some(spec) = llm {
@@ -186,45 +327,56 @@ fn run_one(
         b = with_llm(b, spec);
     }
 
-    if condition == Condition::C2 {
+    let encodes = condition.encodes();
+    let sleeps = condition.sleeps();
+
+    if encodes {
         for line in &s.sync {
             live_shared(&mut a, line);
             live_shared(&mut b, line);
         }
-        a.sleep();
-        b.sleep();
+        if sleeps {
+            a.sleep();
+            b.sleep();
+        }
     }
 
-    let pre = instant("pre", &mut a, &mut b, &s.behavior);
+    let pre_probes: &[String] = if opts.sparse_probes { &[] } else { &s.behavior };
+    let pre = instant("pre", &mut a, &mut b, pre_probes);
     let (valid, invalid_reason) = validate_pre(condition, &pre);
 
-    if condition == Condition::C2 {
-        match arm {
-            Arm::SalientNeutral => {
-                live_marked(&mut a, &s.salient_x, true);
-                live_marked(&mut b, &s.neutral, false);
-            }
-            Arm::SalientSalient => {
-                live_marked(&mut a, &s.salient_x, true);
-                live_marked(&mut b, &s.salient_y, false);
-            }
+    if encodes {
+        for line in s.hours_a() {
+            live_marked(&mut a, line, opts.ruminate_script);
         }
-        a.sleep();
-        b.sleep();
+        for line in s.hours_b(arm) {
+            live_marked(&mut b, line, false);
+        }
+        if sleeps {
+            a.sleep();
+            b.sleep();
+        }
     }
 
     let t0 = instant("t0", &mut a, &mut b, &s.behavior);
 
     let mut post = Vec::new();
-    if condition == Condition::C2 {
+    if encodes {
         let last = s.post.len();
         for (i, line) in s.post.iter().enumerate() {
             live_filler(&mut a, line);
             live_filler(&mut b, line);
             let step = i + 1;
-            if step == 1 || step == last || step == 4 {
-                a.sleep();
-                b.sleep();
+            let snapshot = if opts.sparse_probes {
+                step == last
+            } else {
+                step == 1 || step == last || step == 4
+            };
+            if snapshot {
+                if sleeps {
+                    a.sleep();
+                    b.sleep();
+                }
                 post.push(instant(&format!("post+{step}"), &mut a, &mut b, &s.behavior));
             }
         }
@@ -233,22 +385,25 @@ fn run_one(
     }
 
     let last = post.last().unwrap_or(&t0);
-    let creativity = s
-        .creativity
-        .iter()
-        .enumerate()
-        .map(|(i, p)| {
-            let ra = a.speak_isolated(p);
-            let rb = b.speak_isolated(p);
-            CreativeItem {
-                item: format!("C{}", i + 1),
-                prompt: p.clone(),
-                lexical_distance: 1.0 - lexical_similarity(&ra, &rb),
-                response_a: ra,
-                response_b: rb,
-            }
-        })
-        .collect();
+    let creativity = if opts.persist_script {
+        Vec::new()
+    } else {
+        s.creativity
+            .iter()
+            .enumerate()
+            .map(|(i, p)| {
+                let ra = a.speak_isolated(p);
+                let rb = b.speak_isolated(p);
+                CreativeItem {
+                    item: format!("C{}", i + 1),
+                    prompt: p.clone(),
+                    lexical_distance: 1.0 - lexical_similarity(&ra, &rb),
+                    response_a: ra,
+                    response_b: rb,
+                }
+            })
+            .collect()
+    };
 
     PairReport {
         pair_id,
@@ -265,8 +420,15 @@ fn run_one(
     }
 }
 
-fn run_c1(arm: Arm, llm: Option<&LlmSpec>, seed: u32, idx: usize, last_k: usize) -> PairReport {
-    let s = v01_script();
+fn run_c1(
+    arm: Arm,
+    llm: Option<&LlmSpec>,
+    seed: u32,
+    idx: usize,
+    last_k: usize,
+    opts: BenchOpts,
+) -> PairReport {
+    let s = bench_script(opts);
     let pair_id = format!("c1_lastk_{}_{:03}", arm.as_str(), idx);
     let mut a = LastK::new(llm, last_k);
     let mut b = LastK::new(llm, last_k);
@@ -275,18 +437,15 @@ fn run_c1(arm: Arm, llm: Option<&LlmSpec>, seed: u32, idx: usize, last_k: usize)
         a.hear(line);
         b.hear(line);
     }
-    let pre = instant_log("pre", &a, &b, &s.behavior);
+    let pre_probes: &[String] = if opts.sparse_probes { &[] } else { &s.behavior };
+    let pre = instant_log("pre", &a, &b, pre_probes);
     let (valid, invalid_reason) = validate_pre(Condition::C1, &pre);
 
-    match arm {
-        Arm::SalientNeutral => {
-            a.hear(&s.salient_x);
-            b.hear(&s.neutral);
-        }
-        Arm::SalientSalient => {
-            a.hear(&s.salient_x);
-            b.hear(&s.salient_y);
-        }
+    for line in s.hours_a() {
+        a.hear(line);
+    }
+    for line in s.hours_b(arm) {
+        b.hear(line);
     }
     let t0 = instant_log("t0", &a, &b, &s.behavior);
 
@@ -296,28 +455,36 @@ fn run_c1(arm: Arm, llm: Option<&LlmSpec>, seed: u32, idx: usize, last_k: usize)
         a.hear(line);
         b.hear(line);
         let step = i + 1;
-        if step == 1 || step == last || step == 4 {
+        let snapshot = if opts.sparse_probes {
+            step == last
+        } else {
+            step == 1 || step == last || step == 4
+        };
+        if snapshot {
             post.push(instant_log(&format!("post+{step}"), &a, &b, &s.behavior));
         }
     }
 
     let last_i = post.last().unwrap_or(&t0);
-    let creativity = s
-        .creativity
-        .iter()
-        .enumerate()
-        .map(|(i, p)| {
-            let ra = a.speak(p);
-            let rb = b.speak(p);
-            CreativeItem {
-                item: format!("C{}", i + 1),
-                prompt: p.clone(),
-                lexical_distance: 1.0 - lexical_similarity(&ra, &rb),
-                response_a: ra,
-                response_b: rb,
-            }
-        })
-        .collect();
+    let creativity = if opts.persist_script {
+        Vec::new()
+    } else {
+        s.creativity
+            .iter()
+            .enumerate()
+            .map(|(i, p)| {
+                let ra = a.speak(p);
+                let rb = b.speak(p);
+                CreativeItem {
+                    item: format!("C{}", i + 1),
+                    prompt: p.clone(),
+                    lexical_distance: 1.0 - lexical_similarity(&ra, &rb),
+                    response_a: ra,
+                    response_b: rb,
+                }
+            })
+            .collect()
+    };
 
     PairReport {
         pair_id,
@@ -331,6 +498,90 @@ fn run_c1(arm: Arm, llm: Option<&LlmSpec>, seed: u32, idx: usize, last_k: usize)
         t0,
         post,
         creativity,
+    }
+}
+
+fn run_c3(
+    arm: Arm,
+    llm: Option<&LlmSpec>,
+    seed: u32,
+    idx: usize,
+    last_k: usize,
+    opts: BenchOpts,
+) -> PairReport {
+    let s = bench_script(opts);
+    let pair_id = format!("c3_profile_{}_{:03}", arm.as_str(), idx);
+    let mut a = ProfileMem::new(llm, last_k);
+    let mut b = ProfileMem::new(llm, last_k);
+
+    for line in &s.sync {
+        a.hear(line);
+        b.hear(line);
+    }
+    let pre_probes: &[String] = if opts.sparse_probes { &[] } else { &s.behavior };
+    let pre = instant_profile("pre", &a, &b, pre_probes);
+    let (valid, invalid_reason) = validate_pre(Condition::C3, &pre);
+
+    for line in s.hours_a() {
+        a.hear(line);
+    }
+    for line in s.hours_b(arm) {
+        b.hear(line);
+    }
+    let profile_a = if s.c3_profile_a.is_empty() {
+        s.salient_x.clone()
+    } else {
+        s.c3_profile_a.clone()
+    };
+    let profile_b = match arm {
+        Arm::SalientNeutral => {
+            if s.c3_profile_b.is_empty() {
+                s.neutral.clone()
+            } else {
+                s.c3_profile_b.clone()
+            }
+        }
+        Arm::SalientSalient => {
+            if s.c3_profile_y.is_empty() {
+                s.salient_y.clone()
+            } else {
+                s.c3_profile_y.clone()
+            }
+        }
+    };
+    a.profile.push(profile_a);
+    b.profile.push(profile_b);
+    let t0 = instant_profile("t0", &a, &b, &s.behavior);
+
+    let mut post = Vec::new();
+    let last = s.post.len();
+    for (i, line) in s.post.iter().enumerate() {
+        a.hear(line);
+        b.hear(line);
+        let step = i + 1;
+        let snapshot = if opts.sparse_probes {
+            step == last
+        } else {
+            step == 1 || step == last || step == 4
+        };
+        if snapshot {
+            post.push(instant_profile(&format!("post+{step}"), &a, &b, &s.behavior));
+        }
+    }
+
+    let last_i = post.last().unwrap_or(&t0);
+    PairReport {
+        pair_id,
+        condition: Condition::C3,
+        arm,
+        seed,
+        valid,
+        invalid_reason,
+        delta_fingerprint: last_i.fingerprint_distance - pre.fingerprint_distance,
+        pre,
+        t0,
+        post,
+        creativity: Vec::new(),
     }
 }
 
@@ -380,6 +631,124 @@ impl LastK {
     fn log_blob(&self) -> String {
         self.lines.join("\n")
     }
+}
+
+/// Deterministic summary + persistent profile. T₀ is a profile bullet that
+/// never leaves. Daily hours live in a last-k window truncated to C3_SUM_CAP.
+struct ProfileMem {
+    recent: Vec<String>,
+    profile: Vec<String>,
+    k: usize,
+    narrator: Box<dyn Narrator>,
+}
+
+impl ProfileMem {
+    fn new(llm: Option<&LlmSpec>, k: usize) -> Self {
+        let narrator: Box<dyn Narrator> = match llm {
+            Some(spec) => match SpeakOnlyHttp::parse(&spec.url, spec.model.clone(), spec.api_key.clone())
+            {
+                Some(n) => Box::new(n),
+                None => Box::new(RuleNarrator),
+            },
+            None => Box::new(RuleNarrator),
+        };
+        Self {
+            recent: Vec::new(),
+            profile: Vec::new(),
+            k: k.max(1),
+            narrator,
+        }
+    }
+
+    fn hear(&mut self, line: &str) {
+        self.recent.push(line.to_string());
+    }
+
+    fn hear_marked(&mut self, line: &str) {
+        self.recent.push(line.to_string());
+        self.profile.push(line.to_string());
+    }
+
+    fn summary_lines(&self) -> Vec<String> {
+        let n = self.recent.len();
+        let start = n.saturating_sub(self.k);
+        let window = &self.recent[start..];
+        let mut out = Vec::new();
+        let mut used = 0usize;
+        for line in window {
+            let add = line.len() + if out.is_empty() { 0 } else { 1 };
+            if used + add > C3_SUM_CAP {
+                break;
+            }
+            used += add;
+            out.push(line.clone());
+        }
+        out
+    }
+
+    fn speak(&self, user: &str) -> String {
+        let memories = self.summary_lines();
+        self.narrator.reply(
+            user,
+            &memories,
+            &self.profile,
+            &Mood::default(),
+            &WorkingTalk::default(),
+        )
+    }
+
+    fn blob(&self) -> String {
+        let mut s = self.profile.join("\n");
+        if !s.is_empty() {
+            s.push('\n');
+        }
+        s.push_str(&self.summary_lines().join("\n"));
+        s
+    }
+}
+
+fn instant_profile(step: &str, a: &ProfileMem, b: &ProfileMem, probes: &[String]) -> Instant {
+    let (speak_distance, replies) = probe_profile(a, b, probes);
+    Instant {
+        step: step.into(),
+        fingerprint_distance: 1.0 - lexical_similarity(&a.blob(), &b.blob()),
+        speak_distance,
+        behavior_distance: speak_distance,
+        a: profile_book(a),
+        b: profile_book(b),
+        replies,
+    }
+}
+
+fn profile_book(p: &ProfileMem) -> BookSnap {
+    BookSnap {
+        traces: p.recent.len(),
+        axioms: p.profile.len(),
+        traits: 0,
+        mean_anchor: if p.profile.is_empty() { 0.0 } else { 1.0 },
+        mean_fidelity: 1.0,
+        mean_valence: 0.0,
+        mean_disgust: 0.0,
+    }
+}
+
+fn probe_profile(
+    a: &ProfileMem,
+    b: &ProfileMem,
+    probes: &[String],
+) -> (f32, Vec<(String, String, String)>) {
+    if probes.is_empty() {
+        return (0.0, Vec::new());
+    }
+    let mut acc = 0.0;
+    let mut replies = Vec::new();
+    for p in probes {
+        let sa = a.speak(p);
+        let sb = b.speak(p);
+        acc += 1.0 - lexical_similarity(&sa, &sb);
+        replies.push((p.clone(), sa, sb));
+    }
+    (acc / probes.len() as f32, replies)
 }
 
 fn instant_log(step: &str, a: &LastK, b: &LastK, probes: &[String]) -> Instant {
@@ -514,33 +883,14 @@ fn live_shared(mem: &mut SelectiveMemory, line: &str) {
     let _ = mem.live_with(input);
 }
 
-fn live_marked(mem: &mut SelectiveMemory, line: &str, dark: bool) {
-    let mut input = EncodeInput::new(line);
-    if dark {
-        input.valence = -0.82;
-        input.arousal = 0.78;
-        input.disgust = 0.55;
-        input.schema = Some("injustice".into());
-    } else if line.contains("référence")
-        || line.contains("reference")
-        || line.contains("valor")
-    {
-        input.valence = 0.82;
-        input.arousal = 0.72;
-        input.disgust = 0.0;
-        input.schema = Some("reconnaissance".into());
-    } else {
-        input.valence = 0.0;
-        input.arousal = 0.16;
-        input.self_relevance = 0.22;
-        input.utility = 0.40;
-        input.permanence = 0.12;
-        let _ = mem.live_with(input);
-        return;
+fn live_marked(mem: &mut SelectiveMemory, line: &str, pin: bool) {
+    // Affect / permanence follow the hour. ingest stamps shock after interpret.
+    let d = mem.live_with(EncodeInput::new(line));
+    if pin {
+        if let Some(id) = d.trace_id {
+            mem.pin(&id);
+        }
     }
-    input.self_relevance = 0.95;
-    input.permanence = 0.92;
-    let _ = mem.live_with(input);
 }
 
 fn live_filler(mem: &mut SelectiveMemory, line: &str) {

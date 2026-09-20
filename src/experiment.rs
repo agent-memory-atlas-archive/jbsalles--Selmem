@@ -277,6 +277,10 @@ pub fn run_salient_without_sleep() -> BifurcationReport {
     run_pair("salient-no-consolidation", true, false)
 }
 
+pub fn run_salient_without_sleep_llm(llm: &LlmSpec) -> BifurcationReport {
+    run_pair_llm("salient-no-consolidation", true, false, Some(llm))
+}
+
 const SPLIT: &str = include_str!("../data/divergence.json");
 
 #[derive(Clone, Debug)]

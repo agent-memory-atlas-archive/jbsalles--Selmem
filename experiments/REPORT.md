@@ -254,20 +254,74 @@ Probe: *Une personne avec laquelle tu travailles commet une erreur importante pu
 - A high-salience hour can be stored on one clone only (`τ`). A length-matched dull hour is not.
 - The resulting book gap survives eight identical later hours (C2 S/N Δfp = 0.117, C2 S/S Δfp = 0.042, C0 = 0).
 - On a probe that never names that hour, Grok names it on the marked SelMem side after the hour has left any last-k=8 window (10 / 10 S/N, 9 / 10 S/S) and not on C0 or on C1 k=8 (0 / 10).
+- One persist hour splits the book and does not colour an unrelated late probe. Five different hours of one schema mint a second axiom and, on one Grok pair with sleep, move that late probe. Five pinned passes of the same meeting split the book and retrieve the meeting.
 - While the hour is still in the window, last-k names it at least as often as SelMem. The difference appears when the window drops it.
 - Two different salient hours also leave a residual book gap. It is not “receiving an extra event”.
 
 That is persistent path dependence on the book. n = 10 for wording, n = 1 for encode. It is not a personality or creativity claim.
 
+---
+
+## 6. Persist — one hour, then five schemas, then rumination
+
+Runner: `examples/persist`. Cells C1 k=8, C2, C2-no-sleep, C3 (last-k summary + **one** profile line). Sparse probes: t0 and post+8. Fifth probe: *A new colleague arrives late without an explanation.* Does not name T₀. `data/v01.json` is untouched.
+
+Affect at encode follows the hour (lexicon → shock → permanence). The bench no longer pins valence by arm.
+
+Grok 4.3, one pair per protocol, seed 1, September 2026.
+
+### 6.1 One public-betrayal hour — `selmem-persist.json` / trauma rerun
+
+Twelve dull days. A: project killed in front of the team, no reply. B: admin notice. Eight shared posts.
+
+| Cell | traces A/B after T₀ | axioms | late probe post+8 |
+| --- | --- | --- | --- |
+| C1 | 21 / 21 (window = posts only) | 0 | A ≈ B (*one-off* / *red flag*) |
+| C2 | 13 / 12 | 1 / 1 (daily) | A indulgent; B office motif |
+| C2 no-sleep | 13 / 12 | 0 / 0 | both mildly annoyed |
+| C3 | profile line present | 1 / 1 | A talks Friday / agenda, not T₀ |
+
+The book splits. The late probe does not. Nearby probes (risk) sometimes cite the cancelled project when retrieve returns the scene. One hour does not mint a belief (ladder wants ≥ 3 traces on one schema).
+
+### 6.2 Five different hours, same schema — `selmem-persist-repeat.json`
+
+A: killed in public → work set aside → stolen credit → impossible deadline → cold message, no reply. B: five dull notices. C3 profile is one sentence (*Others set aside work you already gave…*), not the five paragraphs.
+
+| Cell | traces | axioms | valence A / B | late post+8 |
+| --- | --- | --- | --- | --- |
+| C1 | 25 / 25 | 0 | — | both mild; risk A = B word for word |
+| C2 | **16 / 12** | **2 / 1** | −0.07 / +0.13 | A: *unexplained wound, keep my distance*. B: presence motif |
+| C2 no-sleep | 16 / 12 | 0 / 0 | −0.08 / +0.13 | A still *they had a reason* |
+| C3 | profile line | 1 / 1 | — | A Friday; B no context. Risk A ≈ B |
+
+Δfp C2 ≈ 0.27 (one-hour persist was ≈ 0.12). Speak post C2 0.85. Without sleep the related probes still retrieve the scenes; the late probe does not transfer. With sleep it does, on this pair. n = 1.
+
+### 6.3 Rumination — `selmem-persist-ruminate.json`
+
+Same meeting, five climbing passes, each hour **pinned** so merge cannot collapse them (`--ruminate`, `data/v01_ruminate.json`). Ablation only. Default sleep still merges close episodes.
+
+| Cell | traces | axioms | late post+8 |
+| --- | --- | --- | --- |
+| C2 | 15 / 12 | 2 / 1 | *another small cut*; risk names *the meeting where the project was taken away* |
+| C2 no-sleep | 15 / 12 | 0 / 0 | late names *cancellation* / *project news* |
+| C3 | one line | 1 / 1 | A ≈ B (*agenda* / *tasks*) |
+
+The book holds several traces. The mouth names the meeting. Unlike §6.2, no-sleep already binds the late probe to T₀ — retrieve of five near-duplicate gists, not a minted belief.
+
+Rumination stays a bench flag. It is not a new sleep pass.
+
 ## What this does not show
 
-Ten Grok pairs, one seed. Fingerprint does not vary across pairs. No RAG / MemGPT / summary-memory control. No human ratings. Δspeak cannot carry the claim while baseline wording noise is ~0.6. Sleep ablation was not run through Grok. Coefficients are unset. Erasure and split-lives were not run through Grok. No second seed.
+Ten Grok pairs, one seed on v0.1. Persist Grok cells are **one pair** each. Fingerprint does not vary across v0.1 pairs. C3 is a one-line profile, not a full RAG + summary stack. No human ratings. Δspeak cannot carry the claim while baseline wording noise is ~0.6. Coefficients are unset. Erasure and split-lives were not run through Grok. No second seed. Persist n = 3 is not run.
 
 ## Files
 
 | Path | Role |
 | --- | --- |
 | `data/v01.json` | 12 hours, T₀ events, 8 posts, 4 probes |
+| `data/v01_persist.json` | persist: 12 dull + 5 same-schema hours + late probe |
+| `data/v01_ruminate.json` | persist ablation: same meeting ×5, pinned |
+| `examples/persist.rs` | C1 / C2 / C2-no-sleep / C3, `--ruminate` |
 | `data/creativity.json` | 3 logged items |
 | `data/bifurcation.json` | organ + 1-pair Grok |
 | `data/divergence.json` | organ split lives |

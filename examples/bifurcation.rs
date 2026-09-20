@@ -9,7 +9,7 @@
 
 use selmem::{
     run_neutral, run_neutral_llm, run_salient, run_salient_llm, run_salient_without_sleep,
-    BifurcationReport, LlmSpec,
+    run_salient_without_sleep_llm, BifurcationReport, LlmSpec,
 };
 
 fn row(title: &str, r: &BifurcationReport) {
@@ -84,13 +84,13 @@ fn main() {
             (
                 run_salient_llm(spec),
                 run_neutral(),
-                run_salient_without_sleep(),
+                run_salient_without_sleep_llm(spec),
             )
         } else {
             (
                 run_salient_llm(spec),
                 run_neutral_llm(spec),
-                run_salient_without_sleep(),
+                run_salient_without_sleep_llm(spec),
             )
         }
     } else {
