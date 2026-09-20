@@ -22,48 +22,73 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             mem.store.archives.len(),
             mem.store.axioms.len()
         )),
-        ("GET", "/profile") => ok(format!(
-            "{{\"name\":\"{}\",\"voice\":\"{}\",\"encode_threshold\":{:.4},\"embellish_gain\":{:.4},\"disgust_gain\":{:.4},\"decay_lambda\":{:.4},\"ground_min_overlap\":{:.4},\"ground_strikes\":{},\"narrator_firmness\":{:.4}}}",
-            json_esc(&mem.profile.name),
-            mem.profile.voice_kind(),
-            mem.profile.encode_threshold,
-            mem.profile.embellish_gain,
-            mem.profile.disgust_gain,
-            mem.profile.decay_lambda,
-            mem.profile.ground_min_overlap,
-            mem.profile.ground_strikes,
-            mem.profile.narrator_firmness
-        )),
+        ("GET", "/profile") => ok(profile_json(mem)),
         ("POST", "/profile") => {
-            if let Some(v) = json_f32(body, "encode_threshold") {
-                mem.profile.encode_threshold = v;
-            }
-            if let Some(v) = json_f32(body, "embellish_gain") {
-                mem.profile.embellish_gain = v;
-            }
-            if let Some(v) = json_f32(body, "disgust_gain") {
-                mem.profile.disgust_gain = v;
-            }
-            if let Some(v) = json_f32(body, "decay_lambda") {
-                mem.profile.decay_lambda = v;
-            }
-            if let Some(v) = json_f32(body, "ground_min_overlap") {
-                mem.profile.ground_min_overlap = v;
-            }
-            if let Some(v) = json_f32(body, "ground_strikes") {
-                mem.profile.ground_strikes = v.max(1.0) as usize;
-            }
-            if let Some(v) = json_f32(body, "narrator_firmness") {
-                mem.profile.narrator_firmness = v.clamp(0.0, 1.0);
+            if let Some(v) = json_str(body, "name") {
+                let n = v.trim();
+                if !n.is_empty() {
+                    mem.profile.name = n.to_string();
+                }
             }
             if let Some(v) = json_str(body, "voice") {
                 mem.profile.set_voice(&v);
             }
+            if let Some(v) = json_f32(body, "encode_threshold") {
+                mem.profile.encode_threshold = v.clamp(0.10, 0.80);
+            }
+            if let Some(v) = json_f32(body, "w_self") {
+                mem.profile.w_self = v.clamp(0.0, 0.60);
+            }
+            if let Some(v) = json_f32(body, "embellish_gain") {
+                mem.profile.embellish_gain = v.clamp(0.0, 0.50);
+            }
+            if let Some(v) = json_f32(body, "disgust_gain") {
+                mem.profile.disgust_gain = v.clamp(0.0, 0.50);
+            }
+            if let Some(v) = json_f32(body, "decay_lambda") {
+                mem.profile.decay_lambda = v.clamp(0.01, 0.30);
+            }
+            if let Some(v) = json_f32(body, "narrator_firmness") {
+                mem.profile.narrator_firmness = v.clamp(0.0, 1.0);
+            }
+            if let Some(v) = json_f32(body, "max_recall") {
+                mem.profile.max_recall = v.clamp(1.0, 12.0) as usize;
+            }
+            if let Some(v) = json_f32(body, "merge_similarity") {
+                mem.profile.merge_similarity = v.clamp(0.05, 0.95);
+            }
+            if let Some(v) = json_f32(body, "ground_min_overlap") {
+                mem.profile.ground_min_overlap = v.clamp(0.0, 1.0);
+            }
+            if let Some(v) = json_f32(body, "ground_strikes") {
+                mem.profile.ground_strikes = v.max(1.0) as usize;
+            }
+            if let Some(v) = json_f32(body, "reconsolidation_eta") {
+                mem.profile.reconsolidation_eta = v.clamp(0.0, 1.0);
+            }
+            if let Some(v) = json_bool(body, "cut_reconsolidate") {
+                mem.cut.reconsolidate = v;
+            }
+            if let Some(v) = json_bool(body, "cut_ground") {
+                mem.cut.ground = v;
+            }
+            if let Some(v) = json_bool(body, "cut_ladder") {
+                mem.cut.ladder = v;
+            }
             let _ = mem.save();
-            ok(format!(
-                "{{\"ok\":true,\"voice\":\"{}\"}}",
-                mem.profile.voice_kind()
-            ))
+            ok(profile_json(mem))
+        }
+        ("GET", "/llm") => ok(llm_json(mem)),
+        ("POST", "/llm") => {
+            let url = json_str(body, "url").unwrap_or_else(|| mem.llm.url.clone());
+            let model = json_str(body, "model").unwrap_or_else(|| mem.llm.model.clone());
+            let key = json_str(body, "api_key");
+            if json_bool(body, "clear").unwrap_or(false) || url.trim().is_empty() {
+                let _ = mem.set_llm("", "", None);
+            } else if let Err(e) = mem.set_llm(&url, &model, key) {
+                return err(400, &e);
+            }
+            ok(llm_json(mem))
         }
         ("GET", "/mood") => ok(format!(
             "{{\"valence\":{:.4},\"arousal\":{:.4},\"disgust\":{:.4}}}",
@@ -490,6 +515,53 @@ fn events_json(mem: &SelectiveMemory) -> String {
     format!("{{\"events\":[{}]}}", items.join(","))
 }
 
+fn mask_key(key: &str) -> String {
+    let t = key.trim();
+    if t.len() <= 8 {
+        return "••••".into();
+    }
+    format!("{}…{}", &t[..4], &t[t.len() - 4..])
+}
+
+fn llm_json(mem: &SelectiveMemory) -> String {
+    let attached = !mem.llm.url.is_empty();
+    let key = mem.llm.key.as_deref().unwrap_or("");
+    format!(
+        "{{\"ok\":true,\"attached\":{},\"url\":\"{}\",\"model\":\"{}\",\"has_key\":{},\"key_hint\":\"{}\"}}",
+        if attached { "true" } else { "false" },
+        json_esc(&mem.llm.url),
+        json_esc(&mem.llm.model),
+        if mem.llm.key.as_ref().map(|k| !k.is_empty()).unwrap_or(false) {
+            "true"
+        } else {
+            "false"
+        },
+        json_esc(&if key.is_empty() { String::new() } else { mask_key(key) }),
+    )
+}
+
+fn profile_json(mem: &SelectiveMemory) -> String {
+    format!(
+        "{{\"ok\":true,\"name\":\"{}\",\"voice\":\"{}\",\"encode_threshold\":{:.4},\"w_self\":{:.4},\"embellish_gain\":{:.4},\"disgust_gain\":{:.4},\"decay_lambda\":{:.4},\"narrator_firmness\":{:.4},\"max_recall\":{},\"merge_similarity\":{:.4},\"ground_min_overlap\":{:.4},\"ground_strikes\":{},\"reconsolidation_eta\":{:.4},\"cut_reconsolidate\":{},\"cut_ground\":{},\"cut_ladder\":{}}}",
+        json_esc(&mem.profile.name),
+        mem.profile.voice_kind(),
+        mem.profile.encode_threshold,
+        mem.profile.w_self,
+        mem.profile.embellish_gain,
+        mem.profile.disgust_gain,
+        mem.profile.decay_lambda,
+        mem.profile.narrator_firmness,
+        mem.profile.max_recall,
+        mem.profile.merge_similarity,
+        mem.profile.ground_min_overlap,
+        mem.profile.ground_strikes,
+        mem.profile.reconsolidation_eta,
+        if mem.cut.reconsolidate { "true" } else { "false" },
+        if mem.cut.ground { "true" } else { "false" },
+        if mem.cut.ladder { "true" } else { "false" },
+    )
+}
+
 fn query_param<'a>(query: &'a str, key: &str) -> Option<&'a str> {
     query.split('&').find_map(|pair| {
         let (k, v) = pair.split_once('=')?;
@@ -507,6 +579,20 @@ fn json_str(body: &str, key: &str) -> Option<String> {
 
 fn json_f32(body: &str, key: &str) -> Option<f32> {
     crate::net::httpx::first_number_field(body, key)
+}
+
+fn json_bool(body: &str, key: &str) -> Option<bool> {
+    let needle = format!("\"{}\"", key);
+    let i = body.find(&needle)?;
+    let rest = &body[i + needle.len()..];
+    let rest = rest.trim_start_matches(|c: char| c == ':' || c.is_whitespace());
+    if rest.starts_with("true") {
+        Some(true)
+    } else if rest.starts_with("false") {
+        Some(false)
+    } else {
+        None
+    }
 }
 
 fn guess_affect(text: &str) -> (f32, f32, f32, Option<String>) {

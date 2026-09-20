@@ -3,7 +3,7 @@ use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::{Arc, Mutex};
 
-use selmem::{api, Config, EntityProfile, HttpEmbedder, HttpNarrator, SelectiveMemory};
+use selmem::{api, Config, EntityProfile, HttpEmbedder, SelectiveMemory};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -43,11 +43,9 @@ fn main() {
         mem.profile.narrator_firmness = v;
     }
     if let Some(endpoint) = llm {
-        if let Some(n) = HttpNarrator::parse(&endpoint, model, key.clone()) {
-            mem = mem.with_narrator(Box::new(n));
-            eprintln!("HTTP narrator attached");
-        } else {
-            eprintln!("endpoint LLM illisible, repli RuleNarrator");
+        match mem.set_llm(&endpoint, &model, key.clone()) {
+            Ok(()) => eprintln!("HTTP narrator attached"),
+            Err(e) => eprintln!("{e}; repli RuleNarrator"),
         }
     }
     if let Some(url) = embed_url {

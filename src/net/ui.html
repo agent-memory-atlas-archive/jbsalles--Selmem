@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SelMem</title>
 <style>
-  :root { --bg:#111114; --card:#1b1b22; --ink:#eee8e0; --muted:#8a847c; --line:#2c2c36; --kept:#c9b27a; --drop:#7a6f68; --panel:420px; }
+  :root { --bg:#111114; --card:#1b1b22; --ink:#eee8e0; --muted:#8a847c; --line:#2c2c36; --kept:#c9b27a; --drop:#7a6f68; --panel:420px; --opts:400px; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font: 16px/1.45 Georgia, serif; }
   main { max-width: 720px; margin: 0 auto; min-height: 100vh; display:flex; flex-direction:column; transition: margin-right .2s ease; }
   body.book-open main { margin-right: min(var(--panel), 100vw); }
+  body.opts-open main { margin-left: min(var(--opts), 100vw); }
   header { padding: 20px 20px 8px; border-bottom:1px solid var(--line); flex-shrink:0; }
   header h1 { font-size: 1.15rem; font-weight: normal; margin:0; }
   header p { margin: 4px 0 0; color:var(--muted); font-size:.9rem; }
@@ -23,6 +24,8 @@
   .drop { color:var(--drop); }
   form { position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:100%; max-width:720px; display:flex; gap:8px; padding:12px 20px 20px; border-top:1px solid var(--line); background:var(--bg); }
   body.book-open form { left: calc(50% - var(--panel) / 2); }
+  body.opts-open form { left: calc(50% + var(--opts) / 2); }
+  body.book-open.opts-open form { left: calc(50% + var(--opts) / 2 - var(--panel) / 2); }
   input, button { font: inherit; }
   #text { flex:1; background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
   button { background:#3a342c; color:var(--ink); border:0; border-radius:10px; padding:10px 14px; cursor:pointer; }
@@ -72,6 +75,40 @@
   }
   #confirm .box p { margin:0 0 14px; }
   #confirm .actions { display:flex; gap:8px; justify-content:flex-end; }
+
+  #opts {
+    position:fixed; top:0; left:0; width:var(--opts); max-width:100vw; height:100vh;
+    background:#16161c; border-right:1px solid var(--line);
+    transform:translateX(-100%); transition:transform .2s ease;
+    display:flex; flex-direction:column; z-index:5;
+  }
+  body.opts-open #opts { transform:none; }
+  #opts header { display:flex; align-items:baseline; justify-content:space-between; }
+  #opts h2 { font-size:1rem; font-weight:normal; margin:0; }
+  #opts-body { flex:1; overflow-y:auto; padding:10px 16px 28px; font-size:.86rem; }
+  #opts fieldset { border:0; margin:0 0 18px; padding:0; }
+  #opts legend { color:var(--kept); font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; margin-bottom:8px; }
+  #opts .hint { color:var(--muted); font-size:.75rem; margin:0 0 10px; }
+  #opts label.row {
+    display:grid; grid-template-columns: 1fr auto; gap:6px 10px; align-items:center;
+    padding:7px 0; border-bottom:1px solid var(--line);
+  }
+  #opts label.row span.name { color:var(--ink); }
+  #opts label.row span.val { color:var(--muted); font-family:ui-monospace,monospace; font-size:.75rem; }
+  #opts input[type=range] { grid-column:1 / -1; width:100%; accent-color:var(--kept); }
+  #opts label.check { display:flex; gap:8px; align-items:center; padding:6px 0; border-bottom:1px solid var(--line); }
+  #opts .presets { display:flex; gap:6px; margin-bottom:8px; }
+  #opts .presets button { flex:1; font-size:.82rem; padding:8px 6px; }
+  #opts .presets button.on { background:#3a342c; color:var(--kept); }
+  #opts input[type=text], #opts input[type=password] {
+    width:100%; background:var(--card); color:var(--ink); border:1px solid var(--line);
+    border-radius:8px; padding:8px 10px; font: inherit; font-size:.85rem; margin:4px 0 10px;
+  }
+  #opts .field-lab { display:block; color:var(--muted); font-size:.75rem; margin-top:6px; }
+  #opts .row-btns { display:flex; gap:6px; margin-top:4px; }
+  #opts details { margin-top:8px; }
+  #opts details summary { color:var(--muted); cursor:pointer; font-size:.82rem; padding:8px 0; }
+  #opts-status { color:var(--muted); font-size:.75rem; padding:8px 16px; border-top:1px solid var(--line); min-height:2.2em; }
 </style>
 </head>
 <body>
@@ -82,16 +119,13 @@
         <h1 id="name">SelMem</h1>
         <p id="status">test interface — memory lives on this server</p>
       </div>
-      <button class="ghost" type="button" id="toggle-book">book</button>
+      <div>
+        <button class="ghost" type="button" id="toggle-opts">options</button>
+        <button class="ghost" type="button" id="toggle-book">book</button>
+      </div>
     </div>
   </header>
   <div class="bar">
-    <input id="token" placeholder="token" autocomplete="off">
-    <select id="voice" title="voice">
-      <option value="tender">tender</option>
-      <option value="austere">austere</option>
-      <option value="neutral">neutral</option>
-    </select>
     <button class="ghost" type="button" id="who">who are you</button>
     <button class="ghost" type="button" id="pin">pin</button>
     <button class="ghost" type="button" id="sleep">sleep</button>
@@ -104,6 +138,81 @@
     <button type="submit" id="send">send</button>
   </form>
 </main>
+<aside id="opts" hidden>
+  <header>
+    <h2>options</h2>
+    <button class="ghost" type="button" id="close-opts">close</button>
+  </header>
+  <div id="opts-body">
+    <fieldset>
+      <legend>entity</legend>
+      <label class="field-lab" for="opt-name">name</label>
+      <input type="text" id="opt-name" autocomplete="off" placeholder="Claire">
+      <p class="hint">Writes the tender / austere contrast pair. Moving a slider marks the profile custom.</p>
+      <div class="presets">
+        <button type="button" data-preset="tender">tender</button>
+        <button type="button" data-preset="austere">austere</button>
+        <button type="button" data-preset="neutral">neutral</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>LLM</legend>
+      <p class="hint">HTTP narrator for speak. Empty URL falls back to rules. Key stays on the process; not written to the vault.</p>
+      <label class="field-lab" for="llm-url">endpoint</label>
+      <input type="text" id="llm-url" placeholder="https://api.x.ai/v1/chat/completions" autocomplete="off">
+      <label class="field-lab" for="llm-model">model</label>
+      <input type="text" id="llm-model" placeholder="grok-4.3" autocomplete="off">
+      <label class="field-lab" for="llm-key">api key</label>
+      <input type="password" id="llm-key" placeholder="unchanged if left blank" autocomplete="off">
+      <div class="row-btns">
+        <button type="button" id="llm-save">attach</button>
+        <button class="ghost" type="button" id="llm-clear">use rules</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>server auth</legend>
+      <p class="hint">Bearer token for this UI, if the daemon was started with --token.</p>
+      <input type="password" id="token" placeholder="token" autocomplete="off">
+    </fieldset>
+    <fieldset>
+      <legend>profile</legend>
+      <p class="hint">Who gets in, and how the night leans.</p>
+      <label class="row"><span class="name">encode threshold τ</span><span class="val" data-for="encode_threshold"></span>
+        <input type="range" id="encode_threshold" min="0.15" max="0.60" step="0.01"></label>
+      <label class="row"><span class="name">self weight</span><span class="val" data-for="w_self"></span>
+        <input type="range" id="w_self" min="0.05" max="0.50" step="0.01"></label>
+      <label class="row"><span class="name">embellish</span><span class="val" data-for="embellish_gain"></span>
+        <input type="range" id="embellish_gain" min="0" max="0.40" step="0.01"></label>
+      <label class="row"><span class="name">disgust gain</span><span class="val" data-for="disgust_gain"></span>
+        <input type="range" id="disgust_gain" min="0" max="0.40" step="0.01"></label>
+      <label class="row"><span class="name">decay λ</span><span class="val" data-for="decay_lambda"></span>
+        <input type="range" id="decay_lambda" min="0.02" max="0.20" step="0.01"></label>
+      <label class="row"><span class="name">narrator firmness</span><span class="val" data-for="narrator_firmness"></span>
+        <input type="range" id="narrator_firmness" min="0" max="1" step="0.01"></label>
+    </fieldset>
+    <fieldset>
+      <legend>recall</legend>
+      <label class="row"><span class="name">max recall</span><span class="val" data-for="max_recall"></span>
+        <input type="range" id="max_recall" min="1" max="8" step="1"></label>
+      <label class="row"><span class="name">merge similarity</span><span class="val" data-for="merge_similarity"></span>
+        <input type="range" id="merge_similarity" min="0.10" max="0.80" step="0.01"></label>
+    </fieldset>
+    <details>
+      <summary>lab — cuts and grounding</summary>
+      <p class="hint">Cuts are runtime only (not in the vault). P0 n=5: recon and ground did not carry the late probe; ladder did.</p>
+      <label class="check"><input type="checkbox" id="cut_reconsolidate"> reconsolidate</label>
+      <label class="check"><input type="checkbox" id="cut_ground"> ground (pull to core)</label>
+      <label class="check"><input type="checkbox" id="cut_ladder"> ladder (mint motif / belief)</label>
+      <label class="row"><span class="name">ground overlap</span><span class="val" data-for="ground_min_overlap"></span>
+        <input type="range" id="ground_min_overlap" min="0" max="0.60" step="0.01"></label>
+      <label class="row"><span class="name">ground strikes</span><span class="val" data-for="ground_strikes"></span>
+        <input type="range" id="ground_strikes" min="1" max="8" step="1"></label>
+      <label class="row"><span class="name">reconsolidation η</span><span class="val" data-for="reconsolidation_eta"></span>
+        <input type="range" id="reconsolidation_eta" min="0" max="1" step="0.01"></label>
+    </details>
+  </div>
+  <div id="opts-status"></div>
+</aside>
 <aside id="book" hidden>
   <header>
     <h2>book</h2>
@@ -167,6 +276,110 @@ function setBookOpen(on) {
   document.getElementById('book').hidden = !on;
   document.getElementById('toggle-book').classList.toggle('on', on);
   if (on) loadBook();
+}
+function setOptsOpen(on) {
+  document.body.classList.toggle('opts-open', on);
+  document.getElementById('opts').hidden = !on;
+  document.getElementById('toggle-opts').classList.toggle('on', on);
+  if (on) fillOpts();
+}
+
+const PRESETS = {
+  tender:  { voice:'tender',  encode_threshold:0.28, w_self:0.25, embellish_gain:0.18, disgust_gain:0.05, decay_lambda:0.10, narrator_firmness:0.42 },
+  austere: { voice:'austere', encode_threshold:0.40, w_self:0.30, embellish_gain:0.05, disgust_gain:0.16, decay_lambda:0.06, narrator_firmness:0.72 },
+  neutral: { voice:'neutral', encode_threshold:0.32, w_self:0.25, embellish_gain:0.10, disgust_gain:0.10, decay_lambda:0.08, narrator_firmness:0.55 }
+};
+const SLIDERS = [
+  'encode_threshold','w_self','embellish_gain','disgust_gain','decay_lambda',
+  'narrator_firmness','max_recall','merge_similarity','ground_min_overlap',
+  'ground_strikes','reconsolidation_eta'
+];
+const CUTS = ['cut_reconsolidate','cut_ground','cut_ladder'];
+let optsApplying = false;
+let optsTimer = 0;
+
+function near(a, b) { return Math.abs(Number(a) - Number(b)) < 0.015; }
+function matchPreset(p) {
+  for (const [name, spec] of Object.entries(PRESETS)) {
+    if (near(p.encode_threshold, spec.encode_threshold)
+      && near(p.embellish_gain, spec.embellish_gain)
+      && near(p.disgust_gain, spec.disgust_gain)
+      && near(p.decay_lambda, spec.decay_lambda)) return name;
+  }
+  return 'custom';
+}
+function paintVals() {
+  SLIDERS.forEach(id => {
+    const el = document.getElementById(id);
+    const lab = document.querySelector('[data-for="'+id+'"]');
+    if (!el || !lab) return;
+    const n = Number(el.value);
+    lab.textContent = el.step === '1' ? String(Math.round(n)) : n.toFixed(2);
+  });
+}
+function fillOptsFrom(p) {
+  if (!p) return;
+  optsApplying = true;
+  SLIDERS.forEach(id => {
+    if (p[id] != null) document.getElementById(id).value = p[id];
+  });
+  CUTS.forEach(id => {
+    if (typeof p[id] === 'boolean') document.getElementById(id).checked = p[id];
+  });
+  if (p.name) document.getElementById('opt-name').value = p.name;
+  const kind = matchPreset(p);
+  document.querySelectorAll('#opts [data-preset]').forEach(b => {
+    b.classList.toggle('on', b.dataset.preset === kind);
+  });
+  paintVals();
+  optsApplying = false;
+}
+async function fillLlm() {
+  try {
+    const l = await api('GET', '/llm');
+    document.getElementById('llm-url').value = l.url || '';
+    document.getElementById('llm-model').value = l.model || '';
+    const keyEl = document.getElementById('llm-key');
+    keyEl.value = '';
+    keyEl.placeholder = l.has_key ? (l.key_hint || '••••') + ' — leave blank to keep' : 'api key';
+  } catch (e) {
+    document.getElementById('opts-status').textContent = e.message;
+  }
+}
+async function fillOpts() {
+  try {
+    fillOptsFrom(await api('GET', '/profile'));
+    await fillLlm();
+    document.getElementById('opts-status').textContent = '';
+  } catch (e) {
+    document.getElementById('opts-status').textContent = e.message;
+  }
+}
+function readOpts() {
+  const body = {};
+  SLIDERS.forEach(id => { body[id] = Number(document.getElementById(id).value); });
+  CUTS.forEach(id => { body[id] = document.getElementById(id).checked; });
+  return body;
+}
+async function saveOpts(extra) {
+  paintVals();
+  const body = Object.assign(readOpts(), extra || {});
+  const name = document.getElementById('opt-name').value.trim();
+  if (name) body.name = name;
+  try {
+    const p = await api('POST', '/profile', body);
+    fillOptsFrom(p);
+    document.getElementById('opts-status').textContent = 'saved · ' + (p.voice || 'custom');
+    document.getElementById('name').textContent = p.name || document.getElementById('name').textContent;
+  } catch (e) {
+    document.getElementById('opts-status').textContent = e.message;
+  }
+}
+function scheduleSave() {
+  if (optsApplying) return;
+  document.querySelectorAll('#opts [data-preset]').forEach(b => b.classList.remove('on'));
+  clearTimeout(optsTimer);
+  optsTimer = setTimeout(() => saveOpts(), 280);
 }
 function renderBook() {
   const body = document.getElementById('book-body');
@@ -236,7 +449,7 @@ async function refresh() {
     document.getElementById('status').textContent = h.traces + ' traces · ' + h.axioms + ' axioms · ' + h.archives + ' archives';
     try {
       const p = await api('GET', '/profile');
-      if (p.voice) document.getElementById('voice').value = p.voice;
+      fillOptsFrom(p);
     } catch (e) {}
     if (document.body.classList.contains('book-open')) loadBook();
   } catch (e) {
@@ -246,13 +459,26 @@ async function refresh() {
 function busy(where, on) {
   const bar = where === 'bar';
   document.getElementById(bar ? 'spin-bar' : 'spin').classList.toggle('on', on);
-  const ids = bar ? ['who', 'pin', 'sleep', 'voice', 'toggle-book', 'reset-book'] : ['send', 'text'];
+  const ids = bar ? ['who', 'pin', 'sleep', 'toggle-book', 'toggle-opts', 'reset-book'] : ['send', 'text'];
   ids.forEach(id => { document.getElementById(id).disabled = on; });
 }
 document.getElementById('toggle-book').onclick = () => {
   setBookOpen(!document.body.classList.contains('book-open'));
 };
 document.getElementById('close-book').onclick = () => setBookOpen(false);
+document.getElementById('toggle-opts').onclick = () => {
+  setOptsOpen(!document.body.classList.contains('opts-open'));
+};
+document.getElementById('close-opts').onclick = () => setOptsOpen(false);
+SLIDERS.forEach(id => {
+  document.getElementById(id).addEventListener('input', () => { paintVals(); scheduleSave(); });
+});
+CUTS.forEach(id => {
+  document.getElementById(id).addEventListener('change', scheduleSave);
+});
+document.querySelectorAll('#opts [data-preset]').forEach(btn => {
+  btn.onclick = () => saveOpts(PRESETS[btn.dataset.preset]);
+});
 const confirmEl = document.getElementById('confirm');
 document.getElementById('reset-book').onclick = () => confirmEl.classList.add('show');
 document.getElementById('reset-no').onclick = () => confirmEl.classList.remove('show');
@@ -295,16 +521,35 @@ document.getElementById('f').onsubmit = async (e) => {
     document.getElementById('text').focus();
   }
 };
-document.getElementById('voice').onchange = async () => {
-  const voice = document.getElementById('voice').value;
-  busy('bar', true);
+document.getElementById('opt-name').addEventListener('change', () => saveOpts());
+document.getElementById('token').addEventListener('change', () => {
+  localStorage.setItem('selmem_token', tokenEl.value.trim());
+});
+document.getElementById('llm-save').onclick = async () => {
+  const url = document.getElementById('llm-url').value.trim();
+  const model = document.getElementById('llm-model').value.trim();
+  const api_key = document.getElementById('llm-key').value.trim();
+  const body = { url, model };
+  if (api_key) body.api_key = api_key;
   try {
-    await api('POST', '/profile', { voice });
-    add('her', '<div class="meta">voice — ' + escapeHtml(voice) + '</div>');
+    const l = await api('POST', '/llm', body);
+    document.getElementById('llm-key').value = '';
+    document.getElementById('llm-key').placeholder = l.has_key ? (l.key_hint || '••••') + ' — leave blank to keep' : 'api key';
+    document.getElementById('opts-status').textContent = l.attached ? ('LLM · ' + (l.model || '') + ' @ ' + (l.url || '')) : 'rules';
   } catch (e) {
-    add('her', '<span class="drop">' + escapeHtml(e.message) + '</span>');
-  } finally {
-    busy('bar', false);
+    document.getElementById('opts-status').textContent = e.message;
+  }
+};
+document.getElementById('llm-clear').onclick = async () => {
+  try {
+    await api('POST', '/llm', { clear: true });
+    document.getElementById('llm-url').value = '';
+    document.getElementById('llm-model').value = '';
+    document.getElementById('llm-key').value = '';
+    document.getElementById('llm-key').placeholder = 'api key';
+    document.getElementById('opts-status').textContent = 'rules narrator';
+  } catch (e) {
+    document.getElementById('opts-status').textContent = e.message;
   }
 };
 document.getElementById('pin').onclick = async () => {

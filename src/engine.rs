@@ -26,8 +26,18 @@ pub struct SelectiveMemory {
     pub path: Option<PathBuf>,
     pub cut: OrganCut,
     pub recall_tally: RecallTally,
+    /// Live HTTP narrator bind. Not in the vault. Empty url = RuleNarrator.
+    pub llm: LlmBind,
     narrator: Box<dyn Narrator>,
     embedder: Box<dyn Embedder>,
+}
+
+/// Runtime LLM endpoint. Key stays on the process; GET only reports a mask.
+#[derive(Clone, Debug, Default)]
+pub struct LlmBind {
+    pub url: String,
+    pub model: String,
+    pub key: Option<String>,
 }
 
 impl SelectiveMemory {
@@ -40,6 +50,7 @@ impl SelectiveMemory {
             path: None,
             cut: OrganCut::full(),
             recall_tally: RecallTally::default(),
+            llm: LlmBind::default(),
             narrator: Box::new(RuleNarrator),
             embedder: Box::new(HashEmbedder),
         }
@@ -61,6 +72,7 @@ impl SelectiveMemory {
                 path: Some(path),
                 cut: OrganCut::full(),
                 recall_tally: RecallTally::default(),
+                llm: LlmBind::default(),
                 narrator: Box::new(RuleNarrator),
                 embedder: Box::new(HashEmbedder),
             })
@@ -73,6 +85,7 @@ impl SelectiveMemory {
                 path: Some(path),
                 cut: OrganCut::full(),
                 recall_tally: RecallTally::default(),
+                llm: LlmBind::default(),
                 narrator: Box::new(RuleNarrator),
                 embedder: Box::new(HashEmbedder),
             })
@@ -82,6 +95,31 @@ impl SelectiveMemory {
     pub fn with_narrator(mut self, narrator: Box<dyn Narrator>) -> Self {
         self.narrator = narrator;
         self
+    }
+
+    /// Attach or detach the HTTP narrator. Empty `url` falls back to rules.
+    pub fn set_llm(&mut self, url: &str, model: &str, key: Option<String>) -> Result<(), String> {
+        let url = url.trim();
+        let model = model.trim();
+        if url.is_empty() {
+            self.narrator = Box::new(RuleNarrator);
+            self.llm = LlmBind::default();
+            return Ok(());
+        }
+        let key = match key {
+            Some(k) if k.trim().is_empty() => self.llm.key.clone(),
+            Some(k) => Some(k),
+            None => self.llm.key.clone(),
+        };
+        let n = crate::recall::HttpNarrator::parse(url, model, key.clone())
+            .ok_or_else(|| "llm url must be http:// or https://".to_string())?;
+        self.narrator = Box::new(n);
+        self.llm = LlmBind {
+            url: url.to_string(),
+            model: if model.is_empty() { "llama3".into() } else { model.into() },
+            key,
+        };
+        Ok(())
     }
 
     pub fn with_cut(mut self, cut: OrganCut) -> Self {
