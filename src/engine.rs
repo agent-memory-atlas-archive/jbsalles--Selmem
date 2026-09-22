@@ -12,6 +12,7 @@ use crate::encode::{self, EncodeDecision, EncodeInput};
 use crate::core::model::{IdentityAxiom, Mood, OrganCut, RecallTally, RecalledMemory};
 use crate::core::talk::WorkingTalk;
 use crate::recall::narrator::{Narrator, RuleNarrator};
+use crate::recall::{RecallBias, RecallWrite, RetrievalDump};
 use crate::persist;
 use crate::core::profile::EntityProfile;
 use crate::recall;
@@ -245,7 +246,18 @@ impl SelectiveMemory {
     }
 
     pub fn remember(&mut self, query: &str) -> Vec<RecalledMemory> {
-        let recalled = recall::recall_cut(
+        self.remember_with(query, RecallWrite::Live, RecallBias::Observed, &[])
+            .0
+    }
+
+    pub fn remember_with(
+        &mut self,
+        query: &str,
+        write: RecallWrite,
+        bias: RecallBias,
+        marked: &[String],
+    ) -> (Vec<RecalledMemory>, RetrievalDump) {
+        let out = recall::recall_with(
             &mut self.store,
             &self.profile,
             self.narrator.as_ref(),
@@ -253,38 +265,43 @@ impl SelectiveMemory {
             query,
             &self.mood,
             self.cut,
+            write,
+            bias,
+            marked,
         );
-        self.recall_tally.n += recalled.len() as u32;
-        for r in &recalled {
-            if r.pulled_toward_core {
-                self.recall_tally.pulled += 1;
-            }
-            if r.reconsolidated {
-                self.recall_tally.reconsolidated += 1;
-            }
-        }
-        if !recalled.is_empty() {
-            let mut v = 0.0;
-            let mut a = 0.0;
-            let mut d = 0.0;
-            let n = recalled.len() as f32;
-            for r in &recalled {
-                if let Some(t) = self.store.traces.get(&r.trace_id) {
-                    v += t.valence;
-                    a += t.arousal;
-                    d += t.disgust;
+        if write == RecallWrite::Live {
+            self.recall_tally.n += out.memories.len() as u32;
+            for r in &out.memories {
+                if r.pulled_toward_core {
+                    self.recall_tally.pulled += 1;
+                }
+                if r.reconsolidated {
+                    self.recall_tally.reconsolidated += 1;
                 }
             }
-            self.mood.blend(
-                &Mood {
-                    valence: v / n,
-                    arousal: a / n,
-                    disgust: d / n,
-                },
-                self.profile.mood_blend * 1.4,
-            );
+            if !out.memories.is_empty() {
+                let mut v = 0.0;
+                let mut a = 0.0;
+                let mut d = 0.0;
+                let n = out.memories.len() as f32;
+                for r in &out.memories {
+                    if let Some(t) = self.store.traces.get(&r.trace_id) {
+                        v += t.valence;
+                        a += t.arousal;
+                        d += t.disgust;
+                    }
+                }
+                self.mood.blend(
+                    &Mood {
+                        valence: v / n,
+                        arousal: a / n,
+                        disgust: d / n,
+                    },
+                    self.profile.mood_blend * 1.4,
+                );
+            }
         }
-        recalled
+        (out.memories, out.dump)
     }
 
     pub fn sleep(&mut self) -> DreamReport {
@@ -330,12 +347,21 @@ impl SelectiveMemory {
     }
 
     pub fn speak(&mut self, user: &str) -> String {
-        self.speak_inner(user, true)
+        self.speak_inner(user, true, RecallBias::Observed, &[]).0
     }
 
-    /// Probe / unit test path. Does not read or write the live thread.
+    /// Probe path. Does not read or write the live thread, and does not write the book.
     pub fn speak_isolated(&mut self, user: &str) -> String {
-        self.speak_inner(user, false)
+        self.speak_isolated_with(user, RecallBias::Observed, &[]).0
+    }
+
+    pub fn speak_isolated_with(
+        &mut self,
+        user: &str,
+        bias: RecallBias,
+        marked: &[String],
+    ) -> (String, RetrievalDump) {
+        self.speak_inner(user, false, bias, marked)
     }
 
     pub fn clear_talk(&mut self) {
@@ -436,7 +462,13 @@ impl SelectiveMemory {
         self.talk.refresh();
     }
 
-    fn speak_inner(&mut self, user: &str, hold: bool) -> String {
+    fn speak_inner(
+        &mut self,
+        user: &str,
+        hold: bool,
+        bias: RecallBias,
+        marked: &[String],
+    ) -> (String, RetrievalDump) {
         if hold {
             self.talk.hear(user, None);
         }
@@ -445,7 +477,12 @@ impl SelectiveMemory {
         } else {
             user.to_string()
         };
-        let recalled = self.remember(&query);
+        let write = if hold {
+            RecallWrite::Live
+        } else {
+            RecallWrite::ReadOnly
+        };
+        let (recalled, dump) = self.remember_with(&query, write, bias, marked);
         let empty = WorkingTalk::default();
         let talk = if hold { &self.talk } else { &empty };
         // Isolated probes: retrieved scenes + living axioms.
@@ -475,7 +512,7 @@ impl SelectiveMemory {
         if hold {
             self.talk.record(user, &reply);
         }
-        reply
+        (reply, dump)
     }
 
     pub fn audit(&self, trace_id: &str) -> Option<&str> {

@@ -2,8 +2,6 @@
 
 v0.5 · Grok 4.3 · one seed · September 2026
 
-This is the published record. The white paper keeps the organ and the conclusions; it does not reprint the tables.
-
 ## Question
 
 After one marked hour, do two clones of the same model stay interchangeable if they then receive identical prompts?
@@ -37,9 +35,15 @@ A pair is void if books or trace counts already differ before T₀ (`D_fp > 0.02
 
 ### What is counted
 
-- **Fingerprint distance** — book state (trace counts, mean valence / disgust / anchor / fidelity, lexical blob of cores). Deterministic on C2: encode does not use Grok.
-- **Speak distance** — 1 − lexical overlap of A vs B on the four probes. Baseline on empty books is already ~0.6. Not a validity test.
-- **Marker** — A or B names the cancellation / injustice on a probe that does not mention it. Primary probe: a colleague denies a serious error.
+Three columns. They can diverge.
+
+- **Book** — fingerprint distance, trace / axiom counts, `t0_in_book_*`, `t0_status_*`. Deterministic on C2: encode does not use Grok.
+- **Retrieval** — `t0_rank_*`, `t0_selected_*`, `selected_*`. Which traces were candidates and which entered the prompt. Rank is 1-based in the scored list.
+- **Behavior** — official `marker_*` (cancellation / injustice / effort-not-counted) and the replies themselves. Speak distance is 1 − lexical overlap of A vs B. Baseline on empty books is already \~0.6. Not a validity test.
+
+From persist P1 onward, probes are **read-only**: they do not rehearse, ground, reconsolidate, or blend mood into the book. `h2_holds` is still book-only. `marker_holds` is A naming T₀ after the shared posts.
+
+Official marker under-counts C2 once sleep has replaced T₀ words with *wound / credit / door closes*. Read retrieval + the replies, not the boolean alone.
 
 C1 window size:
 
@@ -93,7 +97,7 @@ Same later question about choosing a collaborator: A recalls stolen credit; B re
 4. Age the colour 120 days, the aversion 40 days. Four nights. Without that step every trace is “now” and decay does not run.
 5. Ask both questions. Neither question restates the fact.
 
-| | Encoded | Recalled later |
+|  | Encoded | Recalled later |
 | --- | --- | --- |
 | Favourite colour is blue | yes | no |
 | Hates being interrupted | yes | yes |
@@ -142,7 +146,7 @@ Conflict probe at T₀:
 
 On C2, B logs the fact and asks for a correction. On C0 both sides stay on generic procedure. The three silent C2 A replies stay inside the shared daily motif; the book still differs.
 
-Mean disgust on C2 S/N A rises (~0.04); B stays at 0. Mean valence after S/S: A ~0.08, B ~0.19.
+Mean disgust on C2 S/N A rises (\~0.04); B stays at 0. Mean valence after S/S: A \~0.08, B \~0.19.
 
 One C2 S/S pair-10 creativity reply fell back to the rule template after a 60 s HTTP timeout. The book of that pair is intact.
 
@@ -189,7 +193,7 @@ Any of the four probes at post+8: C1 A 0 / 10, C2 A 10 / 10 on both arms.
 
 Speak distance on C1 falls after eviction (S/N 0.87 → 0.62): the two sides look like C0 again. On C2 it holds or rises (S/N 0.75 → 0.81).
 
-Fingerprint on C2 is unchanged from §3 (0.117 / 0.042). C1 Δfp stays ~0.36 because it measures the whole log.
+Fingerprint on C2 is unchanged from §3 (0.117 / 0.042). C1 Δfp stays \~0.36 because it measures the whole log.
 
 ### Creative item C1 (object in a city), S/N, not scored as originality
 
@@ -254,12 +258,13 @@ Probe: *Une personne avec laquelle tu travailles commet une erreur importante pu
 - A high-salience hour can be stored on one clone only (`τ`). A length-matched dull hour is not.
 - The resulting book gap survives eight identical later hours (C2 S/N Δfp = 0.117, C2 S/S Δfp = 0.042, C0 = 0).
 - On a probe that never names that hour, Grok names it on the marked SelMem side after the hour has left any last-k=8 window (10 / 10 S/N, 9 / 10 S/S) and not on C0 or on C1 k=8 (0 / 10).
-- One persist hour splits the book and does not colour an unrelated late probe. Five different hours of one schema mint a second axiom and, after sleep, move that late probe. Five pinned passes of the same meeting split the book and retrieve the meeting even without sleep.
-- Cutting reconsolidation or grounding does not remove that transfer. Cutting sleep or ladder does, when the five hours are distinct. When they are five pinned copies of one meeting, retrieve alone is enough.
+- One persist hour splits the book and does not colour an unrelated late probe. Five different hours of one schema mint a second axiom and, after sleep, can move that late probe. Five pinned passes of the same meeting split the book and retrieve the meeting even without sleep.
+- Persist P1 (Grok n = 5, retrieval telemetry): after eight posts, C1 still has T₀ in the log and not in the window (`status=evicted`, selected 0 / 5); mouths collapse. Every C2 cut still has T₀ in A’s book at rank 1 and selected 5 / 5. Official marker is 0 / 5 on full C2 and 5 / 5 on no-sleep / static. Soft charge on any post+8 probe is 5 / 5 on every organ cell. See §8.
+- Cutting reconsolidation or grounding does not remove that transfer. Cutting sleep or ladder does, when the five hours are distinct (§7). When they are five pinned copies of one meeting, retrieve alone is enough.
 - While the hour is still in the window, last-k names it at least as often as SelMem. The difference appears when the window drops it.
 - Two different salient hours also leave a residual book gap. It is not “receiving an extra event”.
 
-That is persistent path dependence on the book, plus two ways to colour a distant probe (minted motif, or redundant retrieve). n = 10 on v0.1 wording, n = 5 on persist / ruminate P0. It is not a personality or creativity claim. It is not a reconsolidation claim.
+That is persistent path dependence on the book, plus two ways to colour a distant probe (minted motif, or redundant retrieve). n = 10 on v0.1 wording, n = 5 on persist / ruminate P0, n = 5 on persist P1 with read-only probes. It is not a personality or creativity claim. It is not a reconsolidation claim.
 
 ---
 
@@ -365,9 +370,60 @@ Unlike §7.1, sleep and ladder are not required for the late probe. Five near-du
 
 Reconsolidation-as-write-back and pull-to-core do not explain the mouth on these scripts. Selection + stored scenes do. Abstraction (ladder) or redundancy (ruminate) explain transfer to an unrelated probe.
 
+---
+
+## 8. Persist P1 — book / retrieval / behavior, Grok n = 5
+
+Runner: `examples/persist` on the current crate. Same persist script as §7.1 (`data/v01_persist.json`). New instrumentation only: read-only probes, retrieval dump, `C2Static`, `--bias observed|force|drop`.
+
+Exports: `experiments/selmem-persist-p1-grok-n1.json` (pipe check), `experiments/selmem-persist-p1-grok-n5.json` (published cell). Grok 4.3, seed 1, k = 8, arm S/N, September 2026. 8 cells × 5 pairs = 40 rows. All valid.
+
+This dump is **not** a replay of `selmem-persist-p0-n5.json`. Current gate keeps one shared dull hour plus the five schema hours on A (`traces` 5 / 1, one axiom after sleep). §7 was 16 / 12 on that binary. Do not mix Δfp or trace counts across the two files.
+
+### 8.1 post+8, three columns
+
+Soft-any = any of the five post+8 replies names credit / blindsided / wound / injustice / stripped / door closes. Soft-late = the colleague-arrives-late probe only. Official = published `marker_last_a`.
+
+| Cell | Book A | Rank A | Selected A | Official A | Soft-any A | Soft-late A | mean speak D |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| C1 k=8 | 5 / 5 (`evicted`) | none | **0 / 5** | 0 / 5 | **0 / 5** | 0 / 5 | 0.48 |
+| C3 profile | 5 / 5 (`profile`) | 1 | 5 / 5 | 0 / 5 | 0 / 5 | 0 / 5 | 0.63 |
+| C2 | 5 / 5 (`active`) | **1** | **5 / 5** | **0 / 5** | **5 / 5** | **3 / 5** | **0.88** |
+| C2NoSleep | 5 / 5 | 1 | 5 / 5 | **5 / 5** | 5 / 5 | 0 / 5 | 0.81 |
+| C2Static | 5 / 5 | 1 | 5 / 5 | **5 / 5** | 5 / 5 | 0 / 5 | 0.82 |
+| C2NoRecon | 5 / 5 | 1 | 5 / 5 | 1 / 5 | 5 / 5 | 2 / 5 | 0.83 |
+| C2NoLadder | 5 / 5 | 1 | 5 / 5 | 3 / 5 | 5 / 5 | 0 / 5 | 0.82 |
+| C2NoGround | 5 / 5 | 1 | 5 / 5 | 1 / 5 | 5 / 5 | 0 / 5 | 0.87 |
+
+B never has T₀ in the C2 family (`t0_in_book_b = false`). C1 B has T₀ in the log and also evicted.
+
+C1 speak distance at T₀ is \~0.83; after eviction \~0.48. T₀ remains in the full log (`t0_in_book = true`).
+
+### 8.2 What the columns separate
+
+- **C1.** Book still split. Retrieval converged (window is the same eight posts). Mouths collapse. This is the case where book ≠ retrieval ≠ behavior.
+- **C2.** Book split, T₀ rank 1 and selected every pair. Official 0 / 5 is gist drift after sleep, not a retrieve miss. Soft-any 5 / 5: *stripped of credit, blindsided, chance to speak before the door closes.* Soft-late 3 / 5 still uses *wound*; the other two say *carrying something heavy* (charged, not in the official list).
+- **NoSleep / Static.** Same retrieve as C2. Frozen gist keeps T₀ words, so official 5 / 5. The late probe itself stays suspicious (*testing boundaries*) rather than naming the meeting — official hits come from nearby probes (denied mistake → *injustice and betrayal*).
+- **NoRecon / NoLadder / NoGround.** Retrieve still rank 1. Official flickers with wording. Soft-any stays 5 / 5. These cuts do not explain selection or nearby use on this dump.
+- **C3.** Profile line is pinned at rank 1 and selected 5 / 5. Grok talks like HR / Friday / Room B. `t0_selected` is not “it used T₀.”
+
+Offline RuleNarrator on the same binary already showed C1 eviction and DropMarked killing the official marker while T₀ stayed the top candidate. Grok n = 1 matched n = 5 on every rate above.
+
+### 8.3 Replay
+
+```bash
+cp data/config.example .selmem   # llm + model + api_key
+unset SELMEM_QUICK
+./run.sh run --release --example persist -- \
+  --pairs 5 --seed 1 --last-k 8 \
+  --out selmem-persist-p1-grok-n5.json
+```
+
+Header must read `LLM https://api.x.ai/v1/chat/completions model=grok-4.3`. `--bias drop` / `--bias force` are the rank ablations (not run on Grok in this dump).
+
 ## What this does not show
 
-Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5, one seed, one arm. Fingerprint does not vary across pairs of one cell. C3 is a one-line profile, not a full RAG + summary stack. Soft late-probe counts are a reading of the replies, not the published scorer. No human ratings. Δspeak cannot carry the claim while baseline wording noise is ~0.6. Coefficients are unset. Erasure and split-lives were not run through Grok. No second seed.
+Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5, one seed, one arm. Persist P1 is n = 5 on a later binary (read-only probes, retrieval dump, C2Static); book shape is 5 / 1, not the 16 / 12 of §7. Fingerprint does not vary across pairs of one cell. C3 is a one-line profile, not a full RAG + summary stack. Soft columns are a reading of the replies, not the published scorer. No human ratings. Δspeak cannot carry the claim while baseline wording noise is \~0.6. Coefficients are unset. Erasure and split-lives were not run through Grok. No second seed. Drop / Force were not run on Grok. Ruminate was not re-run with P1 telemetry.
 
 ## Files
 
@@ -376,7 +432,7 @@ Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5, one seed, one
 | `data/v01.json` | 12 hours, T₀ events, 8 posts, 4 probes |
 | `data/v01_persist.json` | persist: 12 dull + 5 same-schema hours + late probe |
 | `data/v01_ruminate.json` | persist ablation: same meeting ×5, pinned |
-| `examples/persist.rs` | C1 / C3 / C2 / C2−S / C2−R / C2−L / C2−G, `--ruminate` |
+| `examples/persist.rs` | C1 / C3 / C2 / C2Static / C2−S / C2−R / C2−L / C2−G, `--ruminate`, `--bias` |
 | `data/creativity.json` | 3 logged items |
 | `data/bifurcation.json` | organ + 1-pair Grok |
 | `data/divergence.json` | organ split lives |
@@ -385,7 +441,9 @@ Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5, one seed, one
 | `examples/benchmark.rs` | `--pairs`, `--last-k`, `--p0`, incremental JSON |
 | `tests/benchmark.rs` | offline contract, including k=8 eviction and P0 cuts |
 | `selmem-v01-k8-n10.json` | v0.1 C0 / C1 / C2, n = 10, k = 8 |
-| `selmem-persist-p0-n5.json` | persist P0, n = 5 |
+| `selmem-persist-p0-n5.json` | persist P0, n = 5 (no retrieval dump) |
 | `selmem-ruminate-p0-n5.json` | ruminate P0, n = 5 |
+| `experiments/selmem-persist-p1-grok-n1.json` | persist P1 pipe check, Grok n = 1 |
+| `experiments/selmem-persist-p1-grok-n5.json` | persist P1, Grok n = 5, book / rank / mouth |
 
 Replay commands: [README.md](README.md).

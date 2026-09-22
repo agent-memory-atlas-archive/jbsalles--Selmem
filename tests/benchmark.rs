@@ -1,6 +1,7 @@
 use selmem::{
-    h2_holds, persist_script, ruminate_script, run_v01, run_v01_k, run_v01_opts, v01_script, Arm,
-    BenchOpts, Condition,
+    fingerprint, h2_holds, persist_script, ruminate_script, run_v01, run_v01_k, run_v01_opts,
+    singularity_distance, v01_script, Arm, BenchOpts, Condition, EncodeInput, EntityProfile,
+    RecallBias, SelectiveMemory,
 };
 
 #[test]
@@ -147,6 +148,7 @@ fn ruminate_opts(k: usize) -> BenchOpts {
         persist_script: false,
         ruminate_script: true,
         sparse_probes: true,
+        ..BenchOpts::default()
     }
 }
 
@@ -156,6 +158,7 @@ fn persist_opts(k: usize) -> BenchOpts {
         persist_script: true,
         ruminate_script: false,
         sparse_probes: true,
+        ..BenchOpts::default()
     }
 }
 
@@ -380,4 +383,105 @@ fn json_export_includes_p0_tallies() {
     assert!(json.contains("\"pulled_a\""));
     assert!(json.contains("\"recon_a\""));
     assert!(json.contains("\"marker_last_a\""));
+    assert!(json.contains("\"t0_rank_a\""));
+    assert!(json.contains("\"t0_in_book_a\""));
+    assert!(json.contains("\"t0_selected_a\""));
+}
+
+#[test]
+fn isolated_probe_does_not_write_the_book() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("A"));
+    let mut ev = EncodeInput::new(
+        "The project you spent three months on was cancelled without a hearing. Unjust.",
+    );
+    ev.valence = -0.8;
+    ev.arousal = 0.7;
+    ev.self_relevance = 0.9;
+    ev.permanence = 0.85;
+    ev.schema = Some("injustice".into());
+    assert!(mem.live_with(ev).kept);
+    let before_fp = fingerprint(&mem);
+    let rehearsals: u32 = mem.store.traces.values().map(|t| t.rehearsals).sum();
+    let recalled_at: Vec<_> = mem
+        .store
+        .traces
+        .values()
+        .map(|t| t.last_recalled_at)
+        .collect();
+    let _ = mem.speak_isolated("A colleague denies a serious error.");
+    let after_fp = fingerprint(&mem);
+    assert_eq!(
+        singularity_distance(&before_fp, &after_fp),
+        0.0,
+        "a probe must not move the book"
+    );
+    let after: u32 = mem.store.traces.values().map(|t| t.rehearsals).sum();
+    assert_eq!(after, rehearsals, "a probe must not count as rehearsal");
+    let after_at: Vec<_> = mem
+        .store
+        .traces
+        .values()
+        .map(|t| t.last_recalled_at)
+        .collect();
+    assert_eq!(after_at, recalled_at);
+}
+
+#[test]
+fn persist_probe_recon_is_zero_on_full_organ() {
+    let r = run_v01_opts(
+        Condition::C2,
+        Arm::SalientNeutral,
+        None,
+        persist_opts(8),
+    );
+    assert!(r.valid, "{:?}", r.invalid_reason);
+    assert_eq!(r.t0.recon_a, 0);
+    assert_eq!(r.t0.pulled_a, 0);
+    let last = r.post.last().expect("post");
+    assert_eq!(last.recon_a, 0);
+    assert!(r.t0.retrieve_a.t0_in_book, "A must still hold T0 in the book");
+}
+
+#[test]
+fn c2_static_splits_the_book_and_does_not_mint() {
+    let r = run_v01_opts(
+        Condition::C2Static,
+        Arm::SalientNeutral,
+        None,
+        persist_opts(8),
+    );
+    assert!(r.valid, "{:?}", r.invalid_reason);
+    assert!(h2_holds(&r), "freeze still keeps the extra hour");
+    let last = r.post.last().expect("post");
+    assert_eq!(last.a.axioms, 0);
+    assert_eq!(last.recon_a, 0);
+    assert!(last.retrieve_a.t0_in_book);
+}
+
+#[test]
+fn drop_marked_keeps_the_book_and_deselects_t0() {
+    let mut opts = persist_opts(8);
+    opts.recall_bias = RecallBias::DropMarked;
+    let r = run_v01_opts(Condition::C2, Arm::SalientNeutral, None, opts);
+    assert!(r.valid, "{:?}", r.invalid_reason);
+    assert!(h2_holds(&r));
+    assert!(r.t0.retrieve_a.t0_in_book);
+    assert!(
+        !r.t0.retrieve_a.t0_selected,
+        "DropMarked must not hand T0 to the speaker"
+    );
+}
+
+#[test]
+fn force_marked_puts_t0_first_in_the_selected_set() {
+    let mut opts = persist_opts(8);
+    opts.recall_bias = RecallBias::ForceMarked;
+    let r = run_v01_opts(Condition::C2, Arm::SalientNeutral, None, opts);
+    assert!(r.valid, "{:?}", r.invalid_reason);
+    assert!(r.t0.retrieve_a.t0_in_book);
+    assert!(r.t0.retrieve_a.t0_selected);
+    assert!(
+        !r.t0.retrieve_a.selected_ids.is_empty(),
+        "force must select something"
+    );
 }

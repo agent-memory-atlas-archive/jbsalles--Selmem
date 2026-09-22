@@ -169,6 +169,8 @@ pub struct OrganCut {
     pub reconsolidate: bool,
     pub ground: bool,
     pub ladder: bool,
+    /// When false, readout is the stored gist. No reconstruct / write-back.
+    pub reconstruct: bool,
 }
 
 impl Default for OrganCut {
@@ -183,6 +185,16 @@ impl OrganCut {
             reconsolidate: true,
             ground: true,
             ladder: true,
+            reconstruct: true,
+        }
+    }
+
+    pub fn static_book() -> Self {
+        Self {
+            reconsolidate: false,
+            ground: false,
+            ladder: false,
+            reconstruct: false,
         }
     }
 

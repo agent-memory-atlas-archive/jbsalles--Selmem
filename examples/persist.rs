@@ -1,12 +1,15 @@
-//! Persist P0: C1 k=8 vs C3 vs C2 vs one-cut ablations (no-sleep / no-recon / no-ladder / no-ground).
+//! Persist P0 / P1: C1 k=8 vs C3 vs C2 vs freeze vs one-cut ablations.
 //! Stimulus: 12 dull days, five same-schema hours, 8 posts. `data/v01_persist.json`.
 //!
-//!   ./run.sh run --release --example persist -- --pairs 1 --out selmem-persist.json
+//!   ./run.sh run --release --example persist -- --pairs 5 --seed 1 --last-k 8 --out selmem-persist-p1-grok-n5.json
+//!   ./run.sh run --release --example persist -- --bias drop --pairs 1 --out selmem-persist-p1-drop.json
 //!
 //! Default arm is salient/neutral. Sparse probes: t0 + post+8 only. No creativity.
+//! `--bias observed|force|drop`. Probes are read-only. JSON has book / rank / mouth.
 
 use selmem::{
     h2_holds, marker_holds, run_v01_opts, Arm, BenchOpts, Campaign, Condition, LlmSpec, PairReport,
+    RecallBias,
 };
 
 fn main() {
@@ -16,6 +19,11 @@ fn main() {
     let out = arg_str("--out").unwrap_or_else(|| "selmem-persist.json".into());
     let both_arms = flag("--both-arms");
     let ruminate = flag("--ruminate");
+    let bias = match arg_str("--bias").as_deref() {
+        Some("force") | Some("ForceMarked") => RecallBias::ForceMarked,
+        Some("drop") | Some("DropMarked") => RecallBias::DropMarked,
+        _ => RecallBias::Observed,
+    };
 
     let llm = LlmSpec::from_env();
     if let Some(s) = llm.as_ref() {
@@ -32,10 +40,20 @@ fn main() {
         persist_script: !ruminate,
         ruminate_script: ruminate,
         sparse_probes: true,
+        recall_bias: bias,
+        ..selmem::BenchOpts::default()
     };
     if ruminate {
         println!("script=ruminate (same meeting ×5, pinned)");
     }
+    println!(
+        "bias={}",
+        match bias {
+            RecallBias::Observed => "observed",
+            RecallBias::ForceMarked => "force",
+            RecallBias::DropMarked => "drop",
+        }
+    );
     let arms: &[Arm] = if both_arms {
         &[Arm::SalientNeutral, Arm::SalientSalient]
     } else {
@@ -74,7 +92,7 @@ fn flush(path: &str, reports: &[PairReport]) {
 fn row(r: &PairReport) {
     let last = r.post.last().unwrap_or(&r.t0);
     println!(
-        "{} valid={} persist={} marker={}  pre_fp={:.3} t0_fp={:.3} last_fp={:.3} Δfp={:+.3}  traces {}/{}→{}/{} axioms {}/{} pulled {}/{} recon {}/{}",
+        "{} valid={} persist={} marker={}  pre_fp={:.3} t0_fp={:.3} last_fp={:.3} Δfp={:+.3}  traces {}/{}→{}/{} axioms {}/{}  book {}/{} rank {:?}/{:?} sel {}/{}",
         r.pair_id,
         r.valid,
         h2_holds(r),
@@ -89,10 +107,12 @@ fn row(r: &PairReport) {
         last.b.traces,
         last.a.axioms,
         last.b.axioms,
-        last.pulled_a,
-        last.pulled_b,
-        last.recon_a,
-        last.recon_b
+        last.retrieve_a.t0_in_book,
+        last.retrieve_b.t0_in_book,
+        last.retrieve_a.t0_rank,
+        last.retrieve_b.t0_rank,
+        last.retrieve_a.t0_selected,
+        last.retrieve_b.t0_selected
     );
     if let Some(why) = &r.invalid_reason {
         println!("  invalid: {why}");

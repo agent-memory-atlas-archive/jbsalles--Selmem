@@ -33,7 +33,9 @@ pub use benchmark::{
 pub use experiment::{run_neutral, run_neutral_llm, run_salient, run_salient_llm, run_salient_without_sleep, run_salient_without_sleep_llm, run_erasure, run_split_lives, script, split_script, BifurcationReport, ErasureReport, LlmSpec};
 pub use config::Config;
 pub use net::api;
-pub use recall::{HttpNarrator, Narrator, RuleNarrator, SpeakOnlyHttp};
+pub use recall::{
+    HttpNarrator, Narrator, RecallBias, RecallWrite, RetrievalDump, RuleNarrator, SpeakOnlyHttp,
+};
 pub use recall::stance::{
     charged_mood, isolated_stance, is_charged, query_hits_episode, stance_is_abstract,
 };

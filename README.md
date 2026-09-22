@@ -6,7 +6,7 @@ An LLM maps context to the next token. A stack of unmodified facts maximises cov
 
 **Manifest:** [WHITEPAPER.md](WHITEPAPER.md)\
 **Layout:** [ARCHITECTURE.md](ARCHITECTURE.md) — encode / judge / night / snapshot.\
-**Benches:** experiments/REPORT.md — method, tables, excerpts, P0 n=5. Replay from experiments/README.md.\
+**Benches:** experiments/REPORT.md — method, tables, excerpts, P0 n=5, P1 three-column n=5. Replay from experiments/README.md.\
 **Knobs:** [PARAMETERS.md](PARAMETERS.md) — exploratory, not fitted.
 
 Rust 1.75. SQLite via system `libsqlite3` (macOS SDK or Linux).
@@ -157,14 +157,17 @@ Published report (method + tables): experiments/REPORT.md. Conclusions only: [WH
 
 ### Persist (interpretation after last-k eviction)
 
-C1 k=8 vs C2 vs C2-no-sleep vs C3 (one-line profile). Default script: 12 dull days, five same-schema hours, late probe. `--ruminate` is the same-meeting ablation (hours pinned so merge cannot collapse them).
+C1 k=8 vs C3 vs C2 vs C2Static vs C2−S/R/L/G. Default script: 12 dull days, five same-schema hours, late probe. `--ruminate` is the same-meeting ablation (hours pinned so merge cannot collapse them). `--bias drop|force` withholds or pins the marked scene at recall.
+
+JSON reports book (`t0_in_book_*`), retrieval (`t0_rank_*`, `t0_selected_*`), and behavior (`marker_*`) separately. Probes are read-only.
 
 ```bash
 ./run.sh run --release --example persist -- --pairs 1 --last-k 8 --out selmem-persist-repeat.json
 ./run.sh run --release --example persist -- --ruminate --pairs 1 --last-k 8 --out selmem-persist-ruminate.json
+./run.sh run --release --example persist -- --pairs 5 --seed 1 --last-k 8 --out selmem-persist-p1-grok-n5.json
 ```
 
-Grok persist cells so far are n = 1. See experiments/REPORT.md §6.
+Grok persist P1 is n = 5. See experiments/REPORT.md §8. Dump: experiments/selmem-persist-p1-grok-n5.json.
 
 ### Benchmark v0.1 (H2)
 

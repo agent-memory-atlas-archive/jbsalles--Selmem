@@ -66,7 +66,7 @@ pub fn encode_score(
         - profile.w_redundancy * redundancy
 }
 
-pub fn refresh_access(trace: &mut MemoryTrace, profile: &EntityProfile) -> f32 {
+pub fn access_value(trace: &MemoryTrace, profile: &EntityProfile) -> f32 {
     let origin = trace.last_recalled_at.unwrap_or(trace.created_at);
     let age_days = (now_secs().saturating_sub(origin) as f32) / 86_400.0;
     // Low salience at the gate → faster access decay. High salience holds.
@@ -78,7 +78,11 @@ pub fn refresh_access(trace: &mut MemoryTrace, profile: &EntityProfile) -> f32 {
         * (1.0 - 0.85 * trace.anchor);
     let decay = (-lam * age_days).exp();
     let rehearsal = 1.0 + profile.rehearsal_boost * (1.0 + trace.rehearsals as f32).ln();
-    trace.access = (trace.fidelity * decay * rehearsal).clamp(0.0, 1.0);
+    (trace.fidelity * decay * rehearsal).clamp(0.0, 1.0)
+}
+
+pub fn refresh_access(trace: &mut MemoryTrace, profile: &EntityProfile) -> f32 {
+    trace.access = access_value(trace, profile);
     trace.access
 }
 
@@ -89,13 +93,13 @@ pub fn affective_congruence(trace: &MemoryTrace, mood: &Mood) -> f32 {
 }
 
 pub fn recall_score_emb(
-    trace: &mut MemoryTrace,
+    trace: &MemoryTrace,
     query: &str,
     query_emb: Option<&[f32]>,
     mood: &Mood,
     profile: &EntityProfile,
 ) -> f32 {
-    refresh_access(trace, profile);
+    let access = access_value(trace, profile);
     let mut sim = lexical_similarity(query, &trace.gist);
     for cue in &trace.cues {
         sim = sim.max(lexical_similarity(query, cue));
@@ -106,5 +110,5 @@ pub fn recall_score_emb(
         }
     }
     let cong = affective_congruence(trace, mood);
-    (0.50 * sim + 0.25 * trace.access + 0.25 * cong) * (0.6 + 0.4 * trace.self_relevance)
+    (0.50 * sim + 0.25 * access + 0.25 * cong) * (0.6 + 0.4 * trace.self_relevance)
 }
