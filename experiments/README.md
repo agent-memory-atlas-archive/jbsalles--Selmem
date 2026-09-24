@@ -14,6 +14,8 @@ This folder is the public record of the SelMem benches. The white paper states t
 | Persist rumination (same meeting ×5, pinned) | `data/v01_ruminate.json` | `examples/persist --ruminate` | yes | Grok n=1, then P0 n=5 |
 | P0 ablations (C1, C3, C2, C2−S/R/L/G) | persist + ruminate scripts | `examples/persist` | yes | n=5 each, seed 1, S/N |
 | P1 three-column persist | same persist script | `examples/persist` | yes | Grok n=5, seed 1, S/N |
+| Persist DropMarked | `data/v01_persist.json` | `examples/persist --bias drop` | yes | Grok n=1, seed 1 |
+| AMA-Bench adapter (side table only) | their trajectories | `examples/ama` + `experiments/ama_bench/` | last-k / static / C2 | 3 episodes, not submitted |
 
 C3 is a last-k summary plus **one** profile line (not the five T₀ paragraphs). Persist script: 12 dull days, five same-schema hours, 8 posts. Sparse probes: t0 and post+8 only. Does not rewrite `data/v01.json`.
 
@@ -40,7 +42,11 @@ JSON logs book (`fingerprint`, traces), retrieval (`t0_in_book_*`, `t0_rank_*`, 
 ./run.sh run --release --example persist -- --pairs 5 --seed 1 --last-k 8 --out selmem-persist-p1-grok-n5.json
 ```
 
-`benchmark --p0` on v0.1 was not run. Persist + ruminate already isolate the cuts. Official `marker_last` under-counts C2 once sleep has replaced T₀ words with *wound / credit*; read rank + the replies. Tables: [REPORT.md](REPORT.md) §7 (P0) and §8 (P1 three-column). Published P1 dump: `experiments/selmem-persist-p1-grok-n5.json`.
+`benchmark --p0` on v0.1 was not run. Persist + ruminate already isolate the cuts. Official `marker_last` under-counts C2 once sleep has replaced T₀ words with *wound / credit*; read rank + the replies. Tables: [REPORT.md](REPORT.md) §7 (P0), §8 (P1 three-column), §9 (Drop Grok + AMA-Bench). Published P1 dump: `experiments/selmem-persist-p1-grok-n5.json`. Drop dump: `selmem-persist-p1-drop-grok.json`.
+
+`data/v01_persist.json` and `data/v01_ruminate.json` must ship with the public tree. A checkout that omits them fails `cargo check --lib` (`include_str!` in `src/benchmark.rs`).
+
+**AMA-Bench is not the persist claim.** Questions are “what ran at step 18.” Last-k is the matching memory. On episodes 129 / 169 / 186 (36 Q, Grok-4.3 self-judge): last-k 0.50, static 0.28, C2 0.19. Do not run the 208-episode set for a leaderboard row. Adapter notes: [ama_bench/README.md](ama_bench/README.md).
 
 Isolated `speak` is the pre-stance path again (retrieved scenes + living axioms). `recall/stance.rs` stays as the ablation that showed A≈B once the scene is withheld.
 

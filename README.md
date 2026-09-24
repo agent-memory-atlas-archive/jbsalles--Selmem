@@ -6,7 +6,7 @@ An LLM maps context to the next token. A stack of unmodified facts maximises cov
 
 **Manifest:** [WHITEPAPER.md](WHITEPAPER.md)\
 **Layout:** [ARCHITECTURE.md](ARCHITECTURE.md) — encode / judge / night / snapshot.\
-**Benches:** experiments/REPORT.md — method, tables, excerpts, P0 n=5, P1 three-column n=5. Replay from experiments/README.md.\
+**Benches:** experiments/REPORT.md — method, tables, P0 / P1, Drop n=1. Replay from experiments/README.md.\
 **Knobs:** [PARAMETERS.md](PARAMETERS.md) — exploratory, not fitted.
 
 Rust 1.75. SQLite via system `libsqlite3` (macOS SDK or Linux).
@@ -167,7 +167,7 @@ JSON reports book (`t0_in_book_*`), retrieval (`t0_rank_*`, `t0_selected_*`), an
 ./run.sh run --release --example persist -- --pairs 5 --seed 1 --last-k 8 --out selmem-persist-p1-grok-n5.json
 ```
 
-Grok persist P1 is n = 5. See experiments/REPORT.md §8. Dump: experiments/selmem-persist-p1-grok-n5.json.
+Grok persist P1 is n = 5. DropMarked Grok is n = 1 (`--bias drop`): T₀ leaves the prompt, C2 mouth stays charged. See experiments/REPORT.md §8–§9.
 
 ### Benchmark v0.1 (H2)
 
