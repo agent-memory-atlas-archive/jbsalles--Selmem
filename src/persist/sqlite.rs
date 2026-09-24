@@ -560,10 +560,10 @@ fn parse_opt_u64(s: &str) -> Option<u64> {
 }
 
 fn parse_ch(s: &str) -> Channel {
-    if s == "world" {
-        Channel::World
-    } else {
-        Channel::Selfhood
+    match s {
+        "world" => Channel::World,
+        "log" => Channel::Log,
+        _ => Channel::Selfhood,
     }
 }
 fn parse_st(s: &str) -> TraceStatus {

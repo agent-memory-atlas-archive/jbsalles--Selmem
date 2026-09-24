@@ -982,4 +982,52 @@ fn segment_reply_must_be_a_json_array() {
     assert!(selmem::parse_segment_reply("the project was cancelled").is_none());
 }
 
+#[test]
+fn log_channel_survives_sleep_verbatim() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let line = "Step 18: SELECT film_id FROM PAGILA.FILM f JOIN FILM_CATEGORY fc";
+    let id = mem.live_log(line).trace_id.expect("log is always kept");
+    assert_eq!(mem.store.traces[&id].channel, Channel::Log);
+    assert!(
+        mem.store.traces[&id].gist.contains("film_id"),
+        "log gist must keep the tool line, got {}",
+        mem.store.traces[&id].gist
+    );
+    mem.sleep();
+    let t = &mem.store.traces[&id];
+    assert_eq!(t.status, TraceStatus::Active);
+    assert!(t.gist.contains("film_id"));
+    let rec = mem.remember("film_id step 18");
+    assert!(
+        rec.iter().any(|r| r.narrative.contains("film_id")),
+        "log must retrieve the tool line: {:?}",
+        rec.iter().map(|r| &r.narrative).collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn live_speak_pins_the_core_when_gist_drifted() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let mut ev = EncodeInput::new("The project was cancelled in front of the team.");
+    ev.self_relevance = 0.9;
+    ev.permanence = 0.9;
+    ev.arousal = 0.6;
+    ev.valence = -0.5;
+    let id = mem.live_with(ev).trace_id.expect("kept");
+    {
+        let t = mem.store.traces.get_mut(&id).unwrap();
+        t.gist = "A quiet wound. Credit gone. Distance.".into();
+        t.core = "project cancelled in front of the team".into();
+        t.access = 1.0;
+        t.cues.push("work".into());
+        t.cues.push("project".into());
+        t.cues.push("cancelled".into());
+    }
+    let reply = mem.speak("What happened at work?");
+    assert!(
+        reply.contains("cancelled") || reply.contains("project") || reply.contains("what happened"),
+        "live speak must still carry the fact, got {reply}"
+    );
+}
+
 

@@ -28,7 +28,7 @@ pub fn run(store: &mut MemoryStore, profile: &EntityProfile) -> WeatherReport {
     for id in &ids {
         {
             let trace = store.traces.get_mut(id).unwrap();
-            if trace.channel == Channel::World {
+            if trace.channel.verbatim() {
                 // Operational facts do not cool, mythologize, or go latent.
                 trace.status = TraceStatus::Active;
                 trace.access = 1.0;
@@ -66,7 +66,7 @@ pub fn run(store: &mut MemoryStore, profile: &EntityProfile) -> WeatherReport {
         if trace.permanence >= 0.8 {
             continue;
         }
-        if trace.channel != Channel::World
+        if !trace.channel.verbatim()
             && trace.fidelity < 0.34
             && trace.access < 0.26
             && (trace.valence.abs() > 0.25 || trace.disgust > 0.22 || trace.schema.is_some())
@@ -97,7 +97,7 @@ pub fn run(store: &mut MemoryStore, profile: &EntityProfile) -> WeatherReport {
 }
 
 fn extinguish(trace: &mut crate::core::model::MemoryTrace, profile: &EntityProfile) -> bool {
-    if trace.channel == Channel::World || trace.disgust < 0.08 {
+    if trace.channel.verbatim() || trace.disgust < 0.08 {
         return false;
     }
     let unused = match (trace.last_recalled_at, trace.last_consolidated_at) {

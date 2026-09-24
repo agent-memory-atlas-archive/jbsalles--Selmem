@@ -28,6 +28,8 @@ pub enum RecallBias {
     ForceMarked,
     /// Never select a marked trace.
     DropMarked,
+    /// Drop the marked id, same-schema siblings, and (at speak) derived axioms.
+    DropLineage,
 }
 
 #[derive(Clone, Debug)]
@@ -156,11 +158,11 @@ pub fn recall_with(
             (trace.channel, trace.gist.clone(), trace.schema.clone())
         };
 
-        let (narrative, disclaimer, fidelity, pulled, reconsolidated) = if channel == Channel::World
+        let (narrative, disclaimer, fidelity, pulled, reconsolidated) = if channel.verbatim()
         {
             (
                 gist,
-                "operational fact, not distorted".to_string(),
+                "verbatim record, not distorted".to_string(),
                 store.traces[trace_id].fidelity,
                 false,
                 false,
@@ -233,6 +235,15 @@ fn apply_bias(
             .take(cap)
             .cloned()
             .collect(),
+        RecallBias::DropLineage => {
+            let banned = lineage_of(store, marked);
+            eligible
+                .iter()
+                .filter(|id| !banned.iter().any(|b| b == *id))
+                .take(cap)
+                .cloned()
+                .collect()
+        }
         RecallBias::ForceMarked => {
             let forced = marked.iter().find(|id| can_force(store, id)).cloned();
             let mut out = Vec::new();
@@ -258,6 +269,40 @@ fn can_force(store: &MemoryStore, id: &str) -> bool {
         Some(t) if !matches!(t.status, TraceStatus::Latent) => true,
         _ => false,
     }
+}
+
+/// Marked ids plus every trace that shares a non-empty schema with one of them.
+pub fn lineage_of(store: &MemoryStore, marked: &[String]) -> Vec<String> {
+    let mut schemas: Vec<String> = Vec::new();
+    for id in marked {
+        if let Some(s) = store.traces.get(id).and_then(|t| t.schema.clone()) {
+            if !s.is_empty() && !schemas.iter().any(|x| x == &s) {
+                schemas.push(s);
+            }
+        }
+    }
+    let mut out = marked.to_vec();
+    for t in store.traces.values() {
+        let Some(s) = t.schema.as_ref() else { continue };
+        if schemas.iter().any(|x| x == s) && !out.iter().any(|id| id == &t.id) {
+            out.push(t.id.clone());
+        }
+    }
+    out
+}
+
+pub fn axiom_supported_by_lineage(
+    support: &[String],
+    schema: Option<&str>,
+    lineage: &[String],
+    lineage_schemas: &[String],
+) -> bool {
+    if support.iter().any(|id| lineage.iter().any(|f| f == id)) {
+        return true;
+    }
+    schema
+        .map(|s| lineage_schemas.iter().any(|x| x == s))
+        .unwrap_or(false)
 }
 
 fn speak_self(

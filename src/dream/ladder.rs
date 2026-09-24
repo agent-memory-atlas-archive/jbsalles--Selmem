@@ -16,7 +16,7 @@ fn extract_axioms(store: &mut MemoryStore, narrator: &dyn Narrator) -> Vec<Ident
     let mut evidence: HashMap<String, Vec<String>> = HashMap::new();
     let mut living: HashMap<String, Vec<String>> = HashMap::new();
     for t in store.traces.values() {
-        if t.channel == Channel::World {
+        if t.channel.verbatim() {
             continue;
         }
         let Some(s) = t.schema.as_ref() else { continue };

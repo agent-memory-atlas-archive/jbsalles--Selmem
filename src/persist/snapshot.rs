@@ -201,6 +201,7 @@ pub fn channel_token(c: Channel) -> &'static str {
     match c {
         Channel::Selfhood => "self",
         Channel::World => "world",
+        Channel::Log => "log",
     }
 }
 

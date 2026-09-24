@@ -230,10 +230,10 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 }
             }
             if let Some(ch) = json_str(body, "channel") {
-                input.channel = if ch == "world" {
-                    Channel::World
-                } else {
-                    Channel::Selfhood
+                input.channel = match ch.as_str() {
+                    "world" => Channel::World,
+                    "log" => Channel::Log,
+                    _ => Channel::Selfhood,
                 };
             }
             let d = mem.live_with(input);
@@ -262,7 +262,7 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                         "{{\"trace_id\":\"{}\",\"fidelity\":{:.3},\"channel\":\"{}\",\"schema\":\"{}\",\"disclaimer\":\"{}\",\"narrative\":\"{}\"}}",
                         json_esc(&r.trace_id),
                         r.fidelity,
-                        if matches!(r.channel, Channel::World) { "world" } else { "self" },
+                        crate::persist::snapshot::channel_token(r.channel),
                         json_esc(r.schema.as_deref().unwrap_or("")),
                         json_esc(&r.disclaimer),
                         json_esc(&r.narrative)
@@ -403,7 +403,7 @@ fn book_json(mem: &SelectiveMemory) -> String {
                 "{{\"id\":\"{}\",\"status\":\"{}\",\"channel\":\"{}\",\"schema\":\"{}\",\"gist\":\"{}\",\"core\":\"{}\",\"fidelity\":{:.3},\"anchor\":{:.3},\"valence\":{:.3},\"created_at\":{},\"archive_id\":\"{}\"}}",
                 json_esc(&t.id),
                 status_name(t.status),
-                if matches!(t.channel, Channel::World) { "world" } else { "self" },
+                crate::persist::snapshot::channel_token(t.channel),
                 json_esc(t.schema.as_deref().unwrap_or("")),
                 json_esc(&t.gist),
                 json_esc(&t.core),

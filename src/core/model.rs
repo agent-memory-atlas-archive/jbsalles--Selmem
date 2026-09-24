@@ -24,6 +24,15 @@ pub fn set_next_id(n: u64) {
 pub enum Channel {
     Selfhood,
     World,
+    /// Tool / journal lines. Always kept. No reconstruct, weather, or merge.
+    Log,
+}
+
+impl Channel {
+    /// Do not warp this record. World facts and tool logs.
+    pub fn verbatim(self) -> bool {
+        matches!(self, Self::World | Self::Log)
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

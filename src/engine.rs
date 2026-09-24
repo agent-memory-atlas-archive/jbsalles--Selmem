@@ -152,6 +152,18 @@ impl SelectiveMemory {
         self.live_with(EncodeInput::new(event))
     }
 
+    /// Tool / journal line. Always kept. Sleep does not rewrite it.
+    pub fn live_log(&mut self, event: &str) -> EncodeDecision {
+        let mut ev = EncodeInput::new(event);
+        ev.channel = crate::core::model::Channel::Log;
+        ev.source = "log";
+        ev.utility = 0.85;
+        ev.permanence = 0.70;
+        ev.self_relevance = 0.15;
+        ev.arousal = 0.15;
+        self.live_with(ev)
+    }
+
     pub fn live_with(&mut self, input: EncodeInput<'_>) -> EncodeDecision {
         self.ingest(input, true)
     }
@@ -491,19 +503,46 @@ impl SelectiveMemory {
             let memories: Vec<String> = recalled
                 .into_iter()
                 .take(1)
-                .map(|r| r.narrative)
+                .map(|r| {
+                    let core = self
+                        .store
+                        .traces
+                        .get(&r.trace_id)
+                        .map(|t| t.core.as_str())
+                        .unwrap_or("");
+                    pin_happened(&r.narrative, core)
+                })
                 .collect();
             (
                 memories,
                 vec![format!("Your name is {}.", self.profile.name)],
             )
         } else {
+            let lineage = crate::recall::retrieve::lineage_of(&self.store, marked);
+            let lineage_schemas: Vec<String> = lineage
+                .iter()
+                .filter_map(|id| self.store.traces.get(id).and_then(|t| t.schema.clone()))
+                .collect();
+            let drop_ax = matches!(bias, RecallBias::DropLineage);
+            let axioms: Vec<String> = self
+                .who_am_i()
+                .into_iter()
+                .filter(|a| {
+                    if !drop_ax {
+                        return true;
+                    }
+                    !crate::recall::retrieve::axiom_supported_by_lineage(
+                        &a.support_trace_ids,
+                        a.schema.as_deref(),
+                        &lineage,
+                        &lineage_schemas,
+                    )
+                })
+                .map(|a| a.statement.clone())
+                .collect();
             (
                 recalled.into_iter().map(|r| r.narrative).collect(),
-                self.who_am_i()
-                    .into_iter()
-                    .map(|a| a.statement.clone())
-                    .collect(),
+                axioms,
             )
         };
         let reply = self
@@ -533,6 +572,27 @@ impl SelectiveMemory {
         t.access = t.access.max(0.7);
         true
     }
+}
+
+/// Live speak only: keep the frozen fact next to a drifted retelling.
+fn pin_happened(narrative: &str, core: &str) -> String {
+    let core = core.trim();
+    if core.is_empty() {
+        return narrative.to_string();
+    }
+    let n = narrative.to_lowercase();
+    let tokens: Vec<&str> = core
+        .split_whitespace()
+        .filter(|w| w.chars().count() > 3)
+        .collect();
+    let hit = tokens
+        .iter()
+        .filter(|t| n.contains(&t.to_lowercase()))
+        .count();
+    if !tokens.is_empty() && hit * 2 >= tokens.len() {
+        return narrative.to_string();
+    }
+    format!("{narrative}\n(what happened: {core})")
 }
 
 fn is_sqlite(path: &Path) -> bool {

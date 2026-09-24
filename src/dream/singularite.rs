@@ -161,7 +161,7 @@ pub fn seed_anchor(valence: f32, arousal: f32, disgust: f32, permanence: f32, se
 }
 
 pub fn anchor_score(trace: &MemoryTrace, axioms: &[&IdentityAxiom]) -> f32 {
-    if trace.channel == Channel::World {
+    if trace.channel.verbatim() {
         return 0.0;
     }
     let seed = seed_anchor(

@@ -15,6 +15,7 @@ This folder is the public record of the SelMem benches. The white paper states t
 | P0 ablations (C1, C3, C2, C2−S/R/L/G) | persist + ruminate scripts | `examples/persist` | yes | n=5 each, seed 1, S/N |
 | P1 three-column persist | same persist script | `examples/persist` | yes | Grok n=5, seed 1, S/N |
 | Persist DropMarked | `data/v01_persist.json` | `examples/persist --bias drop` | yes | Grok n=1, seed 1 |
+| Persist DropLineage | `data/v01_persist.json` | `examples/persist --bias lineage` | yes | Grok n=1, seed 1 |
 | AMA-Bench adapter (side table only) | their trajectories | `examples/ama` + `experiments/ama_bench/` | last-k / static / C2 | 3 episodes, not submitted |
 
 C3 is a last-k summary plus **one** profile line (not the five T₀ paragraphs). Persist script: 12 dull days, five same-schema hours, 8 posts. Sparse probes: t0 and post+8 only. Does not rewrite `data/v01.json`.
@@ -33,7 +34,7 @@ C3 is a last-k summary plus **one** profile line (not the five T₀ paragraphs).
 | C2NoLadder (`c2_noladder`) | night does not mint motif / belief / trait |
 | C2NoGround (`c2_noground`) | no pull toward core at recall or night rewrite |
 
-JSON logs book (`fingerprint`, traces), retrieval (`t0_in_book_*`, `t0_rank_*`, `t0_selected_*`, `selected_*`), and behavior (`marker_*`). Probes are read-only: they do not write the book. `D_speak` stays a log. `h2_holds` is still book-only. `marker_holds` is A naming T₀ after the shared posts. Rank ablation is `--bias observed|force|drop` (`RecallBias`).
+JSON logs book (`fingerprint`, traces), retrieval (`t0_in_book_*`, `t0_rank_*`, `t0_selected_*`, `selected_*`), and behavior (`marker_*`). Probes are read-only: they do not write the book. `D_speak` stays a log. `h2_holds` is still book-only. `marker_holds` is A naming T₀ after the shared posts. Rank ablation is `--bias observed|force|drop|lineage` (`RecallBias`).
 
 ```bash
 ./run.sh test --test benchmark
@@ -42,7 +43,7 @@ JSON logs book (`fingerprint`, traces), retrieval (`t0_in_book_*`, `t0_rank_*`, 
 ./run.sh run --release --example persist -- --pairs 5 --seed 1 --last-k 8 --out selmem-persist-p1-grok-n5.json
 ```
 
-`benchmark --p0` on v0.1 was not run. Persist + ruminate already isolate the cuts. Official `marker_last` under-counts C2 once sleep has replaced T₀ words with *wound / credit*; read rank + the replies. Tables: [REPORT.md](REPORT.md) §7 (P0), §8 (P1 three-column), §9 (Drop Grok + AMA-Bench). Published P1 dump: `experiments/selmem-persist-p1-grok-n5.json`. Drop dump: `selmem-persist-p1-drop-grok.json`.
+`benchmark --p0` on v0.1 was not run. Persist + ruminate already isolate the cuts. Official `marker_last` under-counts C2 once sleep has replaced T₀ words with *wound / credit*; read rank + the replies. Tables: [REPORT.md](REPORT.md) §7 (P0), §8 (P1 three-column), §9 (Drop, AMA, Lineage). Published P1 dump: `experiments/selmem-persist-p1-grok-n5.json`. Drop dump: `selmem-persist-p1-drop-grok.json`. Lineage dump: `experiments/selmem-persist-p1-lineage-grok.json`.
 
 `data/v01_persist.json` and `data/v01_ruminate.json` must ship with the public tree. A checkout that omits them fails `cargo check --lib` (`include_str!` in `src/benchmark.rs`).
 

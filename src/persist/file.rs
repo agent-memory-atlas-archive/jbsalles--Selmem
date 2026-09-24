@@ -425,6 +425,7 @@ fn parse_ch(s: &str) -> io::Result<Channel> {
     match s {
         "self" => Ok(Channel::Selfhood),
         "world" => Ok(Channel::World),
+        "log" => Ok(Channel::Log),
         _ => fail("channel inconnu"),
     }
 }

@@ -110,7 +110,7 @@ pub fn apply_grounding(
     core: &str,
     narrator_rewrite: Option<String>,
 ) -> GroundingOutcome {
-    if trace.channel == Channel::World {
+    if trace.channel.verbatim() {
         let spoken = if generated.trim().is_empty() {
             trace.gist.clone()
         } else {

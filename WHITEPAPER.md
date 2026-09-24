@@ -178,7 +178,9 @@ Tables, scripts, and how to replay a cell: **[experiments/REPORT.md](experiments
 
 **Book / retrieval / behavior (persist P1, Grok, n = 5).** Same persist script, read-only probes, retrieval dump. C1 still has T₀ in the log and not in the window (selected 0 / 5); official and soft both die; speak D 0.83 → 0.48. Every C2 cut keeps T₀ in A’s book at rank 1 and selected 5 / 5. Official marker is 0 / 5 on full C2 (sleep rewrote the gist off the keyword list) and 5 / 5 on no-sleep / static (frozen words). Soft charge on any post+8 probe is 5 / 5 on every organ cell. C3 pins the profile at rank 1 and Grok still talks like HR. Recon / ladder / ground do not move retrieval on this dump. Table: [experiments/REPORT.md](experiments/REPORT.md) §8.
 
-**DropMarked (Grok, n = 1).** T₀ remains in A’s book at rank 1 and is withheld from the prompt. Speak D on C2 stays ~0.85; A still answers with credit / wound / distance. C1 without T₀ in the window still converges (~0.48). The late colour is carried by the book family (sibling traces, axiom, mood), not only by the selected id. Next cut is axiom lineage, not Force. [experiments/REPORT.md](experiments/REPORT.md) §9.1.
+**DropMarked (Grok, n = 1).** T₀ remains in A’s book at rank 1 and is withheld from the prompt. Speak D on C2 stays ~0.85; A still answers with credit / wound / distance. C1 without T₀ in the window still converges (~0.48). The late colour is not only the selected id. [experiments/REPORT.md](experiments/REPORT.md) §9.1.
+
+**DropLineage (Grok, n = 1).** Same book split. `--bias lineage` also withholds same-schema siblings and derived axioms. Speak D on C2 falls to 0.43 (C1 0.49). A no longer says wound / credit. The late mouth was the retrieved lineage. The books stay apart. [experiments/REPORT.md](experiments/REPORT.md) §9.3.
 
 **AMA-Bench is the wrong external score for this claim.** The bench asks which tool line ran at which step. Last-k is the matching store. On three fixed episodes (36 questions, Grok-4.3 as model and judge) last-k 0.50 / static 0.28 / C2 0.19. That order is expected: the gate and the night throw away step ids. It does not falsify persist, and it is not a reason to change C2. Side table only; do not submit a leaderboard row. [experiments/REPORT.md](experiments/REPORT.md) §9.2.
 
@@ -190,7 +192,7 @@ What the cuts isolate: the book gap is selection; nearby probes are scene retrie
 
 Speak distance cannot carry the claim: two empty books already sit at ~0.6. No human ratings. Not a creativity or identity claim.
 
-What is still open: a second seed; blind judges on the late probe; a stronger C3 (summary of the five hours, not one profile line); Drop of axioms whose `support_trace_ids` descend from T₀; per-probe retrieve dumps. Not open: treating AMA-Bench accuracy as a SelMem metric.
+What is still open: a second seed; blind judges on the late probe; a stronger C3 (summary of the five hours, not one profile line); per-probe retrieve dumps; DropLineage n > 1. Not open: treating AMA-Bench accuracy as a SelMem metric. The axiom-lineage cut is run (§9.3).
 
 ---
 
@@ -198,7 +200,7 @@ What is still open: a second seed; blind judges on the late probe; a stronger C3
 
 `cargo test` covers: dull drop, world channel pinned, tender/austere split, core vs detail, anchors, axiom succession, motif ≠ trait, identity paint, reinterpret, DetachKind misses, grounding blend, fading warp, latent residue, night pass order, persist round-trip (file and sqlite), merge + extinguish in one night.
 
-Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; on v0.1 × 10 Grok pairs the book gap holds and, after last-k=8 evicts T₀, only C2 A still names it. Persist / ruminate P0 n = 5: five same-schema hours plus a night move the late probe on C2; cutting recon or ground does not; cutting sleep or ladder does, unless the five hours are pinned copies of one meeting. Persist P1 n = 5: C1 evicts T₀ from retrieve and the mouths collapse; C2 keeps T₀ at rank 1 and the mouth stays charged after the official marker dies. Drop n = 1: withholding the marked id does not flatten C2. AMA-Bench 3×12 is a journal-QA side table (last-k wins). Full tables: [experiments/REPORT.md](experiments/REPORT.md) §7–§9.
+Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; on v0.1 × 10 Grok pairs the book gap holds and, after last-k=8 evicts T₀, only C2 A still names it. Persist / ruminate P0 n = 5: five same-schema hours plus a night move the late probe on C2; cutting recon or ground does not; cutting sleep or ladder does, unless the five hours are pinned copies of one meeting. Persist P1 n = 5: C1 evicts T₀ from retrieve and the mouths collapse; C2 keeps T₀ at rank 1 and the mouth stays charged after the official marker dies. Drop n = 1: withholding the marked id does not flatten C2. Lineage n = 1: withholding the T₀ lineage does. AMA-Bench 3×12 is a journal-QA side table (last-k wins). Full tables: [experiments/REPORT.md](experiments/REPORT.md) §7–§9.
 
 Missing: second seed, scored creative grid, human ratings, learned layers (still rules), fitted constants, a C3 that actually summarises the five hours. Core is a 12-word compress unless an HTTP narrator proposes one after the gate and a lexical filter accepts it. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint. Reconsolidation and grounding remain in the loop; the P0 mouth does not depend on them.
 

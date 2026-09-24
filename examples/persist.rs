@@ -5,7 +5,8 @@
 //!   ./run.sh run --release --example persist -- --bias drop --pairs 1 --out selmem-persist-p1-drop.json
 //!
 //! Default arm is salient/neutral. Sparse probes: t0 + post+8 only. No creativity.
-//! `--bias observed|force|drop`. Probes are read-only. JSON has book / rank / mouth.
+//! `--bias observed|force|drop|lineage`. Probes are read-only. JSON has book / rank / mouth.
+//! `lineage` also drops same-schema siblings and axioms whose support traces descend from T0.
 
 use selmem::{
     h2_holds, marker_holds, run_v01_opts, Arm, BenchOpts, Campaign, Condition, LlmSpec, PairReport,
@@ -22,6 +23,9 @@ fn main() {
     let bias = match arg_str("--bias").as_deref() {
         Some("force") | Some("ForceMarked") => RecallBias::ForceMarked,
         Some("drop") | Some("DropMarked") => RecallBias::DropMarked,
+        Some("lineage") | Some("drop-lineage") | Some("DropLineage") | Some("family") => {
+            RecallBias::DropLineage
+        }
         _ => RecallBias::Observed,
     };
 
@@ -52,6 +56,7 @@ fn main() {
             RecallBias::Observed => "observed",
             RecallBias::ForceMarked => "force",
             RecallBias::DropMarked => "drop",
+            RecallBias::DropLineage => "lineage",
         }
     );
     let arms: &[Arm] = if both_arms {

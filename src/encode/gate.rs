@@ -138,14 +138,17 @@ fn encode_one(
     );
 
     let mut threshold = profile.encode_threshold;
-    if input.channel == Channel::World {
+    if input.channel.verbatim() {
         threshold *= 0.6;
+    }
+    if input.channel == Channel::Log {
+        threshold = 0.0;
     }
     if input.permanence >= 0.8 {
         threshold = threshold.min(0.2);
     }
 
-    if score < threshold && input.permanence < 0.8 && input.channel != Channel::World {
+    if score < threshold && input.permanence < 0.8 && !input.channel.verbatim() {
         return EncodeDecision {
             kept: false,
             score,
@@ -167,8 +170,20 @@ fn encode_one(
 
     let mut trace = MemoryTrace {
         id: new_id("tr"),
-        gist: compress(input.event, 28),
-        core: compress(input.event, 12),
+        gist: if input.channel == Channel::Log {
+            let mut g = input.event.trim().to_string();
+            if g.chars().count() > 480 {
+                g = g.chars().take(480).collect();
+            }
+            g
+        } else {
+            compress(input.event, 28)
+        },
+        core: if input.channel == Channel::Log {
+            compress(input.event, 24)
+        } else {
+            compress(input.event, 12)
+        },
         cues: input.cues.unwrap_or_else(|| default_cues(input.event)),
         valence: input.valence,
         arousal: input.arousal,

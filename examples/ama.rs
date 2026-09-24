@@ -83,7 +83,7 @@ fn construct(args: &mut impl Iterator<Item = String>) {
     let mut seen = 0u32;
     for p in &packs {
         seen += 1;
-        let d = mem.live(p);
+        let d = mem.live_log(p);
         if d.kept {
             kept += 1;
         }

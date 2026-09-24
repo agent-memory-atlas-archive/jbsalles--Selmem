@@ -7,7 +7,7 @@ use crate::core::model::{Channel, MemoryTrace, Mood, TraceStatus};
 use crate::core::store::MemoryStore;
 
 pub fn is_charged(trace: &MemoryTrace) -> bool {
-    if trace.channel == Channel::World {
+    if trace.channel.verbatim() {
         return false;
     }
     if matches!(trace.status, TraceStatus::Myth) {

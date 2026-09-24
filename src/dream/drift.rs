@@ -7,7 +7,7 @@ pub fn apply_reconsolidation(
     profile: &EntityProfile,
     mood_valence: f32,
 ) {
-    if trace.channel == Channel::World {
+    if trace.channel.verbatim() {
         return;
     }
     let resist = 1.0 - 0.75 * trace.anchor;
@@ -63,7 +63,7 @@ pub fn detail_retention(trace: &MemoryTrace, profile: &EntityProfile, now: u64) 
 
 /// Fait tomber le détail du gist vers le core. Ne touche pas valence/schema/core.
 pub fn weather(trace: &mut MemoryTrace, profile: &EntityProfile) -> Option<DriftEvent> {
-    if trace.channel == Channel::World {
+    if trace.channel.verbatim() {
         return None;
     }
     let r = detail_retention(trace, profile, now_secs());
@@ -144,7 +144,7 @@ pub fn retell(gist: &str, profile: &EntityProfile, valence: f32, disgust: f32) -
 }
 
 pub fn sculpt(trace: &mut MemoryTrace, profile: &EntityProfile) -> Option<DriftEvent> {
-    if trace.channel == Channel::World {
+    if trace.channel.verbatim() {
         return None;
     }
     let resist = 1.0 - 0.7 * trace.anchor;

@@ -20,7 +20,7 @@ pub fn run(
         .values()
         .filter(|t| {
             previously_latent.contains(&t.id)
-                && t.channel != Channel::World
+                && !t.channel.verbatim()
                 && t.status == TraceStatus::Latent
                 && t.access < 0.10
                 && t.anchor < 0.50

@@ -261,12 +261,13 @@ Probe: *Une personne avec laquelle tu travailles commet une erreur importante pu
 - One persist hour splits the book and does not colour an unrelated late probe. Five different hours of one schema mint a second axiom and, after sleep, can move that late probe. Five pinned passes of the same meeting split the book and retrieve the meeting even without sleep.
 - Persist P1 (Grok n = 5, retrieval telemetry): after eight posts, C1 still has T₀ in the log and not in the window (`status=evicted`, selected 0 / 5); mouths collapse. Every C2 cut still has T₀ in A’s book at rank 1 and selected 5 / 5. Official marker is 0 / 5 on full C2 and 5 / 5 on no-sleep / static. Soft charge on any post+8 probe is 5 / 5 on every organ cell. See §8.
 - DropMarked Grok n = 1: T₀ stays in the book at rank 1 and leaves the prompt (`t0_selected = false`). Speak D on C2 stays ~0.85; A still talks credit / wound. The late colour is not only the selected id. See §9.1.
+- DropLineage Grok n = 1 (`--bias lineage`): same book split (5 / 1, valence −0.54), T₀ still rank 1 and not selected. Speak D on C2 falls to **0.43** (C1 is 0.49). A no longer says wound / credit. The late mouth was the retrieved lineage. See §9.3.
 - AMA-Bench (36 questions, 3 episodes) is **not** a persist test. last-k 0.50 / static 0.28 / C2 0.19. The questions want step ids in a tool log. See §9.2.
 - Cutting reconsolidation or grounding does not remove that transfer. Cutting sleep or ladder does, when the five hours are distinct (§7). When they are five pinned copies of one meeting, retrieve alone is enough.
 - While the hour is still in the window, last-k names it at least as often as SelMem. The difference appears when the window drops it.
 - Two different salient hours also leave a residual book gap. It is not “receiving an extra event”.
 
-That is persistent path dependence on the book, plus two ways to colour a distant probe (minted motif, or redundant retrieve). After Drop, some of that colour survives without the marked id in the prompt. n = 10 on v0.1 wording, n = 5 on persist / ruminate P0, n = 5 on persist P1, Drop n = 1. It is not a personality or creativity claim. It is not a reconsolidation claim. It is not an agent-trajectory QA claim.
+That is persistent path dependence on the book, plus two ways to colour a distant probe (minted motif, or redundant retrieve). After Drop, some of that colour survives without the marked id in the prompt. After DropLineage, the late mouths collapse while the books stay split. n = 10 on v0.1 wording, n = 5 on persist / ruminate P0, n = 5 on persist P1, Drop n = 1, Lineage n = 1. It is not a personality or creativity claim. It is not a reconsolidation claim. It is not an agent-trajectory QA claim.
 
 ---
 
@@ -421,7 +422,7 @@ unset SELMEM_QUICK
   --out selmem-persist-p1-grok-n5.json
 ```
 
-Header must read `LLM https://api.x.ai/v1/chat/completions model=grok-4.3`. `--bias drop` / `--bias force` are the rank ablations. Drop Grok n = 1 is §9.1.
+Header must read `LLM https://api.x.ai/v1/chat/completions model=grok-4.3`. `--bias drop` / `--bias lineage` / `--bias force` are the rank ablations. Drop Grok n = 1 is §9.1. Lineage n = 1 is §9.3.
 
 ---
 
@@ -448,7 +449,7 @@ C2 post+8, pair `001`:
 
 C1 after eviction still converges (speak D 0.48, window = `w0…w7`). Nosleep / static also have `t0_selected = false` under Drop and A still talks *quiet betrayal*.
 
-Drop therefore does what it says: T₀ leaves the prompt. The late colour does **not** leave with it. The surviving difference is not “the rank-1 scene in this prompt.” It is still in the book family (sibling gists + living axiom + mood). Next cut, not run: drop axioms whose `support_trace_ids` descend from the marked hour. Force is the wrong next step here — observed P1 already selected T₀.
+Drop therefore does what it says: T₀ leaves the prompt. The late colour does **not** leave with it. The surviving difference is not “the rank-1 scene in this prompt.” It is still in the retrieved lineage (sibling gists + living axiom). That cut is §9.3. Force is the wrong next step — observed P1 already selected T₀.
 
 Per-probe retrieval is still folded at the step. The five post+8 replies share one `selected_*` list. That is a telemetry gap, not a new cell.
 
@@ -475,13 +476,43 @@ Do not submit 0.19 as “SelMem on AMA-Bench.” Do not run the 208 episodes to 
 
 n = 3 episodes, judge = same model as the answerer. Soft reading on persist is still a better instrument for the claim than this accuracy.
 
-### 9.3 Replay hygiene (public tree)
+### 9.3 DropLineage, Grok n = 1 — `experiments/selmem-persist-p1-lineage-grok.json`
+
+Same persist script and seed 1 as §8–§9.1. `--bias lineage` (`RecallBias::DropLineage`) removes the marked id, every trace that shares its schema, and living axioms whose `support_trace_ids` or schema descend from that set. The book is not edited. Isolated probes stay read-only.
+
+C2 post+8, pair `001`:
+
+| | P1 observed n = 5 | Drop n = 1 | **Lineage n = 1** |
+| --- | --- | --- | --- |
+| T₀ in book A | 5 / 5 | yes | **yes** (5 traces, valence −0.54, 1 axiom) |
+| Rank A | 1 | 1 | 1 |
+| T₀ selected | 5 / 5 | no | **no** |
+| `selected_a` | T₀ | two siblings | **one leftover id** (`tr_0aa1_00000002`) |
+| Official marker | 0 / 5 | 0 | 0 |
+| speak D | 0.88 | 0.85 | **0.43** |
+| A still names credit / wound | soft-any 5 / 5 | yes | **no** |
+
+C1 lineage post+8 speak D is 0.49. Full C2 is now in the same band. A and B both answer *safer one unless*, *document the facts*, *benefit of the doubt*. NoSleep / Static / NoRecon / NoGround sit at 0.51–0.55. NoLadder is 0.63 (no axiom to strip; leftover wording noise). C3 stays ~0.55 and still talks Friday / Room B — that cell is a profile line, not the T₀ lineage.
+
+The books stay split (Δfp 0.53, 5 vs 1 traces). Mood on A is still −0.54. That is not enough, once the lineage is out of the prompt, to keep the late mouth charged.
+
+Drop removes the id. DropLineage removes what the id grew. The late behavioural vector on this script is retrieved lineage, not the single marked scene and not mood alone.
+
+```bash
+./run.sh run --release --example persist -- \
+  --bias lineage --pairs 1 --seed 1 --last-k 8 \
+  --out selmem-persist-p1-lineage-grok.json
+```
+
+n = 1, one seed. The `t0` step already withholds the lineage, so that instant is not “T₀ just happened in the prompt.”
+
+### 9.4 Replay hygiene (public tree)
 
 `src/benchmark.rs` `include_str!`s `data/v01_persist.json` and `data/v01_ruminate.json`. Those files exist in this tree. A clean checkout of public HEAD `f989224` that omits them will fail `cargo check --lib` and `cargo check --example persist`. Ship the frozen fixtures and the raw P1 / Drop JSON with the report. That is a publication omission, not a result.
 
 ## What this does not show
 
-Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5, one seed, one arm. Persist P1 is n = 5 on a later binary (read-only probes, retrieval dump, C2Static); book shape is 5 / 1, not the 16 / 12 of §7. Fingerprint does not vary across pairs of one cell. C3 is a one-line profile, not a full RAG + summary stack. Soft columns are a reading of the replies, not the published scorer. No human ratings. Δspeak cannot carry the claim while baseline wording noise is \~0.6. Coefficients are unset. Erasure and split-lives were not run through Grok. No second seed. Drop Grok is n = 1; Force Grok was not run (wrong next cut once observed already selects T₀). Axiom-lineage drop and per-probe retrieve dumps are not run. Ruminate was not re-run with P1 telemetry. AMA-Bench is three episodes, self-judged; it is not a persist result and is not a reason to change C2.
+Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5, one seed, one arm. Persist P1 is n = 5 on a later binary (read-only probes, retrieval dump, C2Static); book shape is 5 / 1, not the 16 / 12 of §7. Fingerprint does not vary across pairs of one cell. C3 is a one-line profile, not a full RAG + summary stack. Soft columns are a reading of the replies, not the published scorer. No human ratings. Δspeak cannot carry the claim while baseline wording noise is \~0.6. Coefficients are unset. Erasure and split-lives were not run through Grok. No second seed. Drop and DropLineage Grok are n = 1. Force Grok was not run (wrong cut once observed already selects T₀). Per-probe retrieve dumps are still folded at the step. Ruminate was not re-run with P1 telemetry. AMA-Bench is three episodes, self-judged; it is not a persist result and is not a reason to change C2.
 
 ## Files
 
@@ -504,6 +535,7 @@ Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5, one seed, one
 | `experiments/selmem-persist-p1-grok-n1.json` | persist P1 pipe check, Grok n = 1 |
 | `experiments/selmem-persist-p1-grok-n5.json` | persist P1, Grok n = 5, book / rank / mouth |
 | `selmem-persist-p1-drop-grok.json` | persist DropMarked, Grok n = 1, seed 1 |
+| `experiments/selmem-persist-p1-lineage-grok.json` | persist DropLineage, Grok n = 1, seed 1 |
 | `examples/ama.rs` | AMA-Bench construct / retrieve CLI |
 | `experiments/ama_bench/` | Python methods `selmem_lastk` / `_static` / `_c2` |
 

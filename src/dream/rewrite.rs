@@ -30,7 +30,7 @@ pub fn run(
                 t.status,
             )
         };
-        if channel == Channel::World || anchor >= 0.88 || status == TraceStatus::Latent {
+        if channel.verbatim() || anchor >= 0.88 || status == TraceStatus::Latent {
             continue;
         }
         let neighbors: Vec<crate::core::model::MemoryTrace> = store
