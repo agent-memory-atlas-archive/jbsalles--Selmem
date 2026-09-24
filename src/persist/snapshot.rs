@@ -223,6 +223,7 @@ pub fn drift_token(k: DriftKind) -> &'static str {
         DriftKind::Rewrite => "rewrite",
         DriftKind::Reinterpret => "reinterpret",
         DriftKind::Ground => "ground",
+        DriftKind::Color => "color",
     }
 }
 

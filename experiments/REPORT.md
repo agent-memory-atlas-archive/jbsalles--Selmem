@@ -261,7 +261,7 @@ Probe: *Une personne avec laquelle tu travailles commet une erreur importante pu
 - One persist hour splits the book and does not colour an unrelated late probe. Five different hours of one schema mint a second axiom and, after sleep, can move that late probe. Five pinned passes of the same meeting split the book and retrieve the meeting even without sleep.
 - Persist P1 (Grok n = 5, retrieval telemetry): after eight posts, C1 still has T₀ in the log and not in the window (`status=evicted`, selected 0 / 5); mouths collapse. Every C2 cut still has T₀ in A’s book at rank 1 and selected 5 / 5. Official marker is 0 / 5 on full C2 and 5 / 5 on no-sleep / static. Soft charge on any post+8 probe is 5 / 5 on every organ cell. See §8.
 - DropMarked Grok n = 1: T₀ stays in the book at rank 1 and leaves the prompt (`t0_selected = false`). Speak D on C2 stays ~0.85; A still talks credit / wound. The late colour is not only the selected id. See §9.1.
-- AMA-Bench (36 questions, 3 episodes) is **not** a persist test. This bench rewards the transcript; the organ compresses it. last-k 0.50 / static 0.28 / C2 0.19. The questions want step ids in a tool log. See §9.2.
+- AMA-Bench (36 questions, 3 episodes) is **not** a persist test. last-k 0.50 / static 0.28 / C2 0.19. The questions want step ids in a tool log. See §9.2.
 - Cutting reconsolidation or grounding does not remove that transfer. Cutting sleep or ladder does, when the five hours are distinct (§7). When they are five pinned copies of one meeting, retrieve alone is enough.
 - While the hour is still in the window, last-k names it at least as often as SelMem. The difference appears when the window drops it.
 - Two different salient hours also leave a residual book gap. It is not “receiving an extra event”.
@@ -470,6 +470,8 @@ Run: open-end, Grok-4.3 as model and judge, **same three episode ids** 129 (TEXT
 AMA-Bench asks for the tool log: *which SQL at step 18*, *which grep at step 8*, *which DOM id first opened the submenu*. That is verbatim episodic journal QA. Last-k is the architecture the questions assume. The salience gate is built for lived hours, not `hover [2749]`. Sleep rewrites gists; it does not preserve step ids. C2 inventing *Eddie Murphy* or citing `tr_1797_…` instead of step 10 is the organ doing what it does.
 
 So last-k ≥ static ≥ C2 is the **expected** order, not a failed persist cell. C1 persist already showed the other side of the same fact: when the question needs the raw line, the window wins; when the window has dropped T₀, only the book still splits the mouth.
+
+Do not submit 0.19 as “SelMem on AMA-Bench.” Do not run the 208 episodes to chase a %. The three cells are a side table: *this bench rewards the transcript; the organ compresses it.* LongMemEval / LoCoMo would be the same class (conversation QA), only slightly less step-id heavy. They are not queued.
 
 n = 3 episodes, judge = same model as the answerer. Soft reading on persist is still a better instrument for the claim than this accuracy.
 

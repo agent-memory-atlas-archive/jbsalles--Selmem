@@ -449,6 +449,7 @@ fn parse_dk(s: &str) -> io::Result<DriftKind> {
         "rewrite" => Ok(DriftKind::Rewrite),
         "reinterpret" => Ok(DriftKind::Reinterpret),
         "ground" => Ok(DriftKind::Ground),
+        "color" => Ok(DriftKind::Color),
         _ => fail("drift inconnue"),
     }
 }

@@ -24,8 +24,14 @@ pub enum DetachKind {
 }
 
 impl DetachKind {
+    /// Unauthorized *claim* (write-back). `Reframe` is tone, not a miss.
     pub fn is_miss(self) -> bool {
-        !matches!(self, Self::Hold | Self::Compress)
+        matches!(self, Self::Elaborate | Self::Contradict | Self::Depart)
+    }
+
+    /// Same event, other speech act. Speak it; do not pull the book.
+    pub fn is_color(self) -> bool {
+        matches!(self, Self::Reframe)
     }
 }
 
@@ -102,10 +108,13 @@ pub fn judge_against_core(generated: &str, core: &str) -> CoreJudgement {
         };
     }
     if extra_frame(&g, &c) {
-        return CoreJudgement {
-            kind: DetachKind::Reframe,
-            overlap,
+        // Same event + new affect frame → color. Low overlap is another scene.
+        let kind = if overlap >= 0.18 {
+            DetachKind::Reframe
+        } else {
+            DetachKind::Depart
         };
+        return CoreJudgement { kind, overlap };
     }
 
     let gt = token_set(generated);
@@ -138,7 +147,7 @@ pub fn is_grounding_miss(generated: &str, core: &str, min_overlap: f32) -> bool 
     let j = judge_against_core(generated, core);
     match j.kind {
         DetachKind::Hold => j.overlap < min_overlap,
-        DetachKind::Compress => false,
+        DetachKind::Compress | DetachKind::Reframe => false,
         _ => true,
     }
 }

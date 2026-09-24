@@ -46,7 +46,7 @@ If you paste the original sentence back “for accuracy”, you have a store aga
 8. **Ladder.** Episode → motif (2 traces, same schema) → belief (3+) → trait (two aligned beliefs). Superseded beliefs stay in lineage.
 9. **Feedback.** Living axioms tint the next event before the gate. Recall can shift sense with current mood.
 10. **Distance.** Fingerprint uses valence, disgust, fidelity, anchors, core tokens, axioms, founders, traits, contradictions. 0 = same book. 1 = disjoint books.
-11. **Grounding.** Fading traces may keep warping. A miss is a kind the core does not authorize (`Elaborate` / `Reframe` / `Contradict` / `Depart`), not a low Jaccard. On a living trace, misses increment `detach_strikes`. Pull-back strength is `narrator_firmness × importance`. Blend toward core, never toward the archive. Jaccard is only the identity gate.
+11. **Grounding.** Fading traces may keep warping. A miss is a kind the core does not authorize (`Elaborate` / `Contradict` / `Depart`), not a low Jaccard. `Reframe` (irony, other speech act on the same event) is spoken and logged as `Color`; it does not increment strikes or rewrite the gist. On a living trace, claim misses increment `detach_strikes`. Pull-back strength is `narrator_firmness × importance`. Blend toward core, never toward the archive. Jaccard is only the identity gate.
 12. **Latent.** The scene can leave recall while schema and affect still bias encode.
 
 ---
@@ -179,6 +179,8 @@ Tables, scripts, and how to replay a cell: **[experiments/REPORT.md](experiments
 **Book / retrieval / behavior (persist P1, Grok, n = 5).** Same persist script, read-only probes, retrieval dump. C1 still has T₀ in the log and not in the window (selected 0 / 5); official and soft both die; speak D 0.83 → 0.48. Every C2 cut keeps T₀ in A’s book at rank 1 and selected 5 / 5. Official marker is 0 / 5 on full C2 (sleep rewrote the gist off the keyword list) and 5 / 5 on no-sleep / static (frozen words). Soft charge on any post+8 probe is 5 / 5 on every organ cell. C3 pins the profile at rank 1 and Grok still talks like HR. Recon / ladder / ground do not move retrieval on this dump. Table: [experiments/REPORT.md](experiments/REPORT.md) §8.
 
 **DropMarked (Grok, n = 1).** T₀ remains in A’s book at rank 1 and is withheld from the prompt. Speak D on C2 stays ~0.85; A still answers with credit / wound / distance. C1 without T₀ in the window still converges (~0.48). The late colour is carried by the book family (sibling traces, axiom, mood), not only by the selected id. Next cut is axiom lineage, not Force. [experiments/REPORT.md](experiments/REPORT.md) §9.1.
+
+**AMA-Bench is the wrong external score for this claim.** The bench asks which tool line ran at which step. Last-k is the matching store. On three fixed episodes (36 questions, Grok-4.3 as model and judge) last-k 0.50 / static 0.28 / C2 0.19. That order is expected: the gate and the night throw away step ids. It does not falsify persist, and it is not a reason to change C2. Side table only; do not submit a leaderboard row. [experiments/REPORT.md](experiments/REPORT.md) §9.2.
 
 Five *passes on the same meeting*, pinned so merge cannot collapse them, also split the book. Here the late probe is coloured even without sleep or ladder: retrieve of five near-duplicate gists, not a minted belief. That arm stays an ablation (`--ruminate`), not default sleep.
 

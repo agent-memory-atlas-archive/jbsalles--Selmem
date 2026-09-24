@@ -88,7 +88,7 @@ A generated sentence is a **miss** when `judge_against_core` returns a kind the 
 | `Hold` | same claim | only if Jaccard `< ground_min_overlap` |
 | `Compress` | detail fell off, core still entails the sentence | no |
 | `Elaborate` | cause / stake the core never licensed | yes |
-| `Reframe` | same event, other speech act (left → abandoned) | yes |
+| `Reframe` | same event, other speech act (irony, punchline) | no — mouth only, `DriftKind::Color` |
 | `Contradict` | spoken sentence denies the core | yes |
 | `Depart` | not the same event | yes |
 

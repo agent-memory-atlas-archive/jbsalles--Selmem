@@ -45,6 +45,8 @@ pub enum DriftKind {
     Rewrite,
     Reinterpret,
     Ground,
+    /// Same event, other speech act. Mouth only; gist and core stay.
+    Color,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

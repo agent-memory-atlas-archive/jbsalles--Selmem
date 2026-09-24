@@ -169,6 +169,8 @@ JSON reports book (`t0_in_book_*`), retrieval (`t0_rank_*`, `t0_selected_*`), an
 
 Grok persist P1 is n = 5. DropMarked Grok is n = 1 (`--bias drop`): T₀ leaves the prompt, C2 mouth stays charged. See experiments/REPORT.md §8–§9.
 
+AMA-Bench (`examples/ama`, experiments/ama_bench/) is a **side table**, not a SelMem score. It asks for step ids in agent logs. last-k 0.50 / static 0.28 / C2 0.19 on 3 episodes. Expected; do not submit. Why: experiments/REPORT.md §9.2.
+
 ### Benchmark v0.1 (H2)
 
 Does `D_fp` stay above pre-T₀ after 8 identical later hours?

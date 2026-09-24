@@ -389,6 +389,7 @@ fn drift_name(k: crate::core::model::DriftKind) -> &'static str {
         Rewrite => "rewrite",
         Reinterpret => "reinterpret",
         Ground => "ground",
+        Color => "color",
     }
 }
 

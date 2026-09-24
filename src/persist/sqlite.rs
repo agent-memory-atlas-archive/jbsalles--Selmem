@@ -583,6 +583,7 @@ fn parse_dk(s: &str) -> DriftKind {
         "rewrite" => DriftKind::Rewrite,
         "reinterpret" => DriftKind::Reinterpret,
         "ground" => DriftKind::Ground,
+        "color" => DriftKind::Color,
         _ => DriftKind::Embellish,
     }
 }

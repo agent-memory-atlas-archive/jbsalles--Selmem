@@ -81,13 +81,14 @@ Embeddings **rank**. They do not decide a miss.
 | `Hold` | same claim | only if Jaccard `< ground_min_overlap` |
 | `Compress` | detail fell off | no |
 | `Elaborate` | cause / stake the core never licensed | yes |
-| `Reframe` | same event, other speech act | yes |
+| `Reframe` | same event, other speech act / irony | no (speak; `Color`; gist stays) |
 | `Contradict` | denial | yes |
 | `Depart` | not this event | yes |
 
 `pull.rs` applies policy: grip = `narrator_firmness × importance`. World
 skips the judge. Cold / myth / latent have grip 0. After enough strikes the
-gist is blended toward a core-facing rewrite (`DriftKind::Ground`). The
+gist is blended toward a core-facing rewrite (`DriftKind::Ground`). A
+`Reframe` is logged as `Color` and does not increment strikes. The
 lexical mix is still the rewrite; replacing it is a later behaviour PR.
 
 The judge uses no LLM. `HttpNarrator` may reconstruct or recontextualize.

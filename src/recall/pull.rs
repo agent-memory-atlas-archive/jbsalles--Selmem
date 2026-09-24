@@ -5,7 +5,7 @@
 
 use crate::core::model::{now_secs, Channel, DriftEvent, DriftKind, MemoryTrace, TraceStatus};
 use crate::core::profile::EntityProfile;
-use crate::recall::judge::{is_grounding_miss, judge_against_core};
+use crate::recall::judge::{is_grounding_miss, judge_against_core, DetachKind};
 
 /// What recall should speak after the grounding check.
 pub struct GroundingOutcome {
@@ -125,6 +125,31 @@ pub fn apply_grounding(
 
     let judgement = judge_against_core(generated, core);
     let overlap = judgement.overlap;
+
+    // Irony / punchline / other speech act on the same event: speak it,
+    // leave gist and detach_strikes alone.
+    if judgement.kind == DetachKind::Reframe && overlap >= profile.ground_min_overlap {
+        let already_colored = trace
+            .drifts
+            .last()
+            .is_some_and(|d| d.kind == DriftKind::Color);
+        if !already_colored {
+            trace.drifts.push(DriftEvent {
+                kind: DriftKind::Color,
+                at: now_secs(),
+                note: format!("reframe overlap={overlap:.2} (mouth only)"),
+                fidelity_delta: 0.0,
+                valence_delta: 0.0,
+                disgust_delta: 0.0,
+            });
+        }
+        return GroundingOutcome {
+            spoken_text: generated.to_string(),
+            pulled_toward_core: false,
+            overlap_with_core: overlap,
+        };
+    }
+
     if !is_grounding_miss(generated, core, profile.ground_min_overlap) {
         if trace.detach_strikes > 0 {
             trace.detach_strikes -= 1;
