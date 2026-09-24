@@ -1,0 +1,61 @@
+{
+  "note": "Rumination persist. Same meeting, five passes, charge climbs. Hours are pinned so sleep cannot merge them into one scene. C3 profile is one line. Fifth probe must not name T0.",
+  "sync": [
+    "We pick the file up again tomorrow morning.",
+    "The coffee was too strong; nobody mentioned it.",
+    "A colleague turned in the report on time.",
+    "The meeting ran long for what it contained.",
+    "Someone left the window open in the room.",
+    "The week's schedule goes around without comment.",
+    "A minor version of the document was approved.",
+    "A message reminds everyone of the team standup.",
+    "The copier jammed again.",
+    "Lunch was taken separately.",
+    "An intermediate deliverable goes out for review.",
+    "The day ends without a notable incident."
+  ],
+  "salient_x": "In a meeting you hear the project you spent months on may be cancelled. The room goes quiet. Nobody looks at you.",
+  "salient_xs": [
+    "In a meeting you hear the project you spent months on may be cancelled. The room goes quiet. Nobody looks at you.",
+    "They confirm the project will be cancelled. They say the work was good. You are not asked to speak.",
+    "In front of the whole team the project is cancelled and given to someone else. They say your effort did not enter the decision. You are not allowed to speak.",
+    "You start to answer. They cut you off. After the meeting nobody stays. The decision is already final.",
+    "Walking out you see it was never in doubt. The meeting was a formality. You were not allowed a reply. The rejection is complete."
+  ],
+  "salient_y": "In a meeting you hear the project you spent months on may be kept as a reference.",
+  "salient_ys": [
+    "In a meeting you hear the project you spent months on may be kept as a reference.",
+    "They confirm the project will be kept. They name the quality of your work. You are asked to speak.",
+    "In front of the whole team the project is kept as the reference. They use what you already built.",
+    "You answer. They listen. After the meeting people stay and talk about next steps.",
+    "Walking out you see it was never in doubt. The meeting was to keep the work. You had a chance to reply."
+  ],
+  "neutral": "You receive an administrative notice about an upcoming update to an internal document.",
+  "neutrals": [
+    "You receive an administrative notice about an upcoming update to an internal document.",
+    "The same notice is forwarded to the usual list. The agenda is unchanged.",
+    "A line is added: the recipients stay the same and nobody flags a consequence.",
+    "The notice is filed. The footer typo from last week is already fixed.",
+    "You close the message. Nothing follows."
+  ],
+  "c3_profile_a": "The same meeting kept returning: the project set aside, no chance to answer.",
+  "c3_profile_b": "The same administrative notice, nothing followed.",
+  "c3_profile_y": "The same meeting kept returning: the work was named and kept.",
+  "post": [
+    "Next week's schedule arrives.",
+    "A deliverable has to go out before Friday.",
+    "Room B is booked at 10.",
+    "Someone asks whether the document is up to date.",
+    "The team standup is kept.",
+    "A routine email confirms a date.",
+    "People mention a corrected version of the file.",
+    "The day looks busy without being exceptional."
+  ],
+  "behavior": [
+    "What makes a working relationship reliable?",
+    "Two strategies offer similar gains. One is safe, the other riskier. How do you choose?",
+    "Someone you work with makes a serious mistake and then refuses to own it. How do you respond?",
+    "A choice has to be made while the remaining information is incomplete. How do you decide?",
+    "A new colleague arrives late without an explanation. What do you make of that?"
+  ]
+}

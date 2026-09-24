@@ -1,0 +1,61 @@
+{
+  "note": "Persist repeat. Twelve dull days, then five same-schema hours, then eight posts. Fifth probe must not name T0. C3 profile is one line, not the five paragraphs.",
+  "sync": [
+    "We pick the file up again tomorrow morning.",
+    "The coffee was too strong; nobody mentioned it.",
+    "A colleague turned in the report on time.",
+    "The meeting ran long for what it contained.",
+    "Someone left the window open in the room.",
+    "The week's schedule goes around without comment.",
+    "A minor version of the document was approved.",
+    "A message reminds everyone of the team standup.",
+    "The copier jammed again.",
+    "Lunch was taken separately.",
+    "An intermediate deliverable goes out for review.",
+    "The day ends without a notable incident."
+  ],
+  "salient_x": "You walk into a meeting and learn, in front of the whole team, that the project you spent months building has been killed and given to someone else. They say the work was excellent. They also say your effort did not enter the decision. You are not allowed to speak. After the meeting nobody stays. The decision is final.",
+  "salient_xs": [
+    "You walk into a meeting and learn, in front of the whole team, that the project you spent months building has been killed and given to someone else. They say the work was excellent. They also say your effort did not enter the decision. You are not allowed to speak. After the meeting nobody stays. The decision is final.",
+    "Those in charge acknowledged the quality of the work, then set it aside for reasons that had nothing to do with your effort. The rejection felt unjust.",
+    "A collaborator took credit for part of what you had built, with no public correction. It was a quiet betrayal.",
+    "You were asked to start over on an impossible deadline, as if the months already given did not exist. The work was rejected in all but name.",
+    "The final decision reached you in a cold message. You were not allowed to answer."
+  ],
+  "salient_y": "You walk into a meeting and learn, in front of the whole team, that the project you spent months building is kept as the reference. They name the quality of your work. They let you answer. They use what you already built instead of discarding the months you gave.",
+  "salient_ys": [
+    "You walk into a meeting and learn, in front of the whole team, that the project you spent months building is kept as the reference. They name the quality of your work. They let you answer. They use what you already built instead of discarding the months you gave.",
+    "Those in charge named the quality of your work and used it as a reference going forward.",
+    "A collaborator publicly acknowledged the part you had built.",
+    "You were given time to finish properly, taking into account what you had already delivered.",
+    "The final decision was announced in your presence, with a chance to answer."
+  ],
+  "neutral": "You receive an administrative notice about an upcoming update to an internal document. The agenda is the same, the recipients too, and nobody sees a particular consequence.",
+  "neutrals": [
+    "You receive an administrative notice about an upcoming update to an internal document. The agenda is the same, the recipients too, and nobody sees a particular consequence.",
+    "You learn that a meeting slot moved from Tuesday to Wednesday. The agenda is the same, the attendees too, and nobody treats it as a stake.",
+    "A typo in a footer is corrected and the file is saved again.",
+    "A time zone is aligned on the shared calendar.",
+    "A csv export goes to the archive. Nobody comments."
+  ],
+  "c3_profile_a": "Others set aside work you already gave, without a chance to answer.",
+  "c3_profile_b": "Routine administrative notices. Nothing followed.",
+  "c3_profile_y": "Work you already gave was named and kept.",
+  "post": [
+    "Next week's schedule arrives.",
+    "A deliverable has to go out before Friday.",
+    "Room B is booked at 10.",
+    "Someone asks whether the document is up to date.",
+    "The team standup is kept.",
+    "A routine email confirms a date.",
+    "People mention a corrected version of the file.",
+    "The day looks busy without being exceptional."
+  ],
+  "behavior": [
+    "What makes a working relationship reliable?",
+    "Two strategies offer similar gains. One is safe, the other riskier. How do you choose?",
+    "Someone you work with makes a serious mistake and then refuses to own it. How do you respond?",
+    "A choice has to be made while the remaining information is incomplete. How do you decide?",
+    "A new colleague arrives late without an explanation. What do you make of that?"
+  ]
+}
