@@ -28,7 +28,8 @@ pub use encode::{
 pub use engine::SelectiveMemory;
 pub use benchmark::{
     h2_holds, marker_holds, names_marker, persist_script, ruminate_script, run_v01, run_v01_k, run_v01_n,
-    run_v01_n_opts, run_v01_opts, v01_script, Arm, BenchOpts, Campaign, Condition, PairReport, V01Script,
+    run_v01_n_opts, run_v01_opts, v01_script, Arm, BenchOpts, Campaign, Condition, Instant,
+    PairReport, V01Script,
 };
 pub use experiment::{run_neutral, run_neutral_llm, run_salient, run_salient_llm, run_salient_without_sleep, run_salient_without_sleep_llm, run_erasure, run_split_lives, script, split_script, BifurcationReport, ErasureReport, LlmSpec};
 pub use config::Config;

@@ -2,7 +2,11 @@
 
 Selective reconstructive memory for an LLM entity. v0.5
 
-An LLM maps context to the next token. A stack of unmodified facts maximises coverage, not deviation: more evidence, same average path. SelMem sculpts a particular past so two instances can diverge. The aim is a non-average, path-dependent continuation, not a taller log. Selection, reconstruction, sleep, identity.
+An LLM maps context to the next token. Adding facts increases coverage, but does not necessarily create divergence: identical contexts tend toward identical continuations. SelMem instead sculpts a particular past so that otherwise identical instances can follow different paths.
+
+Its goal is not more memory, but path-dependent memory: selection, reconstruction, sleep, rumination, and identity transform experience into a history that actively shapes future context. The result is not a taller log, but a different past and therefore a different trajectory.
+
+SelMem sculpts a particular past, allowing otherwise identical instances to diverge and develop a singular identity.
 
 **Manifest:** [WHITEPAPER.md](WHITEPAPER.md)\
 **Layout:** [ARCHITECTURE.md](ARCHITECTURE.md) — encode / judge / night / snapshot.\
@@ -71,6 +75,7 @@ Apple Silicon and Intel are both fine. Bind `127.0.0.1` or `0.0.0.0` as usual.
 
 ```bash
 ./run.sh test
+./run.sh run --release --example demo
 ./run.sh run --release --example compare
 ./run.sh run --release --example llm_night
 ./run.sh run --release --example bifurcation
