@@ -543,10 +543,14 @@ impl SelectiveMemory {
                     pin_happened(&r.narrative, core)
                 })
                 .collect();
-            (
-                memories,
-                vec![format!("Your name is {}.", self.profile.name)],
-            )
+            let mut axioms = vec![format!("Your name is {}.", self.profile.name)];
+            axioms.extend(
+                self.who_am_i()
+                    .into_iter()
+                    .take(4)
+                    .map(|a| a.statement.clone()),
+            );
+            (memories, axioms)
         } else {
             let lineage = crate::recall::retrieve::lineage_of(&self.store, marked);
             let lineage_schemas: Vec<String> = lineage
@@ -570,25 +574,23 @@ impl SelectiveMemory {
                 })
                 .map(|a| a.statement.clone())
                 .collect();
-            (
-                if axioms_only {
-                    Vec::new()
-                } else {
-                    recalled
-                        .into_iter()
-                        .map(|r| {
-                            let core = self
-                                .store
-                                .traces
-                                .get(&r.trace_id)
-                                .map(|t| t.core.as_str())
-                                .unwrap_or("");
-                            pin_happened(&r.narrative, core)
-                        })
-                        .collect()
-                },
-                axioms,
-            )
+            let memories: Vec<String> = if axioms_only {
+                Vec::new()
+            } else {
+                recalled
+                    .into_iter()
+                    .map(|r| {
+                        let core = self
+                            .store
+                            .traces
+                            .get(&r.trace_id)
+                            .map(|t| t.core.as_str())
+                            .unwrap_or("");
+                        pin_happened(&r.narrative, core)
+                    })
+                    .collect()
+            };
+            (memories, axioms)
         };
         let reply = self
             .narrator

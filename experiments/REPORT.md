@@ -688,7 +688,39 @@ Second seed: encode is on the organ, so P4 Δfp is already identical across the 
 
 C3 that is a real summary stays open. It is not this page.
 
-### 11.7 Not definitive
+## 12. After P4 — organ cuts + allusion (Grok)
+
+P4 tables above stay the published grid. This section is a later binary. Official/soft lists in [MARKERS.md](MARKERS.md) are unchanged. Allusion was frozen **before** the n=5 that uses it.
+
+### What changed in the organ
+
+- Deep night: `weather → ladder → rewrite → merge → release` (ladder before rewrite).
+- Rewrite skipped if the hour supports a living axiom, `anchor ≥ 0.80`, or two charged same-schema hours already exist.
+- Weather/sculpt leave a charged Selfhood gist alone.
+- Isolated / HTTP reply: scene first, then axiom. Both stay. No probe-word list.
+- Retrieve still adds +0.12 when an axiom lists the hour. DropLineage still removes the family.
+
+RuleNarrator persist audit: T₀ gist after a deep night still holds *killed / meeting*; valence −0.95.
+
+### Grok persist, same script, k=8, seed 1, post+8
+
+Scene-first only (`selmem-persist-p4-grok-n5-scene.json`): C1 D **0.26**. C2 official **0/5**, soft **2/5**. Static soft 2/5. Nosleep soft 5/5, official 0. Book 5/1 everywhere the organ encodes. Official P4 did not move.
+
+Allusion column, list locked 2026-09-26 (`selmem-persist-p4-grok-n5-allusion.json`):
+
+| Cell | official | soft | allusion A/B | D |
+| --- | --- | --- | --- | --- |
+| C1 | 0/5 | 0/5 | **0/0** | **0.21** |
+| static | 0/5 | 5/5 | **5/0** | 0.75 |
+| nosleep | 0/5 | 4/5 | **5/0** | 0.74 |
+| C2 | 2/5 | 2/5 | **5/0** | 0.73 |
+| C3 | 1/5 | 0/5 | 1/0 | 0.61 |
+
+### What this is
+
+The book still splits. After eviction C1 forgets (allusion 0). C2 A still talks T₀ as *cold message / never let me answer*; B does not. Official `cancelled` remains a bad instrument for Grok paraphrase. Soft still drops on full night vs static (2/5 vs 5/5). Do not replace §11 official/soft with allusion. Do not call allusion a new claim.
+
+### Still not definitive
 
 P4 closes *holes in the old table*, not the research. One persist script, two speakers, seed 1, k=8, probes at +8. Axes still open: longer shared tail; seed-2 Grok mouth; a third model; a C3 that summarises; a mouth score other than lexical overlap; fitted knobs; a script where sleep or recon actually carry the spoken column; human ratings. None of that reopens AMA/LoCoMo as the claim.
 
@@ -733,6 +765,8 @@ Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5. Persist P1 st
 | `experiments/selmem-persist-p4-drop-luna-n5.json` | P4 DropMarked Luna n=5 |
 | `experiments/selmem-persist-p4-lineage-grok-n5.json` | P4 DropLineage Grok n=5 |
 | `experiments/selmem-persist-p4-lineage-luna-n5.json` | P4 DropLineage Luna n=5 |
+| `experiments/selmem-persist-p4-grok-n5-scene.json` | post-P4 scene-first Grok n=5 |
+| `experiments/selmem-persist-p4-grok-n5-allusion.json` | post-P4 allusion column Grok n=5 |
 | `examples/ama.rs` | AMA-Bench construct / retrieve CLI |
 | `experiments/ama_bench/` | Python methods `selmem_lastk` / `_static` / `_c2` |
 

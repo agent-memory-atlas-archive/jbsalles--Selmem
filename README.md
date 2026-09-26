@@ -441,6 +441,7 @@ Do not read these as results. They are not in the published sentence.
 - Luna `D_speak` as a published mouth score.
 - Three items in `data/creativity.json` (logged, not scored).
 - Sleep as what *splits* the books on the persist script (P4 static / no-sleep already split).
+- Allusion as a replacement for P4 official/soft (side column, REPORT §12).
 
 ## What this is not
 

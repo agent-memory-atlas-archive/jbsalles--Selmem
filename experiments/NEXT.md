@@ -177,3 +177,4 @@ Calendar is not a virtue. A failed gist audit ends the day.
 | 2026-09-26 | More bench without an organ cut will not move official C2. |
 | 2026-09-26 | LoCoMo is horizon, session-as-hour, band (0.05, 0.40), not SOTA. |
 | 2026-09-26 | Wash + visibility in code: night order ladder-before-rewrite; rewrite skip axiom/anchor/2-charged; charged gist survives weather+sculpt; retrieve +0.12 on axiom support. |
+| 2026-09-26 | Isolated situated probes withhold axioms. Allusion list frozen then Grok n=5: C2 5/5, C1 0/5. Official P4 not replaced. |

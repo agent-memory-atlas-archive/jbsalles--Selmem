@@ -242,11 +242,6 @@ impl Narrator for HttpNarrator {
     ) -> String {
         let mut ctx = String::new();
         ctx.push_str(&talk.render());
-        for a in axioms.iter().take(4) {
-            ctx.push_str("- axiome: ");
-            ctx.push_str(a);
-            ctx.push('\n');
-        }
         for (i, m) in memories.iter().take(4).enumerate() {
             if i == 0 {
                 ctx.push_str("cette heure: ");
@@ -254,6 +249,11 @@ impl Narrator for HttpNarrator {
                 ctx.push_str("- memory: ");
             }
             ctx.push_str(m);
+            ctx.push('\n');
+        }
+        for a in axioms.iter().take(4) {
+            ctx.push_str("- axiome: ");
+            ctx.push_str(a);
             ctx.push('\n');
         }
         let system = &crate::lexicon::prompts().reply;

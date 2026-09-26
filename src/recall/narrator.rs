@@ -68,13 +68,13 @@ pub trait Narrator: Send + Sync {
         talk: &WorkingTalk,
     ) -> String {
         let mut out = String::new();
-        if let Some(ax) = axioms.first() {
-            out.push_str(ax);
-            out.push(' ');
-        }
         if let Some(m) = memories.first() {
             out.push_str(&crate::lexicon::rule().reply_recall);
             out.push_str(m);
+            out.push(' ');
+        }
+        if let Some(ax) = axioms.first() {
+            out.push_str(ax);
             out.push(' ');
         }
         if out.is_empty() {

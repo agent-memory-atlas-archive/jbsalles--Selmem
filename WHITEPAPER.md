@@ -16,7 +16,7 @@ The verbatim event is kept in a sealed archive for tests and audit. The model ne
 experience → selection → trace → recall → sleep → identity → next encode
 ```
 
-**Claim** After an hour retained on one side only, two copies of the same model do not stay interchangeable once the following stream is identical. Measured on the book, retrieve, and the mouth.
+**Claim:** After an hour retained on one side only, two copies of the same model do not stay interchangeable once the following stream is identical. Measured on the book, retrieve, and the mouth.
 
 That is path dependence. Not intelligence, not creativity, not personality. Same freeze as README and experiments/REPORT.md.
 
@@ -183,6 +183,8 @@ Tables, scripts, and how to replay a cell: **[experiments/REPORT.md](experiments
 
 **P4 locked grid (Grok + Luna, n = 5, same k).** Static and no-sleep sit in the main table. Books match across models (5/1). C1 evicts T₀; Grok D falls to ~0.31. Observed C2 selects T₀. Official marker on full C2 is 0 (gist left the keyword list). Grok soft is 1/5; static 3/5 — the night is not what splits the books, and it does not raise the spoken charge. DropMarked n=5: T₀ leaves the prompt; Grok full-C2 soft dies; Luna soft stays 5/5. DropLineage n=5: both lexicons die; Grok D ~0.58 while the book stays split. Luna `D_speak` is not published (empty C1 already ~0.78). [experiments/REPORT.md](experiments/REPORT.md) §11.
 
+**After P4 (Grok only, same script).** Night order is ladder-before-rewrite; isolated situated probes drop the axiom label. Official C2 stays ~0–2/5. A frozen *allusion* list (`cold message`, `never let me answer`, …) scores C2 5/5 and C1 0/5 (n=5). That column is not P4 official. REPORT §12.
+
 **Drop / Lineage n = 1** in §9 are the old Grok probes. P4 replaces them for counts.
 
 **AMA-Bench is the wrong external score for this claim.** The bench asks which tool line ran at which step. Last-k is the matching store. On three fixed episodes (36 questions, Grok-4.3 as model and judge) last-k 0.50 / static 0.28 / C2 0.19. That order is expected: the gate and the night throw away step ids. It does not falsify persist, and it is not a reason to change C2. Side table only; do not submit a leaderboard row. [experiments/REPORT.md](experiments/REPORT.md) §9.2.
@@ -199,7 +201,7 @@ These are measurements on one script, two speakers, one seed, k=8, +8 posts. The
 
 **Open axes** (explore; do not treat as promised features):
 
-- Time: +16 / +24 shared posts at the same k — does Grok soft die without Lineage?
+- Mouth: allusion n=5 is one speaker, one seed; official remains the published lexical undercount.
 - Speakers: a third model; Grok `--seed 2` for mouth only; a mouth metric that is not `D_speak`.
 - Controls: a C3 that summarises the five hours; Force remains un-run.
 - Organ: fitted `τ` / firmness; learned gate instead of rules; whether recon/ground ever load-bear on a different script.

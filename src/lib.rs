@@ -32,7 +32,7 @@ pub use encode::{
 pub use engine::SelectiveMemory;
 pub use bench_report::{print_banner, print_pair_verbose};
 pub use benchmark::{
-    h2_holds, hearth_script, marker_holds, names_marker, names_soft_marker, persist_script, ruminate_script, run_v01, run_v01_k, run_v01_n, soft_holds,
+    h2_holds, hearth_script, marker_holds, names_allusion_marker, names_marker, names_soft_marker, persist_script, ruminate_script, run_v01, run_v01_k, run_v01_n, soft_holds,
     run_v01_n_opts, run_v01_opts, v01_script, Arm, BenchOpts, Campaign, Condition, Instant,
     PairReport, V01Script,
 };
@@ -43,6 +43,6 @@ pub use recall::{
     HttpNarrator, Narrator, RecallBias, RecallWrite, RetrievalDump, RuleNarrator, SpeakOnlyHttp,
 };
 pub use recall::stance::{
-    charged_mood, isolated_stance, is_charged, query_hits_episode, stance_is_abstract,
+    charged_mood, isolated_stance, is_charged, query_hits_episode,
 };
 pub use HttpNarrator as LLMNarrator;

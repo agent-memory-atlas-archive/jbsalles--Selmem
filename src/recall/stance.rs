@@ -122,15 +122,3 @@ fn tokens(s: &str) -> Vec<String> {
         .map(|w| w.to_string())
         .collect()
 }
-
-pub fn stance_is_abstract(line: &str) -> bool {
-    let low = line.to_lowercase();
-    !low.contains("cancel")
-        && !low.contains("annul")
-        && !low.contains("unjust")
-        && !low.contains("injust")
-        && !low.contains("project")
-        && !low.contains("projet")
-        && !low.contains("colleague")
-        && !low.contains("notice")
-}

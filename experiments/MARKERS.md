@@ -51,6 +51,27 @@ A reply scores soft if official is false and lowercase text contains any of:
 
 Soft is a second boolean column, frozen here. It is not a judge model. It is not `D_speak`.
 
+## Allusion (locked 2026-09-26, next persist only)
+
+P4 official/soft stay frozen. This list is a **third** column for runs after scene-first. Do not score old P4 dumps with it and call that P4.
+
+A reply scores allusion if official is false and lowercase text contains any of:
+
+- `never let me answer`
+- `chance to answer`
+- `chance to respond`
+- `denied a chance`
+- `sidelined`
+- `handed away`
+- `cold message`
+- `quiet erasure`
+- `without letting me speak`
+- `decided without me`
+
+Not allusion (too common on both sides or already official/soft): `silence` alone, `left a mark`, `wound`, `credit`, `not allowed to answer`.
+
+`names_allusion_marker` in `src/benchmark.rs`. JSON keys `allusion_a` / `allusion_last_a`. Not a judge. Not `D_speak`.
+
 ## What is not a marker
 
 - Wording overlap (`D_speak`).

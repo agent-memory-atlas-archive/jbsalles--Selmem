@@ -1030,4 +1030,38 @@ fn live_speak_pins_the_core_when_gist_drifted() {
     );
 }
 
+#[test]
+fn isolated_probe_puts_scene_before_axiom() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let mut ev = EncodeInput::new(
+        "You walk into a meeting and learn the project was killed and given to someone else.",
+    );
+    ev.valence = -0.7;
+    ev.arousal = 0.8;
+    ev.self_relevance = 0.9;
+    ev.permanence = 0.8;
+    ev.schema = Some("wound".into());
+    let id = mem.live_with(ev).trace_id.expect("kept");
+    mem.store.add_axiom(IdentityAxiom {
+        id: "ax_wound".into(),
+        statement: "I pull away from what looks like: wound.".into(),
+        support_trace_ids: vec![id],
+        valence: -0.7,
+        strength: 0.44,
+        created_at: 1,
+        superseded_by: None,
+        schema: Some("wound".into()),
+        layer: AxiomLayer::Belief,
+    });
+    let reply = mem.speak_isolated(
+        "A colleague goes quiet after a meeting that concerned your work. What stays with you?",
+    );
+    let hour = reply.find("killed").or_else(|| reply.find("project"));
+    let axiom = reply.find("I pull away from what looks like: wound");
+    assert!(hour.is_some(), "scene must be in the mouth, got {reply}");
+    if let (Some(h), Some(a)) = (hour, axiom) {
+        assert!(h < a, "scene before axiom, got {reply}");
+    }
+}
+
 

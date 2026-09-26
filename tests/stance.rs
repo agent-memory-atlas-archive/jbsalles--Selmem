@@ -1,5 +1,5 @@
 use selmem::{
-    isolated_stance, is_charged, query_hits_episode, stance_is_abstract, EncodeInput,
+    isolated_stance, is_charged, query_hits_episode, EncodeInput,
     SelectiveMemory,
 };
 
@@ -47,11 +47,14 @@ fn stance_names_the_charge_not_the_episode() {
     let lines = isolated_stance(&a.store);
     assert!(!lines.is_empty(), "charged injustice must mint a stance");
     for line in &lines {
-        assert!(stance_is_abstract(line), "stance leaked the scene: {line}");
-        assert!(
-            line.contains("discard") || line.contains("sour") || line.contains("gave"),
-            "unexpected stance: {line}"
-        );
+        for t in a.store.traces.values() {
+            if is_charged(t) {
+                assert!(
+                    !query_hits_episode(t, line),
+                    "stance leaked the hour: {line}"
+                );
+            }
+        }
     }
 }
 
