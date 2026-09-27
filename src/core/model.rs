@@ -1,13 +1,63 @@
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
+/// Real unix seconds when the virtual clock was first read.
+static CLOCK_ORIGIN_REAL: AtomicU64 = AtomicU64::new(0);
+/// Extra virtual seconds jumped by `advance_hours` (UI night).
+static CLOCK_JUMP: AtomicU64 = AtomicU64::new(0);
+/// Wall-time multiplier 1..=200. UI default 24 (one sleep ≈ one day).
+static CLOCK_SCALE: AtomicU32 = AtomicU32::new(24);
 
-pub fn now_secs() -> u64 {
+fn wall_secs() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs())
         .unwrap_or(0)
+}
+
+fn origin_real() -> u64 {
+    let o = CLOCK_ORIGIN_REAL.load(Ordering::Relaxed);
+    if o == 0 {
+        let w = wall_secs();
+        match CLOCK_ORIGIN_REAL.compare_exchange(0, w, Ordering::Relaxed, Ordering::Relaxed) {
+            Ok(_) => w,
+            Err(cur) => cur,
+        }
+    } else {
+        o
+    }
+}
+
+/// Virtual now. Encodes, weather, and recall stamps all use this.
+pub fn now_secs() -> u64 {
+    let origin = origin_real();
+    let elapsed = wall_secs().saturating_sub(origin);
+    let scale = clock_scale() as u64;
+    origin
+        .saturating_add(elapsed.saturating_mul(scale))
+        .saturating_add(CLOCK_JUMP.load(Ordering::Relaxed))
+}
+
+pub fn clock_scale() -> u32 {
+    CLOCK_SCALE.load(Ordering::Relaxed).clamp(1, 200)
+}
+
+pub fn set_clock_scale(scale: u32) {
+    CLOCK_SCALE.store(scale.clamp(1, 200), Ordering::Relaxed);
+}
+
+/// Jump the organ clock forward. One UI sleep uses this so weather sees days.
+pub fn advance_hours(hours: f32) {
+    let secs = (hours.max(0.0) * 3600.0) as u64;
+    CLOCK_JUMP.fetch_add(secs, Ordering::Relaxed);
+}
+
+#[cfg(test)]
+pub fn reset_clock_for_tests() {
+    CLOCK_ORIGIN_REAL.store(0, Ordering::Relaxed);
+    CLOCK_JUMP.store(0, Ordering::Relaxed);
+    CLOCK_SCALE.store(1, Ordering::Relaxed);
 }
 
 pub fn new_id(prefix: &str) -> String {

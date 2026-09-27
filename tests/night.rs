@@ -450,3 +450,26 @@ fn rewrite_skips_axiom_backed_hours() {
     assert_eq!(after, &before, "rewrite must skip axiom-backed hours");
     let _ = n;
 }
+
+#[test]
+fn advancing_hours_lets_weather_see_age() {
+    selmem::set_clock_scale(1);
+    let mut profile = EntityProfile::tender("Claire");
+    profile.encode_threshold = 0.05;
+    profile.decay_lambda = 0.20;
+    let mut mem = SelectiveMemory::new(profile);
+    let mut ev = dull("The standup was at nine and the file went to the archive.", "daily");
+    ev.permanence = 0.20;
+    ev.self_relevance = 0.40;
+    ev.valence = 0.10;
+    let id = mem.live_with(ev).trace_id.expect("kept");
+    let f0 = mem.store.traces[&id].fidelity;
+    selmem::advance_hours(24.0 * 40.0);
+    let _ = mem.sleep();
+    let f1 = mem.store.traces[&id].fidelity;
+    assert!(
+        f1 < f0 - 0.01,
+        "40 virtual days must weather a dull hour ({f0} → {f1})"
+    );
+    selmem::set_clock_scale(24);
+}

@@ -191,6 +191,12 @@
         <input type="range" id="narrator_firmness" min="0" max="1" step="0.01"></label>
     </fieldset>
     <fieldset>
+      <legend>time</legend>
+      <p class="hint">Weather ages by calendar days. ×1 a night is minutes of real time — the gist barely moves. Each sleep also jumps the organ clock by this many hours.</p>
+      <label class="row"><span class="name">time × hours / night</span><span class="val" data-for="time_scale"></span>
+        <input type="range" id="time_scale" min="1" max="200" step="1" value="24"></label>
+    </fieldset>
+    <fieldset>
       <legend>recall</legend>
       <label class="row"><span class="name">max recall</span><span class="val" data-for="max_recall"></span>
         <input type="range" id="max_recall" min="1" max="8" step="1"></label>
@@ -292,7 +298,7 @@ const PRESETS = {
 const SLIDERS = [
   'encode_threshold','w_self','embellish_gain','disgust_gain','decay_lambda',
   'narrator_firmness','max_recall','merge_similarity','ground_min_overlap',
-  'ground_strikes','reconsolidation_eta'
+  'ground_strikes','reconsolidation_eta','time_scale'
 ];
 const CUTS = ['cut_reconsolidate','cut_ground','cut_ladder'];
 let optsApplying = false;
@@ -393,7 +399,8 @@ function renderBook() {
         '<div class="id">' + escapeHtml(t.id) + '</div>' +
         '<p>' + escapeHtml(t.gist || t.core || '') + '</p>' +
         '<time>' + when(t.created_at) + ' · f=' + Number(t.fidelity).toFixed(2) +
-        ' a=' + Number(t.anchor).toFixed(2) + '</time></div>'
+        ' a=' + Number(t.anchor).toFixed(2) +
+        (t.drift ? ' · ' + escapeHtml(t.drift) : '') + '</time></div>'
       );
     });
   } else if (bookTab === 'axioms') {
@@ -581,7 +588,15 @@ document.getElementById('sleep').onclick = async () => {
   busy('bar', true);
   try {
     const r = await api('POST', '/sleep', {});
-    add('her', '<div class="meta">night — sculpted ' + r.sculpted + ' · merged ' + r.merged + ' · extinguished ' + r.extinguished + ' · axioms ' + r.axioms + '</div>');
+    add('her', '<div class="meta">night · ' + (r.kind || '?') +
+      ' · +' + (r.hours_advanced || 0) + 'h' +
+      ' · weathered ' + r.weathered +
+      ' · rewritten ' + r.rewritten +
+      ' · sculpted ' + r.sculpted +
+      ' · merged ' + r.merged +
+      ' · faded ' + r.faded +
+      ' · myth ' + r.myth +
+      ' · axioms ' + r.axioms + '</div>');
     refresh();
   } catch (e) {
     add('her', '<span class="drop">' + escapeHtml(e.message) + '</span>');

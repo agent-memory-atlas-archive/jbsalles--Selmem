@@ -66,6 +66,9 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             if let Some(v) = json_f32(body, "reconsolidation_eta") {
                 mem.profile.reconsolidation_eta = v.clamp(0.0, 1.0);
             }
+            if let Some(v) = json_f32(body, "time_scale") {
+                crate::core::model::set_clock_scale(v.round() as u32);
+            }
             if let Some(v) = json_bool(body, "cut_reconsolidate") {
                 mem.cut.reconsolidate = v;
             }
@@ -276,6 +279,8 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             let topic = mem.talk.topic.clone();
             let (sitting, _) = mem.keep_sitting();
             mem.clear_talk();
+            let hours = crate::core::model::clock_scale() as f32;
+            crate::core::model::advance_hours(hours);
             let report = mem.sleep();
             mem.fade_sitting();
             for t in &snap {
@@ -284,7 +289,7 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             mem.talk.topic = topic;
             let _ = mem.save();
             ok(format!(
-                "{{\"faded\":{},\"cold\":{},\"myth\":{},\"merged\":{},\"extinguished\":{},\"weathered\":{},\"rewritten\":{},\"released\":{},\"sculpted\":{},\"axioms\":{},\"sitting\":{},\"kind\":\"{}\",\"new_hours\":{},\"charge\":{:.3}}}",
+                "{{\"faded\":{},\"cold\":{},\"myth\":{},\"merged\":{},\"extinguished\":{},\"weathered\":{},\"rewritten\":{},\"released\":{},\"sculpted\":{},\"axioms\":{},\"sitting\":{},\"kind\":\"{}\",\"new_hours\":{},\"charge\":{:.3},\"hours_advanced\":{},\"time_scale\":{},\"now\":{}}}",
                 report.faded,
                 report.cold,
                 report.myth,
@@ -298,7 +303,10 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 sitting,
                 report.kind.as_str(),
                 report.new_hours,
-                report.charge
+                report.charge,
+                crate::core::model::clock_scale(),
+                crate::core::model::clock_scale(),
+                crate::core::model::now_secs()
             ))
         }
         ("POST", "/speak") => {
@@ -403,7 +411,7 @@ fn book_json(mem: &SelectiveMemory) -> String {
         .into_iter()
         .map(|t| {
             format!(
-                "{{\"id\":\"{}\",\"status\":\"{}\",\"channel\":\"{}\",\"schema\":\"{}\",\"gist\":\"{}\",\"core\":\"{}\",\"fidelity\":{:.3},\"anchor\":{:.3},\"valence\":{:.3},\"created_at\":{},\"archive_id\":\"{}\"}}",
+                "{{\"id\":\"{}\",\"status\":\"{}\",\"channel\":\"{}\",\"schema\":\"{}\",\"gist\":\"{}\",\"core\":\"{}\",\"fidelity\":{:.3},\"anchor\":{:.3},\"valence\":{:.3},\"created_at\":{},\"archive_id\":\"{}\",\"drift\":\"{}\"}}",
                 json_esc(&t.id),
                 status_name(t.status),
                 crate::persist::snapshot::channel_token(t.channel),
@@ -414,7 +422,8 @@ fn book_json(mem: &SelectiveMemory) -> String {
                 t.anchor,
                 t.valence,
                 t.created_at,
-                json_esc(t.archive_id.as_deref().unwrap_or(""))
+                json_esc(t.archive_id.as_deref().unwrap_or("")),
+                json_esc(t.drifts.last().map(|d| d.note.as_str()).unwrap_or(""))
             )
         })
         .collect();
@@ -546,7 +555,7 @@ fn llm_json(mem: &SelectiveMemory) -> String {
 
 fn profile_json(mem: &SelectiveMemory) -> String {
     format!(
-        "{{\"ok\":true,\"name\":\"{}\",\"voice\":\"{}\",\"encode_threshold\":{:.4},\"w_self\":{:.4},\"embellish_gain\":{:.4},\"disgust_gain\":{:.4},\"decay_lambda\":{:.4},\"narrator_firmness\":{:.4},\"max_recall\":{},\"merge_similarity\":{:.4},\"ground_min_overlap\":{:.4},\"ground_strikes\":{},\"reconsolidation_eta\":{:.4},\"cut_reconsolidate\":{},\"cut_ground\":{},\"cut_ladder\":{}}}",
+        "{{\"ok\":true,\"name\":\"{}\",\"voice\":\"{}\",\"encode_threshold\":{:.4},\"w_self\":{:.4},\"embellish_gain\":{:.4},\"disgust_gain\":{:.4},\"decay_lambda\":{:.4},\"narrator_firmness\":{:.4},\"max_recall\":{},\"merge_similarity\":{:.4},\"ground_min_overlap\":{:.4},\"ground_strikes\":{},\"reconsolidation_eta\":{:.4},\"time_scale\":{},\"cut_reconsolidate\":{},\"cut_ground\":{},\"cut_ladder\":{}}}",
         json_esc(&mem.profile.name),
         mem.profile.voice_kind(),
         mem.profile.encode_threshold,
@@ -560,6 +569,7 @@ fn profile_json(mem: &SelectiveMemory) -> String {
         mem.profile.ground_min_overlap,
         mem.profile.ground_strikes,
         mem.profile.reconsolidation_eta,
+        crate::core::model::clock_scale(),
         if mem.cut.reconsolidate { "true" } else { "false" },
         if mem.cut.ground { "true" } else { "false" },
         if mem.cut.ladder { "true" } else { "false" },
