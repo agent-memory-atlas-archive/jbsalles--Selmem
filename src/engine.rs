@@ -458,8 +458,8 @@ impl SelectiveMemory {
         (kept, cue)
     }
 
-    /// Sitting hours are not vows. Each chat-night they lose a little;
-    /// after about 20, recall no longer finds them.
+    /// Sitting hours are not vows. Fidelity floors at 0.15 (husk).
+    /// Access drops; at the floor the hour goes latent, then leaves.
     pub fn fade_sitting(&mut self) {
         let talk_ids: Vec<String> = self
             .store
@@ -475,13 +475,26 @@ impl SelectiveMemory {
             })
             .map(|t| t.id.clone())
             .collect();
+        let mut drop = Vec::new();
         for id in talk_ids {
             let Some(t) = self.store.traces.get_mut(&id) else {
                 continue;
             };
+            crate::encode::scoring::refresh_access(t, &self.profile);
             t.fidelity = (t.fidelity - 0.04).max(0.15);
-            t.access = (t.access - 0.05).max(0.0);
+            t.access = (t.access - 0.05).min(t.access).max(0.0);
             t.permanence = (t.permanence - 0.01).max(0.0);
+            // Floor is the husk. Forgetting is access → latent → leave the book.
+            if t.fidelity <= 0.151 && t.access < 0.12 {
+                if t.status == crate::core::model::TraceStatus::Latent {
+                    drop.push(id);
+                } else {
+                    t.status = crate::core::model::TraceStatus::Latent;
+                }
+            }
+        }
+        for id in drop {
+            self.store.release_trace(&id);
         }
     }
 

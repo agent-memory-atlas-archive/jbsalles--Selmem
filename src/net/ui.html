@@ -588,7 +588,7 @@ document.getElementById('sleep').onclick = async () => {
   busy('bar', true);
   try {
     const r = await api('POST', '/sleep', {});
-    add('her', '<div class="meta">night · ' + (r.kind || '?') +
+    let line = 'night · ' + (r.kind || '?') +
       ' · +' + (r.hours_advanced || 0) + 'h' +
       ' · weathered ' + r.weathered +
       ' · rewritten ' + r.rewritten +
@@ -596,7 +596,11 @@ document.getElementById('sleep').onclick = async () => {
       ' · merged ' + r.merged +
       ' · faded ' + r.faded +
       ' · myth ' + r.myth +
-      ' · axioms ' + r.axioms + '</div>');
+      ' · axioms ' + r.axioms;
+    if ((r.kind || '') === 'shallow' && !Number(r.weathered) && !Number(r.axioms)) {
+      line += ' · sitting only — pin an hour to weather or mint';
+    }
+    add('her', '<div class="meta">' + line + '</div>');
     refresh();
   } catch (e) {
     add('her', '<span class="drop">' + escapeHtml(e.message) + '</span>');

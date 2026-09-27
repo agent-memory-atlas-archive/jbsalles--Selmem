@@ -168,13 +168,7 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
         }
         ("POST", "/pin") => {
             let from_body = json_str(body, "text").or_else(|| json_str(body, "event"));
-            let from_talk = mem
-                .talk
-                .turns
-                .last()
-                .map(|t| t.user.clone())
-                .or_else(|| mem.talk.topic.clone())
-                .unwrap_or_default();
+            let from_talk = sitting_pin_text(&mem.talk);
             let text = from_body.filter(|s| !s.trim().is_empty()).unwrap_or(from_talk);
             if text.trim().is_empty() {
                 return err(400, "nothing to pin");
@@ -190,6 +184,9 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             input.schema = mem.talk.schema.clone().or(schema).or(Some("pinned".into()));
             input.channel = Channel::Selfhood;
             let dec = mem.live_with(input);
+            if let Some(id) = dec.trace_id.as_deref() {
+                let _ = mem.pin(id);
+            }
             let _ = mem.save();
             ok(format!(
                 "{{\"kept\":{},\"score\":{:.4},\"reason\":\"{}\",\"pinned\":\"{}\",\"topic\":\"{}\"}}",
@@ -611,4 +608,26 @@ fn json_bool(body: &str, key: &str) -> Option<bool> {
 
 fn guess_affect(text: &str) -> (f32, f32, f32, Option<String>) {
     crate::encode::affect::guess(text)
+}
+
+/// Last user line that is not "remember this / pin this".
+fn sitting_pin_text(talk: &crate::core::talk::WorkingTalk) -> String {
+    for t in talk.turns.iter().rev() {
+        let s = t.user.trim();
+        if s.is_empty() || pin_command(s) {
+            continue;
+        }
+        return s.to_string();
+    }
+    talk.topic.clone().unwrap_or_default()
+}
+
+fn pin_command(s: &str) -> bool {
+    let n = s.split_whitespace().count();
+    if n > 8 {
+        return false;
+    }
+    let l = s.to_lowercase();
+    (l.contains("remember") || l.contains("souviens") || l.contains("pin "))
+        && (l.contains("this") || l.contains("ça") || l.contains("ca") || l.contains("ok"))
 }

@@ -127,6 +127,15 @@ pub fn recall_with(
                 refresh_access(trace, profile);
             }
             let trace = store.traces.get(&trace_id)?;
+            let talk = trace
+                .archive_id
+                .as_ref()
+                .and_then(|id| store.archives.get(id))
+                .map(|a| a.source == "talk")
+                .unwrap_or(false);
+            if talk && trace.access < 0.10 {
+                return None;
+            }
             let mut score = recall_score_emb(trace, query, Some(&query_embedding), mood, profile);
             // Frozen δ. If DropLineage stops flattening Grok D, this is too large.
             if !store.living_axiom_ids_for(&trace_id).is_empty() {
