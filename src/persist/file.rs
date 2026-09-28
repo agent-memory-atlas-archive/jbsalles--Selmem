@@ -30,7 +30,12 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
 
         writeln!(w, "archives {}", store.archives.len())?;
         for a in store.archives.values() {
-            writeln!(w, "archive {} {}", a.id, a.created_at)?;
+            match (a.released_from.as_deref(), a.released_at) {
+                (Some(from), Some(at)) => {
+                    writeln!(w, "archive {} {} released {} {}", a.id, a.created_at, at, from)?
+                }
+                _ => writeln!(w, "archive {} {}", a.id, a.created_at)?,
+            }
             write_blob(&mut w, &a.source)?;
             write_blob(&mut w, &a.verbatim)?;
         }
@@ -86,10 +91,12 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         let source = read_blob(&mut r)?;
         let verbatim = read_blob(&mut r)?;
         let id = p[1].to_string();
-        store.archives.insert(
-            id.clone(),
-            assemble_archive(id, parse_u64(p[2])?, source, verbatim),
-        );
+        let mut rec = assemble_archive(id.clone(), parse_u64(p[2])?, source, verbatim);
+        if p.len() >= 6 && p[3] == "released" {
+            rec.released_at = parse_u64(p[4]).ok();
+            rec.released_from = Some(p[5].to_string());
+        }
+        store.archives.insert(id, rec);
     }
 
     let n_tr = parse_count(&read_line(&mut r)?, "traces")?;

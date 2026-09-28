@@ -105,6 +105,9 @@ pub fn assemble_archive(
         created_at,
         source,
         verbatim,
+        released_from: None,
+        released_at: None,
+        core: String::new(),
     }
 }
 

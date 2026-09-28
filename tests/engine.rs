@@ -1064,4 +1064,34 @@ fn isolated_probe_puts_scene_before_axiom() {
     }
 }
 
+#[test]
+fn release_keeps_sealed_archive_for_audit() {
+    let mut mem = SelectiveMemory::new(EntityProfile::tender("Claire"));
+    let mut ev = EncodeInput::new("On 19 January lunch was billed to cost centre 4412.");
+    ev.valence = 0.05;
+    ev.arousal = 0.10;
+    ev.self_relevance = 0.20;
+    ev.permanence = 0.10;
+    ev.schema = Some("admin".into());
+    let id = mem.live_with(ev).trace_id.expect("kept");
+    assert_eq!(
+        mem.audit(&id).unwrap(),
+        "On 19 January lunch was billed to cost centre 4412."
+    );
+    let aid = mem.store.traces[&id].archive_id.clone().expect("archive");
+    assert!(mem.store.release_trace(&id).is_some());
+    assert!(!mem.store.traces.contains_key(&id));
+    assert!(mem.store.archives.contains_key(&aid));
+    let tomb = &mem.store.archives[&aid];
+    assert_eq!(tomb.released_from.as_deref(), Some(id.as_str()));
+    assert!(tomb.released_at.is_some());
+    assert_eq!(
+        mem.audit(&id).unwrap(),
+        "On 19 January lunch was billed to cost centre 4412."
+    );
+    selmem::persist::prune_orphaned_archives(&mut mem.store);
+    assert!(mem.store.archives.contains_key(&aid), "tomb must survive prune");
+    assert!(mem.remember("cost centre 4412").is_empty());
+}
+
 

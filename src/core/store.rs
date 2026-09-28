@@ -166,22 +166,40 @@ impl MemoryStore {
             .fold(0.0_f32, f32::max)
     }
 
-    /// Drop an hour from the book. Archive goes if nothing else points at it.
+    /// Drop an hour from the book. The sealed archive stays (tomb).
     pub fn release_trace(&mut self, id: &str) -> Option<MemoryTrace> {
         let trace = self.traces.remove(id)?;
         self.edges.remove(id);
         for neigh in self.edges.values_mut() {
             neigh.remove(id);
         }
-        if let Some(aid) = trace.archive_id.as_deref() {
-            let used = self
+        if let Some(aid) = trace.archive_id.clone() {
+            let still = self
                 .traces
                 .values()
-                .any(|t| t.archive_id.as_deref() == Some(aid));
-            if !used {
-                self.archives.remove(aid);
+                .any(|t| t.archive_id.as_deref() == Some(aid.as_str()));
+            if !still {
+                if let Some(a) = self.archives.get_mut(&aid) {
+                    a.released_from = Some(trace.id.clone());
+                    a.released_at = Some(crate::core::model::now_secs());
+                    if a.core.is_empty() {
+                        a.core = trace.core.clone();
+                    }
+                }
             }
         }
         Some(trace)
+    }
+
+    /// Sealed verbatim for a living hour or a released tomb. Never a mouth input.
+    pub fn archive_verbatim(&self, trace_id: &str) -> Option<&str> {
+        if let Some(t) = self.traces.get(trace_id) {
+            let aid = t.archive_id.as_ref()?;
+            return self.archives.get(aid).map(|a| a.verbatim.as_str());
+        }
+        self.archives
+            .values()
+            .find(|a| a.released_from.as_deref() == Some(trace_id) || a.id == trace_id)
+            .map(|a| a.verbatim.as_str())
     }
 }

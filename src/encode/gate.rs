@@ -165,6 +165,9 @@ fn encode_one(
         verbatim: input.event.to_string(),
         source: input.source.to_string(),
         created_at: now_secs(),
+        released_from: None,
+        released_at: None,
+        core: String::new(),
     };
     let archive_id = store.add_archive(archive);
 

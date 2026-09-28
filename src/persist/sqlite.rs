@@ -190,7 +190,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
     let db = Db::open(path)?;
     db.exec(
         "CREATE TABLE IF NOT EXISTS meta(k TEXT PRIMARY KEY, v TEXT NOT NULL);
-         CREATE TABLE IF NOT EXISTS archives(id TEXT PRIMARY KEY, created INTEGER, source TEXT, verbatim TEXT);
+         CREATE TABLE IF NOT EXISTS archives(id TEXT PRIMARY KEY, created INTEGER, source TEXT, verbatim TEXT, released_from TEXT, released_at INTEGER, core TEXT);
          CREATE TABLE IF NOT EXISTS traces(
            id TEXT PRIMARY KEY, gist TEXT, core TEXT, valence REAL, arousal REAL, disgust REAL,
            self_relevance REAL, schema TEXT, channel TEXT, archive_id TEXT,
@@ -211,6 +211,9 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
     let _ = db.exec("ALTER TABLE traces ADD COLUMN anchor REAL;");
     let _ = db.exec("ALTER TABLE traces ADD COLUMN detach_strikes INTEGER;");
     let _ = db.exec("ALTER TABLE axioms ADD COLUMN layer TEXT;");
+    let _ = db.exec("ALTER TABLE archives ADD COLUMN released_from TEXT;");
+    let _ = db.exec("ALTER TABLE archives ADD COLUMN released_at INTEGER;");
+    let _ = db.exec("ALTER TABLE archives ADD COLUMN core TEXT;");
     db.exec("BEGIN IMMEDIATE;")?;
     db.exec(
         "DELETE FROM meta; DELETE FROM archives; DELETE FROM traces;
@@ -236,12 +239,20 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         }
     }
     {
-        let st = db.prepare("INSERT INTO archives(id,created,source,verbatim) VALUES (?1,?2,?3,?4)")?;
+        let st = db.prepare(
+            "INSERT INTO archives(id,created,source,verbatim,released_from,released_at,core) VALUES (?1,?2,?3,?4,?5,?6,?7)",
+        )?;
         for a in store.archives.values() {
             st.bind_text(1, &a.id)?;
             st.bind_i64(2, a.created_at as i64)?;
             st.bind_text(3, &a.source)?;
             st.bind_text(4, &a.verbatim)?;
+            st.bind_text(5, a.released_from.as_deref().unwrap_or(""))?;
+            match a.released_at {
+                Some(ts) => st.bind_i64(6, ts as i64)?,
+                None => st.bind_null(6)?,
+            }
+            st.bind_text(7, &a.core)?;
             st.step_done()?;
         }
     }
@@ -409,16 +420,28 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         store.last_deep_at = last_deep_s.parse().ok();
     }
 
-    for row in query(&db, "SELECT id,created,source,verbatim FROM archives")? {
+    for row in query(
+        &db,
+        "SELECT id,created,source,verbatim,released_from,released_at,core FROM archives",
+    )? {
         if row.len() < 4 {
             continue;
         }
-        let a = assemble_archive(
+        let mut a = assemble_archive(
             row[0].clone(),
             row[1].parse().unwrap_or(0),
             row[2].clone(),
             row[3].clone(),
         );
+        if row.len() >= 7 {
+            if !row[4].is_empty() {
+                a.released_from = Some(row[4].clone());
+            }
+            if !row[5].is_empty() {
+                a.released_at = row[5].parse().ok();
+            }
+            a.core = row[6].clone();
+        }
         store.archives.insert(a.id.clone(), a);
     }
 

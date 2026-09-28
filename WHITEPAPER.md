@@ -10,7 +10,7 @@ An LLM maps a context window to a next-token distribution. Adding memory usually
 
 SelMem treats memory as a state that changes. Not every event is stored. Stored events lose detail. Recall rebuilds a sentence from the current trace instead of replaying the original. That rebuild can write back. Repeated traces form motifs, then beliefs, then traits, which bias the next encode.
 
-The verbatim event is kept in a sealed archive for tests and audit. The model never reads it. It only sees the lived trace (gist, core, affect, fidelity).
+The verbatim event is kept in a sealed archive for tests and audit. The model never reads it. It only sees the lived trace (gist, core, affect, fidelity). When an hour leaves the book the archive stays as a tomb (`released_from`, `released_at`, core). `audit` still finds it. The mouth does not.
 
 ```
 experience → selection → trace → recall → sleep → identity → next encode

@@ -615,9 +615,7 @@ impl SelectiveMemory {
     }
 
     pub fn audit(&self, trace_id: &str) -> Option<&str> {
-        let trace = self.store.traces.get(trace_id)?;
-        let aid = trace.archive_id.as_ref()?;
-        self.store.archives.get(aid).map(|a| a.verbatim.as_str())
+        self.store.archive_verbatim(trace_id)
     }
 
     /// Spoken utility stamp. Live `speak` calls this on the selected hour.

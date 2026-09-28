@@ -202,6 +202,11 @@ pub struct ArchiveRecord {
     pub verbatim: String,
     pub source: String,
     pub created_at: u64,
+    /// Living hour that left the book. Empty while the hour is still there.
+    pub released_from: Option<String>,
+    pub released_at: Option<u64>,
+    /// Binding fact at release. Not the gist. The mouth never reads this.
+    pub core: String,
 }
 
 #[derive(Clone, Debug)]
