@@ -110,5 +110,7 @@ pub fn recall_score_emb(
         }
     }
     let cong = affective_congruence(trace, mood);
-    (0.50 * sim + 0.25 * access + 0.25 * cong) * (0.6 + 0.4 * trace.self_relevance)
+    (0.50 * sim + 0.25 * access + 0.25 * cong)
+        * (0.6 + 0.4 * trace.self_relevance)
+        * (0.85 + 0.15 * trace.permanence.clamp(0.0, 1.0))
 }

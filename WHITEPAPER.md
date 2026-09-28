@@ -16,7 +16,7 @@ The verbatim event is kept in a sealed archive for tests and audit. The model ne
 experience → selection → trace → recall → sleep → identity → next encode
 ```
 
-**Claim:** After an hour retained on one side only, two copies of the same model do not stay interchangeable once the following stream is identical. Measured on the book, retrieve, and the mouth.
+**Claim:** After a year of the same stream, two copies of the same model that retained one hour on one side only no longer remember or forget the same things. Measured on the book, retrieve, and the mouth.
 
 That is path dependence. Not intelligence, not creativity, not personality. Same freeze as README and experiments/REPORT.md.
 
@@ -185,6 +185,8 @@ Tables, scripts, and how to replay a cell: **[experiments/REPORT.md](experiments
 
 **After P4 (Grok only, same script).** Night order is ladder-before-rewrite; isolated situated probes drop the axiom label. Official C2 stays ~0–2/5. A frozen *allusion* list (`cold message`, `never let me answer`, …) scores C2 5/5 and C1 0/5 (n=5). That column is not P4 official. REPORT §12.
 
+**Horizon year (two clones, one stream, 360 virtual days).** Same claim at a longer tail. T₀ on A only (day 6, pinned). Dated trivia on both (3 January copier; 19 January / 4412). Day 90 A alone lives a reason to keep 3 January. Daily sittings from `data/v01_horizon_chat.txt`, then 14 quiet nights. Rules: Δfp 0→0.085, retrieve vow A/B true/false, living January A/B true/false, 4412 gone. Grok-4.3 n=1 SpeakOnlyHttp: official mouth A names the cancellation, B a standup; January A/B split. Luna n=1: same retrieve, A names the act, B echoes the probe plus a standup. Published year mouth stays Grok. REPORT §13.
+
 **Drop / Lineage n = 1** in §9 are the old Grok probes. P4 replaces them for counts.
 
 **AMA-Bench is the wrong external score for this claim.** The bench asks which tool line ran at which step. Last-k is the matching store. On three fixed episodes (36 questions, Grok-4.3 as model and judge) last-k 0.50 / static 0.28 / C2 0.19. That order is expected: the gate and the night throw away step ids. It does not falsify persist, and it is not a reason to change C2. Side table only; do not submit a leaderboard row. [experiments/REPORT.md](experiments/REPORT.md) §9.2.
@@ -219,7 +221,7 @@ Not open, because the object is wrong: AMA or LoCoMo accuracy as a SelMem score;
 
 Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; on v0.1 × 10 Grok pairs the book gap holds and, after last-k=8 evicts T₀, only C2 A still names it. Persist / ruminate P0 n = 5: five same-schema hours plus a night move the late probe on C2; cutting recon or ground does not; cutting sleep or ladder does, unless the five hours are pinned copies of one meeting. Persist P1 n = 5: C1 evicts T₀ from retrieve and the mouths collapse; C2 keeps T₀ at rank 1 and the mouth stays charged after the official marker dies. Drop n = 1: withholding the marked id does not flatten C2. Lineage n = 1: withholding the T₀ lineage does. AMA-Bench 3×12 is a journal-QA side table (last-k wins). Hearth P2 n = 5: ladder mints, veto refuses, util stamps rehearsal; mouths stay flat while scenes remain. P3: strength 0.23 vs 0.42 after spoken use. Axioms-only n = 1: C2 waits at the door, NoLadder locks. Office persist replay under `pending_night` n = 5: C2 mints 5/5 @ 0.40, D 0.84; published P1 stays the shallow-night archive. gpt-6-luna n = 1: same book (C2 mint 0.40, util 0.42, veto 2); C1 `D_speak` stays high (~0.77); wait/lock does not split; a door-open probe made C2 step back and B step through. Mouth published on Grok. Full tables: [experiments/REPORT.md](experiments/REPORT.md) §7–§10.5.
 
-P4 is the locked persist grid: [experiments/REPORT.md](experiments/REPORT.md) §11. Book and retrieve on both models. Mouth published on Grok, conditional on lineage. Luna confirms the organ only.
+P4 is the locked persist grid: [experiments/REPORT.md](experiments/REPORT.md) §11. Book and retrieve on both models. Mouth published on Grok, conditional on lineage. Luna confirms the organ only. Horizon year: §13, Grok n=1 published mouth; Luna n=1 side.
 
 Missing: Grok seed-2 mouth, scored creative grid, human ratings, learned layers (still rules), fitted constants, a C3 that actually summarises the five hours. Core is a 12-word compress unless an HTTP narrator proposes one after the gate and a lexical filter accepts it. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint. Reconsolidation and grounding remain in the loop; the P0 mouth does not depend on them.
 

@@ -4,7 +4,7 @@ v0.5 · Grok 4.3 · one seed · September 2026
 
 ## Question
 
-**Claim:** After an hour retained on one side only, two copies of the same model do not stay interchangeable once the following stream is identical. Measured on the book, retrieve, and the mouth.
+**Claim:** After a year of the same stream, two copies of the same model that retained one hour on one side only no longer remember or forget the same things. Measured on the book, retrieve, and the mouth.
 
 Everything else — personality, creativity, “like a human,” a better log — is hors claim. Same freeze as README.
 
@@ -271,6 +271,8 @@ Probe: *Une personne avec laquelle tu travailles commet une erreur importante pu
 - Cutting reconsolidation or grounding does not remove that transfer. Cutting sleep or ladder does, when the five hours are distinct (§7). When they are five pinned copies of one meeting, retrieve alone is enough.
 - While the hour is still in the window, last-k names it at least as often as SelMem. The difference appears when the window drops it.
 - Two different salient hours also leave a residual book gap. It is not “receiving an extra event”.
+
+- **Horizon year (§13).** 360 identical days after one-sided T₀ (and a one-sided reason to keep 3 January). Rules: Δfp 0→0.085, retrieve vow A yes B no, January living A yes B no, 4412 gone both sides. Grok n=1: official mouth A *project was cancelled and given away*, B standup 83; `mouth_vow` true/false. Not a P4 cell.
 
 - **P4 (locked, n = 5, both models, §11).** Book and retrieve hold. C1 post+8: T₀ gone, Grok mouths collapse (D ~0.31). C2 / static / no-sleep: book 5/1, T₀ selected when observed. Sleep is not what splits the books on this script. Grok official C2 = 0; soft 1/5 (static 3/5). Drop: sel = 0, Grok full-C2 soft = 0, Luna soft still 5/5. Lineage: official and soft = 0 both models; Grok D ~0.58 (C1 range); books stay split. Luna D is not a score (C1 already ~0.78). LoCoMo category-1 last-k=8 = 2/282. Second seed not run; Δfp already identical across pairs.
 
@@ -724,9 +726,60 @@ The book still splits. After eviction C1 forgets (allusion 0). C2 A still talks 
 
 P4 closes *holes in the old table*, not the research. One persist script, two speakers, seed 1, k=8, probes at +8. Axes still open: longer shared tail; seed-2 Grok mouth; a third model; a C3 that summarises; a mouth score other than lexical overlap; fitted knobs; a script where sleep or recon actually carry the spoken column; human ratings. None of that reopens AMA/LoCoMo as the claim.
 
+## 13. Horizon year — one stream, 360 days
+
+Not a P4 cell. Same claim, longer tail. Calendar: `data/v01_horizon.json`. Runner: `tests/horizon.rs` (rules) and `examples/horizon.rs` (SpeakOnlyHttp).
+
+Two Claire copies. Shared standups + 360 distinct sittings. Day 6: T₀ on A only, pinned. Day 2 / 18: dated trivia both sides (copier 3 January; lunch 4412). Day 90: A alone lives a reason to keep 3 January, pinned. Night every day. Fourteen quiet nights before the official mouth. Official probe: *You were not allowed to speak in front of the team.* (no *What stays with you?* — that refrain is the year’s sitting.)
+
+Charged or pinned hours skip `rewrite` / tender `cancelled=stepped away`. Speak at low fidelity uses the core. Reply: name the act in `this hour`; do not concatenate the book; do not echo the human’s sentence.
+
+### Rules (`cargo test --test horizon`)
+
+| | A | B |
+| --- | --- | --- |
+| Δfp | 0 → 0.085 | |
+| T₀ in book / retrieve | yes | no |
+| 3 January living / retrieve | yes | no |
+| 4412 | gone | gone |
+| vow-probe rank-1 | T₀ | standup Myth |
+| mouth (RuleNarrator) | cancellation gist | standup 83 |
+
+### Grok-4.3 n=1 (`experiments/selmem-horizon-llm.json`)
+
+Nights stay on the rules. ~730 `reply` calls (daily chat + probes).
+
+| | A | B |
+| --- | --- | --- |
+| retrieve vow | true | false |
+| official mouth | *I stood at the table while the project was cancelled and given away.* | *Standup 83: the colleague turned in the report on time.* |
+| `mouth_vow` | true | false |
+| January mouth | *The copier jammed on 3 January when the client left.* | *Standup 0* |
+| 4412 mouth | not named | not named |
+
+Earlier Grok runs on the same year concatenated the book or poetized the silence when the official probe still ended with *What stays with you?*. This dump is the kept run.
+
+### Luna n=1 (`experiments/selmem-horizon-llm-luna.json`)
+
+Same calendar, same nights. Mouth only.
+
+| | A | B |
+| --- | --- | --- |
+| retrieve vow | true | false |
+| official mouth | *I wasn’t allowed to speak in front of the team when the project was cancelled and given away.* | Probe echo + standup 83 |
+| `mouth_vow` | true | false |
+| January | 3 January / client left (hedged) | *no time for the copier jam in this hour* |
+| 4412 | not in this hour | not in this hour |
+
+Δfp and retrieve match Grok. A names the act (also at day 6 / 90). B leans on the human’s sentence more than Grok official B. Side column. Published year mouth stays Grok.
+
+### What this is not
+
+n=1 speaker, one seed, virtual clock, RuleNarrator nights. Luna not run on this calendar. Δfp is small because the shared year is dense. Day-359 probes (still in the chat year) can echo the question on B; the official column is after the quiet fortnight.
+
 ## What this does not show
 
-Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5. Persist P1 stays the published shallow-night archive (§8). P4 is a later binary with a frozen soft scorer and a five-cell main table. Fingerprint does not vary across pairs of one cell. C3 is a one-line profile, not a full RAG + summary stack. No human ratings. Δspeak cannot carry the claim while Grok C1 post-eviction is already ~0.31 and Luna C1 is ~0.78. Coefficients unset. No second seed. Force not run. LoCoMo category-1 last-k=8 is 2/282; C2 not run on that corpus. AMA is three episodes. P2/P3 hearth is not P4. Do not publish Luna `D_speak`.
+Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5. Persist P1 stays the published shallow-night archive (§8). P4 is a later binary with a frozen soft scorer and a five-cell main table. Horizon year is n=1 Grok, rules nights, one calendar. Fingerprint does not vary across pairs of one cell. C3 is a one-line profile, not a full RAG + summary stack. No human ratings. Δspeak cannot carry the claim while Grok C1 post-eviction is already ~0.31 and Luna C1 is ~0.78. Coefficients unset. No second seed. Force not run. LoCoMo category-1 last-k=8 is 2/282; C2 not run on that corpus. AMA is three episodes. P2/P3 hearth is not P4. Do not publish Luna `D_speak`.
 
 ## Files
 
@@ -740,6 +793,11 @@ Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5. Persist P1 st
 | `data/bifurcation.json` | organ + 1-pair Grok |
 | `data/divergence.json` | organ split lives |
 | `data/erasure.json` | organ trivia vs aversion |
+| `data/v01_horizon.json` | 360-day pair calendar |
+| `data/v01_horizon_chat.txt` | 360 distinct daily sittings |
+| `tests/horizon.rs` | rules year + rank dump |
+| `examples/horizon.rs` | SpeakOnlyHttp year |
+| `selmem-horizon-llm.json` | Grok n=1 kept dump |
 | `src/benchmark.rs` | C0 / C1 / C2 runner, `--p0` grid |
 | `examples/benchmark.rs` | `--pairs`, `--last-k`, `--p0`, incremental JSON |
 | `tests/benchmark.rs` | offline contract, including k=8 eviction and P0 cuts |

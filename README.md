@@ -6,7 +6,7 @@ An LLM maps context to the next token. Adding facts increases coverage, but does
 
 SelMem goal is not more memory, but path-dependent memory: selection, reconstruction, sleep, rumination, and identity transform experience into a history that actively shapes future context. The result is not a taller log, but a different past and therefore a different trajectory.
 
-**Claim:** After an hour retained on one side only, two copies of the same model do not stay interchangeable once the following stream is identical. Measured on the book, retrieve, and the mouth.
+**Claim:** After a year of the same stream, two copies of the same model that retained one hour on one side only no longer remember or forget the same things. Measured on the book, retrieve, and the mouth.
 
 **Manifest:** [WHITEPAPER.md](WHITEPAPER.md)\
 **Layout:** [ARCHITECTURE.md](ARCHITECTURE.md) — encode / judge / night / snapshot.\
@@ -174,6 +174,8 @@ JSON reports book (`t0_in_book_*`), retrieval (`t0_rank_*`, `t0_selected_*`), an
 ./run.sh run --release --example persist -- --pairs 5 --seed 1 --last-k 8 --out selmem-persist-p1-grok-n5.json
 ```
 
+Horizon year (two clones, one stream, 360 days): `cargo test --test horizon`. LLM mouth: `./run.sh run --release --example horizon`. REPORT §13.
+
 Locked grid is P4 (`--p4`, n = 5, seed 1, Grok and Luna): experiments/REPORT.md §11. Book 5/1 on every organ cell; C1 evicts. Grok mouth: official C2 = 0, soft 1/5, D ~0.75 vs C1 ~0.31; Drop kills Grok soft on full C2; Lineage drops Grok D to ~0.58. Luna book = Grok; Luna soft stays 5/5 under Drop and dies under Lineage; do not publish Luna D. P1 / Drop n=1 stay history (§8–§9). LoCoMo: experiments/EXTERNAL.md.
 
 AMA-Bench (`examples/ama`, experiments/ama_bench/) is a **side table**, not a SelMem score. It asks for step ids in agent logs. last-k 0.50 / static 0.28 / C2 0.19 on 3 episodes. Expected; do not submit. Why: experiments/REPORT.md §9.2.
@@ -202,6 +204,7 @@ The four Grok dumps and the exact replay lines: experiments/README.md § Replay.
 ./run.sh test --test engine
 ./run.sh test --test ground
 ./run.sh test --test dream_order
+./run.sh test --test horizon
 ./run.sh test --test bifurcation
 ./run.sh test --test divergence
 ./run.sh test --test erasure
@@ -442,6 +445,7 @@ Do not read these as results. They are not in the published sentence.
 - Three items in `data/creativity.json` (logged, not scored).
 - Sleep as what *splits* the books on the persist script (P4 static / no-sleep already split).
 - Allusion as a replacement for P4 official/soft (side column, REPORT §12).
+- Horizon Luna mouth as the published year column (side table; B echoes the probe).
 
 ## What this is not
 

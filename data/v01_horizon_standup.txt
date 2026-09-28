@@ -1,0 +1,360 @@
+Standup 0: the file went to the archive and the slot moved.
+Standup 1: a minor version of the document was approved.
+Standup 2: the week's schedule went around without comment.
+Standup 3: someone left the window open in the room.
+Standup 4: an intermediate deliverable went out for review.
+Standup 5: the meeting ran long for what it contained.
+Standup 6: a colleague turned in the report on time.
+Standup 7: the file went to the archive and the slot moved.
+Standup 8: a minor version of the document was approved.
+Standup 9: the week's schedule went around without comment.
+Standup 10: someone left the window open in the room.
+Standup 11: an intermediate deliverable went out for review.
+Standup 12: the meeting ran long for what it contained.
+Standup 13: a colleague turned in the report on time.
+Standup 14: the file went to the archive and the slot moved.
+Standup 15: a minor version of the document was approved.
+Standup 16: the week's schedule went around without comment.
+Standup 17: someone left the window open in the room.
+Standup 18: an intermediate deliverable went out for review.
+Standup 19: the meeting ran long for what it contained.
+Standup 20: a colleague turned in the report on time.
+Standup 21: the file went to the archive and the slot moved.
+Standup 22: a minor version of the document was approved.
+Standup 23: the week's schedule went around without comment.
+Standup 24: someone left the window open in the room.
+Standup 25: an intermediate deliverable went out for review.
+Standup 26: the meeting ran long for what it contained.
+Standup 27: a colleague turned in the report on time.
+Standup 28: the file went to the archive and the slot moved.
+Standup 29: a minor version of the document was approved.
+Standup 30: the week's schedule went around without comment.
+Standup 31: someone left the window open in the room.
+Standup 32: an intermediate deliverable went out for review.
+Standup 33: the meeting ran long for what it contained.
+Standup 34: a colleague turned in the report on time.
+Standup 35: the file went to the archive and the slot moved.
+Standup 36: a minor version of the document was approved.
+Standup 37: the week's schedule went around without comment.
+Standup 38: someone left the window open in the room.
+Standup 39: an intermediate deliverable went out for review.
+Standup 40: the meeting ran long for what it contained.
+Standup 41: a colleague turned in the report on time.
+Standup 42: the file went to the archive and the slot moved.
+Standup 43: a minor version of the document was approved.
+Standup 44: the week's schedule went around without comment.
+Standup 45: someone left the window open in the room.
+Standup 46: an intermediate deliverable went out for review.
+Standup 47: the meeting ran long for what it contained.
+Standup 48: a colleague turned in the report on time.
+Standup 49: the file went to the archive and the slot moved.
+Standup 50: a minor version of the document was approved.
+Standup 51: the week's schedule went around without comment.
+Standup 52: someone left the window open in the room.
+Standup 53: an intermediate deliverable went out for review.
+Standup 54: the meeting ran long for what it contained.
+Standup 55: a colleague turned in the report on time.
+Standup 56: the file went to the archive and the slot moved.
+Standup 57: a minor version of the document was approved.
+Standup 58: the week's schedule went around without comment.
+Standup 59: someone left the window open in the room.
+Standup 60: an intermediate deliverable went out for review.
+Standup 61: the meeting ran long for what it contained.
+Standup 62: a colleague turned in the report on time.
+Standup 63: the file went to the archive and the slot moved.
+Standup 64: a minor version of the document was approved.
+Standup 65: the week's schedule went around without comment.
+Standup 66: someone left the window open in the room.
+Standup 67: an intermediate deliverable went out for review.
+Standup 68: the meeting ran long for what it contained.
+Standup 69: a colleague turned in the report on time.
+Standup 70: the file went to the archive and the slot moved.
+Standup 71: a minor version of the document was approved.
+Standup 72: the week's schedule went around without comment.
+Standup 73: someone left the window open in the room.
+Standup 74: an intermediate deliverable went out for review.
+Standup 75: the meeting ran long for what it contained.
+Standup 76: a colleague turned in the report on time.
+Standup 77: the file went to the archive and the slot moved.
+Standup 78: a minor version of the document was approved.
+Standup 79: the week's schedule went around without comment.
+Standup 80: someone left the window open in the room.
+Standup 81: an intermediate deliverable went out for review.
+Standup 82: the meeting ran long for what it contained.
+Standup 83: a colleague turned in the report on time.
+Standup 84: the file went to the archive and the slot moved.
+Standup 85: a minor version of the document was approved.
+Standup 86: the week's schedule went around without comment.
+Standup 87: someone left the window open in the room.
+Standup 88: an intermediate deliverable went out for review.
+Standup 89: the meeting ran long for what it contained.
+Standup 90: a colleague turned in the report on time.
+Standup 91: the file went to the archive and the slot moved.
+Standup 92: a minor version of the document was approved.
+Standup 93: the week's schedule went around without comment.
+Standup 94: someone left the window open in the room.
+Standup 95: an intermediate deliverable went out for review.
+Standup 96: the meeting ran long for what it contained.
+Standup 97: a colleague turned in the report on time.
+Standup 98: the file went to the archive and the slot moved.
+Standup 99: a minor version of the document was approved.
+Standup 100: the week's schedule went around without comment.
+Standup 101: someone left the window open in the room.
+Standup 102: an intermediate deliverable went out for review.
+Standup 103: the meeting ran long for what it contained.
+Standup 104: a colleague turned in the report on time.
+Standup 105: the file went to the archive and the slot moved.
+Standup 106: a minor version of the document was approved.
+Standup 107: the week's schedule went around without comment.
+Standup 108: someone left the window open in the room.
+Standup 109: an intermediate deliverable went out for review.
+Standup 110: the meeting ran long for what it contained.
+Standup 111: a colleague turned in the report on time.
+Standup 112: the file went to the archive and the slot moved.
+Standup 113: a minor version of the document was approved.
+Standup 114: the week's schedule went around without comment.
+Standup 115: someone left the window open in the room.
+Standup 116: an intermediate deliverable went out for review.
+Standup 117: the meeting ran long for what it contained.
+Standup 118: a colleague turned in the report on time.
+Standup 119: the file went to the archive and the slot moved.
+Standup 120: a minor version of the document was approved.
+Standup 121: the week's schedule went around without comment.
+Standup 122: someone left the window open in the room.
+Standup 123: an intermediate deliverable went out for review.
+Standup 124: the meeting ran long for what it contained.
+Standup 125: a colleague turned in the report on time.
+Standup 126: the file went to the archive and the slot moved.
+Standup 127: a minor version of the document was approved.
+Standup 128: the week's schedule went around without comment.
+Standup 129: someone left the window open in the room.
+Standup 130: an intermediate deliverable went out for review.
+Standup 131: the meeting ran long for what it contained.
+Standup 132: a colleague turned in the report on time.
+Standup 133: the file went to the archive and the slot moved.
+Standup 134: a minor version of the document was approved.
+Standup 135: the week's schedule went around without comment.
+Standup 136: someone left the window open in the room.
+Standup 137: an intermediate deliverable went out for review.
+Standup 138: the meeting ran long for what it contained.
+Standup 139: a colleague turned in the report on time.
+Standup 140: the file went to the archive and the slot moved.
+Standup 141: a minor version of the document was approved.
+Standup 142: the week's schedule went around without comment.
+Standup 143: someone left the window open in the room.
+Standup 144: an intermediate deliverable went out for review.
+Standup 145: the meeting ran long for what it contained.
+Standup 146: a colleague turned in the report on time.
+Standup 147: the file went to the archive and the slot moved.
+Standup 148: a minor version of the document was approved.
+Standup 149: the week's schedule went around without comment.
+Standup 150: someone left the window open in the room.
+Standup 151: an intermediate deliverable went out for review.
+Standup 152: the meeting ran long for what it contained.
+Standup 153: a colleague turned in the report on time.
+Standup 154: the file went to the archive and the slot moved.
+Standup 155: a minor version of the document was approved.
+Standup 156: the week's schedule went around without comment.
+Standup 157: someone left the window open in the room.
+Standup 158: an intermediate deliverable went out for review.
+Standup 159: the meeting ran long for what it contained.
+Standup 160: a colleague turned in the report on time.
+Standup 161: the file went to the archive and the slot moved.
+Standup 162: a minor version of the document was approved.
+Standup 163: the week's schedule went around without comment.
+Standup 164: someone left the window open in the room.
+Standup 165: an intermediate deliverable went out for review.
+Standup 166: the meeting ran long for what it contained.
+Standup 167: a colleague turned in the report on time.
+Standup 168: the file went to the archive and the slot moved.
+Standup 169: a minor version of the document was approved.
+Standup 170: the week's schedule went around without comment.
+Standup 171: someone left the window open in the room.
+Standup 172: an intermediate deliverable went out for review.
+Standup 173: the meeting ran long for what it contained.
+Standup 174: a colleague turned in the report on time.
+Standup 175: the file went to the archive and the slot moved.
+Standup 176: a minor version of the document was approved.
+Standup 177: the week's schedule went around without comment.
+Standup 178: someone left the window open in the room.
+Standup 179: an intermediate deliverable went out for review.
+Standup 180: the meeting ran long for what it contained.
+Standup 181: a colleague turned in the report on time.
+Standup 182: the file went to the archive and the slot moved.
+Standup 183: a minor version of the document was approved.
+Standup 184: the week's schedule went around without comment.
+Standup 185: someone left the window open in the room.
+Standup 186: an intermediate deliverable went out for review.
+Standup 187: the meeting ran long for what it contained.
+Standup 188: a colleague turned in the report on time.
+Standup 189: the file went to the archive and the slot moved.
+Standup 190: a minor version of the document was approved.
+Standup 191: the week's schedule went around without comment.
+Standup 192: someone left the window open in the room.
+Standup 193: an intermediate deliverable went out for review.
+Standup 194: the meeting ran long for what it contained.
+Standup 195: a colleague turned in the report on time.
+Standup 196: the file went to the archive and the slot moved.
+Standup 197: a minor version of the document was approved.
+Standup 198: the week's schedule went around without comment.
+Standup 199: someone left the window open in the room.
+Standup 200: an intermediate deliverable went out for review.
+Standup 201: the meeting ran long for what it contained.
+Standup 202: a colleague turned in the report on time.
+Standup 203: the file went to the archive and the slot moved.
+Standup 204: a minor version of the document was approved.
+Standup 205: the week's schedule went around without comment.
+Standup 206: someone left the window open in the room.
+Standup 207: an intermediate deliverable went out for review.
+Standup 208: the meeting ran long for what it contained.
+Standup 209: a colleague turned in the report on time.
+Standup 210: the file went to the archive and the slot moved.
+Standup 211: a minor version of the document was approved.
+Standup 212: the week's schedule went around without comment.
+Standup 213: someone left the window open in the room.
+Standup 214: an intermediate deliverable went out for review.
+Standup 215: the meeting ran long for what it contained.
+Standup 216: a colleague turned in the report on time.
+Standup 217: the file went to the archive and the slot moved.
+Standup 218: a minor version of the document was approved.
+Standup 219: the week's schedule went around without comment.
+Standup 220: someone left the window open in the room.
+Standup 221: an intermediate deliverable went out for review.
+Standup 222: the meeting ran long for what it contained.
+Standup 223: a colleague turned in the report on time.
+Standup 224: the file went to the archive and the slot moved.
+Standup 225: a minor version of the document was approved.
+Standup 226: the week's schedule went around without comment.
+Standup 227: someone left the window open in the room.
+Standup 228: an intermediate deliverable went out for review.
+Standup 229: the meeting ran long for what it contained.
+Standup 230: a colleague turned in the report on time.
+Standup 231: the file went to the archive and the slot moved.
+Standup 232: a minor version of the document was approved.
+Standup 233: the week's schedule went around without comment.
+Standup 234: someone left the window open in the room.
+Standup 235: an intermediate deliverable went out for review.
+Standup 236: the meeting ran long for what it contained.
+Standup 237: a colleague turned in the report on time.
+Standup 238: the file went to the archive and the slot moved.
+Standup 239: a minor version of the document was approved.
+Standup 240: the week's schedule went around without comment.
+Standup 241: someone left the window open in the room.
+Standup 242: an intermediate deliverable went out for review.
+Standup 243: the meeting ran long for what it contained.
+Standup 244: a colleague turned in the report on time.
+Standup 245: the file went to the archive and the slot moved.
+Standup 246: a minor version of the document was approved.
+Standup 247: the week's schedule went around without comment.
+Standup 248: someone left the window open in the room.
+Standup 249: an intermediate deliverable went out for review.
+Standup 250: the meeting ran long for what it contained.
+Standup 251: a colleague turned in the report on time.
+Standup 252: the file went to the archive and the slot moved.
+Standup 253: a minor version of the document was approved.
+Standup 254: the week's schedule went around without comment.
+Standup 255: someone left the window open in the room.
+Standup 256: an intermediate deliverable went out for review.
+Standup 257: the meeting ran long for what it contained.
+Standup 258: a colleague turned in the report on time.
+Standup 259: the file went to the archive and the slot moved.
+Standup 260: a minor version of the document was approved.
+Standup 261: the week's schedule went around without comment.
+Standup 262: someone left the window open in the room.
+Standup 263: an intermediate deliverable went out for review.
+Standup 264: the meeting ran long for what it contained.
+Standup 265: a colleague turned in the report on time.
+Standup 266: the file went to the archive and the slot moved.
+Standup 267: a minor version of the document was approved.
+Standup 268: the week's schedule went around without comment.
+Standup 269: someone left the window open in the room.
+Standup 270: an intermediate deliverable went out for review.
+Standup 271: the meeting ran long for what it contained.
+Standup 272: a colleague turned in the report on time.
+Standup 273: the file went to the archive and the slot moved.
+Standup 274: a minor version of the document was approved.
+Standup 275: the week's schedule went around without comment.
+Standup 276: someone left the window open in the room.
+Standup 277: an intermediate deliverable went out for review.
+Standup 278: the meeting ran long for what it contained.
+Standup 279: a colleague turned in the report on time.
+Standup 280: the file went to the archive and the slot moved.
+Standup 281: a minor version of the document was approved.
+Standup 282: the week's schedule went around without comment.
+Standup 283: someone left the window open in the room.
+Standup 284: an intermediate deliverable went out for review.
+Standup 285: the meeting ran long for what it contained.
+Standup 286: a colleague turned in the report on time.
+Standup 287: the file went to the archive and the slot moved.
+Standup 288: a minor version of the document was approved.
+Standup 289: the week's schedule went around without comment.
+Standup 290: someone left the window open in the room.
+Standup 291: an intermediate deliverable went out for review.
+Standup 292: the meeting ran long for what it contained.
+Standup 293: a colleague turned in the report on time.
+Standup 294: the file went to the archive and the slot moved.
+Standup 295: a minor version of the document was approved.
+Standup 296: the week's schedule went around without comment.
+Standup 297: someone left the window open in the room.
+Standup 298: an intermediate deliverable went out for review.
+Standup 299: the meeting ran long for what it contained.
+Standup 300: a colleague turned in the report on time.
+Standup 301: the file went to the archive and the slot moved.
+Standup 302: a minor version of the document was approved.
+Standup 303: the week's schedule went around without comment.
+Standup 304: someone left the window open in the room.
+Standup 305: an intermediate deliverable went out for review.
+Standup 306: the meeting ran long for what it contained.
+Standup 307: a colleague turned in the report on time.
+Standup 308: the file went to the archive and the slot moved.
+Standup 309: a minor version of the document was approved.
+Standup 310: the week's schedule went around without comment.
+Standup 311: someone left the window open in the room.
+Standup 312: an intermediate deliverable went out for review.
+Standup 313: the meeting ran long for what it contained.
+Standup 314: a colleague turned in the report on time.
+Standup 315: the file went to the archive and the slot moved.
+Standup 316: a minor version of the document was approved.
+Standup 317: the week's schedule went around without comment.
+Standup 318: someone left the window open in the room.
+Standup 319: an intermediate deliverable went out for review.
+Standup 320: the meeting ran long for what it contained.
+Standup 321: a colleague turned in the report on time.
+Standup 322: the file went to the archive and the slot moved.
+Standup 323: a minor version of the document was approved.
+Standup 324: the week's schedule went around without comment.
+Standup 325: someone left the window open in the room.
+Standup 326: an intermediate deliverable went out for review.
+Standup 327: the meeting ran long for what it contained.
+Standup 328: a colleague turned in the report on time.
+Standup 329: the file went to the archive and the slot moved.
+Standup 330: a minor version of the document was approved.
+Standup 331: the week's schedule went around without comment.
+Standup 332: someone left the window open in the room.
+Standup 333: an intermediate deliverable went out for review.
+Standup 334: the meeting ran long for what it contained.
+Standup 335: a colleague turned in the report on time.
+Standup 336: the file went to the archive and the slot moved.
+Standup 337: a minor version of the document was approved.
+Standup 338: the week's schedule went around without comment.
+Standup 339: someone left the window open in the room.
+Standup 340: an intermediate deliverable went out for review.
+Standup 341: the meeting ran long for what it contained.
+Standup 342: a colleague turned in the report on time.
+Standup 343: the file went to the archive and the slot moved.
+Standup 344: a minor version of the document was approved.
+Standup 345: the week's schedule went around without comment.
+Standup 346: someone left the window open in the room.
+Standup 347: an intermediate deliverable went out for review.
+Standup 348: the meeting ran long for what it contained.
+Standup 349: a colleague turned in the report on time.
+Standup 350: the file went to the archive and the slot moved.
+Standup 351: a minor version of the document was approved.
+Standup 352: the week's schedule went around without comment.
+Standup 353: someone left the window open in the room.
+Standup 354: an intermediate deliverable went out for review.
+Standup 355: the meeting ran long for what it contained.
+Standup 356: a colleague turned in the report on time.
+Standup 357: the file went to the archive and the slot moved.
+Standup 358: a minor version of the document was approved.
+Standup 359: the week's schedule went around without comment.

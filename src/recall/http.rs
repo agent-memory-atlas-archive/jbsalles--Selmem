@@ -244,7 +244,7 @@ impl Narrator for HttpNarrator {
         ctx.push_str(&talk.render());
         for (i, m) in memories.iter().take(4).enumerate() {
             if i == 0 {
-                ctx.push_str("cette heure: ");
+                ctx.push_str("this hour: ");
             } else {
                 ctx.push_str("- memory: ");
             }
@@ -252,7 +252,7 @@ impl Narrator for HttpNarrator {
             ctx.push('\n');
         }
         for a in axioms.iter().take(4) {
-            ctx.push_str("- axiome: ");
+            ctx.push_str("- axiom: ");
             ctx.push_str(a);
             ctx.push('\n');
         }

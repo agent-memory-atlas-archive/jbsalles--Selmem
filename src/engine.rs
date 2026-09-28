@@ -545,7 +545,7 @@ impl SelectiveMemory {
         let (memories, axioms) = if hold {
             let memories: Vec<String> = recalled
                 .into_iter()
-                .take(1)
+                .take(2)
                 .map(|r| {
                     let core = self
                         .store
@@ -556,7 +556,7 @@ impl SelectiveMemory {
                     pin_happened(&r.narrative, core)
                 })
                 .collect();
-            let mut axioms = vec![format!("Your name is {}.", self.profile.name)];
+            let mut axioms = vec![format!("I am {}.", self.profile.name)];
             axioms.extend(
                 self.who_am_i()
                     .into_iter()

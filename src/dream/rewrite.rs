@@ -95,6 +95,12 @@ fn skip_rewrite(
     anchor: f32,
     schema: Option<&str>,
 ) -> bool {
+    if let Some(t) = store.traces.get(id) {
+        let charged = t.self_relevance >= 0.80 && t.valence.abs() >= 0.40;
+        if charged || t.permanence >= 0.92 {
+            return true;
+        }
+    }
     if anchor >= 0.80 {
         return true;
     }
