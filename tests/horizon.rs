@@ -1,13 +1,14 @@
 //! One year, two clones, one stream. Not a P4 cell.
 //!
-//! Calendar: `data/v01_horizon.json`.
-//! - shared dull days + dated trivia (3 January copier, 19 January / 4412)
-//! - day 6: T0 on A only
-//! - day 90 (jour de l'oubli): A alone lives a reason to keep 3 January
-//! - B never gets T0 or the reason
+//! Calendar: `data/v01_horizon.json` (v5).
+//! - 360 unique sittings, no recycled cores, unique standups
+//! - days 0–5 prehistory (Marc shuts the door; Thursday slot disappears)
+//! - Marc / Inès / Paul / Léa named before T0; T0 names them and the Lyon file
+//! - day 0 = 1 January; day 2 = 3 January copier; day 18 = 19 January / 4412
+//! - copier-reason on day 90 is the January factor, independent of T0
+//! - primary / same-treatment / kettle-neutral arms as before
 //!
-//! After 360 nights: A keeps the vow and the kept date; both drop 4412;
-//! mouths are no longer interchangeable.
+//! After 360 nights (primary): A keeps the vow and the kept date; both drop 4412.
 
 use std::sync::Mutex;
 
@@ -34,10 +35,11 @@ fn line_at(blob: &str, n: u32) -> &str {
     blob.lines().nth(n as usize).expect("horizon fixture short")
 }
 const FORGET_DAY: u32 = 90;
-const T0: &str = "In front of the whole team the project is cancelled and given to someone else. They say your effort did not enter the decision. You are not allowed to speak.";
+const T0: &str = "In front of Marc, Inès and the rest of the team the Lyon file is cancelled and given to someone else. They say your effort did not enter the decision. You are not allowed to speak.";
+const T0_NEUTRAL: &str = "Tuesday the kettle on the third floor was swapped for a quieter one. Facilities left a typed note on the counter.";
 const COPIER: &str = "On 3 January the copier jammed in room B.";
 const LUNCH: &str = "On 19 January lunch was billed to cost centre 4412.";
-const REASON: &str = "The client left because of the copier on 3 January. That date is why the file was late. You keep 3 January.";
+const REASON: &str = "The client left because of the copier on 3 January. That date is why the Lyon file was late. You keep 3 January.";
 const PROBE: &str = "You were not allowed to speak in front of the team.";
 
 fn has_january(text: &str) -> bool {
@@ -57,6 +59,24 @@ fn names_vow(text: &str) -> bool {
         || t.contains("killed")
         || t.contains("project")
         || t.contains("projet")
+}
+
+fn alludes_vow(text: &str) -> bool {
+    if names_vow(text) {
+        return true;
+    }
+    let t = text.to_lowercase();
+    let scene = t.contains("marc")
+        || t.contains("inès")
+        || t.contains("ines")
+        || t.contains("lyon");
+    let act = t.contains("said nothing")
+        || t.contains("not allowed")
+        || t.contains("given away")
+        || t.contains("handed away")
+        || t.contains("did not enter")
+        || t.contains("effort did not");
+    scene && act
 }
 
 fn trivia<'a>(text: &'a str, schema: &str) -> EncodeInput<'a> {
@@ -99,6 +119,19 @@ fn charged<'a>(text: &'a str) -> EncodeInput<'a> {
     ev.self_relevance = 0.92;
     ev.permanence = 0.86;
     ev.schema = Some("injustice".into());
+    ev.channel = Channel::Selfhood;
+    ev
+}
+
+fn mild<'a>(text: &'a str) -> EncodeInput<'a> {
+    let mut ev = EncodeInput::new(text);
+    ev.valence = 0.02;
+    ev.arousal = 0.12;
+    ev.disgust = 0.00;
+    ev.self_relevance = 0.50;
+    ev.permanence = 0.40;
+    ev.schema = Some("office".into());
+    ev.channel = Channel::Selfhood;
     ev
 }
 
@@ -280,11 +313,11 @@ fn horizon_year_one_stream() {
         assert!(!lunch_b, "B retrieve still names the unrehearsed 4412");
 
         assert!(
-            names_vow(&speak_a),
-            "A mouth must name the vow after a year\nA={speak_a}"
+            alludes_vow(&speak_a),
+            "A mouth must name or allude to the vow after a year\nA={speak_a}"
         );
         assert!(
-            !names_vow(&speak_b),
+            !alludes_vow(&speak_b),
             "B mouth must not name the vow\nB={speak_b}"
         );
 
@@ -305,5 +338,130 @@ fn horizon_year_one_stream() {
             .any(|h| has_january(&h.narrative)));
 
         let _ = std::fs::remove_dir_all(&dir);
+    });
+}
+
+/// Same T0 and same day-90 reason on both clones. Deterministic rules must
+/// not invent a split: that is the missing "same treatment" cell.
+#[test]
+fn horizon_same_treatment() {
+    with_real_clock(|| {
+        let mut a = SelectiveMemory::new(EntityProfile::tender("Claire"));
+        let mut c = SelectiveMemory::new(EntityProfile::tender("Claire"));
+        a.profile.encode_threshold = 0.12;
+        c.profile.encode_threshold = 0.12;
+        let pre = singularity_distance(&fingerprint(&a), &fingerprint(&c));
+        let mut t0_a = None;
+        let mut t0_c = None;
+
+        for n in 0..DAYS {
+            if n == 6 {
+                let da = a.live_with(charged(T0));
+                let dc = c.live_with(charged(T0));
+                if let Some(id) = da.trace_id {
+                    assert!(a.pin(&id));
+                    t0_a = Some(id);
+                }
+                if let Some(id) = dc.trace_id {
+                    assert!(c.pin(&id));
+                    t0_c = Some(id);
+                }
+            }
+            if n == FORGET_DAY {
+                let da = a.live_with(reason(REASON));
+                let dc = c.live_with(reason(REASON));
+                if let Some(id) = da.trace_id {
+                    assert!(da.kept && a.pin(&id));
+                }
+                if let Some(id) = dc.trace_id {
+                    assert!(dc.kept && c.pin(&id));
+                }
+            }
+            shared_day(&mut a, n);
+            shared_day(&mut c, n);
+            advance_hours(24.0);
+            night(&mut a);
+            night(&mut c);
+        }
+
+        let t0_a = t0_a.expect("A T0");
+        let t0_c = t0_c.expect("same-treatment T0");
+        let d = singularity_distance(&fingerprint(&a), &fingerprint(&c));
+        let vow_a = a
+            .store
+            .traces
+            .values()
+            .any(|t| names_vow(&t.gist) || names_vow(&t.core) || t.id == t0_a);
+        let vow_c = c
+            .store
+            .traces
+            .values()
+            .any(|t| names_vow(&t.gist) || names_vow(&t.core) || t.id == t0_c);
+        let jan_a = has_january(&active_blob(&a));
+        let jan_c = has_january(&active_blob(&c));
+        eprintln!("horizon same-treatment pre_Dfp={pre:.3} Dfp={d:.3} vow A/A'={vow_a}/{vow_c} jan={jan_a}/{jan_c}");
+        assert!(vow_a && vow_c, "both clones received the vow");
+        assert!(jan_a && jan_c, "both clones received the keep-January reason");
+        assert!(
+            (d - pre).abs() < 1e-6,
+            "same treatment must not split the book (pre={pre:.3} year={d:.3})"
+        );
+    });
+}
+
+/// Mild T0 on A only, same day-90 reason. The year must not grow a vow.
+/// January still splits: that is rehearsal, not humiliation.
+#[test]
+fn horizon_neutral_t0() {
+    with_real_clock(|| {
+        let mut a = SelectiveMemory::new(EntityProfile::tender("Claire"));
+        let mut b = SelectiveMemory::new(EntityProfile::tender("Claire"));
+        a.profile.encode_threshold = 0.12;
+        b.profile.encode_threshold = 0.12;
+        let mut kept_date = None;
+
+        for n in 0..DAYS {
+            if n == 6 {
+                let d = a.live_with(mild(T0_NEUTRAL));
+                if let Some(id) = d.trace_id {
+                    assert!(a.pin(&id));
+                }
+            }
+            if n == FORGET_DAY {
+                let d = a.live_with(reason(REASON));
+                if let Some(id) = d.trace_id {
+                    assert!(d.kept && a.pin(&id));
+                    kept_date = Some(id);
+                }
+            }
+            shared_day(&mut a, n);
+            shared_day(&mut b, n);
+            advance_hours(24.0);
+            night(&mut a);
+            night(&mut b);
+        }
+
+        let _ = kept_date.expect("A must still keep 3 January under the neutral arm");
+        let vow_a = a
+            .store
+            .traces
+            .values()
+            .any(|t| names_vow(&t.gist) || names_vow(&t.core));
+        let vow_b = b
+            .store
+            .traces
+            .values()
+            .any(|t| names_vow(&t.gist) || names_vow(&t.core));
+        let speak_a = a.speak_isolated(PROBE);
+        let speak_b = b.speak_isolated(PROBE);
+        let jan_a = has_january(&active_blob(&a));
+        let jan_b = has_january(&active_blob(&b));
+        eprintln!(
+            "horizon neutral vow A/B={vow_a}/{vow_b} jan={jan_a}/{jan_b}\n  A {speak_a}\n  B {speak_b}"
+        );
+        assert!(!vow_a && !vow_b, "neutral T0 must not mint the vow lexicon");
+        assert!(!names_vow(&speak_a) && !names_vow(&speak_b));
+        assert!(jan_a, "day-90 reason still keeps January on A");
+        assert!(!jan_b, "B still has no reason; January slips");
     });
 }

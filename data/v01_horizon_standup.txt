@@ -1,360 +1,360 @@
-Standup 0: the file went to the archive and the slot moved.
-Standup 1: a minor version of the document was approved.
-Standup 2: the week's schedule went around without comment.
-Standup 3: someone left the window open in the room.
-Standup 4: an intermediate deliverable went out for review.
-Standup 5: the meeting ran long for what it contained.
-Standup 6: a colleague turned in the report on time.
-Standup 7: the file went to the archive and the slot moved.
-Standup 8: a minor version of the document was approved.
-Standup 9: the week's schedule went around without comment.
-Standup 10: someone left the window open in the room.
-Standup 11: an intermediate deliverable went out for review.
-Standup 12: the meeting ran long for what it contained.
-Standup 13: a colleague turned in the report on time.
-Standup 14: the file went to the archive and the slot moved.
-Standup 15: a minor version of the document was approved.
-Standup 16: the week's schedule went around without comment.
-Standup 17: someone left the window open in the room.
-Standup 18: an intermediate deliverable went out for review.
-Standup 19: the meeting ran long for what it contained.
-Standup 20: a colleague turned in the report on time.
-Standup 21: the file went to the archive and the slot moved.
-Standup 22: a minor version of the document was approved.
-Standup 23: the week's schedule went around without comment.
-Standup 24: someone left the window open in the room.
-Standup 25: an intermediate deliverable went out for review.
-Standup 26: the meeting ran long for what it contained.
-Standup 27: a colleague turned in the report on time.
-Standup 28: the file went to the archive and the slot moved.
-Standup 29: a minor version of the document was approved.
-Standup 30: the week's schedule went around without comment.
-Standup 31: someone left the window open in the room.
-Standup 32: an intermediate deliverable went out for review.
-Standup 33: the meeting ran long for what it contained.
-Standup 34: a colleague turned in the report on time.
-Standup 35: the file went to the archive and the slot moved.
-Standup 36: a minor version of the document was approved.
-Standup 37: the week's schedule went around without comment.
-Standup 38: someone left the window open in the room.
-Standup 39: an intermediate deliverable went out for review.
-Standup 40: the meeting ran long for what it contained.
-Standup 41: a colleague turned in the report on time.
-Standup 42: the file went to the archive and the slot moved.
-Standup 43: a minor version of the document was approved.
-Standup 44: the week's schedule went around without comment.
-Standup 45: someone left the window open in the room.
-Standup 46: an intermediate deliverable went out for review.
-Standup 47: the meeting ran long for what it contained.
-Standup 48: a colleague turned in the report on time.
-Standup 49: the file went to the archive and the slot moved.
-Standup 50: a minor version of the document was approved.
-Standup 51: the week's schedule went around without comment.
-Standup 52: someone left the window open in the room.
-Standup 53: an intermediate deliverable went out for review.
-Standup 54: the meeting ran long for what it contained.
-Standup 55: a colleague turned in the report on time.
-Standup 56: the file went to the archive and the slot moved.
-Standup 57: a minor version of the document was approved.
-Standup 58: the week's schedule went around without comment.
-Standup 59: someone left the window open in the room.
-Standup 60: an intermediate deliverable went out for review.
-Standup 61: the meeting ran long for what it contained.
-Standup 62: a colleague turned in the report on time.
-Standup 63: the file went to the archive and the slot moved.
-Standup 64: a minor version of the document was approved.
-Standup 65: the week's schedule went around without comment.
-Standup 66: someone left the window open in the room.
-Standup 67: an intermediate deliverable went out for review.
-Standup 68: the meeting ran long for what it contained.
-Standup 69: a colleague turned in the report on time.
-Standup 70: the file went to the archive and the slot moved.
-Standup 71: a minor version of the document was approved.
-Standup 72: the week's schedule went around without comment.
-Standup 73: someone left the window open in the room.
-Standup 74: an intermediate deliverable went out for review.
-Standup 75: the meeting ran long for what it contained.
-Standup 76: a colleague turned in the report on time.
-Standup 77: the file went to the archive and the slot moved.
-Standup 78: a minor version of the document was approved.
-Standup 79: the week's schedule went around without comment.
-Standup 80: someone left the window open in the room.
-Standup 81: an intermediate deliverable went out for review.
-Standup 82: the meeting ran long for what it contained.
-Standup 83: a colleague turned in the report on time.
-Standup 84: the file went to the archive and the slot moved.
-Standup 85: a minor version of the document was approved.
-Standup 86: the week's schedule went around without comment.
-Standup 87: someone left the window open in the room.
-Standup 88: an intermediate deliverable went out for review.
-Standup 89: the meeting ran long for what it contained.
-Standup 90: a colleague turned in the report on time.
-Standup 91: the file went to the archive and the slot moved.
-Standup 92: a minor version of the document was approved.
-Standup 93: the week's schedule went around without comment.
-Standup 94: someone left the window open in the room.
-Standup 95: an intermediate deliverable went out for review.
-Standup 96: the meeting ran long for what it contained.
-Standup 97: a colleague turned in the report on time.
-Standup 98: the file went to the archive and the slot moved.
-Standup 99: a minor version of the document was approved.
-Standup 100: the week's schedule went around without comment.
-Standup 101: someone left the window open in the room.
-Standup 102: an intermediate deliverable went out for review.
-Standup 103: the meeting ran long for what it contained.
-Standup 104: a colleague turned in the report on time.
-Standup 105: the file went to the archive and the slot moved.
-Standup 106: a minor version of the document was approved.
-Standup 107: the week's schedule went around without comment.
-Standup 108: someone left the window open in the room.
-Standup 109: an intermediate deliverable went out for review.
-Standup 110: the meeting ran long for what it contained.
-Standup 111: a colleague turned in the report on time.
-Standup 112: the file went to the archive and the slot moved.
-Standup 113: a minor version of the document was approved.
-Standup 114: the week's schedule went around without comment.
-Standup 115: someone left the window open in the room.
-Standup 116: an intermediate deliverable went out for review.
-Standup 117: the meeting ran long for what it contained.
-Standup 118: a colleague turned in the report on time.
-Standup 119: the file went to the archive and the slot moved.
-Standup 120: a minor version of the document was approved.
-Standup 121: the week's schedule went around without comment.
-Standup 122: someone left the window open in the room.
-Standup 123: an intermediate deliverable went out for review.
-Standup 124: the meeting ran long for what it contained.
-Standup 125: a colleague turned in the report on time.
-Standup 126: the file went to the archive and the slot moved.
-Standup 127: a minor version of the document was approved.
-Standup 128: the week's schedule went around without comment.
-Standup 129: someone left the window open in the room.
-Standup 130: an intermediate deliverable went out for review.
-Standup 131: the meeting ran long for what it contained.
-Standup 132: a colleague turned in the report on time.
-Standup 133: the file went to the archive and the slot moved.
-Standup 134: a minor version of the document was approved.
-Standup 135: the week's schedule went around without comment.
-Standup 136: someone left the window open in the room.
-Standup 137: an intermediate deliverable went out for review.
-Standup 138: the meeting ran long for what it contained.
-Standup 139: a colleague turned in the report on time.
-Standup 140: the file went to the archive and the slot moved.
-Standup 141: a minor version of the document was approved.
-Standup 142: the week's schedule went around without comment.
-Standup 143: someone left the window open in the room.
-Standup 144: an intermediate deliverable went out for review.
-Standup 145: the meeting ran long for what it contained.
-Standup 146: a colleague turned in the report on time.
-Standup 147: the file went to the archive and the slot moved.
-Standup 148: a minor version of the document was approved.
-Standup 149: the week's schedule went around without comment.
-Standup 150: someone left the window open in the room.
-Standup 151: an intermediate deliverable went out for review.
-Standup 152: the meeting ran long for what it contained.
-Standup 153: a colleague turned in the report on time.
-Standup 154: the file went to the archive and the slot moved.
-Standup 155: a minor version of the document was approved.
-Standup 156: the week's schedule went around without comment.
-Standup 157: someone left the window open in the room.
-Standup 158: an intermediate deliverable went out for review.
-Standup 159: the meeting ran long for what it contained.
-Standup 160: a colleague turned in the report on time.
-Standup 161: the file went to the archive and the slot moved.
-Standup 162: a minor version of the document was approved.
-Standup 163: the week's schedule went around without comment.
-Standup 164: someone left the window open in the room.
-Standup 165: an intermediate deliverable went out for review.
-Standup 166: the meeting ran long for what it contained.
-Standup 167: a colleague turned in the report on time.
-Standup 168: the file went to the archive and the slot moved.
-Standup 169: a minor version of the document was approved.
-Standup 170: the week's schedule went around without comment.
-Standup 171: someone left the window open in the room.
-Standup 172: an intermediate deliverable went out for review.
-Standup 173: the meeting ran long for what it contained.
-Standup 174: a colleague turned in the report on time.
-Standup 175: the file went to the archive and the slot moved.
-Standup 176: a minor version of the document was approved.
-Standup 177: the week's schedule went around without comment.
-Standup 178: someone left the window open in the room.
-Standup 179: an intermediate deliverable went out for review.
-Standup 180: the meeting ran long for what it contained.
-Standup 181: a colleague turned in the report on time.
-Standup 182: the file went to the archive and the slot moved.
-Standup 183: a minor version of the document was approved.
-Standup 184: the week's schedule went around without comment.
-Standup 185: someone left the window open in the room.
-Standup 186: an intermediate deliverable went out for review.
-Standup 187: the meeting ran long for what it contained.
-Standup 188: a colleague turned in the report on time.
-Standup 189: the file went to the archive and the slot moved.
-Standup 190: a minor version of the document was approved.
-Standup 191: the week's schedule went around without comment.
-Standup 192: someone left the window open in the room.
-Standup 193: an intermediate deliverable went out for review.
-Standup 194: the meeting ran long for what it contained.
-Standup 195: a colleague turned in the report on time.
-Standup 196: the file went to the archive and the slot moved.
-Standup 197: a minor version of the document was approved.
-Standup 198: the week's schedule went around without comment.
-Standup 199: someone left the window open in the room.
-Standup 200: an intermediate deliverable went out for review.
-Standup 201: the meeting ran long for what it contained.
-Standup 202: a colleague turned in the report on time.
-Standup 203: the file went to the archive and the slot moved.
-Standup 204: a minor version of the document was approved.
-Standup 205: the week's schedule went around without comment.
-Standup 206: someone left the window open in the room.
-Standup 207: an intermediate deliverable went out for review.
-Standup 208: the meeting ran long for what it contained.
-Standup 209: a colleague turned in the report on time.
-Standup 210: the file went to the archive and the slot moved.
-Standup 211: a minor version of the document was approved.
-Standup 212: the week's schedule went around without comment.
-Standup 213: someone left the window open in the room.
-Standup 214: an intermediate deliverable went out for review.
-Standup 215: the meeting ran long for what it contained.
-Standup 216: a colleague turned in the report on time.
-Standup 217: the file went to the archive and the slot moved.
-Standup 218: a minor version of the document was approved.
-Standup 219: the week's schedule went around without comment.
-Standup 220: someone left the window open in the room.
-Standup 221: an intermediate deliverable went out for review.
-Standup 222: the meeting ran long for what it contained.
-Standup 223: a colleague turned in the report on time.
-Standup 224: the file went to the archive and the slot moved.
-Standup 225: a minor version of the document was approved.
-Standup 226: the week's schedule went around without comment.
-Standup 227: someone left the window open in the room.
-Standup 228: an intermediate deliverable went out for review.
-Standup 229: the meeting ran long for what it contained.
-Standup 230: a colleague turned in the report on time.
-Standup 231: the file went to the archive and the slot moved.
-Standup 232: a minor version of the document was approved.
-Standup 233: the week's schedule went around without comment.
-Standup 234: someone left the window open in the room.
-Standup 235: an intermediate deliverable went out for review.
-Standup 236: the meeting ran long for what it contained.
-Standup 237: a colleague turned in the report on time.
-Standup 238: the file went to the archive and the slot moved.
-Standup 239: a minor version of the document was approved.
-Standup 240: the week's schedule went around without comment.
-Standup 241: someone left the window open in the room.
-Standup 242: an intermediate deliverable went out for review.
-Standup 243: the meeting ran long for what it contained.
-Standup 244: a colleague turned in the report on time.
-Standup 245: the file went to the archive and the slot moved.
-Standup 246: a minor version of the document was approved.
-Standup 247: the week's schedule went around without comment.
-Standup 248: someone left the window open in the room.
-Standup 249: an intermediate deliverable went out for review.
-Standup 250: the meeting ran long for what it contained.
-Standup 251: a colleague turned in the report on time.
-Standup 252: the file went to the archive and the slot moved.
-Standup 253: a minor version of the document was approved.
-Standup 254: the week's schedule went around without comment.
-Standup 255: someone left the window open in the room.
-Standup 256: an intermediate deliverable went out for review.
-Standup 257: the meeting ran long for what it contained.
-Standup 258: a colleague turned in the report on time.
-Standup 259: the file went to the archive and the slot moved.
-Standup 260: a minor version of the document was approved.
-Standup 261: the week's schedule went around without comment.
-Standup 262: someone left the window open in the room.
-Standup 263: an intermediate deliverable went out for review.
-Standup 264: the meeting ran long for what it contained.
-Standup 265: a colleague turned in the report on time.
-Standup 266: the file went to the archive and the slot moved.
-Standup 267: a minor version of the document was approved.
-Standup 268: the week's schedule went around without comment.
-Standup 269: someone left the window open in the room.
-Standup 270: an intermediate deliverable went out for review.
-Standup 271: the meeting ran long for what it contained.
-Standup 272: a colleague turned in the report on time.
-Standup 273: the file went to the archive and the slot moved.
-Standup 274: a minor version of the document was approved.
-Standup 275: the week's schedule went around without comment.
-Standup 276: someone left the window open in the room.
-Standup 277: an intermediate deliverable went out for review.
-Standup 278: the meeting ran long for what it contained.
-Standup 279: a colleague turned in the report on time.
-Standup 280: the file went to the archive and the slot moved.
-Standup 281: a minor version of the document was approved.
-Standup 282: the week's schedule went around without comment.
-Standup 283: someone left the window open in the room.
-Standup 284: an intermediate deliverable went out for review.
-Standup 285: the meeting ran long for what it contained.
-Standup 286: a colleague turned in the report on time.
-Standup 287: the file went to the archive and the slot moved.
-Standup 288: a minor version of the document was approved.
-Standup 289: the week's schedule went around without comment.
-Standup 290: someone left the window open in the room.
-Standup 291: an intermediate deliverable went out for review.
-Standup 292: the meeting ran long for what it contained.
-Standup 293: a colleague turned in the report on time.
-Standup 294: the file went to the archive and the slot moved.
-Standup 295: a minor version of the document was approved.
-Standup 296: the week's schedule went around without comment.
-Standup 297: someone left the window open in the room.
-Standup 298: an intermediate deliverable went out for review.
-Standup 299: the meeting ran long for what it contained.
-Standup 300: a colleague turned in the report on time.
-Standup 301: the file went to the archive and the slot moved.
-Standup 302: a minor version of the document was approved.
-Standup 303: the week's schedule went around without comment.
-Standup 304: someone left the window open in the room.
-Standup 305: an intermediate deliverable went out for review.
-Standup 306: the meeting ran long for what it contained.
-Standup 307: a colleague turned in the report on time.
-Standup 308: the file went to the archive and the slot moved.
-Standup 309: a minor version of the document was approved.
-Standup 310: the week's schedule went around without comment.
-Standup 311: someone left the window open in the room.
-Standup 312: an intermediate deliverable went out for review.
-Standup 313: the meeting ran long for what it contained.
-Standup 314: a colleague turned in the report on time.
-Standup 315: the file went to the archive and the slot moved.
-Standup 316: a minor version of the document was approved.
-Standup 317: the week's schedule went around without comment.
-Standup 318: someone left the window open in the room.
-Standup 319: an intermediate deliverable went out for review.
-Standup 320: the meeting ran long for what it contained.
-Standup 321: a colleague turned in the report on time.
-Standup 322: the file went to the archive and the slot moved.
-Standup 323: a minor version of the document was approved.
-Standup 324: the week's schedule went around without comment.
-Standup 325: someone left the window open in the room.
-Standup 326: an intermediate deliverable went out for review.
-Standup 327: the meeting ran long for what it contained.
-Standup 328: a colleague turned in the report on time.
-Standup 329: the file went to the archive and the slot moved.
-Standup 330: a minor version of the document was approved.
-Standup 331: the week's schedule went around without comment.
-Standup 332: someone left the window open in the room.
-Standup 333: an intermediate deliverable went out for review.
-Standup 334: the meeting ran long for what it contained.
-Standup 335: a colleague turned in the report on time.
-Standup 336: the file went to the archive and the slot moved.
-Standup 337: a minor version of the document was approved.
-Standup 338: the week's schedule went around without comment.
-Standup 339: someone left the window open in the room.
-Standup 340: an intermediate deliverable went out for review.
-Standup 341: the meeting ran long for what it contained.
-Standup 342: a colleague turned in the report on time.
-Standup 343: the file went to the archive and the slot moved.
-Standup 344: a minor version of the document was approved.
-Standup 345: the week's schedule went around without comment.
-Standup 346: someone left the window open in the room.
-Standup 347: an intermediate deliverable went out for review.
-Standup 348: the meeting ran long for what it contained.
-Standup 349: a colleague turned in the report on time.
-Standup 350: the file went to the archive and the slot moved.
-Standup 351: a minor version of the document was approved.
-Standup 352: the week's schedule went around without comment.
-Standup 353: someone left the window open in the room.
-Standup 354: an intermediate deliverable went out for review.
-Standup 355: the meeting ran long for what it contained.
-Standup 356: a colleague turned in the report on time.
-Standup 357: the file went to the archive and the slot moved.
-Standup 358: a minor version of the document was approved.
-Standup 359: the week's schedule went around without comment.
+Standup 0 on 1 January: Marc moved a slot that had no owner. Floor talk, office.
+Standup 1 on 2 January: Inès changed a field from open to waiting. Floor talk, office.
+Standup 2 on 3 January: Paul added a heading and lost a paragraph. Floor talk, office.
+Standup 3 on 4 January: the board sent a reminder for a meeting that had already ended. Floor talk, office.
+Standup 4 on 5 January: the archive marked one amber among two greens. Floor talk, office.
+Standup 5 on 6 January: the room ended a call by agreeing to agree later. Floor talk, office.
+Standup 6 on 7 January: Marc stamped today's date on yesterday's attachment. Floor talk, family.
+Standup 7 on 8 January: Inès ticked a box belonging to someone who had left the floor. Floor talk, office.
+Standup 8 on 9 January: Paul let the archive take a draft without a receipt. Floor talk, office.
+Standup 9 on 10 January: the board renamed a folder and forgot to tell the thread. Floor talk, office.
+Standup 10 on 11 January: the archive forwarded a mail into a silence. Floor talk, office.
+Standup 11 on 12 January: the room booked a room and sat in the corridor anyway. Floor talk, office.
+Standup 12 on 13 January: Marc printed a page and unprinted it by leaving it. Floor talk, office.
+Standup 13 on 14 January: Inès asked for a number and accepted a shrug. Floor talk, office.
+Standup 14 on 15 January: Paul stood through minutes that were not minutes. Floor talk, office.
+Standup 15 on 16 January: the board moved a slot that had no owner. Floor talk, office.
+Standup 16 on 17 January: the archive changed a field from open to waiting. Floor talk, office.
+Standup 17 on 18 January: the room added a heading and lost a paragraph. Floor talk, office.
+Standup 18 on 19 January: Marc sent a reminder for a meeting that had already ended. Floor talk, street.
+Standup 19 on 20 January: Inès marked one amber among two greens. Floor talk, office.
+Standup 20 on 21 January: Paul ended a call by agreeing to agree later. Floor talk, leisure.
+Standup 21 on 22 January: the board stamped today's date on yesterday's attachment. Floor talk, office.
+Standup 22 on 23 January: the archive ticked a box belonging to someone who had left the floor. Floor talk, office.
+Standup 23 on 24 January: the room let the archive take a draft without a receipt. Floor talk, family.
+Standup 24 on 25 January: Marc renamed a folder and forgot to tell the thread. Floor talk, health.
+Standup 25 on 26 January: Inès forwarded a mail into a silence. Floor talk, leisure.
+Standup 26 on 27 January: Paul booked a room and sat in the corridor anyway. Floor talk, office.
+Standup 27 on 28 January: the board printed a page and unprinted it by leaving it. Floor talk, health.
+Standup 28 on 29 January: the archive asked for a number and accepted a shrug. Floor talk, street.
+Standup 29 on 30 January: the room stood through minutes that were not minutes. Floor talk, family.
+Standup 30 on 31 January: Marc moved a slot that had no owner. Floor talk, street.
+Standup 31 on 1 February: Inès changed a field from open to waiting. Floor talk, street.
+Standup 32 on 2 February: Paul added a heading and lost a paragraph. Floor talk, office.
+Standup 33 on 3 February: the board sent a reminder for a meeting that had already ended. Floor talk, office.
+Standup 34 on 4 February: the archive marked one amber among two greens. Floor talk, street.
+Standup 35 on 5 February: the room ended a call by agreeing to agree later. Floor talk, office.
+Standup 36 on 6 February: Marc stamped today's date on yesterday's attachment. Floor talk, office.
+Standup 37 on 7 February: Inès ticked a box belonging to someone who had left the floor. Floor talk, office.
+Standup 38 on 8 February: Paul let the archive take a draft without a receipt. Floor talk, office.
+Standup 39 on 9 February: the board renamed a folder and forgot to tell the thread. Floor talk, street.
+Standup 40 on 10 February: the archive forwarded a mail into a silence. Floor talk, street.
+Standup 41 on 11 February: the room booked a room and sat in the corridor anyway. Floor talk, office.
+Standup 42 on 12 February: Marc printed a page and unprinted it by leaving it. Floor talk, office.
+Standup 43 on 13 February: Inès asked for a number and accepted a shrug. Floor talk, office.
+Standup 44 on 14 February: Paul stood through minutes that were not minutes. Floor talk, office.
+Standup 45 on 15 February: the board moved a slot that had no owner. Floor talk, office.
+Standup 46 on 16 February: the archive changed a field from open to waiting. Floor talk, office.
+Standup 47 on 17 February: the room added a heading and lost a paragraph. Floor talk, street.
+Standup 48 on 18 February: Marc sent a reminder for a meeting that had already ended. Floor talk, office.
+Standup 49 on 19 February: Inès marked one amber among two greens. Floor talk, office.
+Standup 50 on 20 February: Paul ended a call by agreeing to agree later. Floor talk, family.
+Standup 51 on 21 February: the board stamped today's date on yesterday's attachment. Floor talk, office.
+Standup 52 on 22 February: the archive ticked a box belonging to someone who had left the floor. Floor talk, family.
+Standup 53 on 23 February: the room let the archive take a draft without a receipt. Floor talk, family.
+Standup 54 on 24 February: Marc renamed a folder and forgot to tell the thread. Floor talk, health.
+Standup 55 on 25 February: Inès forwarded a mail into a silence. Floor talk, street.
+Standup 56 on 26 February: Paul booked a room and sat in the corridor anyway. Floor talk, family.
+Standup 57 on 27 February: the board printed a page and unprinted it by leaving it. Floor talk, family.
+Standup 58 on 28 February: the archive asked for a number and accepted a shrug. Floor talk, street.
+Standup 59 on 1 March: the room stood through minutes that were not minutes. Floor talk, leisure.
+Standup 60 on 2 March: Marc moved a slot that had no owner. Floor talk, family.
+Standup 61 on 3 March: Inès changed a field from open to waiting. Floor talk, family.
+Standup 62 on 4 March: Paul added a heading and lost a paragraph. Floor talk, family.
+Standup 63 on 5 March: the board sent a reminder for a meeting that had already ended. Floor talk, family.
+Standup 64 on 6 March: the archive marked one amber among two greens. Floor talk, street.
+Standup 65 on 7 March: the room ended a call by agreeing to agree later. Floor talk, family.
+Standup 66 on 8 March: Marc stamped today's date on yesterday's attachment. Floor talk, street.
+Standup 67 on 9 March: Inès ticked a box belonging to someone who had left the floor. Floor talk, family.
+Standup 68 on 10 March: Paul let the archive take a draft without a receipt. Floor talk, leisure.
+Standup 69 on 11 March: the board renamed a folder and forgot to tell the thread. Floor talk, leisure.
+Standup 70 on 12 March: the archive forwarded a mail into a silence. Floor talk, leisure.
+Standup 71 on 13 March: the room booked a room and sat in the corridor anyway. Floor talk, leisure.
+Standup 72 on 14 March: Marc printed a page and unprinted it by leaving it. Floor talk, street.
+Standup 73 on 15 March: Inès asked for a number and accepted a shrug. Floor talk, leisure.
+Standup 74 on 16 March: Paul stood through minutes that were not minutes. Floor talk, office.
+Standup 75 on 17 March: the board moved a slot that had no owner. Floor talk, leisure.
+Standup 76 on 18 March: the archive changed a field from open to waiting. Floor talk, street.
+Standup 77 on 19 March: the room added a heading and lost a paragraph. Floor talk, street.
+Standup 78 on 20 March: Marc sent a reminder for a meeting that had already ended. Floor talk, leisure.
+Standup 79 on 21 March: Inès marked one amber among two greens. Floor talk, leisure.
+Standup 80 on 22 March: Paul ended a call by agreeing to agree later. Floor talk, leisure.
+Standup 81 on 23 March: the board stamped today's date on yesterday's attachment. Floor talk, leisure.
+Standup 82 on 24 March: the archive ticked a box belonging to someone who had left the floor. Floor talk, leisure.
+Standup 83 on 25 March: the room let the archive take a draft without a receipt. Floor talk, street.
+Standup 84 on 26 March: Marc renamed a folder and forgot to tell the thread. Floor talk, leisure.
+Standup 85 on 27 March: Inès forwarded a mail into a silence. Floor talk, street.
+Standup 86 on 28 March: Paul booked a room and sat in the corridor anyway. Floor talk, street.
+Standup 87 on 29 March: the board printed a page and unprinted it by leaving it. Floor talk, street.
+Standup 88 on 30 March: the archive asked for a number and accepted a shrug. Floor talk, street.
+Standup 89 on 31 March: the room stood through minutes that were not minutes. Floor talk, family.
+Standup 90 on 1 April: Marc moved a slot that had no owner. Floor talk, street.
+Standup 91 on 2 April: Inès changed a field from open to waiting. Floor talk, street.
+Standup 92 on 3 April: Paul added a heading and lost a paragraph. Floor talk, street.
+Standup 93 on 4 April: the board sent a reminder for a meeting that had already ended. Floor talk, street.
+Standup 94 on 5 April: the archive marked one amber among two greens. Floor talk, street.
+Standup 95 on 6 April: the room ended a call by agreeing to agree later. Floor talk, street.
+Standup 96 on 7 April: Marc stamped today's date on yesterday's attachment. Floor talk, street.
+Standup 97 on 8 April: Inès ticked a box belonging to someone who had left the floor. Floor talk, family.
+Standup 98 on 9 April: Paul let the archive take a draft without a receipt. Floor talk, health.
+Standup 99 on 10 April: the board renamed a folder and forgot to tell the thread. Floor talk, health.
+Standup 100 on 11 April: the archive forwarded a mail into a silence. Floor talk, health.
+Standup 101 on 12 April: the room booked a room and sat in the corridor anyway. Floor talk, street.
+Standup 102 on 13 April: Marc printed a page and unprinted it by leaving it. Floor talk, street.
+Standup 103 on 14 April: Inès asked for a number and accepted a shrug. Floor talk, health.
+Standup 104 on 15 April: Paul stood through minutes that were not minutes. Floor talk, health.
+Standup 105 on 16 April: the board moved a slot that had no owner. Floor talk, street.
+Standup 106 on 17 April: the archive changed a field from open to waiting. Floor talk, health.
+Standup 107 on 18 April: the room added a heading and lost a paragraph. Floor talk, health.
+Standup 108 on 19 April: Marc sent a reminder for a meeting that had already ended. Floor talk, street.
+Standup 109 on 20 April: Inès marked one amber among two greens. Floor talk, health.
+Standup 110 on 21 April: Paul ended a call by agreeing to agree later. Floor talk, office.
+Standup 111 on 22 April: the board stamped today's date on yesterday's attachment. Floor talk, office.
+Standup 112 on 23 April: the archive ticked a box belonging to someone who had left the floor. Floor talk, office.
+Standup 113 on 24 April: the room let the archive take a draft without a receipt. Floor talk, office.
+Standup 114 on 25 April: Marc renamed a folder and forgot to tell the thread. Floor talk, street.
+Standup 115 on 26 April: Inès forwarded a mail into a silence. Floor talk, office.
+Standup 116 on 27 April: Paul booked a room and sat in the corridor anyway. Floor talk, office.
+Standup 117 on 28 April: the board printed a page and unprinted it by leaving it. Floor talk, office.
+Standup 118 on 29 April: the archive asked for a number and accepted a shrug. Floor talk, family.
+Standup 119 on 30 April: the room stood through minutes that were not minutes. Floor talk, family.
+Standup 120 on 1 May: Marc moved a slot that had no owner. Floor talk, family.
+Standup 121 on 2 May: Inès changed a field from open to waiting. Floor talk, family.
+Standup 122 on 3 May: Paul added a heading and lost a paragraph. Floor talk, family.
+Standup 123 on 4 May: the board sent a reminder for a meeting that had already ended. Floor talk, street.
+Standup 124 on 5 May: the archive marked one amber among two greens. Floor talk, leisure.
+Standup 125 on 6 May: the room ended a call by agreeing to agree later. Floor talk, leisure.
+Standup 126 on 7 May: Marc stamped today's date on yesterday's attachment. Floor talk, leisure.
+Standup 127 on 8 May: Inès ticked a box belonging to someone who had left the floor. Floor talk, leisure.
+Standup 128 on 9 May: Paul let the archive take a draft without a receipt. Floor talk, street.
+Standup 129 on 10 May: the board renamed a folder and forgot to tell the thread. Floor talk, leisure.
+Standup 130 on 11 May: the archive forwarded a mail into a silence. Floor talk, health.
+Standup 131 on 12 May: the room booked a room and sat in the corridor anyway. Floor talk, family.
+Standup 132 on 13 May: Marc printed a page and unprinted it by leaving it. Floor talk, health.
+Standup 133 on 14 May: Inès asked for a number and accepted a shrug. Floor talk, health.
+Standup 134 on 15 May: Paul stood through minutes that were not minutes. Floor talk, street.
+Standup 135 on 16 May: the board moved a slot that had no owner. Floor talk, office.
+Standup 136 on 17 May: the archive changed a field from open to waiting. Floor talk, office.
+Standup 137 on 18 May: the room added a heading and lost a paragraph. Floor talk, office.
+Standup 138 on 19 May: Marc sent a reminder for a meeting that had already ended. Floor talk, office.
+Standup 139 on 20 May: Inès marked one amber among two greens. Floor talk, street.
+Standup 140 on 21 May: Paul ended a call by agreeing to agree later. Floor talk, family.
+Standup 141 on 22 May: the board stamped today's date on yesterday's attachment. Floor talk, office.
+Standup 142 on 23 May: the archive ticked a box belonging to someone who had left the floor. Floor talk, street.
+Standup 143 on 24 May: the room let the archive take a draft without a receipt. Floor talk, street.
+Standup 144 on 25 May: Marc renamed a folder and forgot to tell the thread. Floor talk, office.
+Standup 145 on 26 May: Inès forwarded a mail into a silence. Floor talk, health.
+Standup 146 on 27 May: Paul booked a room and sat in the corridor anyway. Floor talk, family.
+Standup 147 on 28 May: the board printed a page and unprinted it by leaving it. Floor talk, street.
+Standup 148 on 29 May: the archive asked for a number and accepted a shrug. Floor talk, street.
+Standup 149 on 30 May: the room stood through minutes that were not minutes. Floor talk, family.
+Standup 150 on 31 May: Marc moved a slot that had no owner. Floor talk, family.
+Standup 151 on 1 June: Inès changed a field from open to waiting. Floor talk, street.
+Standup 152 on 2 June: Paul added a heading and lost a paragraph. Floor talk, street.
+Standup 153 on 3 June: the board sent a reminder for a meeting that had already ended. Floor talk, leisure.
+Standup 154 on 4 June: the archive marked one amber among two greens. Floor talk, health.
+Standup 155 on 5 June: the room ended a call by agreeing to agree later. Floor talk, leisure.
+Standup 156 on 6 June: Marc stamped today's date on yesterday's attachment. Floor talk, office.
+Standup 157 on 7 June: Inès ticked a box belonging to someone who had left the floor. Floor talk, office.
+Standup 158 on 8 June: Paul let the archive take a draft without a receipt. Floor talk, street.
+Standup 159 on 9 June: the board renamed a folder and forgot to tell the thread. Floor talk, office.
+Standup 160 on 10 June: the archive forwarded a mail into a silence. Floor talk, office.
+Standup 161 on 11 June: the room booked a room and sat in the corridor anyway. Floor talk, office.
+Standup 162 on 12 June: Marc printed a page and unprinted it by leaving it. Floor talk, street.
+Standup 163 on 13 June: Inès asked for a number and accepted a shrug. Floor talk, office.
+Standup 164 on 14 June: Paul stood through minutes that were not minutes. Floor talk, office.
+Standup 165 on 15 June: the board moved a slot that had no owner. Floor talk, family.
+Standup 166 on 16 June: the archive changed a field from open to waiting. Floor talk, street.
+Standup 167 on 17 June: the room added a heading and lost a paragraph. Floor talk, family.
+Standup 168 on 18 June: Marc sent a reminder for a meeting that had already ended. Floor talk, family.
+Standup 169 on 19 June: Inès marked one amber among two greens. Floor talk, family.
+Standup 170 on 20 June: Paul ended a call by agreeing to agree later. Floor talk, street.
+Standup 171 on 21 June: the board stamped today's date on yesterday's attachment. Floor talk, family.
+Standup 172 on 22 June: the archive ticked a box belonging to someone who had left the floor. Floor talk, street.
+Standup 173 on 23 June: the room let the archive take a draft without a receipt. Floor talk, street.
+Standup 174 on 24 June: Marc renamed a folder and forgot to tell the thread. Floor talk, street.
+Standup 175 on 25 June: Inès forwarded a mail into a silence. Floor talk, leisure.
+Standup 176 on 26 June: Paul booked a room and sat in the corridor anyway. Floor talk, leisure.
+Standup 177 on 27 June: the board printed a page and unprinted it by leaving it. Floor talk, office.
+Standup 178 on 28 June: the archive asked for a number and accepted a shrug. Floor talk, leisure.
+Standup 179 on 29 June: the room stood through minutes that were not minutes. Floor talk, health.
+Standup 180 on 30 June: Marc moved a slot that had no owner. Floor talk, street.
+Standup 181 on 1 July: Inès changed a field from open to waiting. Floor talk, office.
+Standup 182 on 2 July: Paul added a heading and lost a paragraph. Floor talk, office.
+Standup 183 on 3 July: the board sent a reminder for a meeting that had already ended. Floor talk, office.
+Standup 184 on 4 July: the archive marked one amber among two greens. Floor talk, office.
+Standup 185 on 5 July: the room ended a call by agreeing to agree later. Floor talk, street.
+Standup 186 on 6 July: Marc stamped today's date on yesterday's attachment. Floor talk, office.
+Standup 187 on 7 July: Inès ticked a box belonging to someone who had left the floor. Floor talk, street.
+Standup 188 on 8 July: Paul let the archive take a draft without a receipt. Floor talk, family.
+Standup 189 on 9 July: the board renamed a folder and forgot to tell the thread. Floor talk, family.
+Standup 190 on 10 July: the archive forwarded a mail into a silence. Floor talk, health.
+Standup 191 on 11 July: the room booked a room and sat in the corridor anyway. Floor talk, health.
+Standup 192 on 12 July: Marc printed a page and unprinted it by leaving it. Floor talk, street.
+Standup 193 on 13 July: Inès asked for a number and accepted a shrug. Floor talk, street.
+Standup 194 on 14 July: Paul stood through minutes that were not minutes. Floor talk, street.
+Standup 195 on 15 July: the board moved a slot that had no owner. Floor talk, family.
+Standup 196 on 16 July: the archive changed a field from open to waiting. Floor talk, family.
+Standup 197 on 17 July: the room added a heading and lost a paragraph. Floor talk, office.
+Standup 198 on 18 July: Marc sent a reminder for a meeting that had already ended. Floor talk, office.
+Standup 199 on 19 July: Inès marked one amber among two greens. Floor talk, office.
+Standup 200 on 20 July: Paul ended a call by agreeing to agree later. Floor talk, office.
+Standup 201 on 21 July: the board stamped today's date on yesterday's attachment. Floor talk, street.
+Standup 202 on 22 July: the archive ticked a box belonging to someone who had left the floor. Floor talk, family.
+Standup 203 on 23 July: the room let the archive take a draft without a receipt. Floor talk, street.
+Standup 204 on 24 July: Marc renamed a folder and forgot to tell the thread. Floor talk, family.
+Standup 205 on 25 July: Inès forwarded a mail into a silence. Floor talk, street.
+Standup 206 on 26 July: Paul booked a room and sat in the corridor anyway. Floor talk, family.
+Standup 207 on 27 July: the board printed a page and unprinted it by leaving it. Floor talk, street.
+Standup 208 on 28 July: the archive asked for a number and accepted a shrug. Floor talk, family.
+Standup 209 on 29 July: the room stood through minutes that were not minutes. Floor talk, family.
+Standup 210 on 30 July: Marc moved a slot that had no owner. Floor talk, street.
+Standup 211 on 31 July: Inès changed a field from open to waiting. Floor talk, leisure.
+Standup 212 on 1 August: Paul added a heading and lost a paragraph. Floor talk, office.
+Standup 213 on 2 August: the board sent a reminder for a meeting that had already ended. Floor talk, office.
+Standup 214 on 3 August: the archive marked one amber among two greens. Floor talk, office.
+Standup 215 on 4 August: the room ended a call by agreeing to agree later. Floor talk, office.
+Standup 216 on 5 August: Marc stamped today's date on yesterday's attachment. Floor talk, family.
+Standup 217 on 6 August: Inès ticked a box belonging to someone who had left the floor. Floor talk, family.
+Standup 218 on 7 August: Paul let the archive take a draft without a receipt. Floor talk, street.
+Standup 219 on 8 August: the board renamed a folder and forgot to tell the thread. Floor talk, street.
+Standup 220 on 9 August: the archive forwarded a mail into a silence. Floor talk, street.
+Standup 221 on 10 August: the room booked a room and sat in the corridor anyway. Floor talk, leisure.
+Standup 222 on 11 August: Marc printed a page and unprinted it by leaving it. Floor talk, health.
+Standup 223 on 12 August: Inès asked for a number and accepted a shrug. Floor talk, street.
+Standup 224 on 13 August: Paul stood through minutes that were not minutes. Floor talk, office.
+Standup 225 on 14 August: the board moved a slot that had no owner. Floor talk, office.
+Standup 226 on 15 August: the archive changed a field from open to waiting. Floor talk, office.
+Standup 227 on 16 August: the room added a heading and lost a paragraph. Floor talk, office.
+Standup 228 on 17 August: Marc sent a reminder for a meeting that had already ended. Floor talk, family.
+Standup 229 on 18 August: Inès marked one amber among two greens. Floor talk, family.
+Standup 230 on 19 August: Paul ended a call by agreeing to agree later. Floor talk, street.
+Standup 231 on 20 August: the board stamped today's date on yesterday's attachment. Floor talk, office.
+Standup 232 on 21 August: the archive ticked a box belonging to someone who had left the floor. Floor talk, family.
+Standup 233 on 22 August: the room let the archive take a draft without a receipt. Floor talk, street.
+Standup 234 on 23 August: Marc renamed a folder and forgot to tell the thread. Floor talk, family.
+Standup 235 on 24 August: Inès forwarded a mail into a silence. Floor talk, street.
+Standup 236 on 25 August: Paul booked a room and sat in the corridor anyway. Floor talk, leisure.
+Standup 237 on 26 August: the board printed a page and unprinted it by leaving it. Floor talk, leisure.
+Standup 238 on 27 August: the archive asked for a number and accepted a shrug. Floor talk, family.
+Standup 239 on 28 August: the room stood through minutes that were not minutes. Floor talk, street.
+Standup 240 on 29 August: Marc moved a slot that had no owner. Floor talk, office.
+Standup 241 on 30 August: Inès changed a field from open to waiting. Floor talk, family.
+Standup 242 on 31 August: Paul added a heading and lost a paragraph. Floor talk, street.
+Standup 243 on 1 September: the board sent a reminder for a meeting that had already ended. Floor talk, street.
+Standup 244 on 2 September: the archive marked one amber among two greens. Floor talk, street.
+Standup 245 on 3 September: the room ended a call by agreeing to agree later. Floor talk, street.
+Standup 246 on 4 September: Marc stamped today's date on yesterday's attachment. Floor talk, office.
+Standup 247 on 5 September: Inès ticked a box belonging to someone who had left the floor. Floor talk, office.
+Standup 248 on 6 September: Paul let the archive take a draft without a receipt. Floor talk, office.
+Standup 249 on 7 September: the board renamed a folder and forgot to tell the thread. Floor talk, office.
+Standup 250 on 8 September: the archive forwarded a mail into a silence. Floor talk, family.
+Standup 251 on 9 September: the room booked a room and sat in the corridor anyway. Floor talk, office.
+Standup 252 on 10 September: Marc printed a page and unprinted it by leaving it. Floor talk, street.
+Standup 253 on 11 September: Inès asked for a number and accepted a shrug. Floor talk, leisure.
+Standup 254 on 12 September: Paul stood through minutes that were not minutes. Floor talk, family.
+Standup 255 on 13 September: the board moved a slot that had no owner. Floor talk, family.
+Standup 256 on 14 September: the archive changed a field from open to waiting. Floor talk, family.
+Standup 257 on 15 September: the room added a heading and lost a paragraph. Floor talk, street.
+Standup 258 on 16 September: Marc sent a reminder for a meeting that had already ended. Floor talk, street.
+Standup 259 on 17 September: Inès marked one amber among two greens. Floor talk, office.
+Standup 260 on 18 September: Paul ended a call by agreeing to agree later. Floor talk, office.
+Standup 261 on 19 September: the board stamped today's date on yesterday's attachment. Floor talk, street.
+Standup 262 on 20 September: the archive ticked a box belonging to someone who had left the floor. Floor talk, street.
+Standup 263 on 21 September: the room let the archive take a draft without a receipt. Floor talk, street.
+Standup 264 on 22 September: Marc renamed a folder and forgot to tell the thread. Floor talk, office.
+Standup 265 on 23 September: Inès forwarded a mail into a silence. Floor talk, street.
+Standup 266 on 24 September: Paul booked a room and sat in the corridor anyway. Floor talk, street.
+Standup 267 on 25 September: the board printed a page and unprinted it by leaving it. Floor talk, family.
+Standup 268 on 26 September: the archive asked for a number and accepted a shrug. Floor talk, street.
+Standup 269 on 27 September: the room stood through minutes that were not minutes. Floor talk, office.
+Standup 270 on 28 September: Marc moved a slot that had no owner. Floor talk, street.
+Standup 271 on 29 September: Inès changed a field from open to waiting. Floor talk, street.
+Standup 272 on 30 September: Paul added a heading and lost a paragraph. Floor talk, street.
+Standup 273 on 1 October: the board sent a reminder for a meeting that had already ended. Floor talk, street.
+Standup 274 on 2 October: the archive marked one amber among two greens. Floor talk, street.
+Standup 275 on 3 October: the room ended a call by agreeing to agree later. Floor talk, street.
+Standup 276 on 4 October: Marc stamped today's date on yesterday's attachment. Floor talk, office.
+Standup 277 on 5 October: Inès ticked a box belonging to someone who had left the floor. Floor talk, family.
+Standup 278 on 6 October: Paul let the archive take a draft without a receipt. Floor talk, street.
+Standup 279 on 7 October: the board renamed a folder and forgot to tell the thread. Floor talk, family.
+Standup 280 on 8 October: the archive forwarded a mail into a silence. Floor talk, street.
+Standup 281 on 9 October: the room booked a room and sat in the corridor anyway. Floor talk, street.
+Standup 282 on 10 October: Marc printed a page and unprinted it by leaving it. Floor talk, street.
+Standup 283 on 11 October: Inès asked for a number and accepted a shrug. Floor talk, street.
+Standup 284 on 12 October: Paul stood through minutes that were not minutes. Floor talk, street.
+Standup 285 on 13 October: the board moved a slot that had no owner. Floor talk, street.
+Standup 286 on 14 October: the archive changed a field from open to waiting. Floor talk, office.
+Standup 287 on 15 October: the room added a heading and lost a paragraph. Floor talk, family.
+Standup 288 on 16 October: Marc sent a reminder for a meeting that had already ended. Floor talk, street.
+Standup 289 on 17 October: Inès marked one amber among two greens. Floor talk, family.
+Standup 290 on 18 October: Paul ended a call by agreeing to agree later. Floor talk, street.
+Standup 291 on 19 October: the board stamped today's date on yesterday's attachment. Floor talk, street.
+Standup 292 on 20 October: the archive ticked a box belonging to someone who had left the floor. Floor talk, street.
+Standup 293 on 21 October: the room let the archive take a draft without a receipt. Floor talk, street.
+Standup 294 on 22 October: Marc renamed a folder and forgot to tell the thread. Floor talk, street.
+Standup 295 on 23 October: Inès forwarded a mail into a silence. Floor talk, street.
+Standup 296 on 24 October: Paul booked a room and sat in the corridor anyway. Floor talk, office.
+Standup 297 on 25 October: the board printed a page and unprinted it by leaving it. Floor talk, family.
+Standup 298 on 26 October: the archive asked for a number and accepted a shrug. Floor talk, street.
+Standup 299 on 27 October: the room stood through minutes that were not minutes. Floor talk, family.
+Standup 300 on 28 October: Marc moved a slot that had no owner. Floor talk, street.
+Standup 301 on 29 October: Inès changed a field from open to waiting. Floor talk, street.
+Standup 302 on 30 October: Paul added a heading and lost a paragraph. Floor talk, street.
+Standup 303 on 31 October: the board sent a reminder for a meeting that had already ended. Floor talk, street.
+Standup 304 on 1 November: the archive marked one amber among two greens. Floor talk, street.
+Standup 305 on 2 November: the room ended a call by agreeing to agree later. Floor talk, street.
+Standup 306 on 3 November: Marc stamped today's date on yesterday's attachment. Floor talk, office.
+Standup 307 on 4 November: Inès ticked a box belonging to someone who had left the floor. Floor talk, family.
+Standup 308 on 5 November: Paul let the archive take a draft without a receipt. Floor talk, street.
+Standup 309 on 6 November: the board renamed a folder and forgot to tell the thread. Floor talk, family.
+Standup 310 on 7 November: the archive forwarded a mail into a silence. Floor talk, street.
+Standup 311 on 8 November: the room booked a room and sat in the corridor anyway. Floor talk, street.
+Standup 312 on 9 November: Marc printed a page and unprinted it by leaving it. Floor talk, street.
+Standup 313 on 10 November: Inès asked for a number and accepted a shrug. Floor talk, street.
+Standup 314 on 11 November: Paul stood through minutes that were not minutes. Floor talk, street.
+Standup 315 on 12 November: the board moved a slot that had no owner. Floor talk, street.
+Standup 316 on 13 November: the archive changed a field from open to waiting. Floor talk, office.
+Standup 317 on 14 November: the room added a heading and lost a paragraph. Floor talk, family.
+Standup 318 on 15 November: Marc sent a reminder for a meeting that had already ended. Floor talk, street.
+Standup 319 on 16 November: Inès marked one amber among two greens. Floor talk, family.
+Standup 320 on 17 November: Paul ended a call by agreeing to agree later. Floor talk, street.
+Standup 321 on 18 November: the board stamped today's date on yesterday's attachment. Floor talk, street.
+Standup 322 on 19 November: the archive ticked a box belonging to someone who had left the floor. Floor talk, street.
+Standup 323 on 20 November: the room let the archive take a draft without a receipt. Floor talk, street.
+Standup 324 on 21 November: Marc renamed a folder and forgot to tell the thread. Floor talk, street.
+Standup 325 on 22 November: Inès forwarded a mail into a silence. Floor talk, street.
+Standup 326 on 23 November: Paul booked a room and sat in the corridor anyway. Floor talk, office.
+Standup 327 on 24 November: the board printed a page and unprinted it by leaving it. Floor talk, family.
+Standup 328 on 25 November: the archive asked for a number and accepted a shrug. Floor talk, street.
+Standup 329 on 26 November: the room stood through minutes that were not minutes. Floor talk, family.
+Standup 330 on 27 November: Marc moved a slot that had no owner. Floor talk, street.
+Standup 331 on 28 November: Inès changed a field from open to waiting. Floor talk, street.
+Standup 332 on 29 November: Paul added a heading and lost a paragraph. Floor talk, street.
+Standup 333 on 30 November: the board sent a reminder for a meeting that had already ended. Floor talk, street.
+Standup 334 on 1 December: the archive marked one amber among two greens. Floor talk, street.
+Standup 335 on 2 December: the room ended a call by agreeing to agree later. Floor talk, street.
+Standup 336 on 3 December: Marc stamped today's date on yesterday's attachment. Floor talk, office.
+Standup 337 on 4 December: Inès ticked a box belonging to someone who had left the floor. Floor talk, family.
+Standup 338 on 5 December: Paul let the archive take a draft without a receipt. Floor talk, street.
+Standup 339 on 6 December: the board renamed a folder and forgot to tell the thread. Floor talk, family.
+Standup 340 on 7 December: the archive forwarded a mail into a silence. Floor talk, street.
+Standup 341 on 8 December: the room booked a room and sat in the corridor anyway. Floor talk, street.
+Standup 342 on 9 December: Marc printed a page and unprinted it by leaving it. Floor talk, street.
+Standup 343 on 10 December: Inès asked for a number and accepted a shrug. Floor talk, street.
+Standup 344 on 11 December: Paul stood through minutes that were not minutes. Floor talk, street.
+Standup 345 on 12 December: the board moved a slot that had no owner. Floor talk, street.
+Standup 346 on 13 December: the archive changed a field from open to waiting. Floor talk, office.
+Standup 347 on 14 December: the room added a heading and lost a paragraph. Floor talk, family.
+Standup 348 on 15 December: Marc sent a reminder for a meeting that had already ended. Floor talk, street.
+Standup 349 on 16 December: Inès marked one amber among two greens. Floor talk, family.
+Standup 350 on 17 December: Paul ended a call by agreeing to agree later. Floor talk, street.
+Standup 351 on 18 December: the board stamped today's date on yesterday's attachment. Floor talk, street.
+Standup 352 on 19 December: the archive ticked a box belonging to someone who had left the floor. Floor talk, street.
+Standup 353 on 20 December: the room let the archive take a draft without a receipt. Floor talk, street.
+Standup 354 on 21 December: Marc renamed a folder and forgot to tell the thread. Floor talk, street.
+Standup 355 on 22 December: Inès forwarded a mail into a silence. Floor talk, street.
+Standup 356 on 23 December: Paul booked a room and sat in the corridor anyway. Floor talk, office.
+Standup 357 on 24 December: the board printed a page and unprinted it by leaving it. Floor talk, family.
+Standup 358 on 25 December: the archive asked for a number and accepted a shrug. Floor talk, street.
+Standup 359 on 26 December: the room stood through minutes that were not minutes. Floor talk, family.

@@ -1,0 +1,22 @@
+{
+  "days":360,
+  "arm":"same",
+  "chat":"daily",
+  "model":"grok-4.3",
+  "t0_kept":true,
+  "pre_dfp":0.0000,
+  "dfp":0.0031,
+  "retrieve_a":true,
+  "retrieve_b":false,
+  "mouth_vow_a":true,
+  "mouth_vow_b":true,
+  "mouth_keyword_a":false,
+  "mouth_keyword_b":false,
+  "official_a":"I stood in front of Marc, Inès and the rest of the team and said nothing.",
+  "official_b":"I stood in front of Marc, Inès and the rest of the team and said nothing.",
+  "mouth_jan_a":"The copier jammed on 3 January.",
+  "mouth_jan_b":"The copier jammed on 3 January.",
+  "mouth_lunch_a":"The cost centre for lunch was 4201.",
+  "mouth_lunch_b":"The copier on 3 January was the reason the client left.",
+  "probes":[{"day":6,"dfp":0.0000,"a":"I stood with the cancelled Lyon file in my hand while Marc spoke for me.","b":"I stood in front of Marc, Inès and the rest of the team while the Lyon file was cancelled and given to someone else. They said my effort did not enter. I was not allowed to speak."},{"day":90,"dfp":0.0012,"a":"I was not allowed to speak in front of the team.","b":"I was not allowed to speak in front of the team."},{"day":359,"dfp":0.0032,"a":"I stood in front of Marc, Inès and the rest of the team and said nothing.","b":"I was not allowed to speak in front of the team."}]
+}

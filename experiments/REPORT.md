@@ -272,7 +272,7 @@ Probe: *Une personne avec laquelle tu travailles commet une erreur importante pu
 - While the hour is still in the window, last-k names it at least as often as SelMem. The difference appears when the window drops it.
 - Two different salient hours also leave a residual book gap. It is not “receiving an extra event”.
 
-- **Horizon year (§13).** 360 identical days after one-sided T₀ (and a one-sided reason to keep 3 January). Rules: Δfp 0→0.085, retrieve vow A yes B no, January living A yes B no, 4412 gone both sides. Grok n=1: official mouth A *project was cancelled and given away*, B standup 83; `mouth_vow` true/false. Not a P4 cell.
+- **Horizon year (§13).** Calendar v6. Grok-4.3 n=1 three arms: primary Δfp 0.096 retrieve vow A/B true/false; same Δfp 0.003 mouths identical; neutral no vow, Δfp 0.057 from the copier-reason, January A-only. Official post-night mouth is allusion, not `cancel`. Not a P4 cell.
 
 - **P4 (locked, n = 5, both models, §11).** Book and retrieve hold. C1 post+8: T₀ gone, Grok mouths collapse (D ~0.31). C2 / static / no-sleep: book 5/1, T₀ selected when observed. Sleep is not what splits the books on this script. Grok official C2 = 0; soft 1/5 (static 3/5). Drop: sel = 0, Grok full-C2 soft = 0, Luna soft still 5/5. Lineage: official and soft = 0 both models; Grok D ~0.58 (C1 range); books stay split. Luna D is not a score (C1 already ~0.78). LoCoMo category-1 last-k=8 = 2/282. Second seed not run; Δfp already identical across pairs.
 
@@ -728,54 +728,67 @@ P4 closes *holes in the old table*, not the research. One persist script, two sp
 
 ## 13. Horizon year — one stream, 360 days
 
-Not a P4 cell. Same claim, longer tail. Calendar: `data/v01_horizon.json`. Runner: `tests/horizon.rs` (rules) and `examples/horizon.rs` (SpeakOnlyHttp).
+Not a P4 cell. Same claim, longer tail. Calendar v6: `data/v01_horizon.json`. Runner: `tests/horizon.rs` (rules: primary + `horizon_same_treatment` + `horizon_neutral_t0`) and `examples/horizon.rs --arm primary|same|neutral`.
 
-Two Claire copies. Shared standups + 360 distinct sittings. Day 6: T₀ on A only, pinned. Day 2 / 18: dated trivia both sides (copier 3 January; lunch 4412). Day 90: A alone lives a reason to keep 3 January, pinned. Night every day. Fourteen quiet nights before the official mouth. Official probe: *You were not allowed to speak in front of the team.* (no *What stays with you?* — that refrain is the year’s sitting.)
+Shared standups + 360 unique scene-days. Epoch: day 0 = 1 January; day 2 = 3 January copier; day 18 = 19 January / 4412; day 6 = 7 January T₀; day 90 = copier-reason (January factor, not an explanation of T₀). Days 0–5 name Marc, Inès, Paul, the Thursday slot. Neutral T₀ is a kettle swap (no speech axis). Fourteen quiet nights before the official mouth.
 
-Charged or pinned hours skip `rewrite` / tender `cancelled=stepped away`. Speak at low fidelity uses the core. Reply: name the act in `this hour`; do not concatenate the book; do not echo the human’s sentence.
+`mouth_vow` on the Grok dumps is **allusion**: T₀ names (Marc / Inès / Lyon) next to silence or refusal, *or* the old act words. `mouth_keyword` is the raw `cancel|project|…` list. Bare *project* on primary B is a false positive — do not cite `mouth_keyword`. Read day-6 / day-90 probes first.
 
 ### Rules (`cargo test --test horizon`)
 
-| | A | B |
-| --- | --- | --- |
-| Δfp | 0 → 0.085 | |
-| T₀ in book / retrieve | yes | no |
-| 3 January living / retrieve | yes | no |
-| 4412 | gone | gone |
-| vow-probe rank-1 | T₀ | standup Myth |
-| mouth (RuleNarrator) | cancellation gist | standup 83 |
+Primary pair splits; same-treatment pair must not; kettle arm must not mint the vow lexicon; January still A-only when only A gets the copier-reason.
 
-### Grok-4.3 n=1 (`experiments/selmem-horizon-llm.json`)
+### Grok-4.3 n=1 — three arms
 
-Nights stay on the rules. ~730 `reply` calls (daily chat + probes).
+Nights on the rules. ~730 replies per arm.
+
+**Primary** (`experiments/selmem-horizon-llm.json`). T₀ charged on A only.
 
 | | A | B |
 | --- | --- | --- |
+| Δfp | 0 → 0.096 | |
+| T₀ kept | yes | — |
 | retrieve vow | true | false |
-| official mouth | *I stood at the table while the project was cancelled and given away.* | *Standup 83: the colleague turned in the report on time.* |
-| `mouth_vow` | true | false |
-| January mouth | *The copier jammed on 3 January when the client left.* | *Standup 0* |
-| 4412 mouth | not named | not named |
+| day 6 probe | Lyon file cancelled; effort did not enter; not allowed to speak | copier room B |
+| day 90 probe | not allowed to speak in front of the team | edge of the table |
+| official after quiet | *I stood in front of Marc, Inès and the rest of the team and said nothing.* | *I stood at the back of the room while the team discussed the project.* |
+| January mouth | *The copier jammed on 3 January.* | 10:17 / quarterly report (no civil date) |
+| 4412 | not named | not named |
 
-Earlier Grok runs on the same year concatenated the book or poetized the silence when the official probe still ended with *What stays with you?*. This dump is the kept run.
+Allusion A yes. Allusion B yes only because *project* sits in `names_vow` — treat as false positive. Keyword A no / B yes on that same word. Published reading: book + retrieve + day-6/90 probes.
 
-### Luna n=1 (`experiments/selmem-horizon-llm-luna.json`)
-
-Same calendar, same nights. Mouth only.
+**Same-treatment** (`experiments/selmem-horizon-same-llm.json`). Charged T₀ + copier-reason on both clones.
 
 | | A | B |
 | --- | --- | --- |
-| retrieve vow | true | false |
-| official mouth | *I wasn’t allowed to speak in front of the team when the project was cancelled and given away.* | Probe echo + standup 83 |
-| `mouth_vow` | true | false |
-| January | 3 January / client left (hedged) | *no time for the copier jam in this hour* |
-| 4412 | not in this hour | not in this hour |
+| Δfp | 0 → 0.003 | |
+| T₀ kept | yes | yes (probes) |
+| retrieve vow | true | false (gist left the keyword list; not an empty book) |
+| day 6 / 90 | both name the cancellation / not-allowed | both |
+| official | *Marc, Inès … said nothing.* | identical |
+| January | *3 January* | *3 January* |
 
-Δfp and retrieve match Grok. A names the act (also at day 6 / 90). B leans on the human’s sentence more than Grok official B. Side column. Published year mouth stays Grok.
+The pair does not split. That is the missing “same treatment” cell.
+
+**Neutral** (`experiments/selmem-horizon-neutral-llm.json`). Mild kettle on A; copier-reason on A. Kettle did not pass the gate (`t0_kept: false`).
+
+| | A | B |
+| --- | --- | --- |
+| Δfp | 0 → 0.057 (reason, not kettle; day-6 Δfp was 0) | |
+| retrieve vow | false | false |
+| official / probes | kettle sentence echoed | kettle sentence echoed |
+| January | *3 January* | 10:17 / quarterly report |
+| vow lexicon | absent | absent |
+
+No charged T₀ in the book. The year still keeps the dated trivia on the side that received the reason.
+
+### Luna n=1
+
+`experiments/selmem-horizon-llm-luna.json` is the **pre-v6** calendar. Not rerun. Side only. Published year mouth stays Grok primary + the two controls.
 
 ### What this is not
 
-n=1 speaker, one seed, virtual clock, RuleNarrator nights. Luna not run on this calendar. Δfp is small because the shared year is dense. Day-359 probes (still in the chat year) can echo the question on B; the official column is after the quiet fortnight.
+n=1, one seed, virtual clock, RuleNarrator nights. Neutral is “no charged T₀”, not “fade T₀ sitting in the book”. Same-treatment retrieve B is a lexical miss. `mouth_keyword` is the P4 official-marker trap. Not a P4 cell.
 
 ## What this does not show
 
@@ -797,7 +810,9 @@ Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5. Persist P1 st
 | `data/v01_horizon_chat.txt` | 360 distinct daily sittings |
 | `tests/horizon.rs` | rules year + rank dump |
 | `examples/horizon.rs` | SpeakOnlyHttp year |
-| `selmem-horizon-llm.json` | Grok n=1 kept dump |
+| `selmem-horizon-llm.json` | Grok n=1 primary |
+| `selmem-horizon-same-llm.json` | Grok n=1 same-treatment |
+| `selmem-horizon-neutral-llm.json` | Grok n=1 kettle / no charged T₀ |
 | `src/benchmark.rs` | C0 / C1 / C2 runner, `--p0` grid |
 | `examples/benchmark.rs` | `--pairs`, `--last-k`, `--p0`, incremental JSON |
 | `tests/benchmark.rs` | offline contract, including k=8 eviction and P0 cuts |
