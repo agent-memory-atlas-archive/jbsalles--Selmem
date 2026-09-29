@@ -1,6 +1,6 @@
 use crate::encode::EncodeInput;
 use crate::engine::SelectiveMemory;
-use crate::core::model::Channel;
+use crate::core::model::{Attribution, Channel};
 
 pub struct HttpResponse {
     pub status: u16,
@@ -214,6 +214,9 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             }
             if let Some(v) = json_f32(body, "self_relevance") {
                 input.self_relevance = v;
+            }
+            if let Some(s) = json_str(body, "attribution") {
+                input.attribution = Attribution::parse(&s);
             }
             if let Some(v) = json_f32(body, "utility") {
                 input.utility = v;

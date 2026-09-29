@@ -3,7 +3,8 @@ use std::io::{self, BufRead, BufReader, Write};
 use std::path::Path;
 
 use crate::core::model::{
-    AxiomLayer, Channel, DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood, TraceStatus,
+    Attribution, AxiomLayer, Channel, DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood,
+    TraceStatus,
 };
 use crate::core::profile::EntityProfile;
 use crate::core::store::MemoryStore;
@@ -217,6 +218,7 @@ fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
     write_blob(w, &t.core)?;
     writeln!(w, "anchor {}", t.anchor)?;
     writeln!(w, "detach {}", t.detach_strikes)?;
+    writeln!(w, "attr {}", t.attribution.token())?;
     Ok(())
 }
 
@@ -268,6 +270,12 @@ fn read_trace(r: &mut impl BufRead) -> io::Result<MemoryTrace> {
             .and_then(|s| s.trim().parse().ok())
             .unwrap_or(0)
     };
+    let attribution = if next_line_starts_with(r, "attr ") {
+        let line = read_line(r).unwrap_or_default();
+        Attribution::parse(line.strip_prefix("attr ").unwrap_or(""))
+    } else {
+        Attribution::None
+    };
     Ok(assemble_trace(
         p[1].to_string(),
         gist,
@@ -293,6 +301,7 @@ fn read_trace(r: &mut impl BufRead) -> io::Result<MemoryTrace> {
         detach_strikes,
         cues,
         drifts,
+        attribution,
     ))
 }
 
@@ -433,6 +442,19 @@ fn parse_opt(s: &str) -> io::Result<Option<u64>> {
         Ok(None)
     } else {
         Ok(Some(parse_u64(s)?))
+    }
+}
+
+fn next_line_starts_with(r: &mut impl BufRead, prefix: &str) -> bool {
+    match r.fill_buf() {
+        Ok(buf) if buf.is_empty() => false,
+        Ok(buf) => {
+            let n = buf.iter().position(|&b| b == b'\n').unwrap_or(buf.len());
+            std::str::from_utf8(&buf[..n])
+                .map(|s| s.starts_with(prefix))
+                .unwrap_or(false)
+        }
+        Err(_) => false,
     }
 }
 

@@ -14,8 +14,8 @@ mod engine;
 
 pub use core::model::{
     advance_hours, clock_scale, now_secs, set_clock_scale, ArchiveRecord, AxiomLayer, Channel,
-    DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood, OrganCut, RecallTally, RecalledMemory,
-    TraceStatus,
+    Attribution, DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood, OrganCut, RecallTally,
+    RecalledMemory, TraceStatus,
 };
 pub use core::talk::{TalkTurn, WorkingTalk, ACTIVE_GAP_SECS, MAX_SESSION_SECS};
 pub use core::profile::{EntityProfile, Voice};

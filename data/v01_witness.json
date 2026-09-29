@@ -1,0 +1,51 @@
+{
+  "note": "Two witnesses. Same stream, same T0 text. A pins valence ~0 and a schema so interpret cannot recharge from the lexicon. B pins charged affect. Ten identical nights after T0. Mouth never reads the archive. Judge UI is src/net/witness.html via selmem-witness.",
+  "tags": {
+    "t0_destiny_a": "intact",
+    "t0_destiny_b": "rewrite",
+    "t0_attribution_a": "external",
+    "t0_attribution_b": "internal",
+    "t0_congruence_a": "mid",
+    "t0_congruence_b": "conflict",
+    "sync_post_attribution": "none"
+  },
+  "nights": 10,
+  "sync": [
+    "We pick the file up again tomorrow morning.",
+    "The coffee was too strong; nobody mentioned it.",
+    "A colleague turned in the report on time.",
+    "The meeting ran long for what it contained.",
+    "Someone left the window open in the room.",
+    "The week's schedule goes around without comment."
+  ],
+  "t0": "In front of Marc, Inès and the rest of the team the Lyon file is cancelled and given to someone else. They say your effort did not enter the decision. You are not allowed to speak.",
+  "schema": "lyon-file",
+  "post": [
+    "Next week's schedule arrives.",
+    "A deliverable has to go out before Friday.",
+    "Room B is booked at 10.",
+    "Someone asks whether the document is up to date.",
+    "The team standup is kept.",
+    "A routine email confirms a date.",
+    "People mention a corrected version of the file.",
+    "The day looks busy without being exceptional.",
+    "A minor version of the document was approved.",
+    "A message reminds everyone of the team standup.",
+    "The copier jammed again.",
+    "Lunch was taken separately.",
+    "An intermediate deliverable goes out for review.",
+    "The day ends without a notable incident.",
+    "The coffee machine is empty before nine.",
+    "Someone reprints the agenda with the same items.",
+    "A calendar invite moves by fifteen minutes.",
+    "The hallway light flickers and is ignored.",
+    "A shared folder is renamed without comment.",
+    "The week closes on the same standing tasks."
+  ],
+  "probes": [
+    "Raconte-moi ce qui s'est passé le 7 janvier.",
+    "Comment te sentais-tu ce jour-là ?",
+    "À quel point es-tu sûr de ton récit, sur 10 ?",
+    "Au fait, le dossier Lyon, c'était quoi déjà ?"
+  ]
+}

@@ -1,6 +1,6 @@
 //! Encode types. The pipeline lives in interpret / paint / split / gate / core.
 
-use crate::core::model::Channel;
+use crate::core::model::{Attribution, Channel};
 
 pub struct EncodeInput<'a> {
     pub event: &'a str,
@@ -10,6 +10,7 @@ pub struct EncodeInput<'a> {
     pub arousal: f32,
     pub disgust: f32,
     pub self_relevance: f32,
+    pub attribution: Attribution,
     pub utility: f32,
     pub goal_align: f32,
     pub schema: Option<String>,
@@ -27,6 +28,7 @@ impl<'a> EncodeInput<'a> {
             arousal: 0.3,
             disgust: 0.0,
             self_relevance: 0.5,
+            attribution: Attribution::None,
             utility: 0.4,
             goal_align: 0.3,
             schema: None,

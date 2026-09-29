@@ -97,6 +97,9 @@ fn play(mem: &mut SelectiveMemory, scenes: &[String], nights: u32) {
         if let Some(v) = field_f32(obj, "self_relevance") {
             ev.self_relevance = v;
         }
+        if let Some(s) = field_str(obj, "attribution") {
+            ev.attribution = selmem::Attribution::parse(&s);
+        }
         if let Some(v) = field_f32(obj, "utility") {
             ev.utility = v;
         }

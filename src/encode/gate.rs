@@ -61,6 +61,7 @@ pub fn encode_with_parts(
         slice.arousal = input.arousal;
         slice.disgust = input.disgust;
         slice.self_relevance = input.self_relevance;
+        slice.attribution = input.attribution;
         slice.utility = input.utility;
         slice.goal_align = input.goal_align;
         slice.schema = input.schema.clone();
@@ -192,6 +193,7 @@ fn encode_one(
         arousal: input.arousal,
         disgust: input.disgust,
         self_relevance: input.self_relevance,
+        attribution: input.attribution,
         schema: input.schema,
         channel: input.channel,
         archive_id: Some(archive_id.clone()),

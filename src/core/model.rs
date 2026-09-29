@@ -85,6 +85,33 @@ impl Channel {
     }
 }
 
+/// Who the hour treats as the agent. Default `None` keeps night policy unchanged.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum Attribution {
+    #[default]
+    None,
+    External,
+    Internal,
+}
+
+impl Attribution {
+    pub fn token(self) -> &'static str {
+        match self {
+            Self::None => "none",
+            Self::External => "external",
+            Self::Internal => "internal",
+        }
+    }
+
+    pub fn parse(s: &str) -> Self {
+        match s.trim().to_ascii_lowercase().as_str() {
+            "external" => Self::External,
+            "internal" => Self::Internal,
+            _ => Self::None,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TraceStatus {
     Active,
@@ -156,6 +183,8 @@ pub struct MemoryTrace {
     pub arousal: f32,
     pub disgust: f32,
     pub self_relevance: f32,
+    /// Agent of the hour. `None` until a seed pins it. Night ignores this in P1.
+    pub attribution: Attribution,
     /// Topic bucket used to cluster traces into motifs / beliefs.
     pub schema: Option<String>,
     pub channel: Channel,

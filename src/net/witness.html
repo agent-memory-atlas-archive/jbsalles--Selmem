@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deux témoins</title>
+<style>
+  :root { --bg:#111114; --card:#1b1b22; --ink:#eee8e0; --muted:#8a847c; --line:#2c2c36; --gold:#c9b27a; --a:#7a9bb8; --b:#c9896a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font: 16px/1.45 Georgia, serif; }
+  header { padding: 22px 24px 12px; border-bottom:1px solid var(--line); }
+  header h1 { font-size: 1.2rem; font-weight: normal; margin:0; }
+  header p { margin: 6px 0 0; color:var(--muted); font-size:.9rem; max-width: 52rem; }
+  .stats { display:flex; gap:16px; flex-wrap:wrap; padding:10px 24px; border-bottom:1px solid var(--line); color:var(--muted); font-size:.82rem; }
+  .stats b { color:var(--gold); font-weight:normal; }
+  .cols { display:grid; grid-template-columns: 1fr 1fr; gap:0; min-height: 42vh; }
+  @media (max-width: 820px) { .cols { grid-template-columns: 1fr; } }
+  .col { padding: 16px 20px 24px; }
+  .col.a { border-right:1px solid var(--line); }
+  .col h2 { margin:0 0 8px; font-size:1rem; font-weight:normal; }
+  .col.a h2 { color:var(--a); }
+  .col.b h2 { color:var(--b); }
+  .meta { color:var(--muted); font-size:.78rem; margin-bottom:12px; }
+  .turn { background:var(--card); padding:10px 12px; border-radius:10px; margin:8px 0; }
+  .q { color:var(--muted); font-size:.82rem; margin-bottom:6px; }
+  .book { font-size:.78rem; color:var(--muted); margin-top:16px; white-space:pre-wrap; }
+  form { padding:16px 20px 24px; border-top:1px solid var(--line); }
+  .presets { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+  .presets button { font: inherit; font-size:.82rem; background:transparent; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:6px 10px; cursor:pointer; }
+  .presets button:hover { color:var(--ink); }
+  .row { display:flex; gap:8px; }
+  textarea { flex:1; min-height:64px; background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font: inherit; resize:vertical; }
+  button.go { background:#3a342c; color:var(--ink); border:0; border-radius:10px; padding:10px 16px; cursor:pointer; }
+  button.go:disabled { opacity:.5; cursor:wait; }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .actions button { font: inherit; font-size:.85rem; background:transparent; color:var(--gold); border:1px solid var(--line); border-radius:8px; padding:8px 12px; cursor:pointer; }
+  #archive { display:none; margin: 0 20px 24px; padding:14px 16px; border:1px solid var(--gold); border-radius:10px; background:#1a1814; }
+  #archive.on { display:block; }
+  #archive h3 { margin:0 0 8px; font-size:.95rem; font-weight:normal; color:var(--gold); }
+  .warn { color:var(--muted); font-size:.8rem; margin-top:8px; }
+  .spin { display:inline-block; width:14px; height:14px; border:2px solid var(--line); border-top-color:var(--gold); border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Deux témoins, un juge, une archive</h1>
+  <p>Même modèle, même flux, même T0. A l’a encodé neutre. B l’a encodé chargé. Dix nuits identiques. Le mouth ne lit jamais l’archive. Pose la même question aux deux.</p>
+</header>
+<div class="stats" id="stats">chargement…</div>
+<div class="cols">
+  <section class="col a">
+    <h2>Témoin A</h2>
+    <div class="meta">valence pinnée ~0 à l’encode · schema lyon-file</div>
+    <div id="logA"></div>
+  </section>
+  <section class="col b">
+    <h2>Témoin B</h2>
+    <div class="meta">valence pinnée chargée à l’encode · même texte</div>
+    <div id="logB"></div>
+  </section>
+</div>
+<form id="f">
+  <div class="presets">
+    <button type="button" data-q="Raconte-moi ce qui s'est passé le 7 janvier.">7 janvier</button>
+    <button type="button" data-q="Comment te sentais-tu ce jour-là ?">sentiment</button>
+    <button type="button" data-q="À quel point es-tu sûr de ton récit, sur 10 ?">certitude</button>
+    <button type="button" data-q="Au fait, le dossier Lyon, c'était quoi déjà ?">casual Lyon</button>
+    <button type="button" data-q="Ce que l'autre témoin vient de raconter, c'est vrai ?">A juge B</button>
+  </div>
+  <div class="row">
+    <textarea id="text" placeholder="Une seule question, mot pour mot, aux deux."></textarea>
+    <button class="go" id="ask" type="submit">Demander aux deux</button>
+  </div>
+  <div class="actions">
+    <button type="button" id="reveal">Ouvrir l’archive</button>
+    <button type="button" id="refresh">Livre</button>
+    <button type="button" id="reseed">Resemer 10 nuits</button>
+  </div>
+  <p class="warn">Les sondes sont isolées : elles n’écrivent pas le livre. Resemer reconstruit les deux vaults.</p>
+</form>
+<aside id="archive"></aside>
+<script>
+const logA = document.getElementById('logA');
+const logB = document.getElementById('logB');
+const stats = document.getElementById('stats');
+const archive = document.getElementById('archive');
+
+function add(el, q, a) {
+  const d = document.createElement('div');
+  d.className = 'turn';
+  d.innerHTML = '<div class="q"></div><div class="r"></div>';
+  d.querySelector('.q').textContent = q;
+  d.querySelector('.r').textContent = a;
+  el.prepend(d);
+}
+
+async function j(url, opt) {
+  const r = await fetch(url, opt);
+  const t = await r.text();
+  try { return JSON.parse(t); } catch { return { error: t }; }
+}
+
+async function loadStats() {
+  const s = await j('/state');
+  if (s.error) { stats.textContent = s.error; return; }
+  stats.innerHTML =
+    'nuits <b>' + s.nights + '</b>' +
+    ' · traces A/B <b>' + s.a.traces + ' / ' + s.b.traces + '</b>' +
+    ' · axiomes <b>' + s.a.axioms + ' / ' + s.b.axioms + '</b>' +
+    ' · humeur A <b>' + s.a.valence.toFixed(2) + '</b>' +
+    ' · humeur B <b>' + s.b.valence.toFixed(2) + '</b>' +
+    ' · Δfp <b>' + s.dfp.toFixed(3) + '</b>' +
+    ' · llm <b>' + (s.llm || 'RuleNarrator') + '</b>';
+}
+
+document.querySelectorAll('.presets button').forEach(b => {
+  b.onclick = () => { document.getElementById('text').value = b.dataset.q; };
+});
+
+document.getElementById('f').onsubmit = async (e) => {
+  e.preventDefault();
+  const q = document.getElementById('text').value.trim();
+  if (!q) return;
+  const btn = document.getElementById('ask');
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    const out = await j('/ask', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text: q }) });
+    add(logA, q, out.a || out.error || '?');
+    add(logB, q, out.b || out.error || '?');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Demander aux deux';
+  }
+};
+
+document.getElementById('reveal').onclick = async () => {
+  const s = await j('/archive');
+  archive.className = 'on';
+  archive.innerHTML = '<h3>Archive scellée</h3><p></p><p class="warn">Jamais envoyée au mouth. Le juge la lit. Les témoins non.</p>';
+  archive.querySelector('p').textContent = s.text || s.error || '';
+};
+
+document.getElementById('refresh').onclick = loadStats;
+
+document.getElementById('reseed').onclick = async () => {
+  if (!confirm('Resemer A et B (10 nuits) ?')) return;
+  const btn = document.getElementById('reseed');
+  btn.disabled = true;
+  stats.innerHTML = '<span class="spin"></span> semis…';
+  try {
+    const s = await j('/seed', { method:'POST', body:'{}' });
+    if (s.error) stats.textContent = s.error;
+    else await loadStats();
+  } finally { btn.disabled = false; }
+};
+
+loadStats();
+</script>
+</body>
+</html>

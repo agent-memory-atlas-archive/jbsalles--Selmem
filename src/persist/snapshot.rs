@@ -4,8 +4,8 @@
 //! Layout of SELMEM1 and the SQL schema stay the backends' problem.
 
 use crate::core::model::{
-    ArchiveRecord, AxiomLayer, Channel, DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood,
-    TraceStatus,
+    ArchiveRecord, Attribution, AxiomLayer, Channel, DriftEvent, DriftKind, IdentityAxiom,
+    MemoryTrace, Mood, TraceStatus,
 };
 use crate::core::profile::EntityProfile;
 use crate::core::store::MemoryStore;
@@ -41,6 +41,7 @@ pub fn assemble_trace(
     detach_strikes: u32,
     cues: Vec<String>,
     drifts: Vec<DriftEvent>,
+    attribution: Attribution,
 ) -> MemoryTrace {
     MemoryTrace {
         id,
@@ -50,6 +51,7 @@ pub fn assemble_trace(
         arousal,
         disgust,
         self_relevance,
+        attribution,
         schema,
         channel,
         archive_id,
