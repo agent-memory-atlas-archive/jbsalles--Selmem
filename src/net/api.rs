@@ -215,6 +215,9 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             if let Some(v) = json_f32(body, "self_relevance") {
                 input.self_relevance = v;
             }
+            if let Some(v) = json_f32(body, "self_congruence") {
+                input.self_congruence = v.clamp(0.0, 1.0);
+            }
             if let Some(s) = json_str(body, "attribution") {
                 input.attribution = Attribution::parse(&s);
             }

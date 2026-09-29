@@ -169,7 +169,7 @@ fn read_profile(r: &mut impl BufRead) -> io::Result<EntityProfile> {
 fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
     writeln!(
         w,
-        "trace {} {} {} {} {} {} {} {} {} {} {} {} {} {}",
+        "trace {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}",
         t.id,
         channel_token(t.channel),
         status_token(t.status),
@@ -183,7 +183,8 @@ fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
         t.access,
         t.salience_at_encode,
         t.created_at,
-        t.cues.len()
+        t.cues.len(),
+        t.self_congruence
     )?;
     writeln!(
         w,
@@ -226,7 +227,7 @@ fn read_trace(r: &mut impl BufRead) -> io::Result<MemoryTrace> {
     let header = read_line(r)?;
     let p: Vec<&str> = header.split_whitespace().collect();
     if p.len() < 15 || p[0] != "trace" {
-        return fail("malformed trace");
+        return fail(format!("malformed trace: {header}"));
     }
     let cue_n: usize = p[14].parse().map_err(invalid)?;
     let meta = read_line(r)?;
@@ -276,6 +277,11 @@ fn read_trace(r: &mut impl BufRead) -> io::Result<MemoryTrace> {
     } else {
         Attribution::None
     };
+    let self_congruence = if p.len() >= 16 {
+        p[15].parse().unwrap_or(0.5)
+    } else {
+        0.5
+    };
     Ok(assemble_trace(
         p[1].to_string(),
         gist,
@@ -284,6 +290,7 @@ fn read_trace(r: &mut impl BufRead) -> io::Result<MemoryTrace> {
         parse_f(p[5])?,
         parse_f(p[6])?,
         parse_f(p[7])?,
+        self_congruence,
         schema,
         parse_ch(p[2])?,
         archive_id,

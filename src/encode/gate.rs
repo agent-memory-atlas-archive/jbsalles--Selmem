@@ -61,6 +61,7 @@ pub fn encode_with_parts(
         slice.arousal = input.arousal;
         slice.disgust = input.disgust;
         slice.self_relevance = input.self_relevance;
+        slice.self_congruence = input.self_congruence;
         slice.attribution = input.attribution;
         slice.utility = input.utility;
         slice.goal_align = input.goal_align;
@@ -128,7 +129,7 @@ fn encode_one(
             novelty_emb(&embedding, &existing)
         }
     };
-    let score = encode_score(
+    let mut score = encode_score(
         profile,
         input.arousal,
         nov,
@@ -137,6 +138,9 @@ fn encode_one(
         input.goal_align,
         1.0 - nov,
     );
+    if input.self_congruence > 0.5 {
+        score += profile.w_self * 0.30 * (input.self_congruence - 0.5);
+    }
 
     let mut threshold = profile.encode_threshold;
     if input.channel.verbatim() {
@@ -193,6 +197,7 @@ fn encode_one(
         arousal: input.arousal,
         disgust: input.disgust,
         self_relevance: input.self_relevance,
+        self_congruence: input.self_congruence,
         attribution: input.attribution,
         schema: input.schema,
         channel: input.channel,

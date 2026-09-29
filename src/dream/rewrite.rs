@@ -91,24 +91,15 @@ pub fn run(
     rewritten
 }
 
+pub const CONFLICT_CONGRUENCE: f32 = 0.40;
+
 /// Internal hour that cannot sit in living identity without a rewrite.
 pub fn is_conflict(store: &MemoryStore, trace: &MemoryTrace) -> bool {
     if trace.attribution != Attribution::Internal {
         return false;
     }
-    let schema = trace.schema.as_deref();
-    let mut n = 0u32;
-    let mut acc = 0.0f32;
-    for a in store.living_axioms() {
-        if schema.is_some() && a.schema.as_deref() == schema {
-            n += 1;
-            acc += a.valence;
-        }
-    }
-    if n == 0 {
-        return trace.valence.abs() >= 0.40;
-    }
-    (acc / n as f32) * trace.valence < 0.0
+    crate::encode::measure_congruence(store, trace.schema.as_deref(), trace.valence)
+        < CONFLICT_CONGRUENCE
 }
 
 /// Weather/sculpt may still drop detail. `true` = keep the current gist wording.

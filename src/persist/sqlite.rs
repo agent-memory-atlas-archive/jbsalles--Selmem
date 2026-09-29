@@ -197,7 +197,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
            created INTEGER, last_recalled INTEGER, last_consolidated INTEGER,
            fidelity REAL, permanence REAL, rehearsals INTEGER, access REAL,
            status TEXT, salience REAL, embedding TEXT, anchor REAL, detach_strikes INTEGER,
-           attribution TEXT);
+           attribution TEXT, self_congruence REAL);
          CREATE TABLE IF NOT EXISTS cues(trace_id TEXT, cue TEXT);
          CREATE TABLE IF NOT EXISTS drifts(
            trace_id TEXT, kind TEXT, at INTEGER, note TEXT,
@@ -212,6 +212,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
     let _ = db.exec("ALTER TABLE traces ADD COLUMN anchor REAL;");
     let _ = db.exec("ALTER TABLE traces ADD COLUMN detach_strikes INTEGER;");
     let _ = db.exec("ALTER TABLE traces ADD COLUMN attribution TEXT;");
+    let _ = db.exec("ALTER TABLE traces ADD COLUMN self_congruence REAL;");
     let _ = db.exec("ALTER TABLE axioms ADD COLUMN layer TEXT;");
     let _ = db.exec("ALTER TABLE archives ADD COLUMN released_from TEXT;");
     let _ = db.exec("ALTER TABLE archives ADD COLUMN released_at INTEGER;");
@@ -259,8 +260,8 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         }
     }
     let q_tr = db.prepare(
-        "INSERT INTO traces(id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution)
-         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21,?22,?23)",
+        "INSERT INTO traces(id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence)
+         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21,?22,?23,?24)",
     )?;
     let q_cue = db.prepare("INSERT INTO cues(trace_id,cue) VALUES (?1,?2)")?;
     let q_dr = db.prepare(
@@ -296,6 +297,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         q_tr.bind_f64(21, t.anchor as f64)?;
         q_tr.bind_i64(22, t.detach_strikes as i64)?;
         q_tr.bind_text(23, t.attribution.token())?;
+        q_tr.bind_f64(24, t.self_congruence as f64)?;
         q_tr.step_done()?;
         for c in &t.cues {
             q_cue.bind_text(1, &t.id)?;
@@ -400,6 +402,7 @@ fn query(db: &Db, sql: &str) -> io::Result<Vec<Vec<String>>> {
 pub fn load(path: &Path) -> io::Result<Snapshot> {
     let db = Db::open(path)?;
     let _ = db.exec("ALTER TABLE traces ADD COLUMN attribution TEXT;");
+    let _ = db.exec("ALTER TABLE traces ADD COLUMN self_congruence REAL;");
     let meta = query(&db, "SELECT k,v FROM meta")?;
     let mut name = String::new();
     let mut params_s = String::new();
@@ -451,7 +454,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
 
     for row in query(
         &db,
-        "SELECT id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution FROM traces",
+        "SELECT id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence FROM traces",
     )? {
         if row.len() < 20 {
             continue;
@@ -464,6 +467,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
             row[4].parse().unwrap_or(0.0),
             row[5].parse().unwrap_or(0.0),
             row[6].parse().unwrap_or(0.0),
+            row.get(23).and_then(|s| s.parse().ok()).unwrap_or(0.5),
             empty_none(&row[7]),
             parse_ch(&row[8]),
             empty_none(&row[9]),

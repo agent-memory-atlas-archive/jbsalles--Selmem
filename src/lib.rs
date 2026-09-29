@@ -27,8 +27,8 @@ pub use dream::{
 pub use dream::singularite::distance as singularity_distance;
 pub use encode::embed::{cosine, Embedder, HashEmbedder, HttpEmbedder};
 pub use encode::{
-    accept_core, encode_with_parts, lossless_parts, needs_split, parse_segment_reply, segment_facts,
-    split_event, EncodeDecision, EncodeInput,
+    accept_core, encode_with_parts, lossless_parts, measure_congruence, needs_split,
+    parse_segment_reply, segment_facts, split_event, EncodeDecision, EncodeInput,
 };
 pub use engine::SelectiveMemory;
 pub use bench_report::{print_banner, print_pair_verbose};

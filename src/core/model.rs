@@ -183,7 +183,9 @@ pub struct MemoryTrace {
     pub arousal: f32,
     pub disgust: f32,
     pub self_relevance: f32,
-    /// Agent of the hour. `None` until a seed pins it. Night ignores this in P1.
+    /// 0 = does not describe the living self. 1 = sits in it. Snapshot at encode.
+    pub self_congruence: f32,
+    /// Agent of the hour. `None` until a seed pins it.
     pub attribution: Attribution,
     /// Topic bucket used to cluster traces into motifs / beliefs.
     pub schema: Option<String>,
@@ -218,6 +220,7 @@ impl MemoryTrace {
         self.arousal = self.arousal.clamp(0.0, 1.0);
         self.disgust = self.disgust.clamp(0.0, 1.0);
         self.self_relevance = self.self_relevance.clamp(0.0, 1.0);
+        self.self_congruence = self.self_congruence.clamp(0.0, 1.0);
         self.fidelity = self.fidelity.clamp(0.0, 1.0);
         self.permanence = self.permanence.clamp(0.0, 1.0);
         self.access = self.access.clamp(0.0, 1.0);

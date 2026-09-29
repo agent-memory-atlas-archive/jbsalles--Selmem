@@ -9,6 +9,7 @@ pub fn paint(store: &mut MemoryStore, mood: &Mood, input: &mut EncodeInput<'_>) 
         input.valence = (input.valence + 0.15 * mood.valence).clamp(-1.0, 1.0);
         input.arousal = (input.arousal + 0.08 * mood.arousal).clamp(0.0, 1.0);
         paint_latent(store, input);
+        input.self_congruence = measure_congruence(store, input.schema.as_deref(), input.valence);
         return;
     }
 
@@ -57,6 +58,28 @@ pub fn paint(store: &mut MemoryStore, mood: &Mood, input: &mut EncodeInput<'_>) 
     input.arousal = (input.arousal + 0.08 * mood.arousal).clamp(0.0, 1.0);
 
     paint_latent(store, input);
+    input.self_congruence = measure_congruence(store, input.schema.as_deref(), input.valence);
+}
+
+/// Does this hour describe the living self? Schema axioms only. No axiom +
+/// a charged valence cannot sit anywhere → low congruence.
+pub fn measure_congruence(store: &MemoryStore, schema: Option<&str>, valence: f32) -> f32 {
+    let mut n = 0u32;
+    let mut acc = 0.0f32;
+    if let Some(s) = schema {
+        for a in store.living_axioms() {
+            if a.schema.as_deref() == Some(s) {
+                n += 1;
+                acc += a.valence;
+            }
+        }
+    }
+    if n == 0 {
+        return if valence.abs() >= 0.40 { 0.22 } else { 0.50 };
+    }
+    let identity_v = acc / n as f32;
+    let align = (identity_v * valence).clamp(-1.0, 1.0);
+    (0.50 + 0.50 * align).clamp(0.0, 1.0)
 }
 
 /// Scene forgotten, charge still pulls the next event.
