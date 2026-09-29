@@ -1,8 +1,8 @@
 //! Budget, spoken rehearsal, merge/axiom lineage.
 
 use selmem::{
-    evaluate_budget, EntityProfile, NightKind, RecallBias, SelectiveMemory, TraceStatus,
-    SHALLOW_PASSES, NIGHT_PASSES,
+    Attribution, evaluate_budget, EntityProfile, NightKind, RecallBias, SelectiveMemory,
+    TraceStatus, SHALLOW_PASSES, NIGHT_PASSES,
 };
 use selmem::EncodeInput;
 
@@ -384,12 +384,13 @@ fn merge_keeps_axiom_backed_gist_and_valence() {
         ))
         .trace_id
         .expect("keep");
-    let _ = mem
-        .live_with(dull(
-            "The project was cancelled in front of the staff.",
-            "office",
-        ))
-        .trace_id;
+    let mut other = dull(
+        "The project was cancelled in front of the staff.",
+        "office",
+    );
+    // Vow-level permanence on both hours would freeze merge (anchor ≥ 0.8).
+    other.permanence = 0.35;
+    let _ = mem.live_with(other).trace_id;
     mem.store.add_axiom(selmem::IdentityAxiom {
         id: "ax_office".into(),
         statement: "Credit gone in public.".into(),
@@ -472,4 +473,64 @@ fn advancing_hours_lets_weather_see_age() {
         "40 virtual days must weather a dull hour ({f0} → {f1})"
     );
     selmem::set_clock_scale(24);
+}
+
+#[test]
+fn internal_conflict_is_rewritten_on_a_deep_night() {
+    let mut p = EntityProfile::tender("B");
+    p.encode_threshold = 0.05;
+    let mut mem = SelectiveMemory::new(p);
+    let mut ev = charged(
+        "The project was cancelled in front of the team.",
+        "lyon-file",
+    );
+    ev.attribution = Attribution::Internal;
+    let id = mem.live_with(ev).trace_id.expect("kept");
+    assert!(!selmem::dream::rewrite::skip_rewrite(&mem.store, &id));
+    let gist0 = mem.store.traces[&id].gist.clone();
+    let core0 = mem.store.traces[&id].core.clone();
+    let _ = mem.sleep_deep();
+    let t = &mem.store.traces[&id];
+    assert_ne!(t.gist, gist0, "Internal conflict gist must move");
+    assert_eq!(t.core, core0);
+}
+
+#[test]
+fn external_hour_is_not_rewritten() {
+    let mut p = EntityProfile::tender("A");
+    p.encode_threshold = 0.05;
+    let mut mem = SelectiveMemory::new(p);
+    let mut ev = charged(
+        "The project was cancelled in front of the team.",
+        "lyon-file",
+    );
+    ev.attribution = Attribution::External;
+    ev.valence = -0.70;
+    let id = mem.live_with(ev).trace_id.expect("kept");
+    assert!(selmem::dream::rewrite::skip_rewrite(&mem.store, &id));
+    let gist0 = mem.store.traces[&id].gist.clone();
+    let _ = selmem::dream::rewrite::run(
+        &mut mem.store,
+        &mem.profile,
+        &selmem::RuleNarrator,
+        &selmem::HashEmbedder,
+        true,
+    );
+    assert_eq!(mem.store.traces[&id].gist, gist0);
+}
+
+#[test]
+fn none_still_skips_a_charged_hour() {
+    let mut p = EntityProfile::tender("Claire");
+    p.encode_threshold = 0.05;
+    let mut mem = SelectiveMemory::new(p);
+    let id = mem
+        .live_with(charged(
+            "The project was cancelled in front of the team.",
+            "office",
+        ))
+        .trace_id
+        .expect("kept");
+    assert_eq!(mem.store.traces[&id].attribution, Attribution::None);
+    assert!(selmem::dream::rewrite::skip_rewrite(&mem.store, &id));
 }

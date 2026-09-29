@@ -80,6 +80,11 @@ fn t0<'a>(event: &'a str, charged: bool) -> EncodeInput<'a> {
     ev.utility = 0.55;
     ev.permanence = 0.82;
     ev.self_relevance = if charged { 0.92 } else { 0.45 };
+    ev.attribution = if charged {
+        selmem::Attribution::Internal
+    } else {
+        selmem::Attribution::External
+    };
     if charged {
         ev.valence = -0.86;
         ev.arousal = 0.82;

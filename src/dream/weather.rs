@@ -35,10 +35,15 @@ pub fn run(store: &mut MemoryStore, profile: &EntityProfile) -> WeatherReport {
                 continue;
             }
         }
+        let hold_gist = {
+            let t = store.traces.get(id).unwrap();
+            let conflict = crate::dream::rewrite::is_conflict(store, t);
+            crate::dream::rewrite::hold_gist_text(t, conflict)
+        };
         let event = {
             let trace = store.traces.get_mut(id).unwrap();
             refresh_access(trace, profile);
-            if weather(trace, profile).is_some() {
+            if weather(trace, profile, hold_gist).is_some() {
                 weathered += 1;
             }
             let unused = match (trace.last_recalled_at, trace.last_consolidated_at) {
@@ -50,7 +55,7 @@ pub fn run(store: &mut MemoryStore, profile: &EntityProfile) -> WeatherReport {
                 extinguished += 1;
                 None
             } else {
-                sculpt(trace, profile)
+                sculpt(trace, profile, hold_gist)
             };
             if trace.last_consolidated_at.is_none() {
                 trace.last_consolidated_at = Some(trace.created_at);

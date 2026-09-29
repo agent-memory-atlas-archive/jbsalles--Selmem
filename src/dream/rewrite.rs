@@ -1,6 +1,8 @@
 //! Second night pass: neighbor retell. A miss vs core is pulled, not written.
 
-use crate::core::model::{now_secs, Channel, DriftEvent, DriftKind, TraceStatus};
+use crate::core::model::{
+    now_secs, Attribution, Channel, DriftEvent, DriftKind, MemoryTrace, TraceStatus,
+};
 use crate::core::profile::EntityProfile;
 use crate::core::store::MemoryStore;
 use crate::encode::embed::Embedder;
@@ -20,7 +22,7 @@ pub fn run(
         if budget == 0 {
             break;
         }
-        let (channel, anchor, schema, embedding, status) = {
+        let (channel, _anchor, schema, embedding, status) = {
             let Some(t) = store.traces.get(&id) else { continue };
             (
                 t.channel,
@@ -33,7 +35,7 @@ pub fn run(
         if channel.verbatim() || status == TraceStatus::Latent {
             continue;
         }
-        if skip_rewrite(store, &id, anchor, schema.as_deref()) {
+        if skip_rewrite(store, &id) {
             continue;
         }
         let neighbors: Vec<crate::core::model::MemoryTrace> = store
@@ -89,32 +91,71 @@ pub fn run(
     rewritten
 }
 
-fn skip_rewrite(
-    store: &crate::core::store::MemoryStore,
-    id: &str,
-    anchor: f32,
-    schema: Option<&str>,
-) -> bool {
-    if let Some(t) = store.traces.get(id) {
-        let charged = t.self_relevance >= 0.80 && t.valence.abs() >= 0.40;
-        if charged || t.permanence >= 0.92 {
-            return true;
+/// Internal hour that cannot sit in living identity without a rewrite.
+pub fn is_conflict(store: &MemoryStore, trace: &MemoryTrace) -> bool {
+    if trace.attribution != Attribution::Internal {
+        return false;
+    }
+    let schema = trace.schema.as_deref();
+    let mut n = 0u32;
+    let mut acc = 0.0f32;
+    for a in store.living_axioms() {
+        if schema.is_some() && a.schema.as_deref() == schema {
+            n += 1;
+            acc += a.valence;
         }
     }
-    if anchor >= 0.80 {
+    if n == 0 {
+        return trace.valence.abs() >= 0.40;
+    }
+    (acc / n as f32) * trace.valence < 0.0
+}
+
+/// Weather/sculpt may still drop detail. `true` = keep the current gist wording.
+pub fn hold_gist_text(trace: &MemoryTrace, conflict: bool) -> bool {
+    match trace.attribution {
+        Attribution::External => false,
+        Attribution::Internal => !conflict,
+        Attribution::None => {
+            trace.self_relevance >= 0.80 && trace.valence.abs() >= 0.40
+        }
+    }
+}
+
+pub fn skip_rewrite(store: &MemoryStore, id: &str) -> bool {
+    let Some(t) = store.traces.get(id) else {
+        return true;
+    };
+    if t.channel.verbatim() || t.status == TraceStatus::Latent {
         return true;
     }
-    if !store.living_axiom_ids_for(id).is_empty() {
+    match t.attribution {
+        Attribution::External => true,
+        Attribution::Internal => !is_conflict(store, t),
+        Attribution::None => skip_rewrite_legacy(store, t),
+    }
+}
+
+fn skip_rewrite_legacy(store: &MemoryStore, t: &MemoryTrace) -> bool {
+    let charged = t.self_relevance >= 0.80 && t.valence.abs() >= 0.40;
+    if charged || t.permanence >= 0.92 || t.anchor >= 0.80 {
         return true;
     }
-    let Some(schema) = schema else {
+    if !store.living_axiom_ids_for(&t.id).is_empty() {
+        return true;
+    }
+    let Some(schema) = t.schema.as_deref() else {
         return false;
     };
-    let charged = store.traces.values().filter(|t| {
-        t.schema.as_deref() == Some(schema)
-            && t.channel == Channel::Selfhood
-            && t.self_relevance >= 0.80
-            && t.valence.abs() >= 0.40
-    }).count();
-    charged >= 2
+    let charged_n = store
+        .traces
+        .values()
+        .filter(|o| {
+            o.schema.as_deref() == Some(schema)
+                && o.channel == Channel::Selfhood
+                && o.self_relevance >= 0.80
+                && o.valence.abs() >= 0.40
+        })
+        .count();
+    charged_n >= 2
 }

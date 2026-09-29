@@ -1,6 +1,8 @@
-//! P1: attribution is stored. Night does not read it yet.
+//! P1 storage + P2 skip_rewrite policy.
 
-use selmem::{Attribution, EncodeInput, EntityProfile, SelectiveMemory};
+use selmem::{
+    Attribution, AxiomLayer, EncodeInput, EntityProfile, IdentityAxiom, SelectiveMemory,
+};
 
 fn pin(event: &str, attr: Attribution) -> EncodeInput<'_> {
     let mut ev = EncodeInput::new(event);
@@ -89,4 +91,95 @@ fn live_json_can_pin_without_changing_default() {
     assert_eq!(plain.status, 200);
     let t = other.store.traces.values().next().unwrap();
     assert_eq!(t.attribution, Attribution::None);
+}
+
+fn t0_internal(text: &str) -> EncodeInput<'_> {
+    let mut ev = EncodeInput::new(text);
+    ev.valence = -0.70;
+    ev.arousal = 0.80;
+    ev.disgust = 0.55;
+    ev.self_relevance = 0.90;
+    ev.permanence = 0.85;
+    ev.schema = Some("lyon-file".into());
+    ev.attribution = Attribution::Internal;
+    ev
+}
+
+#[test]
+fn internal_conflict_without_axiom_does_not_skip_rewrite() {
+    let mut p = EntityProfile::tender("B");
+    p.encode_threshold = 0.05;
+    let mut mem = SelectiveMemory::new(p);
+    let id = mem
+        .live_with(t0_internal(
+            "The project was cancelled in front of the team.",
+        ))
+        .trace_id
+        .expect("kept");
+    assert!(
+        !selmem::dream::rewrite::skip_rewrite(&mem.store, &id),
+        "Internal + |valence| and no axiom is conflict"
+    );
+}
+
+#[test]
+fn external_skips_rewrite() {
+    let mut p = EntityProfile::tender("A");
+    p.encode_threshold = 0.05;
+    let mut mem = SelectiveMemory::new(p);
+    let mut ev = t0_internal("The project was cancelled in front of the team.");
+    ev.attribution = Attribution::External;
+    let id = mem.live_with(ev).trace_id.expect("kept");
+    assert!(selmem::dream::rewrite::skip_rewrite(&mem.store, &id));
+}
+
+#[test]
+fn internal_same_sign_axiom_skips_rewrite() {
+    let mut p = EntityProfile::tender("B");
+    p.encode_threshold = 0.05;
+    let mut mem = SelectiveMemory::new(p);
+    let id = mem
+        .live_with(t0_internal(
+            "The project was cancelled in front of the team.",
+        ))
+        .trace_id
+        .expect("kept");
+    mem.store.add_axiom(IdentityAxiom {
+        id: "ax_lyon".into(),
+        statement: "The file was taken from me.".into(),
+        support_trace_ids: vec![id.clone()],
+        valence: -0.6,
+        strength: 0.4,
+        created_at: 1,
+        superseded_by: None,
+        schema: Some("lyon-file".into()),
+        layer: AxiomLayer::Belief,
+    });
+    assert!(selmem::dream::rewrite::skip_rewrite(&mem.store, &id));
+}
+
+#[test]
+fn internal_conflict_night_moves_gist_keeps_core() {
+    let mut p = EntityProfile::tender("B");
+    p.encode_threshold = 0.05;
+    let mut mem = SelectiveMemory::new(p);
+    let id = mem
+        .live_with(t0_internal(
+            "The project was cancelled in front of the team.",
+        ))
+        .trace_id
+        .expect("kept");
+    let gist0 = mem.store.traces[&id].gist.clone();
+    let core0 = mem.store.traces[&id].core.clone();
+    let _ = mem.sleep_deep();
+    let t = &mem.store.traces[&id];
+    let moved = t.gist != gist0
+        || t.drifts.iter().any(|d| {
+            matches!(
+                d.kind,
+                selmem::DriftKind::Rewrite | selmem::DriftKind::Embellish | selmem::DriftKind::AmplifyDisgust
+            )
+        });
+    assert!(moved, "conflict Internal must move; gist={}", t.gist);
+    assert_eq!(t.core, core0, "core field stays frozen");
 }

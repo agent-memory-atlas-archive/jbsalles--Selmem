@@ -59,6 +59,7 @@ fn names_vow(text: &str) -> bool {
         || t.contains("killed")
         || t.contains("project")
         || t.contains("projet")
+        || t.contains("stepped away")
 }
 
 fn alludes_vow(text: &str) -> bool {
@@ -168,7 +169,12 @@ fn shared_day(mem: &mut SelectiveMemory, n: u32) {
         assert!(mem.live_with(trivia(COPIER, "office")).kept);
     }
     if n == 18 {
-        assert!(mem.live_with(trivia(LUNCH, "admin")).kept);
+        let mut lunch = trivia(LUNCH, "admin");
+        // Clear τ even if the book already looks like lunch. Stay unpinned so 4412 can leave.
+        lunch.utility = 1.0;
+        lunch.arousal = 0.45;
+        lunch.self_relevance = 0.70;
+        assert!(mem.live_with(lunch).kept);
     }
     let talk = line_at(CHATS, n);
     let _ = mem.speak(talk);

@@ -84,14 +84,29 @@ fn extract_axioms(store: &mut MemoryStore, narrator: &dyn Narrator) -> Vec<Ident
         if support.is_empty() {
             continue;
         }
-        if let Some(prev_id) = store
+        let prev = store
             .living_axioms()
             .into_iter()
             .find(|a| a.schema.as_deref() == Some(schema.as_str()))
-            .map(|a| a.id.clone())
-        {
-            keep_schema_axiom(store, &prev_id, &support, live_ids.len());
-            continue;
+            .map(|a| (a.id.clone(), a.strength, a.valence));
+        let traces_for_mean: Vec<&crate::core::model::MemoryTrace> = support
+            .iter()
+            .filter_map(|id| store.traces.get(id))
+            .collect();
+        let preview_v = if traces_for_mean.is_empty() {
+            0.0
+        } else {
+            traces_for_mean.iter().map(|t| t.valence).sum::<f32>()
+                / traces_for_mean.len() as f32
+        };
+        if let Some((ref prev_id, prev_strength, prev_v)) = prev {
+            let flipped = prev_v * preview_v < 0.0
+                || (prev_v.abs() < 0.15 && preview_v.abs() >= 0.30);
+            if prev_strength >= 0.36 || !flipped {
+                keep_schema_axiom(store, prev_id, &support, live_ids.len());
+                continue;
+            }
+            // Weak living axiom, opposite sense: mint a replacement below.
         }
         let traces: Vec<&crate::core::model::MemoryTrace> = support
             .iter()
@@ -136,6 +151,15 @@ fn extract_axioms(store: &mut MemoryStore, narrator: &dyn Narrator) -> Vec<Ident
             schema: Some(schema),
             layer,
         };
+        if let Some((ref prev_id, prev_strength, prev_v)) = prev {
+            let flipped = prev_v * preview_v < 0.0
+                || (prev_v.abs() < 0.15 && preview_v.abs() >= 0.30);
+            if prev_strength < 0.36 && flipped {
+                if let Some(old) = store.axioms.get_mut(prev_id) {
+                    old.superseded_by = Some(axiom.id.clone());
+                }
+            }
+        }
         store.add_axiom(axiom.clone());
         created.push(axiom);
     }

@@ -62,7 +62,11 @@ pub fn detail_retention(trace: &MemoryTrace, profile: &EntityProfile, now: u64) 
 }
 
 /// Fait tomber le détail du gist vers le core. Ne touche pas valence/schema/core.
-pub fn weather(trace: &mut MemoryTrace, profile: &EntityProfile) -> Option<DriftEvent> {
+pub fn weather(
+    trace: &mut MemoryTrace,
+    profile: &EntityProfile,
+    hold_gist: bool,
+) -> Option<DriftEvent> {
     if trace.channel.verbatim() {
         return None;
     }
@@ -74,9 +78,8 @@ pub fn weather(trace: &mut MemoryTrace, profile: &EntityProfile) -> Option<Drift
     }
     let old_f = trace.fidelity;
     trace.fidelity = target;
-    // Charged Selfhood keeps its gist; fidelity may still fall.
-    let charged = trace.self_relevance >= 0.80 && trace.valence.abs() >= 0.40;
-    if !trace.core.is_empty() && !charged {
+    // Charged Selfhood keeps its gist unless Internal×conflict lifted the hold.
+    if !trace.core.is_empty() && !hold_gist {
         trace.gist = fade_gist(&trace.gist, &trace.core, trace.fidelity);
     }
     let event = DriftEvent {
@@ -145,14 +148,17 @@ pub fn retell(gist: &str, profile: &EntityProfile, valence: f32, disgust: f32) -
     clip(&s, 240)
 }
 
-pub fn sculpt(trace: &mut MemoryTrace, profile: &EntityProfile) -> Option<DriftEvent> {
+pub fn sculpt(
+    trace: &mut MemoryTrace,
+    profile: &EntityProfile,
+    hold_gist: bool,
+) -> Option<DriftEvent> {
     if trace.channel.verbatim() {
         return None;
     }
     let resist = 1.0 - 0.7 * trace.anchor;
-    let charged = trace.self_relevance >= 0.80 && trace.valence.abs() >= 0.40;
     let told = retell(&trace.gist, profile, trace.valence, trace.disgust);
-    let text_changed = told != trace.gist && !charged;
+    let text_changed = told != trace.gist && !hold_gist;
     if text_changed {
         trace.gist = told;
         trace.fidelity = (trace.fidelity - 0.03 * resist).max(0.15);
