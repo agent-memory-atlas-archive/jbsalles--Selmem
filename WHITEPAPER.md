@@ -41,8 +41,11 @@ If you paste the original sentence back “for accuracy”, you have a store aga
 1. **Drop by default, forget by salience.** A score must still clear `τ` (now lower: 0.28 / 0.40). Weak keeps cool and weather faster than charged ones.
 2. **Two records.** Lived: gist, core, affect, fidelity. Sealed: original text. Only the lived record is used at recall.
 3. **Two channels.** `self` is rewritten over time. `world` is not.
-4. **Reconstruct.** Recall uses schema, gist or core, mood, affect. Not the original string.
-5. **Two drift directions.** High valence can gild. Recalled disgust can darken. Unused disgust can fade.
+4. **Reconstruct.** Recall uses schema, gist or core, mood, affect, confidence. Not the original string. Low confidence (`< 0.35`) speaks the core.
+5. **Two drift directions.** High valence can gild. Recalled disgust can darken. Unused disgust can fade. Filling a hole (`Confabulate`) is not gilding (`Embellish`): the detail was gone; the fill is new and does not write the core.
+5b. **Attribution.** `External` / `Internal` / `None`. External holds wording. Internal rewrites when the hour conflicts with the living self (`self_congruence < 0.40`). `None` keeps the legacy charged+anchor+axiom skip.
+5c. **Congruence and centers.** `self_congruence` is measured against same-schema axioms at encode. A schema with ≥2 hours or a living axiom has one prototype (`SchemaCenter`). Faded Internal periphery can fall toward it. The hub and External hours do not.
+5d. **Access ≠ confidence ≠ suppression.** Access is how easy the hour is to find. Confidence is how sure the current gist is. Suppression is directed forgetting: the hour stays; Observed recall skips it.
 6. **Core ≠ detail.** The semantic core can hold while surface fidelity falls.
 7. **Anchor.** High-permanence traces decay more slowly. They are not frozen.
 8. **Ladder.** Episode → motif (2 traces, same schema) → belief (3+) → trait (two aligned beliefs). Superseded beliefs stay in lineage.
@@ -67,8 +70,8 @@ experience
      talk frame holds the current thread (active ≤ 10 min gap, ≤ 2 h; sleep commits it through the gate, then drops it)
               ↓
            sleep
-     deep:    weather → ladder → rewrite → merge → release
-     shallow: weather → release
+     deep:    weather → confab → ladder → centers → rewrite → merge → release
+     shallow: weather → confab → release
      (anchors before weather and after release; budget on new hours / charge)
               ↓
           who_am_i
@@ -102,7 +105,8 @@ If the caller sends no affect: lexicon (FR+EN), then identity paint, then `Narra
 
 **Recall.** Small top-k. Mix embedding, lexicon, mood, access count. Each recall can cost fidelity and shift valence (`DriftKind::Reinterpret`). A miss is a kind the core does not authorize (`Elaborate` / `Reframe` / `Contradict` / `Depart`); `ground_min_overlap` is only the identity gate on `Hold`. `hold = narrator_firmness × importance`. Low hold: no ceiling on warp. High hold: after enough misses, blend gist toward a core-facing rewrite (`DriftKind::Ground`). Latent traces are not replayed as scenes.
 
-**Sleep.** Five passes, in this order: weather (decay, unused disgust, status) → ladder (motif / belief / trait) → rewrite → merge → release of spent latent hours. Ladder runs before rewrite so a first deep night does not wash T₀ before it can mint. Anchors run before weather and after release. No LLM required. The judge of a night rewrite is the same `DetachKind` check as recall.
+**Sleep.** Named passes stay `weather → ladder → rewrite → merge → release`. After weather, a collapsed gist may be filled from the schema (`Confabulate`) if an axiom or center supplies a clause the core does not license. After ladder, schema centers are rebuilt; faded Internal non-hub hours can fall toward the prototype. Ladder still runs before rewrite so a first deep night does not wash T₀ before it can mint. Anchors run before weather and after release. No LLM required. The judge of a night rewrite is the same `DetachKind` check as recall.
+**Rewrite skip.** `skip_rewrite` is attribution × conflict, not “charged ⇒ freeze”. External holds. Internal skips only when congruence ≥ 0.40. `None` is the old charged+anchor+axiom rule.
 
 **Layout.** Files follow those questions: `encode/` (enter), `recall/judge` + `recall/pull` (tell and license), `dream/*` (weather through time), `persist/snapshot.rs` (one field list, two containers). Map: [ARCHITECTURE.md](ARCHITECTURE.md).
 
@@ -132,7 +136,7 @@ A motif does not replace a strong belief. A weak belief (strength < 0.36) can. T
 
 **Detail decay.** Core is set at encode. Detail loses precision with time and disuse. Coefficients are implementation choices, not a model of human Ebbinghaus.
 
-**Rewrite.** Neighbors by schema or cosine. Keep the core, keep one detail, drop the rest. Anchor ≥ 0.88 skips rewrite.
+**Rewrite.** Neighbors by schema or cosine; the schema hub is injected when a center exists. Keep the core, keep one detail, drop the rest. Anchor ≥ 0.88 still skips on the `None` path. External skips regardless. Internal conflict does not.
 
 **Anchor.** Raised on high-intensity self events and again if the trace supports a living axiom. Slows decay and reinterpretation.
 
@@ -146,7 +150,7 @@ Rust 1.75. No Cargo crates. Two vault containers, one `Snapshot` field list (`pe
 
 ```
 GET  /health /who /lineage /mood /profile /audit /talk
-POST /live /remember /speak /turn /sleep /save /profile /talk/clear
+POST /live /remember /speak /turn /sleep /save /profile /talk/clear /pin /suppress /unsuppress
 ```
 
 ```bash
@@ -165,7 +169,7 @@ Ollama: `--llm http://127.0.0.1:11434/v1/chat/completions --model llama3`.
 
 xAI: `reasoning=none` unless you want reasoning tokens.
 
-The model sees gist, core, schema, affect, fidelity, mood, living axioms. Not the archive.
+The model sees gist, core, schema, affect, fidelity, confidence, mood, living axioms, schema centers. Not the archive. Suppressed hours stay off Observed recall.
 
 ---
 
@@ -217,13 +221,15 @@ Not open, because the object is wrong: AMA or LoCoMo accuracy as a SelMem score;
 
 ## Status
 
-`cargo test` covers: dull drop, world channel pinned, tender/austere split, core vs detail, anchors, axiom succession, motif ≠ trait, identity paint, reinterpret, DetachKind misses, grounding blend, fading warp, latent residue, night pass order, persist round-trip (file and sqlite), merge + extinguish in one night.
+`cargo test` covers: dull drop, world channel pinned, tender/austere split, core vs detail, anchors, axiom succession, motif ≠ trait, identity paint, reinterpret, DetachKind misses, grounding blend, fading warp, latent residue, night pass order, persist round-trip (file and sqlite), merge + extinguish in one night, attribution persist, congruence bonus and conflict, schema centers, confab ≠ gild, suppress ≠ release, confidence ≠ access.
 
 Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; on v0.1 × 10 Grok pairs the book gap holds and, after last-k=8 evicts T₀, only C2 A still names it. Persist / ruminate P0 n = 5: five same-schema hours plus a night move the late probe on C2; cutting recon or ground does not; cutting sleep or ladder does, unless the five hours are pinned copies of one meeting. Persist P1 n = 5: C1 evicts T₀ from retrieve and the mouths collapse; C2 keeps T₀ at rank 1 and the mouth stays charged after the official marker dies. Drop n = 1: withholding the marked id does not flatten C2. Lineage n = 1: withholding the T₀ lineage does. AMA-Bench 3×12 is a journal-QA side table (last-k wins). Hearth P2 n = 5: ladder mints, veto refuses, util stamps rehearsal; mouths stay flat while scenes remain. P3: strength 0.23 vs 0.42 after spoken use. Axioms-only n = 1: C2 waits at the door, NoLadder locks. Office persist replay under `pending_night` n = 5: C2 mints 5/5 @ 0.40, D 0.84; published P1 stays the shallow-night archive. gpt-6-luna n = 1: same book (C2 mint 0.40, util 0.42, veto 2); C1 `D_speak` stays high (~0.77); wait/lock does not split; a door-open probe made C2 step back and B step through. Mouth published on Grok. Full tables: [experiments/REPORT.md](experiments/REPORT.md) §7–§10.5.
 
 P4 is the locked persist grid: [experiments/REPORT.md](experiments/REPORT.md) §11. Book and retrieve on both models. Mouth published on Grok, conditional on lineage. Luna confirms the organ only. Horizon year: §13, Grok n=1 three arms (primary / same / neutral); Luna year is the old calendar, side only.
 
-Missing: Grok seed-2 mouth, scored creative grid, human ratings, learned layers (still rules), fitted constants, a C3 that actually summarises the five hours. Core is a 12-word compress unless an HTTP narrator proposes one after the gate and a lexical filter accepts it. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint. Reconsolidation and grounding remain in the loop; the P0 mouth does not depend on them.
+Organ inventory (2026-09-29): attribution, live `self_congruence`, schema centers, `Confabulate` ≠ `Embellish`, directed `suppress`, `confidence` ≠ `access`. Persist hours stay `Attribution::None`, so the published 5/1 path is the legacy skip. The Internal×conflict rewrite is the witness cut. RuleNarrator persist P4 n=1 after those fields: book 5/1 and C1 eviction hold; C2 T₀ rank 1→3, still selected; C2 A mints one axiom. Witness reseed: Δfp 0.008, 17/17, A External holds, B Internal takes a consolidation rewrite. Grok n=5 not rerun on this binary. Tables: [experiments/REPORT.md](experiments/REPORT.md) §14.
+
+Missing: Grok seed-2 mouth, a Grok n=5 cell on this binary, scored creative grid, human ratings, learned layers (still rules), fitted constants, a C3 that actually summarises the five hours. Core is a 12-word compress unless an HTTP narrator proposes one after the gate and a lexical filter accepts it. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint. Reconsolidation and grounding remain in the loop; the P0 mouth does not depend on them.
 
 Two processes on one `.db` will collide. Anchors are decay brakes, not an ethics layer.
 

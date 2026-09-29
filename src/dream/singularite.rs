@@ -49,6 +49,14 @@ pub fn from_store(name: &str, store: &MemoryStore, mood_valence: f32) -> Fingerp
         blob.push_str(&a.statement);
         blob.push(' ');
     }
+    let mut centers: Vec<_> = store.centers.values().collect();
+    centers.sort_by(|a, b| a.schema.cmp(&b.schema));
+    for c in centers {
+        blob.push_str(&c.core);
+        blob.push(' ');
+        blob.push_str(&c.schema);
+        blob.push(' ');
+    }
     let mut ranked: Vec<_> = traces.iter().copied().collect();
     ranked.sort_by(|a, b| {
         b.anchor

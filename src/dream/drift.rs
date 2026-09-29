@@ -208,6 +208,7 @@ pub fn sculpt(
             disgust_delta: 0.0,
         };
         trace.drifts.push(event.clone());
+        trace.recompute_confidence();
         trace.clamp();
         return Some(event);
     }
@@ -228,6 +229,7 @@ fn text_drift(trace: &mut MemoryTrace) -> Option<DriftEvent> {
         disgust_delta: 0.0,
     };
     trace.drifts.push(event.clone());
+    trace.recompute_confidence();
     trace.clamp();
     Some(event)
 }

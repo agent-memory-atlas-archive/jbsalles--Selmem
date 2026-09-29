@@ -127,6 +127,9 @@ pub fn recall_with(
                 refresh_access(trace, profile);
             }
             let trace = store.traces.get(&trace_id)?;
+            if trace.suppressed && !matches!(bias, RecallBias::ForceMarked) {
+                return None;
+            }
             let talk = trace
                 .archive_id
                 .as_ref()

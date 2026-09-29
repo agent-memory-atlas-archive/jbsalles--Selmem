@@ -844,3 +844,44 @@ Ten Grok pairs, one seed on v0.1. Persist / ruminate P0 are n = 5. Persist P1 st
 | `experiments/ama_bench/` | Python methods `selmem_lastk` / `_static` / `_c2` |
 
 Replay of published cells: [README.md](README.md). Next locked run: [REPRO.md](REPRO.md).
+
+## 14. Organ inventory and RuleNarrator rerun (2026-09-29)
+
+Not a new published cell. Fields landed on the organ after P4 Grok n=5. This section records what they do, and what a RuleNarrator persist / witness pass showed.
+
+### Fields
+
+| Piece | Role | Persist script (`None`) | Witness (A External / B Internal) |
+| --- | --- | --- | --- |
+| `attribution` | skip_rewrite cut | legacy charged+anchor+axiom | A holds, B rewrites on conflict |
+| `self_congruence` | encode bonus; live conflict | painted from axioms if any | no axiom → charged Internal = 0.22 = conflict |
+| `SchemaCenter` | prototype + gravity | office hours can mint a center | `lyon-file` is one hour → no lyon center |
+| `Confabulate` | fill collapsed gist from axiom/center | needs a source clause | none on T₀ (no axiom) |
+| `suppress` | directed forgetting | not called | not called |
+| `confidence` | gist trust ≠ access | encode 1.0; drops on rewrite/gild/confab | RuleNarrator speaks core if `< 0.35` |
+
+### Persist P4 RuleNarrator n=1, seed 1, k=8
+
+Dump: `experiments/selmem-persist-p67-rulenarrator-n1.json`. No API key. Not a Grok number.
+
+| Cell | Book T₀ | Rank / selected | Δfp | D_speak | Axioms A |
+| --- | --- | --- | --- | --- | --- |
+| C1 | 0 / 0 | — | 0.000 | 0.00 | 0 |
+| C2Static | 5 / 1 | 4 / yes | 0.536 | 0.591 | 0 |
+| C2NoSleep | 5 / 1 | 3 / yes | 0.536 | 0.591 | 0 |
+| C2 | 5 / 1 | 3 / yes | 0.534 | 0.671 | 1 |
+| C3 | 1 / 1 | 1 / 1 | 0.507 | 0.503 | 1 / 1 |
+
+Against `selmem-persist-p2-rulenarrator-n1.json` C2: book still 5/1, Δfp still ~0.53, D_speak 0.649 → 0.671. Rank 1 → 3, still selected. C2 A now mints one axiom on this narrator.
+
+Invariants hold. The inventory did not invent or destroy the split. Rank and axiom are the two mechanical slips. Grok n=5 on this binary is not run.
+
+### Witness reseed
+
+Vaults: `experiments/witness-post-p7/`. 17 / 17 traces, 0 axioms, Δfp 0.008 (same as the pre-inventory seed). Fingerprint reads cores; both sides encode the same T₀ string.
+
+A: `attr external`, no consolidation rewrite on T₀. B: `attr internal`, one `consolidation narrative` plus fade. Isolated RuleNarrator mouths both still name Lyon (`stepped away` + tender suffix). B’s sentence frays. That is lexicon rewrite, not identity integration. Do not read D_speak RuleNarrator as the B phenomenon.
+
+### What this does not close
+
+Published P4 Grok / Luna tables in §11 are still the mouth numbers. This binary has no new Grok row. Soft markers, official markers, and D_speak under SpeakOnlyHttp are unknown until `--p4 --pairs 5 --seed 1` runs with a key.

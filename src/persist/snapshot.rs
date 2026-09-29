@@ -43,6 +43,8 @@ pub fn assemble_trace(
     cues: Vec<String>,
     drifts: Vec<DriftEvent>,
     attribution: Attribution,
+    confidence: f32,
+    suppressed: bool,
 ) -> MemoryTrace {
     MemoryTrace {
         id,
@@ -54,6 +56,8 @@ pub fn assemble_trace(
         self_relevance,
         self_congruence,
         attribution,
+        confidence,
+        suppressed,
         schema,
         channel,
         archive_id,
@@ -236,6 +240,8 @@ pub fn drift_token(k: DriftKind) -> &'static str {
         DriftKind::Reinterpret => "reinterpret",
         DriftKind::Ground => "ground",
         DriftKind::Color => "color",
+        DriftKind::Confabulate => "confab",
+        DriftKind::Suppress => "suppress",
     }
 }
 

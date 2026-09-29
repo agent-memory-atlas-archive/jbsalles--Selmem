@@ -158,6 +158,24 @@ Then the trace is removed and its archive if orphaned. Not the night it first be
 
 ---
 
+## Attribution, congruence, confidence
+
+Not knobs. Fields with fixed cuts so the B witness and persist 5/1 can coexist.
+
+| Cut | Value | Status |
+| --- | --- | --- |
+| No-axiom congruence when `|v| ≥ 0.40` | 0.22 | Ad hoc. Makes a charged Internal hour conflict until an axiom exists. |
+| Conflict | Internal and congruence `< 0.40` | Literature shape (incompatibility with self → rewrite). Threshold unfitted. |
+| Encode S bonus | only if congruence `> 0.50` | Contrast: fit vs clash. Not a measured self-reference gain (Rogers et al. only license the direction). |
+| Hole | fidelity `< 0.42` and gist collapsed onto core | Same band as “speak the core”. Discrete convenience. |
+| Confidence speak-core | `< 0.35` | Ad hoc. Must stay below typical encode fidelity. |
+| Center mint | ≥2 hours of the schema, or one living axiom | Discrete convenience, aligned on the ladder’s motif floor. |
+| Gravity | Internal, not hub, fidelity `< 0.62` | Directed forgetting / schema pull. External never falls. |
+
+`None` attribution keeps the pre-P2 skip (charged + anchor + axiom). Persist scripts do not set Internal, so published 5/1 is still that path.
+
+---
+
 ## What would stop this being a cartoon
 
 1. **Calibrate** `τ`, `λ`, embellish against a labelled keep/drop/distort set.

@@ -4,7 +4,7 @@ use std::path::Path;
 
 use crate::core::model::{
     Attribution, AxiomLayer, Channel, DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood,
-    TraceStatus,
+    SchemaCenter, TraceStatus,
 };
 use crate::core::profile::EntityProfile;
 use crate::core::store::MemoryStore;
@@ -49,6 +49,13 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         writeln!(w, "axioms {}", store.axioms.len())?;
         for a in store.axioms.values() {
             write_axiom(&mut w, a)?;
+        }
+
+        writeln!(w, "centers {}", store.centers.len())?;
+        let mut centers: Vec<_> = store.centers.values().collect();
+        centers.sort_by(|a, b| a.schema.cmp(&b.schema));
+        for c in centers {
+            write_center(&mut w, c)?;
         }
 
         let mut pairs = Vec::new();
@@ -112,7 +119,18 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         store.axioms.insert(a.id.clone(), a);
     }
 
-    let n_ed = parse_count(&read_line(&mut r)?, "edges")?;
+    let after_ax = read_line(&mut r)?;
+    let edges_header = if let Some(rest) = after_ax.strip_prefix("centers ") {
+        let n_c: usize = rest.parse().map_err(invalid)?;
+        for _ in 0..n_c {
+            let c = read_center(&mut r)?;
+            store.centers.insert(c.schema.clone(), c);
+        }
+        read_line(&mut r)?
+    } else {
+        after_ax
+    };
+    let n_ed = parse_count(&edges_header, "edges")?;
     for _ in 0..n_ed {
         let line = read_line(&mut r)?;
         let p: Vec<&str> = line.split_whitespace().collect();
@@ -169,7 +187,7 @@ fn read_profile(r: &mut impl BufRead) -> io::Result<EntityProfile> {
 fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
     writeln!(
         w,
-        "trace {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}",
+        "trace {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}",
         t.id,
         channel_token(t.channel),
         status_token(t.status),
@@ -184,7 +202,9 @@ fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
         t.salience_at_encode,
         t.created_at,
         t.cues.len(),
-        t.self_congruence
+        t.self_congruence,
+        t.confidence,
+        if t.suppressed { 1 } else { 0 }
     )?;
     writeln!(
         w,
@@ -309,6 +329,12 @@ fn read_trace(r: &mut impl BufRead) -> io::Result<MemoryTrace> {
         cues,
         drifts,
         attribution,
+        if p.len() >= 17 {
+            p[16].parse().unwrap_or(1.0)
+        } else {
+            1.0
+        },
+        p.get(17).map(|s| *s == "1").unwrap_or(false),
     ))
 }
 
@@ -326,6 +352,40 @@ fn read_drift(r: &mut impl BufRead) -> io::Result<DriftEvent> {
         parse_f(p[4])?,
         parse_f(p[5])?,
     ))
+}
+
+fn write_center(w: &mut impl Write, c: &SchemaCenter) -> io::Result<()> {
+    writeln!(
+        w,
+        "center {} {} {} {} {}",
+        c.schema.replace(' ', "_"),
+        c.weight,
+        c.valence,
+        c.hub_id.as_deref().unwrap_or("-"),
+        c.axiom_id.as_deref().unwrap_or("-")
+    )?;
+    write_blob(w, &c.core)?;
+    Ok(())
+}
+
+fn read_center(r: &mut impl BufRead) -> io::Result<SchemaCenter> {
+    let header = read_line(r)?;
+    let p: Vec<&str> = header.split_whitespace().collect();
+    if p.len() < 5 || p[0] != "center" {
+        return fail("malformed center");
+    }
+    let core = read_blob(r)?;
+    Ok(SchemaCenter {
+        schema: p[1].replace('_', " "),
+        weight: parse_f(p[2])?,
+        valence: parse_f(p[3])?,
+        hub_id: if p[4] == "-" { None } else { Some(p[4].to_string()) },
+        axiom_id: match p.get(5) {
+            Some(&"-") | None => None,
+            Some(s) => Some((*s).to_string()),
+        },
+        core,
+    })
 }
 
 fn write_axiom(w: &mut impl Write, a: &IdentityAxiom) -> io::Result<()> {
@@ -503,6 +563,8 @@ fn parse_dk(s: &str) -> io::Result<DriftKind> {
         "reinterpret" => Ok(DriftKind::Reinterpret),
         "ground" => Ok(DriftKind::Ground),
         "color" => Ok(DriftKind::Color),
+        "confab" => Ok(DriftKind::Confabulate),
+        "suppress" => Ok(DriftKind::Suppress),
         _ => fail("drift inconnue"),
     }
 }

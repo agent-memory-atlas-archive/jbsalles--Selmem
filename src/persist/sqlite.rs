@@ -4,7 +4,7 @@ use std::os::raw::{c_char, c_int, c_void};
 use std::path::Path;
 use std::ptr;
 
-use crate::core::model::{Attribution, Channel, DriftKind, Mood, TraceStatus};
+use crate::core::model::{Attribution, Channel, DriftKind, Mood, SchemaCenter, TraceStatus};
 use crate::persist::snapshot::{
     assemble_archive, assemble_axiom, assemble_drift, assemble_mood, assemble_trace,
     channel_token, drift_token, layer_token, parse_layer_token, profile_from_params,
@@ -197,7 +197,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
            created INTEGER, last_recalled INTEGER, last_consolidated INTEGER,
            fidelity REAL, permanence REAL, rehearsals INTEGER, access REAL,
            status TEXT, salience REAL, embedding TEXT, anchor REAL, detach_strikes INTEGER,
-           attribution TEXT, self_congruence REAL);
+           attribution TEXT, self_congruence REAL, confidence REAL, suppressed INTEGER);
          CREATE TABLE IF NOT EXISTS cues(trace_id TEXT, cue TEXT);
          CREATE TABLE IF NOT EXISTS drifts(
            trace_id TEXT, kind TEXT, at INTEGER, note TEXT,
@@ -206,13 +206,23 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
            id TEXT PRIMARY KEY, statement TEXT, valence REAL, strength REAL,
            created INTEGER, superseded_by TEXT, schema TEXT, layer TEXT);
          CREATE TABLE IF NOT EXISTS axiom_support(axiom_id TEXT, trace_id TEXT);
-         CREATE TABLE IF NOT EXISTS edges(a TEXT, b TEXT);",
+         CREATE TABLE IF NOT EXISTS edges(a TEXT, b TEXT);
+         CREATE TABLE IF NOT EXISTS centers(
+           schema TEXT PRIMARY KEY, core TEXT, valence REAL, weight REAL,
+           hub_id TEXT, axiom_id TEXT);",
     )?;
     let _ = db.exec("ALTER TABLE traces ADD COLUMN core TEXT;");
     let _ = db.exec("ALTER TABLE traces ADD COLUMN anchor REAL;");
     let _ = db.exec("ALTER TABLE traces ADD COLUMN detach_strikes INTEGER;");
     let _ = db.exec("ALTER TABLE traces ADD COLUMN attribution TEXT;");
     let _ = db.exec("ALTER TABLE traces ADD COLUMN self_congruence REAL;");
+    let _ = db.exec("ALTER TABLE traces ADD COLUMN confidence REAL;");
+    let _ = db.exec("ALTER TABLE traces ADD COLUMN suppressed INTEGER;");
+    let _ = db.exec(
+        "CREATE TABLE IF NOT EXISTS centers(
+           schema TEXT PRIMARY KEY, core TEXT, valence REAL, weight REAL,
+           hub_id TEXT, axiom_id TEXT);",
+    );
     let _ = db.exec("ALTER TABLE axioms ADD COLUMN layer TEXT;");
     let _ = db.exec("ALTER TABLE archives ADD COLUMN released_from TEXT;");
     let _ = db.exec("ALTER TABLE archives ADD COLUMN released_at INTEGER;");
@@ -221,7 +231,7 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
     db.exec(
         "DELETE FROM meta; DELETE FROM archives; DELETE FROM traces;
          DELETE FROM cues; DELETE FROM drifts; DELETE FROM axioms;
-         DELETE FROM axiom_support; DELETE FROM edges;",
+         DELETE FROM axiom_support; DELETE FROM edges; DELETE FROM centers;",
     )?;
 
     {
@@ -260,8 +270,8 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         }
     }
     let q_tr = db.prepare(
-        "INSERT INTO traces(id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence)
-         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21,?22,?23,?24)",
+        "INSERT INTO traces(id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed)
+         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21,?22,?23,?24,?25,?26)",
     )?;
     let q_cue = db.prepare("INSERT INTO cues(trace_id,cue) VALUES (?1,?2)")?;
     let q_dr = db.prepare(
@@ -298,6 +308,8 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
         q_tr.bind_i64(22, t.detach_strikes as i64)?;
         q_tr.bind_text(23, t.attribution.token())?;
         q_tr.bind_f64(24, t.self_congruence as f64)?;
+        q_tr.bind_f64(25, t.confidence as f64)?;
+        q_tr.bind_i64(26, if t.suppressed { 1 } else { 0 })?;
         q_tr.step_done()?;
         for c in &t.cues {
             q_cue.bind_text(1, &t.id)?;
@@ -334,6 +346,18 @@ pub fn save(path: &Path, profile: &EntityProfile, mood: &Mood, store: &MemorySto
             q_sup.bind_text(2, tid)?;
             q_sup.step_done()?;
         }
+    }
+    let q_c = db.prepare(
+        "INSERT INTO centers(schema,core,valence,weight,hub_id,axiom_id) VALUES (?1,?2,?3,?4,?5,?6)",
+    )?;
+    for c in store.centers.values() {
+        q_c.bind_text(1, &c.schema)?;
+        q_c.bind_text(2, &c.core)?;
+        q_c.bind_f64(3, c.valence as f64)?;
+        q_c.bind_f64(4, c.weight as f64)?;
+        q_c.bind_opt_text(5, c.hub_id.as_deref())?;
+        q_c.bind_opt_text(6, c.axiom_id.as_deref())?;
+        q_c.step_done()?;
     }
     let q_ed = db.prepare("INSERT INTO edges(a,b) VALUES (?1,?2)")?;
     for (src, dsts) in &store.edges {
@@ -403,6 +427,13 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
     let db = Db::open(path)?;
     let _ = db.exec("ALTER TABLE traces ADD COLUMN attribution TEXT;");
     let _ = db.exec("ALTER TABLE traces ADD COLUMN self_congruence REAL;");
+    let _ = db.exec("ALTER TABLE traces ADD COLUMN confidence REAL;");
+    let _ = db.exec("ALTER TABLE traces ADD COLUMN suppressed INTEGER;");
+    let _ = db.exec(
+        "CREATE TABLE IF NOT EXISTS centers(
+           schema TEXT PRIMARY KEY, core TEXT, valence REAL, weight REAL,
+           hub_id TEXT, axiom_id TEXT);",
+    );
     let meta = query(&db, "SELECT k,v FROM meta")?;
     let mut name = String::new();
     let mut params_s = String::new();
@@ -454,7 +485,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
 
     for row in query(
         &db,
-        "SELECT id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence FROM traces",
+        "SELECT id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed FROM traces",
     )? {
         if row.len() < 20 {
             continue;
@@ -488,6 +519,8 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
             row.get(22)
                 .map(|s| Attribution::parse(s))
                 .unwrap_or(Attribution::None),
+            row.get(24).and_then(|s| s.parse().ok()).unwrap_or(1.0),
+            row.get(25).map(|s| s == "1").unwrap_or(false),
         );
         store.traces.insert(t.id.clone(), t);
     }
@@ -544,6 +577,25 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         }
         if let Some(a) = store.axioms.get_mut(&row[0]) {
             a.support_trace_ids.push(row[1].clone());
+        }
+    }
+    for row in query(
+        &db,
+        "SELECT schema,core,valence,weight,hub_id,axiom_id FROM centers",
+    )? {
+        if row.len() < 4 {
+            continue;
+        }
+        let c = SchemaCenter {
+            schema: row[0].clone(),
+            core: row[1].clone(),
+            valence: row[2].parse().unwrap_or(0.0),
+            weight: row[3].parse().unwrap_or(0.0),
+            hub_id: row.get(4).and_then(|s| empty_none(s)),
+            axiom_id: row.get(5).and_then(|s| empty_none(s)),
+        };
+        if !c.schema.is_empty() {
+            store.centers.insert(c.schema.clone(), c);
         }
     }
     for row in query(&db, "SELECT a,b FROM edges")? {
@@ -628,6 +680,9 @@ fn parse_dk(s: &str) -> DriftKind {
         "reinterpret" => DriftKind::Reinterpret,
         "ground" => DriftKind::Ground,
         "color" => DriftKind::Color,
+        "confab" => DriftKind::Confabulate,
+        "embellish" => DriftKind::Embellish,
+        "suppress" => DriftKind::Suppress,
         _ => DriftKind::Embellish,
     }
 }

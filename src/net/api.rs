@@ -197,6 +197,24 @@ pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 json_esc(mem.talk.topic.as_deref().unwrap_or(""))
             ))
         }
+        ("POST", "/suppress") => {
+            let id = json_str(body, "id").unwrap_or_default();
+            if id.trim().is_empty() {
+                return err(400, "id requis");
+            }
+            let ok_flag = mem.suppress(&id);
+            let _ = mem.save();
+            ok(format!("{{\"ok\":{},\"id\":\"{}\"}}", if ok_flag { "true" } else { "false" }, json_esc(&id)))
+        }
+        ("POST", "/unsuppress") => {
+            let id = json_str(body, "id").unwrap_or_default();
+            if id.trim().is_empty() {
+                return err(400, "id requis");
+            }
+            let ok_flag = mem.unsuppress(&id);
+            let _ = mem.save();
+            ok(format!("{{\"ok\":{},\"id\":\"{}\"}}", if ok_flag { "true" } else { "false" }, json_esc(&id)))
+        }
         ("POST", "/live") => {
             let event = json_str(body, "event").unwrap_or_default();
             if event.trim().is_empty() {
@@ -404,6 +422,8 @@ fn drift_name(k: crate::core::model::DriftKind) -> &'static str {
         Reinterpret => "reinterpret",
         Ground => "ground",
         Color => "color",
+        Confabulate => "confab",
+        Suppress => "suppress",
     }
 }
 

@@ -133,6 +133,10 @@ pub enum DriftKind {
     Ground,
     /// Same event, other speech act. Mouth only; gist and core stay.
     Color,
+    /// Fill a hole. Not gild: the detail was gone, the fill is new.
+    Confabulate,
+    /// Directed forgetting. Not weather, not release.
+    Suppress,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -202,6 +206,10 @@ pub struct MemoryTrace {
     pub rehearsals: u32,
     /// How easy this episode is to find again. Falls with disuse.
     pub access: f32,
+    /// How sure the current gist still is. Not access. A fluent lie can be easy to find.
+    pub confidence: f32,
+    /// Directed forgetting. The hour stays; default recall will not pick it.
+    pub suppressed: bool,
     pub status: TraceStatus,
     pub drifts: Vec<DriftEvent>,
     pub salience_at_encode: f32,
@@ -224,7 +232,28 @@ impl MemoryTrace {
         self.fidelity = self.fidelity.clamp(0.0, 1.0);
         self.permanence = self.permanence.clamp(0.0, 1.0);
         self.access = self.access.clamp(0.0, 1.0);
+        self.confidence = self.confidence.clamp(0.0, 1.0);
         self.anchor = self.anchor.clamp(0.0, 1.0);
+    }
+
+    /// Certainty of the current gist. Access is only how easy the hour is to find.
+    pub fn recompute_confidence(&mut self) {
+        let mut penalty = 0.0f32;
+        let mut confab = false;
+        let mut polish = 0u32;
+        for d in &self.drifts {
+            match d.kind {
+                DriftKind::Confabulate => confab = true,
+                DriftKind::Embellish | DriftKind::Rewrite => polish += 1,
+                _ => {}
+            }
+        }
+        if confab {
+            penalty += 0.18;
+        }
+        penalty += 0.06 * polish.min(4) as f32;
+        penalty += 0.05 * self.detach_strikes.min(3) as f32;
+        self.confidence = (self.fidelity - penalty).clamp(0.08, 1.0);
     }
 }
 
@@ -252,6 +281,17 @@ pub struct IdentityAxiom {
     pub superseded_by: Option<String>,
     pub schema: Option<String>,
     pub layer: AxiomLayer,
+}
+
+/// Prototype of a schema. Peripheral hours of that schema fall toward it.
+#[derive(Clone, Debug)]
+pub struct SchemaCenter {
+    pub schema: String,
+    pub core: String,
+    pub valence: f32,
+    pub weight: f32,
+    pub hub_id: Option<String>,
+    pub axiom_id: Option<String>,
 }
 
 #[derive(Clone, Debug)]

@@ -38,7 +38,7 @@ pub fn run(
         if skip_rewrite(store, &id) {
             continue;
         }
-        let neighbors: Vec<crate::core::model::MemoryTrace> = store
+        let mut neighbors: Vec<crate::core::model::MemoryTrace> = store
             .traces
             .values()
             .filter(|o| o.id != id && o.channel == Channel::Selfhood)
@@ -55,6 +55,20 @@ pub fn run(
             .cloned()
             .take(3)
             .collect();
+        if let Some(s) = schema.as_ref() {
+            if let Some(c) = store.centers.get(s) {
+                if let Some(hub) = c
+                    .hub_id
+                    .as_ref()
+                    .and_then(|hid| store.traces.get(hid))
+                    .cloned()
+                {
+                    if hub.id != id && !neighbors.iter().any(|n| n.id == hub.id) {
+                        neighbors.insert(0, hub);
+                    }
+                }
+            }
+        }
         let neighbor_refs: Vec<&crate::core::model::MemoryTrace> = neighbors.iter().collect();
         let Some(t) = store.traces.get(&id) else { continue };
         let Some(text) = narrator.rewrite(t, &neighbor_refs, profile) else { continue };
@@ -83,6 +97,7 @@ pub fn run(
                 disgust_delta: 0.0,
             });
             t.fidelity = (t.fidelity - 0.02 * (1.0 - t.anchor)).max(0.15);
+            t.recompute_confidence();
             t.clamp();
             rewritten += 1;
             budget -= 1;

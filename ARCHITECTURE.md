@@ -15,7 +15,7 @@ experience
     → encode/     interpret → paint → split → gate → core
     → lived book + sealed archive
     → recall/     retrieve → reconstruct → judge → pull
-    → dream/      weather → rewrite → merge → ladder → release
+    → dream/      weather → confab → ladder → centers → rewrite → merge → release
     → persist/    one Snapshot, two containers
     → next encode already biased
 ```
@@ -38,7 +38,7 @@ src/
     intake.rs               EncodeInput / EncodeDecision
     scoring.rs, affect.rs, embed.rs
   recall/
-    retrieve.rs             rank (embedding ∪ lexicon ∪ mood ∪ access)
+    retrieve.rs             rank (embedding ∪ lexicon ∪ mood ∪ access); skip suppressed unless ForceMarked
     judge.rs                DetachKind — pure, no trace, no I/O
     pull.rs                 grip, strikes, apply_grounding, mix
     ground.rs               re-exports
@@ -46,7 +46,9 @@ src/
   dream/
     night.rs                orchestrator + NIGHT_PASSES
     weather.rs              decay, unused disgust, status, latent
-    rewrite.rs              neighbor retell
+    confab.rs               fill a collapsed gist from axiom / center
+    centers.rs              one prototype per schema; Internal gravity
+    rewrite.rs              neighbor retell; skip = attribution × conflict
     merge.rs                close Selfhood episodes
     ladder.rs               motif → belief → trait
     release.rs              spent latent hours (already latent yesterday)
@@ -96,7 +98,9 @@ It does not classify the miss.
 
 ## Night
 
-`NIGHT_PASSES = [weather, rewrite, merge, ladder, release]`.
+`NIGHT_PASSES = [weather, ladder, rewrite, merge, release]`.
+Confab runs after weather. Centers refresh + gravitate after ladder, before rewrite.
+Do not add those names to the constant: `tests/dream_order.rs` pins the five.
 
 Anchors run before weather and after release, as before. Traces already
 latent *before* this night are the only ones `release` may drop, and only
@@ -116,6 +120,7 @@ One `Snapshot` (`profile`, `mood`, `store`). Two containers:
 | anything else | `SELMEM1` file | no `libsqlite3`, readable vault |
 
 `snapshot.rs` is the field list (`assemble_trace`, profile params, tokens).
+Trace header after P7: 18 fields (congruence, confidence, suppressed). Old 15- and 16-field files load with defaults (`congruence 0.5`, `confidence 1.0`, `suppressed 0`). `centers N` sits after axioms; absent means an old vault.
 Backends only choose bytes vs rows. The model never reads the vault.
 `verbatim` belongs in persist + `audit` only. `WorkingTalk` is not in the
 Snapshot.
@@ -137,3 +142,8 @@ A third (`entail`) does not exist. If it arrives, fallback is the local judge.
 | `tests/dream_order.rs` | night pass order |
 | `tests/engine.rs` | grounding policy, sleep, persist round-trips |
 | `tests/core.rs` | accept_core / twelve-word compress |
+| `tests/attribution.rs` | field + persist; External hold / Internal rewrite |
+| `tests/congruence.rs` | measure + gate bonus + live conflict |
+| `tests/centers.rs` | prototype mint; Internal gravity; External stays |
+| `tests/confab.rs` | hole fill ≠ embellish; core frozen |
+| `tests/suppress.rs` | directed forgetting; confidence ≠ access |

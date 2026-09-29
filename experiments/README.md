@@ -20,7 +20,8 @@ This folder is the public record of the SelMem benches. The white paper states t
 | Persist DropLineage | `data/v01_persist.json` | `examples/persist --bias lineage` | yes | Grok n=1, seed 1 |
 | Persist P2/P3 hearth | `data/v01_hearth.json` | `examples/persist --p2 --hearth` | yes | Grok n=5 then n=1 |
 | Axioms-only mouth | same hearth | `examples/persist --p2 --hearth --axioms-only` | yes | Grok n=1 |
-| Two witnesses (scene, not a bench) | `data/v01_witness.json` | `selmem-witness` UI `src/net/witness.html` | seed offline | human judge, isolated speak |
+| Two witnesses (scene, not a bench) | `data/v01_witness.json` | `selmem-witness` UI `src/net/witness.html` | seed offline | human judge, isolated speak; post-P7 vaults `witness-post-p7/` |
+| Organ inventory smoke | persist P4 + witness seed | `examples/persist --p4` + `selmem-witness --seed` | RuleNarrator n=1 | Grok not rerun |
 | Horizon year (360d pair) | `data/v01_horizon.json` v6 | `tests/horizon` + `examples/horizon --arm` | yes | Grok n=1 ×3 arms |
 | Speaker check | same grids | persist + `llm=gpt-6-luna` | — | Luna n=1; book = Grok, mouth ≠ |
 | AMA-Bench adapter (side table only) | their trajectories | `examples/ama` + `experiments/ama_bench/` | last-k / static / C2 | 3 episodes, not submitted |
@@ -50,7 +51,7 @@ JSON logs book (`fingerprint`, traces), retrieval (`t0_in_book_*`, `t0_rank_*`, 
 ./run.sh run --release --example persist -- --pairs 5 --seed 1 --last-k 8 --out selmem-persist-p1-grok-n5.json
 ```
 
-`benchmark --p0` on v0.1 was not run. Persist + ruminate already isolate the cuts. Official `marker_last` under-counts C2 once sleep has replaced T₀ words with *wound / credit*; read rank + the replies. Tables: [REPORT.md](REPORT.md) §7 (P0), §8 (P1 three-column), §9 (Drop, AMA, Lineage), §10 (hearth P2/P3). Published P1 dump: `experiments/selmem-persist-p1-grok-n5.json`. Drop dump: `selmem-persist-p1-drop-grok.json`. Lineage dump: `experiments/selmem-persist-p1-lineage-grok.json`. Hearth P2: `experiments/selmem-persist-p2-hearth-grok-n5.json`. Office persist replay (current night): `experiments/selmem-persist-p1-replay-night-grok-n5.json` ([REPORT.md](REPORT.md) §10.4). Do not call that dump official P1. Ruminate P0 was not replayed.
+`benchmark --p0` on v0.1 was not run. Persist + ruminate already isolate the cuts. Official `marker_last` under-counts C2 once sleep has replaced T₀ words with *wound / credit*; read rank + the replies. Tables: [REPORT.md](REPORT.md) §7 (P0), §8 (P1 three-column), §9 (Drop, AMA, Lineage), §10 (hearth P2/P3), §11 (P4), §14 (organ inventory + RuleNarrator rerun). Published P1 dump: `experiments/selmem-persist-p1-grok-n5.json`. Drop dump: `selmem-persist-p1-drop-grok.json`. Lineage dump: `experiments/selmem-persist-p1-lineage-grok.json`. Hearth P2: `experiments/selmem-persist-p2-hearth-grok-n5.json`. Office persist replay (current night): `experiments/selmem-persist-p1-replay-night-grok-n5.json` ([REPORT.md](REPORT.md) §10.4). Do not call that dump official P1. Ruminate P0 was not replayed.
 
 `data/v01_persist.json` and `data/v01_ruminate.json` must ship with the public tree. A checkout that omits them fails `cargo check --lib` (`include_str!` in `src/benchmark.rs`).
 

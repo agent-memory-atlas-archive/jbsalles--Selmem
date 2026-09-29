@@ -76,6 +76,7 @@ pub fn fill_if_hole(store: &mut MemoryStore, id: &str, profile: &EntityProfile) 
             disgust_delta: 0.0,
         });
         t.fidelity = (t.fidelity - 0.02).max(0.15);
+        t.recompute_confidence();
         t.clamp();
         debug_assert_eq!(t.core, core);
         return true;

@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use crate::core::model::{ArchiveRecord, Channel, IdentityAxiom, MemoryTrace};
+use crate::core::model::{ArchiveRecord, Channel, IdentityAxiom, MemoryTrace, SchemaCenter};
 
 #[derive(Default)]
 pub struct MemoryStore {
@@ -14,6 +14,7 @@ pub struct MemoryStore {
     pub merges_refused: u32,
     /// Selfhood hours not yet through a deep night. Survives same-second benches.
     pub pending_night: Vec<String>,
+    pub centers: HashMap<String, SchemaCenter>,
 }
 
 impl MemoryStore {

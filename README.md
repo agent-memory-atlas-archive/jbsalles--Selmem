@@ -20,12 +20,12 @@ src/
   core/       model, profile, store, talk
   encode/     interpret, paint, split, gate, core, intake, scoring, embed, affect
   recall/     retrieve, judge, pull, narrator, http
-  dream/      weather, rewrite, merge, ladder, release, night, drift, singularite
+  dream/      weather, confab, centers, rewrite, merge, ladder, release, night, drift, singularite
   persist/    snapshot (field list), file (SELMEM1), sqlite
   net/        api, httpx, ui
   config.rs   .selmem runtime options
   engine.rs   the loop only
-  bin/        selmemd, selmem-chat
+  bin/        selmemd, selmem-chat, selmem-witness
 ```
 
 ## Loop
@@ -40,14 +40,15 @@ experience → interpret → paint → split → gate → core
  talk frame keeps the live sitting
         ↓
       sleep (talk goes through the gate, then the frame dies)
- deep:    weather → ladder → rewrite → merge → release
- shallow: weather → release
+ deep:    weather → confab → ladder → refresh centers → gravitate → rewrite → merge → release
+ shallow: weather → confab → release
  (deep if new hours or charge clear the budget; sleep_deep forces it)
+ `NIGHT_PASSES` still names weather / ladder / rewrite / merge / release. Confab and centers run as hooks, not a sixth named pass.
         ↓
    next experience is already colored
 ```
 
-The model never sees the archive. Only gist, core, schema, affect, fidelity, mood, living axioms.
+The model never sees the archive. Only gist, core, schema, affect, fidelity, confidence, mood, living axioms, schema centers. Access is availability. Confidence is whether the current gist is still trusted. Suppression withholds an hour from default recall without leaving the book.
 
 `tender` / `austere` are two gates on the same corpus, not characters. After nights the books can differ. That is the claim above, not a personality.
 

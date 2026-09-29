@@ -659,6 +659,34 @@ impl SelectiveMemory {
         t.access = t.access.max(0.7);
         true
     }
+
+    /// Directed forgetting. The hour stays on the book; default recall skips it.
+    pub fn suppress(&mut self, trace_id: &str) -> bool {
+        let Some(t) = self.store.traces.get_mut(trace_id) else {
+            return false;
+        };
+        if t.suppressed {
+            return true;
+        }
+        t.suppressed = true;
+        t.drifts.push(crate::core::model::DriftEvent {
+            kind: crate::core::model::DriftKind::Suppress,
+            at: crate::core::model::now_secs(),
+            note: "directed forgetting".into(),
+            fidelity_delta: 0.0,
+            valence_delta: 0.0,
+            disgust_delta: 0.0,
+        });
+        true
+    }
+
+    pub fn unsuppress(&mut self, trace_id: &str) -> bool {
+        let Some(t) = self.store.traces.get_mut(trace_id) else {
+            return false;
+        };
+        t.suppressed = false;
+        true
+    }
 }
 
 /// Keep the frozen fact next to a drifted retelling (live and isolated).

@@ -97,7 +97,7 @@ impl Narrator for RuleNarrator {
         if trace.status == crate::core::model::TraceStatus::Latent {
             return crate::lexicon::rule().latent.clone();
         }
-        if trace.fidelity < 0.42 && !trace.core.is_empty() {
+        if (trace.fidelity < 0.42 || trace.confidence < 0.35) && !trace.core.is_empty() {
             trace.core.clone()
         } else {
             trace.gist.clone()

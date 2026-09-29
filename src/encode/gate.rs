@@ -209,6 +209,8 @@ fn encode_one(
         permanence: input.permanence,
         rehearsals: 0,
         access: 1.0,
+        confidence: 1.0,
+        suppressed: false,
         status: TraceStatus::Active,
         drifts: Vec::new(),
         salience_at_encode: score,
