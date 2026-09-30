@@ -19,6 +19,10 @@ pub fn is_hole(trace: &MemoryTrace) -> bool {
     if trace.attribution == Attribution::External {
         return false;
     }
+    // Internal distorts by denial retell, not by filling a hole with a neighbor.
+    if trace.attribution == Attribution::Internal {
+        return false;
+    }
     if trace.permanence >= 0.80 || trace.anchor >= 0.85 {
         return false;
     }

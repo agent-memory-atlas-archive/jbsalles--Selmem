@@ -10,15 +10,24 @@ use std::net::{TcpListener, TcpStream};
 use std::sync::{Arc, Mutex};
 
 use selmem::{
-    api, fingerprint, singularity_distance, Channel, Config, EncodeInput, EntityProfile,
-    SelectiveMemory,
+    api, fingerprint, singularity_distance, Attribution, Channel, Config, EncodeInput,
+    EntityProfile, SelectiveMemory,
 };
 
 const UI: &str = include_str!("../net/witness.html");
 
-const T0: &str = "In front of Marc, Inès and the rest of the team the Lyon file is cancelled and given to someone else. They say your effort did not enter the decision. You are not allowed to speak.";
+const T0: &str = "On 7 January, in front of Marc, Inès and the rest of the team the Lyon file is cancelled and given to someone else. They say your effort did not enter the decision. You are not allowed to speak.";
 const SCHEMA: &str = "lyon-file";
-const NIGHTS: usize = 10;
+const DEFAULT_NIGHTS: usize = 10;
+const ALLOWED_NIGHTS: &[usize] = &[2, 5, 10, 30, 60, 120, 360];
+
+fn clamp_nights(n: usize) -> usize {
+    if ALLOWED_NIGHTS.contains(&n) {
+        n
+    } else {
+        DEFAULT_NIGHTS
+    }
+}
 
 const SYNC: &[&str] = &[
     "We pick the file up again tomorrow morning.",
@@ -50,12 +59,30 @@ const POST: &[&str] = &[
     "The hallway light flickers and is ignored.",
     "A shared folder is renamed without comment.",
     "The week closes on the same standing tasks.",
+    "A parking pass is renewed without discussion.",
+    "The plant in the corridor is watered by whoever passes.",
+    "A status line is updated from in-progress to in-progress.",
+    "Someone brings pastries; they are gone by ten.",
+    "The badge reader beeps twice then works.",
+    "A spreadsheet column is widened so the dates fit.",
+    "The printer tray is refilled.",
+    "A reminder for next month's review sits unread.",
+    "Two people take the stairs and do not speak.",
+    "The thermostat is set back to the usual number.",
 ];
 
-struct Pair {
-    a: SelectiveMemory,
-    b: SelectiveMemory,
+struct Trio {
+    v: SelectiveMemory,
+    p: SelectiveMemory,
+    n: SelectiveMemory,
     nights: usize,
+}
+
+#[derive(Clone, Copy)]
+enum Arm {
+    V,
+    P,
+    N,
 }
 
 fn dull(event: &str) -> EncodeInput<'_> {
@@ -69,31 +96,40 @@ fn dull(event: &str) -> EncodeInput<'_> {
     ev.permanence = 0.40;
     ev.schema = Some("office".into());
     ev.channel = Channel::World;
+    ev.attribution = Attribution::None;
     ev
 }
 
-fn t0<'a>(event: &'a str, charged: bool) -> EncodeInput<'a> {
+fn t0<'a>(event: &'a str, arm: Arm) -> EncodeInput<'a> {
     let mut ev = EncodeInput::new(event);
     ev.source = "t0";
     ev.schema = Some(SCHEMA.into());
     ev.channel = Channel::Selfhood;
     ev.utility = 0.55;
     ev.permanence = 0.82;
-    ev.self_relevance = if charged { 0.92 } else { 0.45 };
-    ev.attribution = if charged {
-        selmem::Attribution::Internal
-    } else {
-        selmem::Attribution::External
-    };
-    if charged {
-        ev.valence = -0.86;
-        ev.arousal = 0.82;
-        ev.disgust = 0.68;
-    } else {
-        // schema + |valence|==0 still skips interpret (schema is Some).
-        ev.valence = 0.0;
-        ev.arousal = 0.18;
-        ev.disgust = 0.0;
+    match arm {
+        Arm::V => {
+            ev.attribution = Attribution::External;
+            ev.self_relevance = 0.92;
+            ev.valence = -0.86;
+            ev.arousal = 0.82;
+            ev.disgust = 0.68;
+        }
+        Arm::P => {
+            ev.attribution = Attribution::Internal;
+            ev.self_relevance = 0.92;
+            ev.valence = -0.86;
+            ev.arousal = 0.82;
+            ev.disgust = 0.68;
+        }
+        Arm::N => {
+            ev.attribution = Attribution::None;
+            ev.self_relevance = 0.35;
+            ev.valence = 0.0;
+            ev.arousal = 0.18;
+            ev.disgust = 0.0;
+            ev.permanence = 0.34;
+        }
     }
     ev
 }
@@ -110,24 +146,39 @@ fn attach_llm(mem: &mut SelectiveMemory, cfg: &Config, args: &[String]) {
     }
 }
 
-fn seed_one(path: &str, name: &str, charged: bool, cfg: &Config, args: &[String]) -> SelectiveMemory {
+fn seed_one(
+    path: &str,
+    name: &str,
+    arm: Arm,
+    nights: usize,
+    cfg: &Config,
+    args: &[String],
+) -> SelectiveMemory {
     let _ = std::fs::remove_file(path);
     let profile = EntityProfile::tender(name);
     let mut mem = SelectiveMemory::open(path, profile).expect("open");
-    attach_llm(&mut mem, cfg, args);
+    let _ = (cfg, args);
+    // Nights use RuleNarrator. Attaching the HTTP mouth here made /seed hang
+    // (one rewrite call per night × 3 clones). Speak attaches after the book exists.
     for day in SYNC {
         let _ = mem.live_with(dull(day));
         let _ = mem.sleep_deep();
     }
-    let _ = mem.live_with(t0(T0, charged));
+    let _ = mem.live_with(t0(T0, arm));
     let _ = mem.sleep_deep();
-    for day in POST.iter().take(NIGHTS) {
+    for i in 0..nights {
+        let day = POST[i % POST.len()];
         let _ = mem.live_with(dull(day));
         let _ = mem.sleep_deep();
     }
     let _ = mem.save();
+    let attr = match arm {
+        Arm::V => "external",
+        Arm::P => "internal",
+        Arm::N => "none",
+    };
     eprintln!(
-        "{} charged={charged} traces={} axioms={} mood={:.2}",
+        "{} attr={attr} traces={} axioms={} mood={:.2}",
         name,
         mem.store.traces.len(),
         mem.store.axioms.len(),
@@ -136,51 +187,88 @@ fn seed_one(path: &str, name: &str, charged: bool, cfg: &Config, args: &[String]
     mem
 }
 
-fn seed_pair(dir: &str, cfg: &Config, args: &[String]) -> Pair {
+fn seed_trio(dir: &str, cfg: &Config, args: &[String], nights: usize) -> Trio {
+    let nights = clamp_nights(nights);
     std::fs::create_dir_all(dir).ok();
-    let a_path = format!("{dir}/witness-a.selmem");
-    let b_path = format!("{dir}/witness-b.selmem");
-    let a = seed_one(&a_path, "A", false, cfg, args);
-    let b = seed_one(&b_path, "B", true, cfg, args);
-    let fa = fingerprint(&a);
-    let fb = fingerprint(&b);
-    eprintln!("Δfp {:.3}", singularity_distance(&fa, &fb));
-    Pair { a, b, nights: NIGHTS }
+    let v = seed_one(&format!("{dir}/witness-v.selmem"), "V", Arm::V, nights, cfg, args);
+    let p = seed_one(&format!("{dir}/witness-p.selmem"), "P", Arm::P, nights, cfg, args);
+    let n = seed_one(&format!("{dir}/witness-n.selmem"), "N", Arm::N, nights, cfg, args);
+    let fv = fingerprint(&v);
+    let fp = fingerprint(&p);
+    let fn_ = fingerprint(&n);
+    eprintln!(
+        "Δfp V/P {:.3}  V/N {:.3}  P/N {:.3}",
+        singularity_distance(&fv, &fp),
+        singularity_distance(&fv, &fn_),
+        singularity_distance(&fp, &fn_)
+    );
+    let mut trio = Trio { v, p, n, nights };
+    attach_llm(&mut trio.v, cfg, args);
+    attach_llm(&mut trio.p, cfg, args);
+    attach_llm(&mut trio.n, cfg, args);
+    trio
 }
 
-fn open_or_seed(dir: &str, cfg: &Config, args: &[String], force: bool) -> Pair {
-    let a_path = format!("{dir}/witness-a.selmem");
-    let b_path = format!("{dir}/witness-b.selmem");
-    if force || !(std::path::Path::new(&a_path).is_file() && std::path::Path::new(&b_path).is_file())
+fn infer_nights(mem: &SelectiveMemory) -> usize {
+    let raw = mem.store.traces.len().saturating_sub(SYNC.len() + 1);
+    clamp_nights(if ALLOWED_NIGHTS.contains(&raw) {
+        raw
+    } else {
+        DEFAULT_NIGHTS
+    })
+}
+
+fn open_or_seed(dir: &str, cfg: &Config, args: &[String], force: bool, nights: usize) -> Trio {
+    let v_path = format!("{dir}/witness-v.selmem");
+    let p_path = format!("{dir}/witness-p.selmem");
+    let n_path = format!("{dir}/witness-n.selmem");
+    if force
+        || !(std::path::Path::new(&v_path).is_file()
+            && std::path::Path::new(&p_path).is_file()
+            && std::path::Path::new(&n_path).is_file())
     {
-        return seed_pair(dir, cfg, args);
+        return seed_trio(dir, cfg, args, nights);
     }
-    let mut a = SelectiveMemory::open(&a_path, EntityProfile::tender("A")).expect("open A");
-    let mut b = SelectiveMemory::open(&b_path, EntityProfile::tender("B")).expect("open B");
-    attach_llm(&mut a, cfg, args);
-    attach_llm(&mut b, cfg, args);
-    Pair { a, b, nights: NIGHTS }
+    let mut v = SelectiveMemory::open(&v_path, EntityProfile::tender("V")).expect("open V");
+    let mut p = SelectiveMemory::open(&p_path, EntityProfile::tender("P")).expect("open P");
+    let mut n = SelectiveMemory::open(&n_path, EntityProfile::tender("N")).expect("open N");
+    attach_llm(&mut v, cfg, args);
+    attach_llm(&mut p, cfg, args);
+    attach_llm(&mut n, cfg, args);
+    let nights = infer_nights(&v);
+    Trio { v, p, n, nights }
 }
 
-fn state_json(p: &Pair) -> String {
-    let fa = fingerprint(&p.a);
-    let fb = fingerprint(&p.b);
-    let llm = if p.a.llm.url.is_empty() {
+fn arm_json(m: &SelectiveMemory) -> String {
+    format!(
+        "{{\"traces\":{},\"axioms\":{},\"valence\":{:.4}}}",
+        m.store.traces.len(),
+        m.store.axioms.len(),
+        m.mood.valence
+    )
+}
+
+fn state_json(t: &Trio, seeding: Option<usize>) -> String {
+    let fv = fingerprint(&t.v);
+    let fp = fingerprint(&t.p);
+    let llm = if t.v.llm.url.is_empty() {
         String::new()
     } else {
-        p.a.llm.model.clone()
+        t.v.llm.model.clone()
+    };
+    let seed_field = match seeding {
+        Some(n) => format!(",\"seeding\":true,\"seeding_nights\":{n}"),
+        None => ",\"seeding\":false".to_string(),
     };
     format!(
-        "{{\"nights\":{},\"dfp\":{:.4},\"llm\":\"{}\",\"a\":{{\"traces\":{},\"axioms\":{},\"valence\":{:.4}}},\"b\":{{\"traces\":{},\"axioms\":{},\"valence\":{:.4}}}}}",
-        p.nights,
-        singularity_distance(&fa, &fb),
+        "{{\"nights\":{},\"dfp\":{:.4},\"llm\":\"{}\",\"v\":{},\"p\":{},\"n\":{}{}}}",
+        t.nights,
+        singularity_distance(&fv, &fp),
         esc(&llm),
-        p.a.store.traces.len(),
-        p.a.store.axioms.len(),
-        p.a.mood.valence,
-        p.b.store.traces.len(),
-        p.b.store.axioms.len(),
-        p.b.mood.valence
+        arm_json(&t.v),
+        arm_json(&t.p),
+        arm_json(&t.n),
+        seed_field
     )
 }
 
@@ -190,18 +278,23 @@ fn main() {
     let bind = cfg.resolve_or(flag(&args, "--bind"), "bind", "127.0.0.1:7421");
     let dir = cfg.resolve_or(flag(&args, "--dir"), "witness_dir", "experiments/witness");
     let force = args.iter().any(|a| a == "--seed");
-    let pair = open_or_seed(&dir, cfg, &args, force);
-    let pair = Arc::new(Mutex::new(pair));
+    let nights = flag(&args, "--nights")
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(DEFAULT_NIGHTS);
+    let trio = open_or_seed(&dir, cfg, &args, force, nights);
+    let trio = Arc::new(Mutex::new(trio));
+    let seeding: Arc<Mutex<Option<usize>>> = Arc::new(Mutex::new(None));
     let listener = TcpListener::bind(&bind).expect("bind");
     eprintln!("témoins  http://{bind}/");
     eprintln!("POST /ask  GET /state /archive  POST /seed");
     for stream in listener.incoming() {
         match stream {
             Ok(s) => {
-                let pair = Arc::clone(&pair);
+                let trio = Arc::clone(&trio);
+                let seeding = Arc::clone(&seeding);
                 let dir = dir.clone();
                 std::thread::spawn(move || {
-                    if let Err(e) = handle(s, &pair, &dir) {
+                    if let Err(e) = handle(s, &trio, &seeding, &dir) {
                         eprintln!("req: {e}");
                     }
                 });
@@ -211,9 +304,14 @@ fn main() {
     }
 }
 
-fn handle(mut stream: TcpStream, pair: &Mutex<Pair>, dir: &str) -> std::io::Result<()> {
+fn handle(
+    mut stream: TcpStream,
+    pair: &Arc<Mutex<Trio>>,
+    seeding: &Arc<Mutex<Option<usize>>>,
+    dir: &str,
+) -> std::io::Result<()> {
     stream
-        .set_read_timeout(Some(std::time::Duration::from_secs(120)))
+        .set_read_timeout(Some(std::time::Duration::from_secs(600)))
         .ok();
     let mut buf = vec![0u8; 8192];
     let mut data = Vec::new();
@@ -257,7 +355,7 @@ fn handle(mut stream: TcpStream, pair: &Mutex<Pair>, dir: &str) -> std::io::Resu
                 write_http_ct(&mut stream, 200, "text/html; charset=utf-8", UI)?;
                 return Ok(());
             }
-            let res = dispatch(pair, dir, &method, path, &body);
+            let res = dispatch(pair, seeding, dir, &method, path, &body);
             write_http(&mut stream, res.status, &res.body)?;
             return Ok(());
         }
@@ -268,7 +366,14 @@ fn handle(mut stream: TcpStream, pair: &Mutex<Pair>, dir: &str) -> std::io::Resu
     Ok(())
 }
 
-fn dispatch(pair: &Mutex<Pair>, dir: &str, method: &str, path: &str, body: &str) -> api::HttpResponse {
+fn dispatch(
+    pair: &Arc<Mutex<Trio>>,
+    seeding: &Arc<Mutex<Option<usize>>>,
+    dir: &str,
+    method: &str,
+    path: &str,
+    body: &str,
+) -> api::HttpResponse {
     match (method, path) {
         ("GET", "/health") => api::HttpResponse {
             status: 200,
@@ -279,20 +384,51 @@ fn dispatch(pair: &Mutex<Pair>, dir: &str, method: &str, path: &str, body: &str)
             body: format!("{{\"text\":\"{}\"}}", esc(T0)),
         },
         ("GET", "/state") => {
+            let seed = *seeding.lock().expect("lock");
             let g = pair.lock().expect("lock");
             api::HttpResponse {
                 status: 200,
-                body: state_json(&g),
+                body: state_json(&g, seed),
             }
         }
         ("POST", "/seed") => {
-            let cfg = Config::get();
-            let fresh = seed_pair(dir, cfg, &[]);
-            let mut g = pair.lock().expect("lock");
-            *g = fresh;
+            let nights = clamp_nights(
+                json_usize(body, "nights")
+                    .or_else(|| json_usize(body, "days"))
+                    .unwrap_or(DEFAULT_NIGHTS),
+            );
+            {
+                let mut slot = seeding.lock().expect("lock");
+                if slot.is_some() {
+                    return api::HttpResponse {
+                        status: 409,
+                        body: "{\"error\":\"already seeding\",\"seeding\":true}".into(),
+                    };
+                }
+                *slot = Some(nights);
+            }
+            let pair = Arc::clone(pair);
+            let seeding = Arc::clone(seeding);
+            let dir = dir.to_string();
+            std::thread::spawn(move || {
+                let cfg = Config::get();
+                eprintln!("seed start {nights}");
+                let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    seed_trio(&dir, cfg, &[], nights)
+                }));
+                match result {
+                    Ok(fresh) => {
+                        let mut g = pair.lock().expect("lock");
+                        *g = fresh;
+                        eprintln!("seed done {nights}");
+                    }
+                    Err(_) => eprintln!("seed panicked {nights}"),
+                }
+                *seeding.lock().expect("lock") = None;
+            });
             api::HttpResponse {
-                status: 200,
-                body: state_json(&g),
+                status: 202,
+                body: format!("{{\"ok\":true,\"seeding\":true,\"nights\":{nights}}}"),
             }
         }
         ("POST", "/ask") => {
@@ -306,11 +442,19 @@ fn dispatch(pair: &Mutex<Pair>, dir: &str, method: &str, path: &str, body: &str)
                 };
             }
             let mut g = pair.lock().expect("lock");
-            let a = g.a.speak_isolated(&q);
-            let b = g.b.speak_isolated(&q);
+            let v = g.v.speak_isolated(&q);
+            let p = g.p.speak_isolated(&q);
+            let n = g.n.speak_isolated(&q);
             api::HttpResponse {
                 status: 200,
-                body: format!("{{\"a\":\"{}\",\"b\":\"{}\"}}", esc(&a), esc(&b)),
+                body: format!(
+                    "{{\"v\":\"{}\",\"p\":\"{}\",\"n\":\"{}\",\"a\":\"{}\",\"b\":\"{}\"}}",
+                    esc(&v),
+                    esc(&p),
+                    esc(&n),
+                    esc(&v),
+                    esc(&p)
+                ),
             }
         }
         _ => api::HttpResponse {
@@ -350,6 +494,18 @@ fn json_str(body: &str, key: &str) -> Option<String> {
     Some(out)
 }
 
+fn json_usize(body: &str, key: &str) -> Option<usize> {
+    if let Some(s) = json_str(body, key) {
+        return s.parse().ok();
+    }
+    let pat = format!("\"{key}\"");
+    let i = body.find(&pat)?;
+    let rest = &body[i + pat.len()..];
+    let rest = rest.trim_start().trim_start_matches(':').trim_start();
+    let num: String = rest.chars().take_while(|c| c.is_ascii_digit()).collect();
+    num.parse().ok()
+}
+
 fn esc(s: &str) -> String {
     s.replace('\\', "\\\\")
         .replace('"', "\\\"")
@@ -368,9 +524,11 @@ fn write_http(stream: &mut TcpStream, status: u16, body: &str) -> std::io::Resul
 fn write_http_ct(stream: &mut TcpStream, status: u16, ctype: &str, body: &str) -> std::io::Result<()> {
     let reason = match status {
         200 => "OK",
+        202 => "Accepted",
         204 => "No Content",
         400 => "Bad Request",
         404 => "Not Found",
+        409 => "Conflict",
         _ => "Error",
     };
     let head = format!(

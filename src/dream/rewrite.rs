@@ -117,15 +117,18 @@ pub fn is_conflict(store: &MemoryStore, trace: &MemoryTrace) -> bool {
         < CONFLICT_CONGRUENCE
 }
 
-/// Weather/sculpt may still drop detail. `true` = keep the current gist wording.
+/// Weather may drop unused detail. `true` = do not fade the gist wording.
 pub fn hold_gist_text(trace: &MemoryTrace, conflict: bool) -> bool {
     match trace.attribution {
-        Attribution::External => false,
+        Attribution::External => true,
         Attribution::Internal => !conflict,
-        Attribution::None => {
-            trace.self_relevance >= 0.80 && trace.valence.abs() >= 0.40
-        }
+        Attribution::None => false,
     }
+}
+
+/// Sculpt retell / token substitution. External preserves. None only fades.
+pub fn allow_retell(trace: &MemoryTrace, conflict: bool) -> bool {
+    matches!(trace.attribution, Attribution::Internal) && conflict
 }
 
 pub fn skip_rewrite(store: &MemoryStore, id: &str) -> bool {

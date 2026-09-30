@@ -1,6 +1,6 @@
 # Plan — organ first, LoCoMo on the horizon
 
-Status: P4 locked the *measurement*. Organ inventory P0–P7 shipped 2026-09-29 (attribution, congruence, centers, confab ≠ gild, suppress, confidence ≠ access). RuleNarrator persist P4 n=1 after the fields: book 5/1 holds; Grok n=5 on this binary is the next measurement, not a new claim.
+Status: P4 locked the *measurement*. Organ inventory P0–P7 shipped 2026-09-29. Witness scene closed 2026-09-30: attribution moves the bearer, not the truth; fluent-false P did not appear at 10 or 360 nights (REPORT §15). Do not add a night or mouth patch to obtain that mouth. RuleNarrator persist P4 n=1 after the fields: book 5/1 holds.
 Claim sentence does not move. Luna `D_speak` stays unpublished. No leaderboard.
 
 Authoring rule: one causal cut at a time, pre-registered pass/fail, smoke on RuleNarrator before any Grok cell.

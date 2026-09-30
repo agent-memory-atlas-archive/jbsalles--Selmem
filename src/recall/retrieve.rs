@@ -144,6 +144,24 @@ pub fn recall_with(
             if !store.living_axiom_ids_for(&trace_id).is_empty() {
                 score += 0.12;
             }
+            // Episode probes ("what happened that day") must not lose to a
+            // sharp World calendar line. Lived Selfhood keeps the floor.
+            if episode_ask(query) {
+                if trace.channel.verbatim() {
+                    score *= 0.32;
+                } else {
+                    score += 0.20;
+                }
+            }
+            if let Some(schema) = trace.schema.as_deref() {
+                let q = query.to_ascii_lowercase();
+                for part in schema.split('-') {
+                    if part.len() > 3 && q.contains(part) {
+                        score += 0.18;
+                        break;
+                    }
+                }
+            }
             Some(ScoredTrace {
                 trace_id,
                 score,
@@ -398,4 +416,16 @@ fn speak_self(
         outcome.pulled_toward_core,
         reconsolidated,
     )
+}
+
+fn episode_ask(query: &str) -> bool {
+    let q = query.to_ascii_lowercase();
+    q.contains("what happened")
+        || q.contains("that day")
+        || q.contains("this day")
+        || q.contains("how did you feel")
+        || q.contains("how sure")
+        || q.contains("do you remember")
+        || q.contains("raconte")
+        || q.contains("ce jour")
 }

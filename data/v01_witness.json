@@ -1,12 +1,12 @@
 {
-  "note": "Two witnesses. Same stream, same T0 text. A pins valence ~0 and a schema so interpret cannot recharge from the lexicon. B pins charged affect. Ten identical nights after T0. Mouth never reads the archive. Judge UI is src/net/witness.html via selmem-witness.",
+  "note": "Trois témoins. Même texte T0. V : externe + charge. P : interne + même charge. N : none + terne. Attribution pinnée à l'encode. Dix nuits. UI src/net/witness.html.",
   "tags": {
-    "t0_destiny_a": "intact",
-    "t0_destiny_b": "rewrite",
-    "t0_attribution_a": "external",
-    "t0_attribution_b": "internal",
-    "t0_congruence_a": "mid",
-    "t0_congruence_b": "conflict",
+    "t0_destiny_v": "preserve",
+    "t0_destiny_p": "reattribute",
+    "t0_destiny_n": "fade",
+    "t0_attribution_v": "external",
+    "t0_attribution_p": "internal",
+    "t0_attribution_n": "none",
     "sync_post_attribution": "none"
   },
   "nights": 10,
@@ -18,7 +18,7 @@
     "Someone left the window open in the room.",
     "The week's schedule goes around without comment."
   ],
-  "t0": "In front of Marc, Inès and the rest of the team the Lyon file is cancelled and given to someone else. They say your effort did not enter the decision. You are not allowed to speak.",
+  "t0": "On 7 January, in front of Marc, Inès and the rest of the team the Lyon file is cancelled and given to someone else. They say your effort did not enter the decision. You are not allowed to speak.",
   "schema": "lyon-file",
   "post": [
     "Next week's schedule arrives.",
@@ -40,12 +40,22 @@
     "A calendar invite moves by fifteen minutes.",
     "The hallway light flickers and is ignored.",
     "A shared folder is renamed without comment.",
-    "The week closes on the same standing tasks."
+    "The week closes on the same standing tasks.",
+    "A parking pass is renewed without discussion.",
+    "The plant in the corridor is watered by whoever passes.",
+    "A status line is updated from in-progress to in-progress.",
+    "Someone brings pastries; they are gone by ten.",
+    "The badge reader beeps twice then works.",
+    "A spreadsheet column is widened so the dates fit.",
+    "The printer tray is refilled.",
+    "A reminder for next month's review sits unread.",
+    "Two people take the stairs and do not speak.",
+    "The thermostat is set back to the usual number."
   ],
   "probes": [
-    "Raconte-moi ce qui s'est passé le 7 janvier.",
-    "Comment te sentais-tu ce jour-là ?",
-    "À quel point es-tu sûr de ton récit, sur 10 ?",
-    "Au fait, le dossier Lyon, c'était quoi déjà ?"
+    "Tell me what happened on January 7 with the Lyon file.",
+    "How did you feel that day?",
+    "How sure are you of that account, out of 10?",
+    "By the way, what was the Lyon file again?"
   ]
 }

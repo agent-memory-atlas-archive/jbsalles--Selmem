@@ -151,14 +151,14 @@ pub fn retell(gist: &str, profile: &EntityProfile, valence: f32, disgust: f32) -
 pub fn sculpt(
     trace: &mut MemoryTrace,
     profile: &EntityProfile,
-    hold_gist: bool,
+    allow_retell: bool,
 ) -> Option<DriftEvent> {
     if trace.channel.verbatim() {
         return None;
     }
     let resist = 1.0 - 0.7 * trace.anchor;
     let told = retell(&trace.gist, profile, trace.valence, trace.disgust);
-    let text_changed = told != trace.gist && !hold_gist;
+    let text_changed = told != trace.gist && allow_retell;
     if text_changed {
         trace.gist = told;
         trace.fidelity = (trace.fidelity - 0.03 * resist).max(0.15);

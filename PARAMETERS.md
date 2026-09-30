@@ -172,7 +172,7 @@ Not knobs. Fields with fixed cuts so the B witness and persist 5/1 can coexist.
 | Center mint | ≥2 hours of the schema, or one living axiom | Discrete convenience, aligned on the ladder’s motif floor. |
 | Gravity | Internal, not hub, fidelity `< 0.62` | Directed forgetting / schema pull. External never falls. |
 
-`None` attribution keeps the pre-P2 skip (charged + anchor + axiom). Persist scripts do not set Internal, so published 5/1 is still that path.
+`None` attribution keeps the pre-P2 skip (charged + anchor + axiom). Persist scripts do not set Internal, so published 5/1 is still that path. Witness (REPORT §15): External hold vs Internal retell vs None fade. The fluent-false Internal mouth was not observed; do not add a knob to obtain it.
 
 ---
 

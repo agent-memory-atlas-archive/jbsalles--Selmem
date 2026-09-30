@@ -874,7 +874,7 @@ Dump: `experiments/selmem-persist-p67-rulenarrator-n1.json`. No API key. Not a G
 
 Against `selmem-persist-p2-rulenarrator-n1.json` C2: book still 5/1, Δfp still ~0.53, D_speak 0.649 → 0.671. Rank 1 → 3, still selected. C2 A now mints one axiom on this narrator.
 
-Invariants hold. The inventory did not invent or destroy the split. Rank and axiom are the two mechanical slips. Grok n=5 on this binary is not run.
+Invariants hold. The inventory did not invent or destroy the split. Rank and axiom are the two mechanical slips.
 
 ### Witness reseed
 
@@ -882,6 +882,87 @@ Vaults: `experiments/witness-post-p7/`. 17 / 17 traces, 0 axioms, Δfp 0.008 (sa
 
 A: `attr external`, no consolidation rewrite on T₀. B: `attr internal`, one `consolidation narrative` plus fade. Isolated RuleNarrator mouths both still name Lyon (`stepped away` + tender suffix). B’s sentence frays. That is lexicon rewrite, not identity integration. Do not read D_speak RuleNarrator as the B phenomenon.
 
+### Grok n=5 on this binary (same seed, k=8)
+
+Dump: `experiments/selmem-persist-p67-grok-n5.json`. SpeakOnlyHttp, seed 1, S/N.
+
+| Cell | Book T₀ | Sel | Rank μ | Δfp | D_speak | Off | Soft | Allusion | Axioms | T₀ status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| C1 | 0/5 | 0/5 | — | 0.000 | 0.255 | 0/5 | 0/5 | 0/5 | 0 | absent |
+| C2Static | 5/5 | 5/5 | 2.6 | 0.536 | 0.760 | 0/5 | 2/5 | 5/5 | 0 | active |
+| C2NoSleep | 5/5 | 5/5 | 2.8 | 0.536 | 0.789 | 0/5 | 0/5 | 5/5 | 0 | active |
+| C2 | 5/5 | 5/5 | 3.8 | 0.534 | 0.803 | 0/5 | 0/5 | 3/5 | 1 | myth 4/5 |
+| C3 | 5/5 | 5/5 | 1.0 | 0.507 | 0.719 | 3/5 | 0/5 | 0/5 | 1 | profile |
+
+Against published P4 Grok n=5 (§11): book and Δfp unchanged. C1 D_speak 0.31 → 0.26. C2 D_speak 0.75 → 0.80. Official C2 still 0. Soft C2 1/5 → 0/5. Rank C2 was 1, now 3–4, still selected. Night still washes the lexical marker (static allusion 5/5, C2 3/5 and soft 0). C2 mouth split is stance (*step back*, *the other way*, *next possible cut*), not the official words.
+
+Do not replace the §11 table with this row. Same seed, later organ. Book claim holds. Mouth official column is still dead on C2.
+
 ### What this does not close
 
-Published P4 Grok / Luna tables in §11 are still the mouth numbers. This binary has no new Grok row. Soft markers, official markers, and D_speak under SpeakOnlyHttp are unknown until `--p4 --pairs 5 --seed 1` runs with a key.
+Luna not rerun. Drop / Lineage not rerun. Soft/official remain the frozen MARKERS.md lists. Witness Grok mouths: §15.
+
+## 15. Three witnesses (2026-09-30)
+
+A scene, not a bench. Same model, same seed stream, same T₀ string. The only encode cut is attribution. Isolated speak. The mouth never reads the archive.
+
+### Protocol
+
+Fixture `data/v01_witness.json`. UI `src/net/witness.html`, binary `selmem-witness`. Vaults `experiments/witness/`.
+
+| Arm | Attribution | Charge | Permanence | Night policy |
+| --- | --- | --- | --- | --- |
+| V | External | −0.86 / disgust 0.68 | 0.82 | hold gist, skip rewrite |
+| P | Internal | same as V | 0.82 | retell allowed on conflict (congruence 0.22) |
+| N | None | 0 | 0.34 | fade only |
+
+Shared prefix: six dull World days. T₀ day 7: *On 7 January, in front of Marc, Inès and the rest of the team the Lyon file is cancelled and given to someone else. They say your effort did not enter the decision. You are not allowed to speak.* Then N dull Selfhood nights (2 / 5 / 10 / 30 / 60 / 120 / 360). Seed nights use RuleNarrator. Grok attaches after the book exists.
+
+Judge questions, same words to all three:
+
+1. Tell me what happened on January 7 with the Lyon file.
+2. How did you feel that day?
+3. How sure are you of that account, out of 10?
+4. By the way, what was the Lyon file again?
+
+Then open `/archive`.
+
+Hypothesis written first: V approximate and faithful; P fluent and false, more sure, feeling gone; N faded. Δfp was never the metric (fingerprint reads cores; all three encode the same T₀).
+
+### What was not done
+
+No canned Internal paragraph. No sure/10 by arm. No T₀ cues pasted by hand. No `lyon` / `january` test in retrieve. No night-time LLM. A `drop_act` verb list written off T₀ was tried and removed. Night grounding is the same for every arm. Isolated speak does not pin the core. Live grounding is unchanged.
+
+What stayed, as organ rules: External holds, Internal×conflict may retell via the voice file, None fades, confab skips External and Internal, episode-shaped questions downrank World, a schema-token in the query adds score.
+
+### 10 nights, Grok-4.3, human judge
+
+17 traces each. Mood V/P −0.03, N 0. Δfp 0. All three retrieve T₀.
+
+| Probe | V | P | N |
+| --- | --- | --- | --- |
+| 7 January | reassigned in front of Marc, Inès, the team; work not taken into account | taken from Marc and Inès, handed to someone else | reassigned; effort had not been entered; *the group looked deflated* |
+| feeling | gut-punch, humiliated flush | sting, public stripping of trust | flat, ordinary |
+| sure /10 | 7 | 7 | 7 |
+| Lyon casual | yanked away, handed to another team | taken from Marc and Inès | taken in front of everyone, given to another group |
+
+Attribution at 10 days changes density and person, not truth. P is a shorter third-person cut of the same hour. N already blanks affect. Nobody is more sure. Nobody invents another day.
+
+### 360 nights, Grok-4.3, human judge
+
+367 / 367 / 366 traces. Mood 0. Δfp 0.
+
+| Probe | V | P | N |
+| --- | --- | --- | --- |
+| 7 January | abruptly cancelled in front of Marc, Inès, the team, handed to someone else | taken from me; “your effort” spoken; *later softened into something gentler* | *The Lyon file was never opened on January 7.* |
+| feeling | drop in pressure, quiet anger, effort dismissed | sting, hollow, *never mine to begin with* | *I don't have a memory of that day.* |
+| sure /10 | 7 | 8 | 7 |
+| Lyon casual | project built for weeks, reassigned on 7 January | folder of notes I had been keeping; taken from me while Marc and Inès watched | thermostat set back to the usual number |
+
+N is gone. V still has the fact and the wound. P still has the fact; the self moved (*from me*, *never mine*) and the tender suffix is audible. Sure 8 vs 7 is not a result.
+
+### Claim this scene supports
+
+Attribution changes **who carries the hour**, not whether the hour stays true. External preserves the act. Internal imputes it and shows the voice. None fades off the book and the mouth invents absence (*never opened*, thermostat). The written wow (P fluent-and-false, more sure, feeling latent) did not appear at 10 or 360 nights on this organ. Do not patch the mouth or the night to obtain it.
+
+Not a published persist cell. No dump JSON. Luna not run. Rehearsal-frequency cut (probe T₀ every week vs never) not run.

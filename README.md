@@ -177,6 +177,8 @@ JSON reports book (`t0_in_book_*`), retrieval (`t0_rank_*`, `t0_selected_*`), an
 
 Horizon year (two clones, one stream, 360 days): `cargo test --test horizon`. Grok n=1 three arms: `./run.sh run --release --example horizon -- --arm primary|same|neutral`. Primary Δfp 0.096 retrieve A/B true/false; same Δfp 0.003 mouths identical; neutral no vow, January still A-only. REPORT §13.
 
+Three witnesses (same T₀, attribution cut only): `./run.sh run --release --bin selmem-witness -- --bind 127.0.0.1:7421 --dir experiments/witness`. Isolated speak, sealed archive. 10 nights: all three still name the act; P is shorter. 360 nights: N gone, V faithful, P still true and self-blaming. REPORT §15.
+
 Locked grid is P4 (`--p4`, n = 5, seed 1, Grok and Luna): experiments/REPORT.md §11. Book 5/1 on every organ cell; C1 evicts. Grok mouth: official C2 = 0, soft 1/5, D ~0.75 vs C1 ~0.31; Drop kills Grok soft on full C2; Lineage drops Grok D to ~0.58. Luna book = Grok; Luna soft stays 5/5 under Drop and dies under Lineage; do not publish Luna D. P1 / Drop n=1 stay history (§8–§9). LoCoMo: experiments/EXTERNAL.md.
 
 AMA-Bench (`examples/ama`, experiments/ama_bench/) is a **side table**, not a SelMem score. It asks for step ids in agent logs. last-k 0.50 / static 0.28 / C2 0.19 on 3 episodes. Expected; do not submit. Why: experiments/REPORT.md §9.2.
