@@ -169,6 +169,7 @@ impl MemoryStore {
 
     /// Drop an hour from the book. The sealed archive stays (tomb).
     pub fn release_trace(&mut self, id: &str) -> Option<MemoryTrace> {
+        self.pending_night.retain(|x| x != id);
         let trace = self.traces.remove(id)?;
         self.edges.remove(id);
         for neigh in self.edges.values_mut() {

@@ -175,6 +175,60 @@ pub struct DriftEvent {
     pub disgust_delta: f32,
 }
 
+/// Where a clause claims to come from. Confabulation is not event evidence.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EvidenceOrigin {
+    Event,
+    Reconstruction,
+    Confabulation,
+    Axiom,
+    SchemaCenter,
+}
+
+impl EvidenceOrigin {
+    pub fn token(self) -> &'static str {
+        match self {
+            Self::Event => "event",
+            Self::Reconstruction => "reconstruction",
+            Self::Confabulation => "confabulation",
+            Self::Axiom => "axiom",
+            Self::SchemaCenter => "center",
+        }
+    }
+
+    pub fn parse(s: &str) -> Self {
+        match s.trim() {
+            "reconstruction" => Self::Reconstruction,
+            "confabulation" => Self::Confabulation,
+            "axiom" => Self::Axiom,
+            "center" => Self::SchemaCenter,
+            _ => Self::Event,
+        }
+    }
+}
+
+/// One transformation of an hour. The genealogy the mouth does not read.
+#[derive(Clone, Debug)]
+pub struct MemoryOperation {
+    pub kind: String,
+    pub at: u64,
+    pub source_trace_ids: Vec<String>,
+    pub source_axiom_ids: Vec<String>,
+    pub source_center: Option<String>,
+    pub before: String,
+    pub after: String,
+    pub confidence: f32,
+    pub origin: EvidenceOrigin,
+}
+
+/// What was concluded at encode. The verbatim observation stays in the archive.
+#[derive(Clone, Debug)]
+pub struct InterpretationStamp {
+    pub statement: String,
+    pub valence: f32,
+    pub confidence: f32,
+}
+
 /// One lived episode. This is what the entity *uses*.
 /// The sealed archive (verbatim) lives in `ArchiveRecord`, pointed at by `archive_id`.
 #[derive(Clone, Debug)]
@@ -220,9 +274,19 @@ pub struct MemoryTrace {
     pub anchor: f32,
     /// Consecutive spoken sentences that left the core. Reset after a pull-back.
     pub detach_strikes: u32,
+    /// Archive id of the observation. The verbatim is not copied into the live core.
+    pub observation_id: Option<String>,
+    /// What SelMem concluded at encode. Distinct from the frozen core and the drifted gist.
+    pub interpretation: InterpretationStamp,
+    /// Genealogy of later transformations. Empty on old vaults.
+    pub operations: Vec<MemoryOperation>,
 }
 
 impl MemoryTrace {
+    pub fn record_operation(&mut self, op: MemoryOperation) {
+        self.operations.push(op);
+    }
+
     pub fn clamp(&mut self) {
         self.valence = self.valence.clamp(-1.0, 1.0);
         self.arousal = self.arousal.clamp(0.0, 1.0);

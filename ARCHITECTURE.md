@@ -147,3 +147,5 @@ A third (`entail`) does not exist. If it arrives, fallback is the local judge.
 | `tests/centers.rs` | prototype mint; Internal gravity; External stays |
 | `tests/confab.rs` | hole fill ≠ embellish; core frozen |
 | `tests/suppress.rs` | directed forgetting; confidence ≠ access |
+
+

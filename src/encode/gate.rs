@@ -223,7 +223,26 @@ fn encode_one(
             input.self_relevance,
         ),
         detach_strikes: 0,
+        observation_id: Some(archive_id.clone()),
+        interpretation: crate::core::model::InterpretationStamp {
+            statement: String::new(),
+            valence: input.valence,
+            confidence: 1.0,
+        },
+        operations: Vec::new(),
     };
+    trace.interpretation.statement = trace.gist.clone();
+    trace.record_operation(crate::core::model::MemoryOperation {
+        kind: "encode".into(),
+        at: trace.created_at,
+        source_trace_ids: Vec::new(),
+        source_axiom_ids: Vec::new(),
+        source_center: None,
+        before: String::new(),
+        after: trace.gist.clone(),
+        confidence: 1.0,
+        origin: crate::core::model::EvidenceOrigin::Event,
+    });
     trace.clamp();
     associate(store, &trace);
     let tid = store.add_trace(trace);

@@ -46,6 +46,12 @@ pub fn assemble_trace(
     confidence: f32,
     suppressed: bool,
 ) -> MemoryTrace {
+    let observation_id = archive_id.clone();
+    let interpretation = crate::core::model::InterpretationStamp {
+        statement: gist.clone(),
+        valence,
+        confidence,
+    };
     MemoryTrace {
         id,
         gist,
@@ -75,6 +81,9 @@ pub fn assemble_trace(
         detach_strikes,
         cues,
         drifts,
+        observation_id,
+        interpretation,
+        operations: Vec::new(),
     }
 }
 

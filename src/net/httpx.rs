@@ -17,16 +17,36 @@ fn which_curl() -> bool {
 fn curl_post(url: &str, api_key: Option<&str>, body: &str) -> Result<String, String> {
     let mut cmd = Command::new("curl");
     let timeout = crate::config::Config::get().http_timeout();
-    cmd.args(["-sS", "--max-time", &timeout, "-X", "POST", url, "-H", "Content-Type: application/json"]);
-    if let Some(k) = api_key {
-        cmd.arg("-H").arg(format!("Authorization: Bearer {k}"));
-    }
+    // Secret stays on stdin (--config -), never in argv.
+    cmd.args([
+        "-sS",
+        "--max-time",
+        &timeout,
+        "-X",
+        "POST",
+        "-H",
+        "Content-Type: application/json",
+        "-w",
+        "\n__SELMEM_HTTP__:%{http_code}",
+        "--config",
+        "-",
+        url,
+    ]);
     cmd.arg("--data-binary").arg(body);
-    let out = cmd.output().map_err(|e| e.to_string())?;
+    cmd.stdin(std::process::Stdio::piped());
+    let mut child = cmd.spawn().map_err(|e| e.to_string())?;
+    if let Some(stdin) = child.stdin.as_mut() {
+        if let Some(k) = api_key {
+            let line = format!("header = \"Authorization: Bearer {}\"\n", k.replace('"', ""));
+            stdin.write_all(line.as_bytes()).map_err(|e| e.to_string())?;
+        }
+    }
+    let out = child.wait_with_output().map_err(|e| e.to_string())?;
     if !out.status.success() {
         return Err(String::from_utf8_lossy(&out.stderr).into());
     }
-    String::from_utf8(out.stdout).map_err(|e| e.to_string())
+    let raw = String::from_utf8(out.stdout).map_err(|e| e.to_string())?;
+    split_http_status(&raw)
 }
 
 fn raw_http_post(url: &str, api_key: Option<&str>, body: &str) -> Result<String, String> {
@@ -56,11 +76,44 @@ fn raw_http_post(url: &str, api_key: Option<&str>, body: &str) -> Result<String,
     req.push_str("\r\n");
     req.push_str(body);
     let mut stream = TcpStream::connect(format!("{host}:{port}")).map_err(|e| e.to_string())?;
-    stream.set_read_timeout(Some(Duration::from_secs(20))).ok();
+    let timeout = crate::config::Config::get().http_timeout().parse().unwrap_or(60);
+    stream
+        .set_read_timeout(Some(Duration::from_secs(timeout)))
+        .ok();
+    stream
+        .set_write_timeout(Some(Duration::from_secs(timeout)))
+        .ok();
     stream.write_all(req.as_bytes()).map_err(|e| e.to_string())?;
     let mut raw = String::new();
     stream.read_to_string(&mut raw).map_err(|e| e.to_string())?;
-    Ok(raw.split("\r\n\r\n").nth(1).unwrap_or(&raw).to_string())
+    let (status, body) = split_raw_status(&raw);
+    if !(200..300).contains(&status) {
+        return Err(format!("HTTP {status}: {}", body.chars().take(180).collect::<String>()));
+    }
+    Ok(body)
+}
+
+fn split_http_status(raw: &str) -> Result<String, String> {
+    const MARK: &str = "\n__SELMEM_HTTP__:";
+    if let Some(i) = raw.rfind(MARK) {
+        let body = &raw[..i];
+        let code: u16 = raw[i + MARK.len()..].trim().parse().unwrap_or(0);
+        if !(200..300).contains(&code) {
+            return Err(format!("HTTP {code}: {}", body.chars().take(180).collect::<String>()));
+        }
+        return Ok(body.to_string());
+    }
+    Ok(raw.to_string())
+}
+
+fn split_raw_status(raw: &str) -> (u16, String) {
+    let status = raw
+        .split_whitespace()
+        .nth(1)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(0);
+    let body = raw.split("\r\n\r\n").nth(1).unwrap_or(raw).to_string();
+    (status, body)
 }
 
 pub fn json_esc(s: &str) -> String {
@@ -247,7 +300,19 @@ pub fn parse_json_string(s: &str) -> Option<(String, usize)> {
                     b'u' if i + 5 < bytes.len() => {
                         let hex = s.get(i + 2..i + 6)?;
                         if let Ok(cp) = u32::from_str_radix(hex, 16) {
-                            if let Some(ch) = char::from_u32(cp) {
+                            if (0xD800..=0xDBFF).contains(&cp) {
+                                let tail = s.get(i + 6..i + 12).unwrap_or("");
+                                if let Some(low) = tail.strip_prefix("\\u").and_then(|h| u32::from_str_radix(&h[..4.min(h.len())], 16).ok()) {
+                                    if (0xDC00..=0xDFFF).contains(&low) && tail.len() >= 6 {
+                                        let u = 0x10000 + (((cp - 0xD800) << 10) | (low - 0xDC00));
+                                        if let Some(ch) = char::from_u32(u) {
+                                            out.push(ch);
+                                        }
+                                        i += 12;
+                                        continue;
+                                    }
+                                }
+                            } else if let Some(ch) = char::from_u32(cp) {
                                 out.push(ch);
                             }
                         }
@@ -327,5 +392,17 @@ fn parse_f32_array(after: &str) -> Option<Vec<f32>> {
         None
     } else {
         Some(vals)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_json_string;
+
+    #[test]
+    fn surrogate_pair_becomes_one_scalar() {
+        let (s, n) = parse_json_string(r#""\uD83D\uDE00""#).unwrap();
+        assert_eq!(s, "😀");
+        assert!(n > 4);
     }
 }

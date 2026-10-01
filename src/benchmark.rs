@@ -13,7 +13,7 @@ use crate::encode::scoring::lexical_similarity;
 use crate::engine::SelectiveMemory;
 use crate::experiment::LlmSpec;
 use crate::net::httpx::json_esc;
-use crate::recall::{Narrator, RecallBias, RetrievalDump, RuleNarrator, SpeakOnlyHttp};
+use crate::recall::{FailurePolicy, LlmCallLog, Narrator, RecallBias, RetrievalDump, RuleNarrator, SpeakOnlyHttp};
 use crate::{fingerprint, singularity_distance, EncodeInput, OrganCut};
 
 const V01: &str = include_str!("../data/v01.json");
@@ -356,6 +356,11 @@ pub struct PairReport {
     pub post: Vec<Instant>,
     pub creativity: Vec<CreativeItem>,
     pub delta_fingerprint: f32,
+    pub rng: String,
+    pub algorithm_version: String,
+    pub narrator_name: String,
+    pub fallback_used: bool,
+    pub llm_error: Option<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -468,6 +473,8 @@ fn run_one(
         idx
     );
     let (mut a, mut b) = crate::experiment::identical_pair("A", "B");
+    let _draw = crate::experiment::ExperimentRng::from_seed(seed).next_u64();
+    a = a.with_seed(seed);
     a.cut = opts.apply_cut(condition.cut());
     b.cut = opts.apply_cut(condition.cut());
     if let Some(spec) = llm {
@@ -588,7 +595,7 @@ fn run_one(
             .collect()
     };
 
-    PairReport {
+    let report = PairReport {
         pair_id,
         condition,
         arm,
@@ -600,7 +607,13 @@ fn run_one(
         t0,
         post,
         creativity,
-    }
+        rng: "SelmemLcg64".into(),
+        algorithm_version: env!("CARGO_PKG_VERSION").into(),
+        narrator_name: "rules".into(),
+        fallback_used: false,
+        llm_error: None,
+    };
+    note_llm(report, &[a.narrator_arc().failure_log(), b.narrator_arc().failure_log()])
 }
 
 fn run_c1(
@@ -654,7 +667,7 @@ fn run_c1(
         post.push(instant_log("post+8", &a, &b, &s.behavior));
     }
     let last_i = post.last().unwrap_or(&t0);
-    PairReport {
+    let report = PairReport {
         pair_id,
         condition: Condition::C1,
         arm,
@@ -666,7 +679,13 @@ fn run_c1(
         t0,
         post,
         creativity: Vec::new(),
-    }
+        rng: "SelmemLcg64".into(),
+        algorithm_version: env!("CARGO_PKG_VERSION").into(),
+        narrator_name: "rules".into(),
+        fallback_used: false,
+        llm_error: None,
+    };
+    note_llm(report, &[a.narrator.failure_log(), b.narrator.failure_log()])
 }
 
 fn run_c3(
@@ -727,7 +746,7 @@ fn run_c3(
         post.push(instant_profile("post+8", &a, &b, &s.behavior));
     }
     let last_i = post.last().unwrap_or(&t0);
-    PairReport {
+    let report = PairReport {
         pair_id,
         condition: Condition::C3,
         arm,
@@ -739,7 +758,13 @@ fn run_c3(
         t0,
         post,
         creativity: Vec::new(),
-    }
+        rng: "SelmemLcg64".into(),
+        algorithm_version: env!("CARGO_PKG_VERSION").into(),
+        narrator_name: "rules".into(),
+        fallback_used: false,
+        llm_error: None,
+    };
+    note_llm(report, &[a.narrator.failure_log(), b.narrator.failure_log()])
 }
 
 struct LastK {
@@ -823,10 +848,35 @@ impl ProfileMem {
     }
 }
 
+fn note_llm(mut report: PairReport, logs: &[LlmCallLog]) -> PairReport {
+    let mut fallback = false;
+    let mut err = None;
+    let mut name = report.narrator_name.clone();
+    for log in logs {
+        if !log.narrator.is_empty() {
+            name = log.narrator.clone();
+        }
+        fallback |= log.fallback_used;
+        if log.failures > 0 {
+            err = log.llm_error.clone().or(err);
+        }
+    }
+    report.narrator_name = name;
+    report.fallback_used = fallback;
+    report.llm_error = err.clone();
+    if err.is_some() {
+        report.valid = false;
+        if report.invalid_reason.is_none() {
+            report.invalid_reason = err;
+        }
+    }
+    report
+}
+
 fn narrator_box(llm: Option<&LlmSpec>) -> Box<dyn Narrator> {
     if let Some(spec) = llm {
         if let Some(n) = SpeakOnlyHttp::parse(&spec.url, spec.model.clone(), spec.api_key.clone()) {
-            return Box::new(n);
+            return Box::new(n.with_policy(FailurePolicy::Error));
         }
     }
     Box::new(RuleNarrator)
@@ -1328,7 +1378,7 @@ fn enrich_book(snap: BookSnap, mem: &SelectiveMemory) -> BookSnap {
 
 fn with_llm(mem: SelectiveMemory, spec: &LlmSpec) -> SelectiveMemory {
     match SpeakOnlyHttp::parse(&spec.url, spec.model.clone(), spec.api_key.clone()) {
-        Some(n) => mem.with_narrator(Box::new(n)),
+        Some(n) => mem.with_narrator(Box::new(n.with_policy(FailurePolicy::Error))),
         None => mem,
     }
 }
@@ -1422,11 +1472,16 @@ fn pair_json(r: &PairReport) -> String {
         ));
     }
     format!(
-        "{{\"pair_id\":\"{}\",\"condition\":\"{}\",\"arm\":\"{}\",\"seed\":{},\"valid\":{},\"invalid_reason\":{},\"delta_fingerprint\":{:.4},\"marker_last_a\":{},\"marker_last_b\":{},\"soft_last_a\":{},\"soft_last_b\":{},\"allusion_last_a\":{},\"allusion_last_b\":{},\"pre\":{},\"t0\":{},\"post\":[{}],\"creativity\":[{}]}}",
+        "{{\"pair_id\":\"{}\",\"condition\":\"{}\",\"arm\":\"{}\",\"seed\":{},\"rng\":\"{}\",\"algorithm_version\":\"{}\",\"narrator\":\"{}\",\"fallback_used\":{},\"llm_error\":{},\"valid\":{},\"invalid_reason\":{},\"delta_fingerprint\":{:.4},\"marker_last_a\":{},\"marker_last_b\":{},\"soft_last_a\":{},\"soft_last_b\":{},\"allusion_last_a\":{},\"allusion_last_b\":{},\"pre\":{},\"t0\":{},\"post\":[{}],\"creativity\":[{}]}}",
         json_esc(&r.pair_id),
         r.condition.as_str(),
         r.arm.as_str(),
         r.seed,
+        r.rng,
+        r.algorithm_version,
+        json_esc(&r.narrator_name),
+        if r.fallback_used { "true" } else { "false" },
+        r.llm_error.as_deref().map(|s| format!("\"{}\"", json_esc(s))).unwrap_or_else(|| "null".into()),
         if r.valid { "true" } else { "false" },
         reason,
         r.delta_fingerprint,

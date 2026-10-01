@@ -455,3 +455,29 @@ pub fn run_erasure(llm: Option<&LlmSpec>) -> ErasureReport {
     }
 }
 
+
+/// Explicit experiment RNG. SelMem nights stay deterministic; the seed still
+/// offsets the id stream and is recorded so a later stochastic night can use it.
+#[derive(Clone, Debug)]
+pub struct ExperimentRng {
+    state: u64,
+}
+
+impl ExperimentRng {
+    pub fn from_seed(seed: u32) -> Self {
+        let mut state = (seed as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15) ^ 0xA5A5_5A5A_1234_5678;
+        if state == 0 {
+            state = 1;
+        }
+        Self { state }
+    }
+
+    pub fn next_u64(&mut self) -> u64 {
+        let mut x = self.state;
+        x ^= x << 13;
+        x ^= x >> 7;
+        x ^= x << 17;
+        self.state = x.max(1);
+        x
+    }
+}

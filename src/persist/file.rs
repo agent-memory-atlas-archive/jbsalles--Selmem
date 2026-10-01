@@ -3,7 +3,7 @@ use std::io::{self, BufRead, BufReader, Write};
 use std::path::Path;
 
 use crate::core::model::{
-    Attribution, AxiomLayer, Channel, DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood,
+    Attribution, AxiomLayer, Channel, DriftEvent, DriftKind, EvidenceOrigin, IdentityAxiom, MemoryOperation, MemoryTrace, Mood,
     SchemaCenter, TraceStatus,
 };
 use crate::core::profile::EntityProfile;
@@ -240,6 +240,22 @@ fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
     writeln!(w, "anchor {}", t.anchor)?;
     writeln!(w, "detach {}", t.detach_strikes)?;
     writeln!(w, "attr {}", t.attribution.token())?;
+    writeln!(w, "ops {}", t.operations.len())?;
+    for op in &t.operations {
+        writeln!(
+            w,
+            "op {} {} {} {} {}",
+            op.kind.replace(' ', "_"),
+            op.at,
+            op.confidence,
+            op.origin.token(),
+            op.source_center.as_deref().unwrap_or("-")
+        )?;
+        write_blob(w, &op.before)?;
+        write_blob(w, &op.after)?;
+        write_blob(w, &op.source_trace_ids.join("\t"))?;
+        write_blob(w, &op.source_axiom_ids.join("\t"))?;
+    }
     Ok(())
 }
 
@@ -302,7 +318,7 @@ fn read_trace(r: &mut impl BufRead) -> io::Result<MemoryTrace> {
     } else {
         0.5
     };
-    Ok(assemble_trace(
+    let mut trace = assemble_trace(
         p[1].to_string(),
         gist,
         core,
@@ -335,7 +351,39 @@ fn read_trace(r: &mut impl BufRead) -> io::Result<MemoryTrace> {
             1.0
         },
         p.get(17).map(|s| *s == "1").unwrap_or(false),
-    ))
+    );
+    if next_line_starts_with(r, "ops ") {
+        let line = read_line(r).unwrap_or_default();
+        let n: usize = line.strip_prefix("ops ").unwrap_or("0").trim().parse().unwrap_or(0);
+        for _ in 0..n {
+            let head = read_line(r)?;
+            let hp: Vec<&str> = head.split_whitespace().collect();
+            if hp.len() < 6 || hp[0] != "op" {
+                return fail(format!("malformed op: {head}"));
+            }
+            let before = read_blob(r)?;
+            let after = read_blob(r)?;
+            let traces = read_blob(r)?;
+            let axioms = read_blob(r)?;
+            let center = hp[5];
+            trace.operations.push(MemoryOperation {
+                kind: hp[1].replace('_', " "),
+                at: hp[2].parse().unwrap_or(0),
+                source_trace_ids: if traces.is_empty() { Vec::new() } else { traces.split('\t').map(|s| s.to_string()).collect() },
+                source_axiom_ids: if axioms.is_empty() { Vec::new() } else { axioms.split('\t').map(|s| s.to_string()).collect() },
+                source_center: if center == "-" { None } else { Some(center.to_string()) },
+                before,
+                after,
+                confidence: hp[3].parse().unwrap_or(1.0),
+                origin: EvidenceOrigin::parse(hp[4]),
+            });
+        }
+    }
+    if let Some(op) = trace.operations.iter().find(|o| o.kind == "encode") {
+        trace.interpretation.statement = op.after.clone();
+        trace.interpretation.confidence = op.confidence;
+    }
+    Ok(trace)
 }
 
 fn read_drift(r: &mut impl BufRead) -> io::Result<DriftEvent> {

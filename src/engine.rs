@@ -5,6 +5,7 @@
 //! Persistence (`save` / `open`) is a vault. The narrator never opens it.
 
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use crate::dream::{self, DreamReport};
 use crate::encode::embed::{Embedder, HashEmbedder};
@@ -29,7 +30,9 @@ pub struct SelectiveMemory {
     pub recall_tally: RecallTally,
     /// Live HTTP narrator bind. Not in the vault. Empty url = RuleNarrator.
     pub llm: LlmBind,
-    narrator: Box<dyn Narrator>,
+    narrator: Arc<dyn Narrator>,
+    /// Experiment seed. Does not make the night stochastic; it seeds the id stream.
+    pub seed: u32,
     embedder: Box<dyn Embedder>,
 }
 
@@ -39,6 +42,16 @@ pub struct LlmBind {
     pub url: String,
     pub model: String,
     pub key: Option<String>,
+}
+
+pub struct MouthDraft {
+    pub user: String,
+    pub memories: Vec<String>,
+    pub axioms: Vec<String>,
+    pub mood: Mood,
+    pub talk: WorkingTalk,
+    pub hold: bool,
+    pub dump: RetrievalDump,
 }
 
 impl SelectiveMemory {
@@ -52,8 +65,9 @@ impl SelectiveMemory {
             cut: OrganCut::full(),
             recall_tally: RecallTally::default(),
             llm: LlmBind::default(),
-            narrator: Box::new(RuleNarrator),
+            narrator: Arc::new(RuleNarrator),
             embedder: Box::new(HashEmbedder),
+            seed: 0,
         }
     }
 
@@ -74,8 +88,9 @@ impl SelectiveMemory {
                 cut: OrganCut::full(),
                 recall_tally: RecallTally::default(),
                 llm: LlmBind::default(),
-                narrator: Box::new(RuleNarrator),
+                narrator: Arc::new(RuleNarrator),
                 embedder: Box::new(HashEmbedder),
+                seed: 0,
             })
         } else {
             Ok(Self {
@@ -87,14 +102,27 @@ impl SelectiveMemory {
                 cut: OrganCut::full(),
                 recall_tally: RecallTally::default(),
                 llm: LlmBind::default(),
-                narrator: Box::new(RuleNarrator),
+                narrator: Arc::new(RuleNarrator),
                 embedder: Box::new(HashEmbedder),
+                seed: 0,
             })
         }
     }
 
     pub fn with_narrator(mut self, narrator: Box<dyn Narrator>) -> Self {
-        self.narrator = narrator;
+        self.narrator = Arc::from(narrator);
+        self
+    }
+
+    pub fn narrator_arc(&self) -> Arc<dyn Narrator> {
+        Arc::clone(&self.narrator)
+    }
+
+    /// Record the seed and offset the process id stream so two seeds are not the same run.
+    pub fn with_seed(mut self, seed: u32) -> Self {
+        self.seed = seed;
+        let origin = (seed as u64).saturating_mul(0x1000).max(1);
+        crate::core::model::set_next_id(origin);
         self
     }
 
@@ -103,7 +131,7 @@ impl SelectiveMemory {
         let url = url.trim();
         let model = model.trim();
         if url.is_empty() {
-            self.narrator = Box::new(RuleNarrator);
+            self.narrator = Arc::new(RuleNarrator);
             self.llm = LlmBind::default();
             return Ok(());
         }
@@ -114,7 +142,7 @@ impl SelectiveMemory {
         };
         let n = crate::recall::HttpNarrator::parse(url, model, key.clone())
             .ok_or_else(|| "llm url must be http:// or https://".to_string())?;
-        self.narrator = Box::new(n);
+        self.narrator = Arc::new(n);
         self.llm = LlmBind {
             url: url.to_string(),
             model: if model.is_empty() { "llama3".into() } else { model.into() },
@@ -510,6 +538,16 @@ impl SelectiveMemory {
         self.talk.refresh();
     }
 
+    pub fn open_mouth(&mut self, user: &str) -> MouthDraft {
+        self.open_mouth_inner(user, true, RecallBias::Observed, &[], false)
+    }
+
+    pub fn close_mouth(&mut self, draft: &MouthDraft, reply: &str) {
+        if draft.hold {
+            self.talk.record(&draft.user, reply);
+        }
+    }
+
     fn speak_inner(
         &mut self,
         user: &str,
@@ -518,6 +556,26 @@ impl SelectiveMemory {
         marked: &[String],
         axioms_only: bool,
     ) -> (String, RetrievalDump) {
+        let draft = self.open_mouth_inner(user, hold, bias, marked, axioms_only);
+        let reply = self.narrator.reply(
+            &draft.user,
+            &draft.memories,
+            &draft.axioms,
+            &draft.mood,
+            &draft.talk,
+        );
+        self.close_mouth(&draft, &reply);
+        (reply, draft.dump)
+    }
+
+    fn open_mouth_inner(
+        &mut self,
+        user: &str,
+        hold: bool,
+        bias: RecallBias,
+        marked: &[String],
+        axioms_only: bool,
+    ) -> MouthDraft {
         if hold {
             self.talk.hear(user, None);
         }
@@ -594,13 +652,15 @@ impl SelectiveMemory {
             };
             (memories, axioms)
         };
-        let reply = self
-            .narrator
-            .reply(user, &memories, &axioms, &self.mood, talk);
-        if hold {
-            self.talk.record(user, &reply);
+        MouthDraft {
+            user: user.to_string(),
+            memories,
+            axioms,
+            mood: self.mood.clone(),
+            talk: talk.clone(),
+            hold,
+            dump,
         }
-        (reply, dump)
     }
 
     pub fn audit(&self, trace_id: &str) -> Option<&str> {

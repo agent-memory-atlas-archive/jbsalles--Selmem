@@ -92,6 +92,17 @@ pub fn run(store: &mut MemoryStore, profile: &EntityProfile, veto: bool) -> u32 
                     valence_delta: 0.0,
                     disgust_delta: 0.0,
                 });
+                dst.record_operation(crate::core::model::MemoryOperation {
+                    kind: "merge".into(),
+                    at: now_secs(),
+                    source_trace_ids: vec![src.id.clone()],
+                    source_axiom_ids: Vec::new(),
+                    source_center: dst.schema.clone(),
+                    before: String::new(),
+                    after: dst.gist.clone(),
+                    confidence: dst.confidence,
+                    origin: crate::core::model::EvidenceOrigin::Reconstruction,
+                });
                 dst.clamp();
             }
             if let Some(src_mut) = store.traces.get_mut(other) {

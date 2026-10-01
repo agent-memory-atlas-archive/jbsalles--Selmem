@@ -1,12 +1,14 @@
 use crate::net::httpx::{extract_json_string, json_esc, post_json};
 use crate::core::model::{MemoryTrace, Mood};
 use crate::core::talk::WorkingTalk;
-use crate::recall::narrator::{Narrator, RuleNarrator};
+use crate::recall::narrator::{FailurePolicy, LlmCallLog, Narrator, RuleNarrator};
 
 pub struct HttpNarrator {
     pub url: String,
     pub model: String,
     pub api_key: Option<String>,
+    pub policy: FailurePolicy,
+    log: std::sync::Mutex<LlmCallLog>,
     fallback: RuleNarrator,
 }
 
@@ -15,12 +17,45 @@ impl HttpNarrator {
         if !(endpoint.starts_with("http://") || endpoint.starts_with("https://")) {
             return None;
         }
+        let model = model.into();
         Some(Self {
             url: endpoint.to_string(),
-            model: model.into(),
+            log: std::sync::Mutex::new(LlmCallLog {
+                narrator: model.clone(),
+                ..LlmCallLog::default()
+            }),
+            model,
             api_key,
+            policy: FailurePolicy::Fallback,
             fallback: RuleNarrator,
         })
+    }
+
+    pub fn with_policy(mut self, policy: FailurePolicy) -> Self {
+        self.policy = policy;
+        self
+    }
+
+    /// True when the caller may use RuleNarrator. Error policy never may.
+    fn note_fail(&self, err: &str) -> bool {
+        let mut log = self.log.lock().unwrap_or_else(|e| e.into_inner());
+        log.failures = log.failures.saturating_add(1);
+        log.llm_error = Some(err.to_string());
+        match self.policy {
+            FailurePolicy::Error => false,
+            FailurePolicy::Fallback | FailurePolicy::RecordAndFallback => {
+                log.fallback_used = true;
+                true
+            }
+        }
+    }
+
+    fn miss(&self, err: &str) -> String {
+        if self.note_fail(err) {
+            String::new()
+        } else {
+            format!("[llm-error] {err}")
+        }
     }
 
     fn chat(&self, system: &str, user: &str) -> Result<String, String> {
@@ -41,6 +76,12 @@ impl HttpNarrator {
             json_esc(system),
             json_esc(user)
         );
+        if let Ok(mut log) = self.log.lock() {
+            log.calls = log.calls.saturating_add(1);
+            if log.narrator.is_empty() {
+                log.narrator = self.model.clone();
+            }
+        }
         let raw = post_json(&self.url, self.api_key.as_deref(), &body)?;
         if let Some(msg) = api_error(&raw) {
             return Err(msg);
@@ -72,6 +113,10 @@ fn token_cap_field(url: &str, model: &str) -> &'static str {
 }
 
 impl Narrator for HttpNarrator {
+    fn failure_log(&self) -> LlmCallLog {
+        self.log.lock().map(|g| g.clone()).unwrap_or_default()
+    }
+
     fn reconstruct(&self, trace: &MemoryTrace, mood: &Mood, query: &str) -> String {
         if trace.status == crate::core::model::TraceStatus::Latent {
             return crate::lexicon::rule().latent.clone();
@@ -90,8 +135,18 @@ impl Narrator for HttpNarrator {
             mood.disgust,
             query
         );
-        self.chat(system, &user)
-            .unwrap_or_else(|_| self.fallback.reconstruct(trace, mood, query))
+        match self.chat(system, &user) {
+            Ok(s) if !s.trim().is_empty() => s,
+            Ok(_) => self.fallback.reconstruct(trace, mood, query),
+            Err(e) => {
+                let marker = self.miss(&e);
+                if marker.is_empty() {
+                    self.fallback.reconstruct(trace, mood, query)
+                } else {
+                    marker
+                }
+            }
+        }
     }
 
     fn distill_axiom(&self, traces: &[&MemoryTrace]) -> Option<String> {
@@ -115,7 +170,13 @@ impl Narrator for HttpNarrator {
                     Some(s)
                 }
             }
-            Err(_) => self.fallback.distill_axiom(traces),
+            Err(e) => {
+                if self.note_fail(&e) {
+                    self.fallback.distill_axiom(traces)
+                } else {
+                    None
+                }
+            }
         }
     }
 
@@ -126,7 +187,10 @@ impl Narrator for HttpNarrator {
         }
         match self.chat(system, event) {
             Ok(raw) => crate::encode::parse_segment_reply(&raw),
-            Err(_) => None,
+            Err(e) => {
+                let _ = self.note_fail(&e);
+                None
+            }
         }
     }
 
@@ -165,7 +229,13 @@ impl Narrator for HttpNarrator {
         );
         match self.chat(system, &user) {
             Ok(raw) => parse_interp(&raw).or_else(|| self.fallback.interpret(event, mood, axioms)),
-            Err(_) => self.fallback.interpret(event, mood, axioms),
+            Err(e) => {
+                if self.note_fail(&e) {
+                    self.fallback.interpret(event, mood, axioms)
+                } else {
+                    None
+                }
+            }
         }
     }
 
@@ -207,7 +277,13 @@ impl Narrator for HttpNarrator {
                     Some(s)
                 }
             }
-            Err(_) => self.fallback.rewrite(trace, neighbors, profile),
+            Err(e) => {
+                if self.note_fail(&e) {
+                    self.fallback.rewrite(trace, neighbors, profile)
+                } else {
+                    None
+                }
+            }
         }
     }
 
@@ -228,7 +304,15 @@ impl Narrator for HttpNarrator {
         );
         match self.chat(system, &user) {
             Ok(s) if !s.trim().is_empty() => s.trim().chars().take(280).collect(),
-            _ => self.fallback.recontextualize(trace, core, profile),
+            Ok(_) => self.fallback.recontextualize(trace, core, profile),
+            Err(e) => {
+                let marker = self.miss(&e);
+                if marker.is_empty() {
+                    self.fallback.recontextualize(trace, core, profile)
+                } else {
+                    marker
+                }
+            }
         }
     }
 
@@ -265,7 +349,12 @@ impl Narrator for HttpNarrator {
             Ok(s) => s,
             Err(e) => {
                 eprintln!("selmem LLM reply failed: {e}");
-                self.fallback.reply(user, memories, axioms, mood, talk)
+                let marker = self.miss(&e);
+                if marker.is_empty() {
+                    self.fallback.reply(user, memories, axioms, mood, talk)
+                } else {
+                    marker
+                }
             }
         }
     }
@@ -294,9 +383,18 @@ impl SpeakOnlyHttp {
             rules: RuleNarrator,
         })
     }
+
+    pub fn with_policy(mut self, policy: FailurePolicy) -> Self {
+        self.http.policy = policy;
+        self
+    }
 }
 
 impl Narrator for SpeakOnlyHttp {
+    fn failure_log(&self) -> LlmCallLog {
+        self.http.failure_log()
+    }
+
     fn reconstruct(&self, trace: &MemoryTrace, mood: &Mood, query: &str) -> String {
         self.rules.reconstruct(trace, mood, query)
     }

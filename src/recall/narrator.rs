@@ -10,7 +10,42 @@ pub struct Interpretation {
     pub self_relevance: f32,
 }
 
+/// What to do when the HTTP narrator cannot get a usable reply.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FailurePolicy {
+    /// UI default. Rules speak, and the miss is logged.
+    Fallback,
+    /// Benchmarks. Do not pretend the model answered.
+    Error,
+    /// Log the miss, then rules. Reports must still say fallback_used.
+    RecordAndFallback,
+}
+
+#[derive(Clone, Debug)]
+pub struct LlmCallLog {
+    pub narrator: String,
+    pub fallback_used: bool,
+    pub llm_error: Option<String>,
+    pub calls: u32,
+    pub failures: u32,
+}
+
+impl Default for LlmCallLog {
+    fn default() -> Self {
+        Self {
+            narrator: "rules".into(),
+            fallback_used: false,
+            llm_error: None,
+            calls: 0,
+            failures: 0,
+        }
+    }
+}
+
 pub trait Narrator: Send + Sync {
+    fn failure_log(&self) -> LlmCallLog {
+        LlmCallLog::default()
+    }
     fn reconstruct(&self, trace: &MemoryTrace, mood: &Mood, query: &str) -> String;
     fn distill_axiom(&self, traces: &[&MemoryTrace]) -> Option<String>;
     /// Live event only — never an archive. Default: none (caller uses lexicon + identity).

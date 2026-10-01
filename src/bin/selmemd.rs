@@ -56,7 +56,7 @@ fn main() {
         }
     }
 
-    let mem = Arc::new(Mutex::new(mem));
+    let mem = Arc::new(Mutex::new(Some(mem)));
     let listener = TcpListener::bind(&bind).expect("bind");
     eprintln!("selmemd sur http://{bind}  fichier={path}");
     if let Some(p) = cfg.path.as_ref() {
@@ -86,7 +86,7 @@ fn main() {
 
 fn handle_conn(
     mut stream: TcpStream,
-    mem: &Mutex<SelectiveMemory>,
+    mem: &Mutex<Option<SelectiveMemory>>,
     token: Option<&str>,
 ) -> std::io::Result<()> {
     stream.set_read_timeout(Some(std::time::Duration::from_secs(90))).ok();
@@ -113,8 +113,8 @@ fn handle_conn(
                 if let Some(v) = l.strip_prefix("content-length:") {
                     content_len = v.trim().parse().unwrap_or(0);
                 }
-                if let Some(v) = line.strip_prefix("Authorization:") {
-                    auth = v.trim().to_string();
+                if l.starts_with("authorization:") {
+                    auth = line.split_once(':').map(|(_, v)| v.trim().to_string()).unwrap_or_default();
                 }
             }
             let body_start = pos + 4;
@@ -138,12 +138,7 @@ fn handle_conn(
                     return Ok(());
                 }
             }
-            let res = {
-                let mut g = mem.lock().map_err(|_| {
-                    std::io::Error::new(std::io::ErrorKind::Other, "memory locked")
-                })?;
-                api::dispatch(&mut g, &method, path, query, &body)
-            };
+            let res = dispatch_unlocked(mem, &method, path, query, &body)?;
             write_http(&mut stream, res.status, &res.body)?;
             return Ok(());
         }
@@ -152,6 +147,72 @@ fn handle_conn(
         }
     }
     Ok(())
+}
+
+
+fn dispatch_unlocked(
+    mem: &Mutex<Option<SelectiveMemory>>,
+    method: &str,
+    path: &str,
+    query: &str,
+    body: &str,
+) -> std::io::Result<selmem::api::HttpResponse> {
+    let busy = || selmem::api::HttpResponse {
+        status: 503,
+        body: "{\"error\":\"memory busy\"}".into(),
+    };
+    if api::is_mouth(method, path) {
+        let text = match api::mouth_user(path, body) {
+            Ok(t) => t,
+            Err(res) => return Ok(res),
+        };
+        let (draft, narrator) = {
+            let mut slot = mem.lock().map_err(|_| {
+                std::io::Error::new(std::io::ErrorKind::Other, "memory locked")
+            })?;
+            let Some(g) = slot.as_mut() else {
+                return Ok(busy());
+            };
+            let draft = g.open_mouth(&text);
+            let narrator = g.narrator_arc();
+            (draft, narrator)
+        };
+        let reply = selmem::Narrator::reply(narrator.as_ref(), &draft.user, &draft.memories, &draft.axioms, &draft.mood, &draft.talk);
+        let mut slot = mem.lock().map_err(|_| {
+            std::io::Error::new(std::io::ErrorKind::Other, "memory locked")
+        })?;
+        let Some(g) = slot.as_mut() else {
+            return Ok(busy());
+        };
+        g.close_mouth(&draft, &reply);
+        let _ = g.save();
+        return Ok(api::mouth_body(path, &reply, g));
+    }
+    let external = method == "POST";
+    if external {
+        let mut organ = {
+            let mut slot = mem.lock().map_err(|_| {
+                std::io::Error::new(std::io::ErrorKind::Other, "memory locked")
+            })?;
+            let Some(organ) = slot.take() else {
+                return Ok(busy());
+            };
+            organ
+        };
+        let res = api::dispatch(&mut organ, method, path, query, body);
+        let mut slot = mem.lock().map_err(|_| {
+            std::io::Error::new(std::io::ErrorKind::Other, "memory locked")
+        })?;
+        *slot = Some(organ);
+        return Ok(res);
+    }
+    let mut slot = mem.lock().map_err(|_| {
+        std::io::Error::new(std::io::ErrorKind::Other, "memory locked")
+    })?;
+    let Some(g) = slot.as_mut() else {
+        return Ok(busy());
+    };
+    Ok(api::dispatch(g, method, path, query, body))
 }
 
 fn find_headers_end(data: &[u8]) -> Option<usize> {

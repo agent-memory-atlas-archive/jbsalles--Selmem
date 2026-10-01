@@ -14,7 +14,7 @@ mod engine;
 
 pub use core::model::{
     advance_hours, clock_scale, now_secs, set_clock_scale, ArchiveRecord, AxiomLayer, Channel,
-    Attribution, DriftEvent, DriftKind, IdentityAxiom, MemoryTrace, Mood, OrganCut, RecallTally,
+    Attribution, DriftEvent, DriftKind, EvidenceOrigin, IdentityAxiom, InterpretationStamp, MemoryOperation, MemoryTrace, Mood, OrganCut, RecallTally,
     SchemaCenter,
     RecalledMemory, TraceStatus,
 };
@@ -38,11 +38,11 @@ pub use benchmark::{
     run_v01_n_opts, run_v01_opts, v01_script, Arm, BenchOpts, Campaign, Condition, Instant,
     PairReport, V01Script,
 };
-pub use experiment::{run_neutral, run_neutral_llm, run_salient, run_salient_llm, run_salient_without_sleep, run_salient_without_sleep_llm, run_erasure, run_split_lives, script, split_script, BifurcationReport, ErasureReport, LlmSpec};
+pub use experiment::{run_neutral, run_neutral_llm, run_salient, run_salient_llm, run_salient_without_sleep, run_salient_without_sleep_llm, run_erasure, run_split_lives, script, split_script, BifurcationReport, ErasureReport, ExperimentRng, LlmSpec};
 pub use config::Config;
 pub use net::api;
 pub use recall::{
-    HttpNarrator, Narrator, RecallBias, RecallWrite, RetrievalDump, RuleNarrator, SpeakOnlyHttp,
+    FailurePolicy, HttpNarrator, LlmCallLog, Narrator, RecallBias, RecallWrite, RetrievalDump, RuleNarrator, SpeakOnlyHttp,
 };
 pub use recall::stance::{
     charged_mood, isolated_stance, is_charged, query_hits_episode,

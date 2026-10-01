@@ -7,6 +7,42 @@ pub struct HttpResponse {
     pub body: String,
 }
 
+pub fn is_mouth(method: &str, path: &str) -> bool {
+    method == "POST" && (path == "/turn" || path == "/speak")
+}
+
+pub fn mouth_user(path: &str, body: &str) -> Result<String, HttpResponse> {
+    let text = json_str(body, "text")
+        .or_else(|| json_str(body, "event"))
+        .or_else(|| json_str(body, "query"))
+        .unwrap_or_default();
+    if text.trim().is_empty() {
+        Err(err(400, "text requis"))
+    } else {
+        let _ = path;
+        Ok(text)
+    }
+}
+
+pub fn mouth_body(path: &str, reply: &str, mem: &SelectiveMemory) -> HttpResponse {
+    if path == "/turn" {
+        ok(format!(
+            "{{\"reply\":\"{}\",\"topic\":\"{}\",\"mood\":{{\"valence\":{:.3},\"arousal\":{:.3},\"disgust\":{:.3}}}}}",
+            json_esc(reply),
+            json_esc(mem.talk.topic.as_deref().unwrap_or("")),
+            mem.mood.valence,
+            mem.mood.arousal,
+            mem.mood.disgust
+        ))
+    } else {
+        ok(format!(
+            "{{\"reply\":\"{}\",\"topic\":\"{}\"}}",
+            json_esc(reply),
+            json_esc(mem.talk.topic.as_deref().unwrap_or(""))
+        ))
+    }
+}
+
 pub fn dispatch(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str, body: &str) -> HttpResponse {
     if method == "OPTIONS" {
         return HttpResponse {

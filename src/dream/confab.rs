@@ -70,6 +70,7 @@ pub fn fill_if_hole(store: &mut MemoryStore, id: &str, profile: &EntityProfile) 
     }
     let core = t.core.clone();
     if let Some(t) = store.traces.get_mut(id) {
+        let before = t.gist.clone();
         t.gist = fill.chars().take(280).collect();
         t.drifts.push(DriftEvent {
             kind: DriftKind::Confabulate,
@@ -78,6 +79,17 @@ pub fn fill_if_hole(store: &mut MemoryStore, id: &str, profile: &EntityProfile) 
             fidelity_delta: -0.02,
             valence_delta: 0.0,
             disgust_delta: 0.0,
+        });
+        t.record_operation(crate::core::model::MemoryOperation {
+            kind: "confab".into(),
+            at: now_secs(),
+            source_trace_ids: vec![id.to_string()],
+            source_axiom_ids: Vec::new(),
+            source_center: t.schema.clone(),
+            before,
+            after: t.gist.clone(),
+            confidence: t.confidence,
+            origin: crate::core::model::EvidenceOrigin::Confabulation,
         });
         t.fidelity = (t.fidelity - 0.02).max(0.15);
         t.recompute_confidence();
