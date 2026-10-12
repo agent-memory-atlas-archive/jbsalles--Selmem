@@ -35,3 +35,7 @@ The default ordinary organ keeps observation support disabled; the paired assay 
 | Creativity | Executable designs scored for utility, structural/behavioral novelty and causal historical dependence on unseen worlds |
 
 Prespecify meaningful effects after estimating natural variability; separate development from confirmation and compute uncertainty over independent histories. A null effect, reduced performance or rigidity can refute the proposed benefit. Do not select only dramatic outputs or treat lexical variation as behavior.
+
+## Matched sleep intervention
+
+[SLEEP.md](SLEEP.md) specifies a paired pilot at 0/1/5/20 cycles, with identical prefix snapshots, equal virtual time, source hashes and isolated probes. Controlled decision utility and LoCoMo-derived factual correctness remain separate measures. This tests preservation and use of memory after sleep, not creative superiority.

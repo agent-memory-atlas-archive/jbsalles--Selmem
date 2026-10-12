@@ -151,7 +151,8 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
 
     let n_ax = parse_count(&read_line(&mut r)?, "axioms")?;
     for _ in 0..n_ax {
-        let a = read_axiom(&mut r)?;
+        let (mut a,legacy) = read_axiom(&mut r)?;
+        if legacy{crate::persist::snapshot::recover_legacy_axiom_context(&mut a, &store.traces);}
         store.axioms.insert(a.id.clone(), a);
     }
 
@@ -665,6 +666,8 @@ fn write_axiom(w: &mut impl Write, a: &IdentityAxiom) -> io::Result<()> {
         a.superseded_by.as_deref().unwrap_or("-"),
         layer_token(a.layer)
     )?;
+    writeln!(w, "axiom_context {} {} {}", a.stake_kind.token(), a.bearer.token(), a.loss_kind.token())?;
+    write_blob(w, &a.stake_mark)?;
     write_blob(w, &a.statement)?;
     write_blob(w, a.schema.as_deref().unwrap_or(""))?;
     for id in &a.support_trace_ids {
@@ -673,7 +676,7 @@ fn write_axiom(w: &mut impl Write, a: &IdentityAxiom) -> io::Result<()> {
     Ok(())
 }
 
-fn read_axiom(r: &mut impl BufRead) -> io::Result<IdentityAxiom> {
+fn read_axiom(r: &mut (impl BufRead + Seek)) -> io::Result<(IdentityAxiom,bool)> {
     let header = read_line(r)?;
     let p: Vec<&str> = header.split_whitespace().collect();
     if p.len() < 7 || p[0] != "axiom" {
@@ -685,6 +688,13 @@ fn read_axiom(r: &mut impl BufRead) -> io::Result<IdentityAxiom> {
         AxiomLayer::Belief
     };
     let n_sup: usize = p[5].parse().map_err(invalid)?;
+    let context = if next_line_starts_with(r, "axiom_context ")? {
+        let line=read_line(r)?;let fields:Vec<_>=line.split_whitespace().collect();
+        if fields.len()!=4{return fail("malformed axiom context");}
+        let kind=crate::core::model::StakeKind::parse(fields[1]);let bearer=crate::core::model::Bearer::parse(fields[2]);let loss=crate::core::model::LossKind::parse(fields[3]);
+        if kind.token()!=fields[1] || bearer.token()!=fields[2] || loss.token()!=fields[3]{return fail("invalid axiom context token");}
+        Some((kind,bearer,loss,read_blob(r)?))
+    }else{None};
     let statement = read_blob(r)?;
     let schema = empty_none(read_blob(r).unwrap_or_default());
     let mut support = Vec::with_capacity(n_sup);
@@ -696,7 +706,7 @@ fn read_axiom(r: &mut impl BufRead) -> io::Result<IdentityAxiom> {
                 .to_string(),
         );
     }
-    Ok(assemble_axiom(
+    let mut axiom=assemble_axiom(
         p[1].to_string(),
         statement,
         parse_f(p[3])?,
@@ -710,7 +720,10 @@ fn read_axiom(r: &mut impl BufRead) -> io::Result<IdentityAxiom> {
         schema,
         layer,
         support,
-    ))
+    );
+    let legacy=context.is_none();
+    if let Some((kind,bearer,loss,mark))=context {axiom.stake_kind=kind;axiom.bearer=bearer;axiom.loss_kind=loss;axiom.stake_mark=mark;}
+    Ok((axiom,legacy))
 }
 
 fn write_blob(w: &mut impl Write, s: &str) -> io::Result<()> {

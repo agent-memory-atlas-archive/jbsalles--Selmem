@@ -234,6 +234,13 @@ pub fn save(
            hub_id TEXT, axiom_id TEXT);",
     );
     let _ = db.exec("ALTER TABLE axioms ADD COLUMN layer TEXT;");
+    for column in ["stake_kind","bearer","loss_kind","stake_mark","absence"] {
+        let _=db.exec(&format!("ALTER TABLE traces ADD COLUMN {column} TEXT;"));
+    }
+    for column in ["stake_kind", "bearer", "loss_kind", "stake_mark"] {
+        let _=db.exec(&format!("ALTER TABLE axioms ADD COLUMN {column} TEXT;"));
+    }
+
     let _ = db.exec("ALTER TABLE archives ADD COLUMN released_from TEXT;");
     let _ = db.exec("ALTER TABLE archives ADD COLUMN released_at INTEGER;");
     let _ = db.exec("ALTER TABLE archives ADD COLUMN core TEXT;");
@@ -321,8 +328,8 @@ pub fn save(
         }
     }
     let q_tr = db.prepare(
-        "INSERT INTO traces(id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed,observation_id,semantic_claim,semantic_entities,semantic_actions,semantic_polarity,semantic_confidence,reality_claim,reality_verifiable,source)
-         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21,?22,?23,?24,?25,?26,?27,?28,?29,?30,?31,?32,?33,?34,?35)",
+        "INSERT INTO traces(id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed,observation_id,semantic_claim,semantic_entities,semantic_actions,semantic_polarity,semantic_confidence,reality_claim,reality_verifiable,source,stake_kind,bearer,loss_kind,stake_mark,absence)
+         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21,?22,?23,?24,?25,?26,?27,?28,?29,?30,?31,?32,?33,?34,?35,?36,?37,?38,?39,?40)",
     )?;
     let q_cue = db.prepare("INSERT INTO cues(trace_id,cue) VALUES (?1,?2)")?;
     let q_dr = db.prepare(
@@ -370,6 +377,11 @@ pub fn save(
         q_tr.bind_text(33, &t.reality.claim)?;
         q_tr.bind_i64(34, if t.reality.verifiable { 1 } else { 0 })?;
         q_tr.bind_text(35, &t.source)?;
+        q_tr.bind_text(36,t.stake_kind.token())?;
+        q_tr.bind_text(37,t.bearer.token())?;
+        q_tr.bind_text(38,t.loss_kind.token())?;
+        q_tr.bind_text(39,&t.stake_mark)?;
+        q_tr.bind_text(40,t.absence.map(|a|a.token()).unwrap_or("-"))?;
         q_tr.step_done()?;
         for c in &t.cues {
             q_cue.bind_text(1, &t.id)?;
@@ -404,7 +416,7 @@ pub fn save(
         }
     }
     let q_ax = db.prepare(
-        "INSERT INTO axioms(id,statement,valence,strength,created,superseded_by,schema,layer) VALUES (?1,?2,?3,?4,?5,?6,?7,?8)",
+        "INSERT INTO axioms(id,statement,valence,strength,created,superseded_by,schema,layer,stake_kind,bearer,loss_kind,stake_mark) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12)",
     )?;
     let q_sup = db.prepare("INSERT INTO axiom_support(axiom_id,trace_id) VALUES (?1,?2)")?;
     for a in store.axioms.values() {
@@ -416,6 +428,10 @@ pub fn save(
         q_ax.bind_opt_text(6, a.superseded_by.as_deref())?;
         q_ax.bind_opt_text(7, a.schema.as_deref())?;
         q_ax.bind_text(8, layer_token(a.layer))?;
+        q_ax.bind_text(9,a.stake_kind.token())?;
+        q_ax.bind_text(10,a.bearer.token())?;
+        q_ax.bind_text(11,a.loss_kind.token())?;
+        q_ax.bind_text(12,&a.stake_mark)?;
         q_ax.step_done()?;
         for tid in &a.support_trace_ids {
             q_sup.bind_text(1, &a.id)?;
@@ -501,6 +517,13 @@ fn query(db: &Db, sql: &str) -> io::Result<Vec<Vec<String>>> {
 
 pub fn load(path: &Path) -> io::Result<Snapshot> {
     let db = Db::open(path)?;
+    for column in ["stake_kind","bearer","loss_kind","stake_mark","absence"] {
+        let _=db.exec(&format!("ALTER TABLE traces ADD COLUMN {column} TEXT;"));
+    }
+    for column in ["stake_kind", "bearer", "loss_kind", "stake_mark"] {
+        let _=db.exec(&format!("ALTER TABLE axioms ADD COLUMN {column} TEXT;"));
+    }
+
     let _ = db.exec("ALTER TABLE traces ADD COLUMN attribution TEXT;");
     let _ = db.exec("ALTER TABLE traces ADD COLUMN self_congruence REAL;");
     let _ = db.exec("ALTER TABLE traces ADD COLUMN confidence REAL;");
@@ -611,7 +634,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
 
     for row in query(
         &db,
-        "SELECT id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed,observation_id,semantic_claim,semantic_entities,semantic_actions,semantic_polarity,semantic_confidence,reality_claim,reality_verifiable,source FROM traces",
+        "SELECT id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed,observation_id,semantic_claim,semantic_entities,semantic_actions,semantic_polarity,semantic_confidence,reality_claim,reality_verifiable,source,stake_kind,bearer,loss_kind,stake_mark,absence FROM traces",
     )? {
         if row.len() < 20 {
             continue;
@@ -708,6 +731,9 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
             ));
         }
         t.clamp();
+        if row[35].is_empty(){let (kind,bearer,loss,mark,absence)=crate::core::model::derive_stake(&t.gist);t.stake_kind=kind;t.bearer=bearer;t.loss_kind=loss;t.stake_mark=mark;t.absence=absence;}else{
+            t.stake_kind=crate::core::model::StakeKind::parse(&row[35]);t.bearer=crate::core::model::Bearer::parse(&row[36]);t.loss_kind=crate::core::model::LossKind::parse(&row[37]);t.stake_mark=row[38].clone();t.absence=crate::core::model::AbsenceKind::parse(&row[39]);
+        }
         store.traces.insert(t.id.clone(), t);
     }
     for row in query(
@@ -766,14 +792,15 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
             ));
         }
     }
+    let mut legacy_axioms=std::collections::HashSet::new();
     for row in query(
         &db,
-        "SELECT id,statement,valence,strength,created,superseded_by,schema,layer FROM axioms",
+        "SELECT id,statement,valence,strength,created,superseded_by,schema,layer,stake_kind,bearer,loss_kind,stake_mark FROM axioms",
     )? {
         if row.len() < 6 {
             continue;
         }
-        let a = assemble_axiom(
+        let mut a = assemble_axiom(
             row[0].clone(),
             row[1].clone(),
             row[2].parse().unwrap_or(0.0),
@@ -784,6 +811,11 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
             parse_layer_token(row.get(7).map(|s| s.as_str()).unwrap_or("belief")),
             Vec::new(),
         );
+        if row[8].is_empty(){legacy_axioms.insert(a.id.clone());}
+        a.stake_kind=crate::core::model::StakeKind::parse(&row[8]);
+        a.bearer=if row[9].is_empty(){crate::core::model::Bearer::World}else{crate::core::model::Bearer::parse(&row[9])};
+        a.loss_kind=crate::core::model::LossKind::parse(&row[10]);
+        a.stake_mark=row[11].clone();
         store.axioms.insert(a.id.clone(), a);
     }
     for row in query(&db, "SELECT axiom_id,trace_id FROM axiom_support")? {
@@ -794,6 +826,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
             a.support_trace_ids.push(row[1].clone());
         }
     }
+    for a in store.axioms.values_mut(){if legacy_axioms.contains(&a.id){crate::persist::snapshot::recover_legacy_axiom_context(a,&store.traces);}}
     for row in query(
         &db,
         "SELECT schema,core,valence,weight,hub_id,axiom_id FROM centers",
@@ -919,3 +952,14 @@ fn parse_dk(s: &str) -> DriftKind {
     }
 }
 
+#[cfg(test)]mod axiom_legacy_tests{
+ use super::*;
+ #[test]fn old_axiom_table_migrates_on_load_and_save(){
+  let p=std::env::temp_dir().join(format!("selmem-old-axioms-{}.db",std::process::id()));let _=std::fs::remove_file(&p);
+  let m=crate::SelectiveMemory::open(&p,EntityProfile::new("test")).unwrap();m.save().unwrap();drop(m);
+  {let db=Db::open(&p).unwrap();db.exec("ALTER TABLE axioms RENAME TO axioms_new; CREATE TABLE axioms(id TEXT PRIMARY KEY,statement TEXT,valence REAL,strength REAL,created INTEGER,superseded_by TEXT,schema TEXT,layer TEXT); DROP TABLE axioms_new;").unwrap();}
+  // Save creates the remaining old-compatible schema and migrates columns.
+  let m=crate::SelectiveMemory::open(&p,EntityProfile::new("test")).unwrap();m.save().unwrap();
+  let db=Db::open(&p).unwrap();let cols=query(&db,"PRAGMA table_info(axioms)").unwrap();for name in ["stake_kind","bearer","loss_kind","stake_mark"]{assert!(cols.iter().any(|r|r[1]==name));}drop(db);std::fs::remove_file(p).unwrap();
+ }
+}

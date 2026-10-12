@@ -8,3 +8,5 @@ The maintained experiment paths are:
 [RESULTS.md](RESULTS.md) records the known observations and limits. Old narrative demos, P0–P67 grids, witnesses, AMA adapters and GENESIS troubleshooting commands have been retired. Their raw evidence remains in the separately supplied history archive and the original Git history; they are not active commands.
 
 Generated runs do not belong in the source tree. Use fresh paths under `experiments/genesis/results/` or `experiments/strategy/`, preserve their manifests and raw responses, and archive them for analysis. Both locations are ignored by Git. No committed result should be silently overwritten or upgraded to the current code version.
+
+GENESIS also provides the [sleep-quality pilot](genesis/SLEEP.md): matched no-sleep/normal/deep clones, controlled learning histories and LoCoMo-derived factual probes.
