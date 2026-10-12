@@ -3,6 +3,16 @@ use crate::core::model::{MemoryTrace, Mood};
 use crate::core::talk::WorkingTalk;
 use crate::recall::narrator::{FailurePolicy, LlmCallLog, Narrator, RuleNarrator};
 
+/// Optional transport evidence, without headers or credentials.
+#[derive(Clone, Debug)]
+pub struct HttpExchange {
+    pub request_body: String,
+    pub response: Result<String, String>,
+}
+pub type HttpExchangeLog = std::sync::Arc<std::sync::Mutex<Vec<HttpExchange>>>;
+
+pub type HttpTransport = std::sync::Arc<dyn Fn(&str, Option<&str>, &str) -> Result<String, String> + Send + Sync>;
+
 pub struct HttpNarrator {
     pub url: String,
     pub model: String,
@@ -10,6 +20,9 @@ pub struct HttpNarrator {
     pub policy: FailurePolicy,
     log: std::sync::Mutex<LlmCallLog>,
     fallback: RuleNarrator,
+    exchanges: Option<HttpExchangeLog>,
+    transport: Option<HttpTransport>,
+    reconstruction_prompt: Option<String>,
 }
 
 impl HttpNarrator {
@@ -28,11 +41,30 @@ impl HttpNarrator {
             api_key,
             policy: FailurePolicy::Fallback,
             fallback: RuleNarrator,
+            exchanges: None,
+            transport: None,
+            reconstruction_prompt: None,
         })
+    }
+
+    pub fn with_transport(mut self, transport: HttpTransport) -> Self {
+        self.transport = Some(transport);
+        self
+    }
+
+    pub fn with_reconstruction_prompt(mut self, prompt: String) -> Self {
+        self.reconstruction_prompt = Some(prompt);
+        self
     }
 
     pub fn with_policy(mut self, policy: FailurePolicy) -> Self {
         self.policy = policy;
+        self
+    }
+
+    /// Instrument HTTP calls without changing reconstruction or default behavior.
+    pub fn with_exchange_log(mut self, log: HttpExchangeLog) -> Self {
+        self.exchanges = Some(log);
         self
     }
 
@@ -82,7 +114,17 @@ impl HttpNarrator {
                 log.narrator = self.model.clone();
             }
         }
-        let raw = post_json(&self.url, self.api_key.as_deref(), &body)?;
+        let response = match &self.transport {
+            Some(transport) => transport(&self.url, self.api_key.as_deref(), &body),
+            None => post_json(&self.url, self.api_key.as_deref(), &body),
+        };
+        if let Some(exchanges) = &self.exchanges {
+            exchanges.lock().unwrap_or_else(|e| e.into_inner()).push(HttpExchange {
+                request_body: body,
+                response: response.clone(),
+            });
+        }
+        let raw = response?;
         if let Some(msg) = api_error(&raw) {
             return Err(msg);
         }
@@ -144,7 +186,7 @@ impl Narrator for HttpNarrator {
         if trace.status == crate::core::model::TraceStatus::Latent {
             return crate::lexicon::rule().latent.clone();
         }
-        let system = &crate::lexicon::prompts().reconstruct;
+        let system = self.reconstruction_prompt.as_ref().unwrap_or(&crate::lexicon::prompts().reconstruct);
         let mut user = format!(
             "gist: {}\nschema: {}\nvalence: {:.2} arousal: {:.2} disgust: {:.2} fidelity: {:.2}\ncurrent mood: v={:.2} a={:.2} d={:.2}\nrecall cue: {}",
             trace.gist,

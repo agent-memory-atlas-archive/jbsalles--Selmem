@@ -463,6 +463,14 @@ pub fn recall_with(
     } else {
         Vec::new()
     };
+    // Attach provenance-derived counts only after reconstruction/grounding and
+    // co-recall learning. They never enter gist write-back or the frozen core.
+    for memory in &mut recalled {
+        if let Some(metadata) = store.observation_evidence.render(store, &memory.trace_id) {
+            memory.narrative.push_str("\n");
+            memory.narrative.push_str(&metadata);
+        }
+    }
     RecallOutcome {
         memories: recalled,
         dump: RetrievalDump {

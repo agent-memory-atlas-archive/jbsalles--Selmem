@@ -8,11 +8,11 @@ An LLM maps context to the next token. Adding facts increases coverage, but does
 
 SelMem goal is not more memory, but path-dependent memory: selection, reconstruction, sleep, rumination, and identity transform experience into a history that actively shapes future context. The result is not a taller log, but a different past and therefore a different trajectory.
 
-**Claim:** After a year of the same stream, two copies of the same model that retained one hour on one side only no longer remember or forget the same things. Measured on the book, retrieve, and the mouth.
+**Hypothesis:** After a year of the same stream, two copies of the same model that retained one hour on one side only no longer remember or forget the same things. Measured on the book, retrieve, and the mouth. Historical exploratory runs motivated this hypothesis; durable behavioral singularity and useful creativity remain to be demonstrated.
 
 **Manifest:** [WHITEPAPER.md](WHITEPAPER.md)\
 **Layout:** [ARCHITECTURE.md](ARCHITECTURE.md) — encode / judge / night / snapshot.\
-**Benches:** experiments/REPORT.md — same sentence, then method and tables. Locked next run: experiments/REPRO.md. Replay from experiments/README.md.\
+**Benches:** [experiments/RESULTS.md](experiments/RESULTS.md) — observations and limits. Replay from [experiments/README.md](experiments/README.md).\
 **Knobs:** [PARAMETERS.md](PARAMETERS.md) — exploratory, not fitted.
 
 **Co-recall:** [Learned associations](docs/CO_RECALL_ASSOCIATIONS.md) — optional organ-level contextual reconstruction, with unchanged retrieval scores and persisted audits.
@@ -29,7 +29,7 @@ src/
   net/        api, httpx, ui
   config.rs   .selmem runtime options
   engine.rs   the loop only
-  bin/        selmemd, selmem-chat, selmem-witness
+  bin/        selmemd, selmem-chat, selmem-genesis, selmem-locomo-strategy
 ```
 
 ## Loop
@@ -56,6 +56,8 @@ The model never sees the archive. Only gist, core, schema, affect, fidelity, con
 
 `tender` / `austere` are two gates on the same corpus, not characters. After nights the books can differ. That is the claim above, not a personality.
 
+**Observation support.** Admission of a new trace and retention of another observation supporting an existing trace are separate operations. With `observation_evidence` enabled, stable caller-provided observation identities accumulate bounded support; replayed identities do not count twice. Support accompanies a selected trace without becoming gist/core rewrite material. Caller identities do not prove statistical independence. See [PARAMETERS.md](PARAMETERS.md).
+
 ## Build
 
 Zero Cargo crates. Persistence is a vault, not the memory: the organ lives in RAM (`MemoryStore`); on `save` it is dumped, on `open` it is reloaded. The model never talks to the vault.
@@ -81,10 +83,9 @@ Use `./run.sh` instead of bare `cargo` so those paths are set. A `SELMEM1` vault
 Apple Silicon and Intel are both fine. Bind `127.0.0.1` or `0.0.0.0` as usual.
 
 ```bash
-./run.sh test
-./run.sh run --release --example compare
-./run.sh run --release --example llm_night
-./run.sh run --release --example bifurcation
+./run.sh test --all-targets
+./run.sh test --doc
+./run.sh run --release --example two_entities
 ./run.sh run --release --bin selmemd -- --help
 ```
 
@@ -137,7 +138,7 @@ Another file: `--config path` or `SELMEM_CONFIG`. Discovery otherwise: cwd `.sel
 | --- | --- | --- | --- |
 | `defaultLlm` | `SELMEM_DEFAULT_LLM` | unset | which block the daemon attaches: `grok` or `gpt` |
 | `llm` | `SELMEM_LLM` | unset | chat completions URL; unset and no plug = `RuleNarrator` |
-| `model` | `SELMEM_MODEL` | bin: `llama3`, benches: `gpt-4o-mini` | model id |
+| `model` | `SELMEM_MODEL` | provider-dependent | model id |
 | `api_key` | `SELMEM_API_KEY` | unset | `Authorization: Bearer` |
 | `reasoning` | `SELMEM_REASONING` | `none` | xAI `reasoning_effort` (`none`/`low`/… or `off` to omit) |
 | `temp` | `SELMEM_TEMP` | `0` | sampling temperature |
@@ -155,7 +156,7 @@ Another file: `--config path` or `SELMEM_CONFIG`. Discovery otherwise: cwd `.sel
 | `probes` | `SELMEM_PROBES` | all / 2 if quick | how many bench questions to speak |
 | `quick` | `SELMEM_QUICK` | unset | `1`/`true`/`yes` = salient only, 2 probes, one persist window |
 
-`selmemd`, `selmem-chat`, and the experiment examples all read this file. `selmemd` prints `config <path>` when it loaded one.
+`selmemd`, `selmem-chat`, and the retained experiment runners read this file. `selmemd` prints `config <path>` when it loaded one.
 
 Do not put `api_key` in a committed file. Copy the example, fill the key locally.
 
@@ -163,161 +164,39 @@ Do not put `api_key` in a committed file. Copy the example, fill the key locally
 
 Rust only. No Python suite. Always use `./run.sh` (not bare `cargo`) so sqlite link flags are set.
 
-Scripts in `data/*.json` are the frozen stimuli. Edit those if you change a protocol; do not rewrite them mid-run. Later prompts in a script never name the marked event.
+The maintained experiments are [GENESIS](experiments/genesis/README.md) and [LoCoMo strategy](docs/LOCOMO_STRATEGY.md). Historical narrative demos and diagnostic grids have been retired; raw evidence remains in the separate audit archive. Current conclusions: [experiments/RESULTS.md](experiments/RESULTS.md) and [WHITEPAPER.md](WHITEPAPER.md) § Conclusions from the benches.
 
-Published report (method + tables): experiments/REPORT.md. Conclusions only: [WHITEPAPER.md](WHITEPAPER.md) § Conclusions from the benches.
+### GENESIS
 
-### Persist (interpretation after last-k eviction)
+One executable, two commands: `selmem-genesis positive` qualifies the decision model against a faithful history; `selmem-genesis learning` tests cumulative learning with observation support OFF/ON. Both read provider configuration from `.selmem`, or the file selected by `--config` / `SELMEM_CONFIG`.
 
-C1 k=8 vs C3 vs C2 vs C2Static vs C2−S/R/L/G. Default script: 12 dull days, five same-schema hours, late probe. `--ruminate` is the same-meeting ablation (hours pinned so merge cannot collapse them). `--bias drop|force` withholds or pins the marked scene at recall.
-
-JSON reports book (`t0_in_book_*`), retrieval (`t0_rank_*`, `t0_selected_*`), and behavior (`marker_*`) separately. Probes are read-only.
+`positive-001`: Grok 48/48 oracle choices; GPT-4o-mini 28/48. `evidence-001`: native and strict recall match the oracle on 8/16 with support OFF and 16/16 with support ON. The effect comes from explicit observation counts, not demonstrated reconstruction superiority, singularity or creativity. One history pair is exploratory, not population replication.
 
 ```bash
-./run.sh run --release --example persist -- --pairs 1 --last-k 8 --out selmem-persist-repeat.json
-./run.sh run --release --example persist -- --ruminate --pairs 1 --last-k 8 --out selmem-persist-ruminate.json
-./run.sh run --release --example persist -- --pairs 5 --seed 1 --last-k 8 --out selmem-persist-p1-grok-n5.json
+./run.sh run --release --bin selmem-genesis -- --help
+bash experiments/genesis/run-positive-control.sh experiments/genesis/results/positive-new
+bash experiments/genesis/run-evidence-learning.sh \
+  experiments/genesis/results/positive-new/grok \
+  experiments/genesis/results/evidence-new
 ```
 
-Horizon year (two clones, one stream, 360 days): `cargo test --test horizon`. Grok n=1 three arms: `./run.sh run --release --example horizon -- --arm primary|same|neutral`. Primary Δfp 0.096 retrieve A/B true/false; same Δfp 0.003 mouths identical; neutral no vow, January still A-only. REPORT §13.
+Real runs make paid API calls. Scripts print progress and cap HTTP attempts including retries. Choose fresh output paths. `--mock` tests plumbing only and cannot qualify a model. See the [protocol](experiments/genesis/protocol.md) for controls, probe isolation and limitations.
 
-Three witnesses (same T₀, attribution cut only): `./run.sh run --release --bin selmem-witness -- --bind 127.0.0.1:7421 --dir experiments/witness`. Isolated speak, sealed archive. 10 nights: all three still name the act; P is shorter. 360 nights: N gone, V faithful, P still true and self-blaming. REPORT §15.
-
-Locked grid is P4 (`--p4`, n = 5, seed 1, Grok and Luna): experiments/REPORT.md §11. Book 5/1 on every organ cell; C1 evicts. Grok mouth: official C2 = 0, soft 1/5, D ~0.75 vs C1 ~0.31; Drop kills Grok soft on full C2; Lineage drops Grok D to ~0.58. Luna book = Grok; Luna soft stays 5/5 under Drop and dies under Lineage; do not publish Luna D. P1 / Drop n=1 stay history (§8–§9). LoCoMo: experiments/EXTERNAL.md.
-
-Age (2026-10-04): erasure hazard falls with survival. Behavioral weight falls with time since use. Recall is multiplied by the book-link share: query seeds, axiom co-supports and non-schema edges, no schema pour. PARAMETERS.md. Tests: `tests/age.rs`.
-
-Wash (`examples/wash`, experiments/REPORT.md §16): three injustice hours, then a new offer. Grok-4.3 seeds 1–3: A refuses, B accepts, controls accept, hour not spoken. n=3. Not a persist cell.
-
-Fork (`examples/fork`, experiments/REPORT.md §17): same history, one opposite stake, same future, probes that do not name the hour. Grok-4.3 seeds 1–5, 100/100 valid. One hour splits the book and recites (`d_beh` 0). Three hours: `d_beh` mean 0.80, clean 3/5. No sleep, null, last-8 and the full log stay at 0. Not a persist cell. The positive fork is often `stake=none`.
-
-AMA-Bench (`examples/ama`, experiments/ama_bench/) is a **side table**, not a SelMem score. It asks for step ids in agent logs. last-k 0.50 / static 0.28 / C2 0.19 on 3 episodes. Expected; do not submit. Why: experiments/REPORT.md §9.2.
-
-### Benchmark v0.1 (H2)
-
-Does `D_fp` stay above pre-T₀ after 8 identical later hours?
-
-C0 = no book. C1 = last-k verbatim (default k = 24; `--last-k 8` drops T0 after the eight posts). C2 = SelMem. Two arms: salient/neutral, and two different salient events. 12 shared hours, 8 posts, 4 behavior probes via `speak_isolated`. Phase 0 invalidates on the book (`D_fp > 0.02` or unequal traces), never on `D_speak`. Three creative items in `data/creativity.json` are recorded, not claimed.
+### Unit tests (no paid LLM calls)
 
 ```bash
-./run.sh test --test benchmark
-./run.sh run --release --example benchmark -- --out selmem-v01.json
-./run.sh run --release --example benchmark -- --pairs 10 --out selmem-v01-n10.json
-```
-
-`RuleNarrator` is deterministic: ten pairs repeat. A live model: same command with `llm=` in `.selmem`. JSON is rewritten after every cell.
-
-The four Grok dumps and the exact replay lines: experiments/README.md § Replay.
-
-### Unit tests (no network)
-
-```bash
-./run.sh test
+./run.sh test --all-targets
+./run.sh test --doc
 ./run.sh test --test scenes
 ./run.sh test --test engine
 ./run.sh test --test ground
 ./run.sh test --test dream_order
 ./run.sh test --test horizon
-./run.sh test --test bifurcation
-./run.sh test --test divergence
-./run.sh test --test erasure
-./run.sh test --test json_parse
 ./run.sh test --test talk
 ./run.sh test --test config
-./run.sh test --test benchmark
 ```
 
-| What | File | Stimulus |
-| --- | --- | --- |
-| Narrative scenes | `tests/scenes.rs` | `tests/cases/*.json` |
-| Decay, anchors, SQLite, Ebbinghaus | `tests/engine.rs` | inline |
-| DetachKind vs core | `tests/ground.rs` | inline |
-| Night pass order | `tests/dream_order.rs` | `NIGHT_PASSES` |
-| Bifurcation A/B (rules) | `tests/bifurcation.rs` | `data/bifurcation.json` |
-| Split lives (rules) | `tests/divergence.rs` | `data/divergence.json` |
-| Erasure: trivia vs repeated aversion | `tests/erasure.rs` | `data/erasure.json` |
-| Chat JSON walker | `tests/json_parse.rs` | fixtures in the test |
-| Working talk (session frame) | `tests/talk.rs` | inline |
-| `.selmem` config parser | `tests/config.rs` | inline |
-| Benchmark v0.1 H2 | `tests/benchmark.rs` | `data/v01.json` |
-
-These use `RuleNarrator`. They must stay green offline.
-
-### Replay a protocol (print the probes)
-
-Same scripts as the unit tests, with the full report on stdout:
-
-```bash
-./run.sh run --release --example bifurcation
-./run.sh run --release --example divergence
-./run.sh run --release --example erasure
-```
-
-`Finished in 0.00s` means Cargo reused an old binary. After pulling code:
-
-```bash
-touch src/experiment.rs examples/bifurcation.rs
-./run.sh build --release --example bifurcation
-```
-
-You should see `Compiling selmem`.
-
-### Same protocols with a live model
-
-Only `speak` / `reply` hits the HTTP API (`SpeakOnlyHttp`). Encode, sleep and reconstruct stay on the organ.
-
-Options live in a `.selmem` file in the working directory (`data/config.example`). CLI flags and `SELMEM_*` env still override the file.
-
-```
-# .selmem  — not a SELMEM1 vault
-llm=https://api.x.ai/v1/chat/completions
-model=grok-4.3
-api_key=xai-…
-reasoning=none
-temp=0
-http_timeout=60
-```
-
-```bash
-cp data/config.example .selmem
-./run.sh run --release --example bifurcation
-./run.sh run --release --example divergence
-```
-
-`--config path` or `SELMEM_CONFIG` selects another file. A `claire.selmem` vault starts with `SELMEM1` and is never read as config.
-
-OpenAI-compatible endpoints work the same. Ollama:
-
-```
-llm=http://127.0.0.1:11434/v1/chat/completions
-model=llama3
-```
-
-Check the endpoint before a 100-call run:
-
-```bash
-curl -sS --max-time 30 "$SELMEM_LLM" \
-  -H "Authorization: Bearer $SELMEM_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d "{\"model\":\"$SELMEM_MODEL\",\"reasoning_effort\":\"none\",\"messages\":[{\"role\":\"user\",\"content\":\"dis: ok\"}]}"
-```
-
-| Variable | Default | Role |
-| --- | --- | --- |
-| `SELMEM_LLM` | unset | chat URL; unset = rules only |
-| `SELMEM_MODEL` | — | model id |
-| `SELMEM_API_KEY` | unset | `Authorization: Bearer` |
-| `SELMEM_REASONING` | `none` | xAI `reasoning_effort` (`none`/`low`/… or `off` to omit) |
-| `SELMEM_TEMP` | `0` | sampling temperature |
-| `SELMEM_HTTP_TIMEOUT` | `60` | curl `--max-time` seconds |
-| `SELMEM_QUICK` | unset | `1` = salient condition only, 2 probes, one persist window |
-| `SELMEM_PROBES` | all / 2 if quick | how many probe questions to speak |
-
-A line `narrator: 0/10 answers are the RuleNarrator template` means the model answered. `Cela me revient` means the HTTP call failed and the rules ran. `selmem LLM reply failed:` prints the error.
-
-Full bifurcation ≈ 100 `reply` calls (5 probes × 2 agents × 5 snapshots × 2 LLM conditions). Quick mode ≈ 12. Ablation `salient-no-consolidation` never calls the model.
-
-Fingerprint distance is on the book (0 = clones). Speak distance is wording overlap; two clones with the same book already differ under Grok (\~0.7). Do not read H₁ off Δspeak alone.
+These cover selection, reconstruction, grounding, consolidation, persistence, observation support and experiment plumbing. `examples/two_entities.rs` is the retained minimal library example.
 
 ## Run
 
@@ -363,7 +242,7 @@ This is not a chatbot with extra context. `/turn` asks the model to continue fro
 What that produces:
 
 - `left` **is not forgetting.** The line stayed in the salon. It dies when you sleep, unless you pin it or it already passed the gate.
-- `kept` **is not “it understood you\`.** It means a trace was written. The next sentence still comes from Grok looking at that gist, not from a stored Q&A.
+- `kept` **is not “it understood you”.** It means a trace was written. The next sentence still comes from Grok looking at that gist, not from a stored Q&A.
 - **Empty book + “hello”** → the model fills the hole. Velvet greetings, “I know your name” without saying it, a politician who “never quite landed.” That is the prior, not SelMem.
 - **Sleep wipes the thread.** “What did we talk about yesterday?” only sees what survived the night. A pinned name can come back; small talk cannot.
 - **Sleep also retells.** Tender can soften a fact (“JB became quieter”). Austere can harden it. The organ is allowed to warp; the UI will look inconsistent if you expect a CRM.
@@ -445,20 +324,14 @@ singularity_distance(&fingerprint(&a), &fingerprint(&b));
 
 ## Hors claim
 
-Do not read these as results. They are not in the published sentence.
+Do not read these as results. They are outside the demonstrated result.
 
 - Personality, character, “Claire / Silas as people.”
 - Creativity, originality, intelligence, “more human.”
-- A taller log, a better RAG, a system prompt that “gets” the user.
-- Human memory, Ebbinghaus as a model, a neocortex.
-- AMA-Bench accuracy (side table; last-k wins journal-QA).
-- LoCoMo / LongMemEval accuracy (last-k=8 hits 2/282 category-1 evidence ids; C2 not run).
-- `D_speak` as a validity test (Grok C1 post-eviction ~0.31; Luna C1 already ~0.78).
-- Luna `D_speak` as a published mouth score.
-- Three items in `data/creativity.json` (logged, not scored).
-- Sleep as what *splits* the books on the persist script (P4 static / no-sleep already split).
-- Allusion as a replacement for P4 official/soft (side column, REPORT §12).
-- Horizon Luna mouth as the published year column (old calendar; side only). Published year is Grok n=1 three arms.
+- Superiority over RAG, summaries or full history.
+- Durable singularity, long-term persistence or transfer to new actors and tasks.
+- Wording distance as a behavioral validity test.
+- A benefit caused specifically by reconstruction rather than retained evidence.
 
 ## What this is not
 
@@ -473,3 +346,7 @@ Humans own architecture, concepts and governance. Models draft code, tests, and 
 
 Deploy the Rust server and UI together on Render Free using [the deployment guide](deploy/README.md).
 The `main` branch deploys after CI passes; the public demo isolates each visitor’s temporary memory and provider key.
+
+### GENESIS experimental protocol
+
+[GENESIS](experiments/genesis/README.md) retains model qualification and a controlled cumulative-learning assay. Probes run on isolated memory states. Transplantation, structural lesions, long-horizon singularity and constrained creativity remain further experiments, not active campaigns or demonstrated results. See the [scope and limitations](experiments/genesis/protocol.md).

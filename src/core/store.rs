@@ -4,6 +4,7 @@ use crate::core::model::{ArchiveRecord, Channel, IdentityAxiom, MemoryTrace, Sch
 
 #[derive(Default)]
 pub struct MemoryStore {
+    pub observation_evidence: super::evidence::ObservationEvidence,
     pub associations: super::association::AssociationGraph,
     pub traces: HashMap<String, MemoryTrace>,
     pub archives: HashMap<String, ArchiveRecord>,

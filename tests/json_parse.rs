@@ -36,14 +36,6 @@ fn chat_completion_uses_message_content_not_the_longest_string() {
 }
 
 #[test]
-fn bifurcation_script_still_loads() {
-    let s = selmem::script();
-    assert!(s.sync.len() >= 8);
-    assert!(s.salient.contains("unjust"));
-    assert_eq!(s.probes.len(), 5);
-}
-
-#[test]
 fn reasoning_longer_than_the_reply_does_not_win() {
     let raw = r#"{
       "choices":[{

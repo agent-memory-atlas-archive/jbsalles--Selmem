@@ -1,4 +1,4 @@
-use selmem::{EncodeInput, EntityProfile, ExperimentRng, SelectiveMemory};
+use selmem::{EncodeInput, EntityProfile, SelectiveMemory};
 
 #[test]
 fn release_drops_pending_night_id() {
@@ -22,15 +22,6 @@ fn encode_keeps_observation_apart_from_interpretation() {
     assert_eq!(t.operations[0].origin.token(), "event");
     let verbatim = mem.store.archive_verbatim(&id).unwrap();
     assert!(verbatim.contains("plate"));
-}
-
-#[test]
-fn experiment_rng_is_stable_per_seed() {
-    let mut a = ExperimentRng::from_seed(1);
-    let mut b = ExperimentRng::from_seed(1);
-    let mut c = ExperimentRng::from_seed(2);
-    assert_eq!(a.next_u64(), b.next_u64());
-    assert_ne!(a.next_u64(), c.next_u64());
 }
 
 #[test]

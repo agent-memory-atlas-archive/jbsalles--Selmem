@@ -1,238 +1,40 @@
 # Architecture
 
-The organ is a changing state, not a store. The files follow the scientific
-questions, not generic Service / Port / Adapter layers.
+SelMem is a Rust memory library with a daemon, terminal client and two experiment adapters. The current organ includes optional cumulative observation support; earlier benchmark source hashes identify historical versions, not a frozen current organ.
 
-How does an hour enter? How is a telling judged? How does a trace weather?
-How is the book saved? Those are four directories.
+| Directory | Responsibility |
+| --- | --- |
+| `core/` | Traces, immutable cores, provenance, profiles, working conversation, co-recall graph and bounded observation support |
+| `encode/` | Interpret, validate, paint, split and select incoming experiences |
+| `recall/` | Select traces, reconstruct, judge against core, ground and optionally reconsolidate |
+| `dream/` | Accessibility decay, consolidation, schemas, beliefs, merging and release |
+| `persist/` | File and SQLite snapshots |
+| `net/`, `config.rs` | Runtime interface/API and provider configuration |
+| `bin/selmem-genesis/` | Positive-control and OFF/ON learning orchestration |
+| `bin/selmem-locomo/` | External strategy benchmark adapter |
 
-The memory organ is frozen at the supplied baseline: same order, rules and
-constants. The active experiment is [LoCoMo strategy](docs/LOCOMO_STRATEGY.md).
-[Source hashes](docs/ORGAN_BASELINE.json) identify the frozen organ; historical
-benchmarks remain separate regression fixtures.
+`engine.rs` coordinates the organ. It does not contain an experimental world or prescribed behavior. `WorkingTalk` is temporary; sleep commits recorded turns through encoding and clears the working frame.
 
-## Questions
+## Records and grounding
 
-```
-experience
-    → encode/     interpret → paint → split → gate → core
-    → lived book + sealed archive
-    → recall/     retrieve → reconstruct → judge → pull
-    → dream/      weather → confab → ladder → centers → rewrite → merge → release
-    → persist/    one Snapshot, two containers
-    → next encode already biased
-```
+A lived trace contains gist, core, schema, affect, confidence, accessibility and provenance. Gist can change; the core supplies a stable grounding reference. The sealed archive is an audit record and is not supplied to the narrator or consulted for runtime grounding. Grounding detects deviation from core, not objective truth about the world.
 
-`engine.rs` only names that order. `WorkingTalk` is not a trace: sleep runs
-each recorded turn through encode with `hold = false`, then drops the frame.
+State transformations carry provenance operations. Readonly recall may generate new output but must not modify the saved memory. GENESIS probes use independent snapshot clones and verify hashes.
 
-## Tree
+## Independent observation support
 
-```
-src/
-  engine.rs                 live / remember / speak / sleep
-  core/                     model (incl. OrganCut), store, profile, talk
-  encode/
-    interpret.rs            lexicon + optional Narrator::interpret
-    paint.rs                living axioms tint the hour
-    split.rs                lossless excerpts, else line/word pack
-    gate.rs                 S vs τ, write the trace
-    core.rs                 accept_core after the gate
-    intake.rs               EncodeInput / EncodeDecision
-    scoring.rs, affect.rs, embed.rs
-  recall/
-    retrieve.rs             rank (embedding ∪ lexicon ∪ mood ∪ access × context cloud); skip suppressed unless ForceMarked
-    judge.rs                DetachKind — pure, no trace, no I/O
-    pull.rs                 grip, strikes, apply_grounding, mix
-    ground.rs               re-exports
-    narrator.rs, http.rs
-  dream/
-    night.rs                orchestrator + NIGHT_PASSES
-    weather.rs              decay (hazard falls with survival), unused disgust, status, latent
-    confab.rs               fill a collapsed gist from axiom / center
-    centers.rs              one prototype per schema; Internal gravity
-    rewrite.rs              neighbor retell; skip = attribution × conflict
-    merge.rs                close Selfhood episodes
-    ladder.rs               motif → belief → trait
-    release.rs              spent latent hours (already latent yesterday)
-    drift.rs, singularite.rs
-  persist/
-    snapshot.rs             field list: assemble_* + profile params
-    file.rs                 SELMEM1 bytes
-    sqlite.rs               rows
-  net/, config.rs, lexicon.rs
-  bin/                      selmemd, selmem-chat, selmem-witness, selmem-locomo/
-```
+`SelectiveMemory::set_observation_evidence(true)` enables bounded support accumulation for `EncodeInput` with a stable `source` and `observation_id`. Exact repeated propositions with new identities update an existing active trace instead of creating another trace. Repeated ingestion of the same identity and conflicting reuse of it are rejected. Recall never increments the observation count.
 
-## Encode
+Near but different propositions are not positive support. An attached proposition scorer may identify a counter-observation; each alternative claim retains its own count. Unknown labels remain on the ordinary salience path. The scorer can be wrong. Distinct caller-provided identities do not themselves prove statistical independence.
 
-Order in `engine::ingest` (and `commit_talk` with `hold = false`):
+Counts accompany a selected trace as labeled metadata after reconstruction, grounding and association learning. They never enter gist/core write-back and do not require archive access. Suppression/deletion of the carrier prevents rendering. GENESIS can lesion support groups independently of traces. File and SQLite snapshots preserve identities and counts.
 
-```
-interpret → paint → maybe talk.hear → split → gate → maybe accept_core → blend mood
-```
+This mechanism defaults off in ordinary stores. The GENESIS learning script explicitly compares off/on with the same inputs. It does not force a decision, lower the salience threshold or declare a personality. Counts are not currently transferred between merged traces; consolidation and long-term behavior require separate validation.
 
-That order is the organ. Identity paint is not interpretation: the book tints
-the hour *before* the gate. `commit_talk` must not grow a second path.
+## Co-recall
 
-## Recall and grounding
+Association learning and use during reconstruction are independent cuts. Co-recalled accepted traces strengthen links; associative cues are fallible context, not historical facts. See [CO_RECALL_ASSOCIATIONS.md](docs/CO_RECALL_ASSOCIATIONS.md). Enabling the feature does not prove it affected a particular recall.
 
-Embeddings **rank**. They do not decide a miss.
+## Experiments
 
-`judge.rs` is pure: `(generated, core) → DetachKind`.
-
-| kind | meaning | miss? |
-|---|---|---|
-| `Hold` | same claim | only if Jaccard `< ground_min_overlap` |
-| `Compress` | detail fell off | no |
-| `Elaborate` | cause / stake the core never licensed | yes |
-| `Reframe` | same event, other speech act / irony | no (speak; `Color`; gist stays) |
-| `Contradict` | denial | yes |
-| `Depart` | not this event | yes |
-
-`pull.rs` applies policy: grip = `narrator_firmness × importance`. World
-skips the judge. Cold / myth / latent have grip 0. After enough strikes the
-gist is blended toward a core-facing rewrite (`DriftKind::Ground`). A
-`Reframe` is logged as `Color` and does not increment strikes. The
-lexical mix is still the rewrite; replacing it is a later behaviour PR.
-
-The judge uses no LLM. `HttpNarrator` may reconstruct or recontextualize.
-It does not classify the miss.
-
-## Night
-
-`NIGHT_PASSES = [weather, ladder, rewrite, merge, release]`.
-Confab runs after weather. Centers refresh + gravitate after ladder, before rewrite.
-Do not add those names to the constant: `tests/dream_order.rs` pins the five.
-
-Anchors run before weather and after release, as before. Traces already
-latent *before* this night are the only ones `release` may drop, and only
-if no living axiom lists them. A belief minted in `ladder` therefore still
-protects its evidence the same night.
-
-`tests/dream_order.rs` pins the name list. Do not swap passes to “clean up”
-a file: the book will move and unit tests on a single trace will not see it.
-
-## Persist
-
-One `Snapshot` (`profile`, `mood`, `store`). Two containers:
-
-| path | backend | why |
-|---|---|---|
-| `.db` / `.sqlite` / `.sqlite3` | sqlite | daemon, `BEGIN IMMEDIATE` |
-| anything else | `SELMEM1` file | no `libsqlite3`, readable vault |
-
-`snapshot.rs` is the field list (`assemble_trace`, profile params, tokens).
-Trace header after P7: 18 fields (congruence, confidence, suppressed). Old 15- and 16-field files load with defaults (`congruence 0.5`, `confidence 1.0`, `suppressed 0`). `centers N` sits after axioms; absent means an old vault.
-Backends only choose bytes vs rows. The model never reads the vault.
-`verbatim` belongs in persist + `audit` only. `WorkingTalk` is not in the
-Snapshot.
-
-## Ports
-
-Two, already:
-
-- `Narrator` — reconstruct, interpret, extract_core, segment, rewrite, reply
-- `Embedder` — neighborhood only
-
-A third (`entail`) does not exist. If it arrives, fallback is the local judge.
-
-## Tests that lock the cuts
-
-| File | What it pins |
-|---|---|
-| `tests/ground.rs` | DetachKind on the John examples |
-| `tests/dream_order.rs` | night pass order |
-| `tests/engine.rs` | grounding policy, sleep, persist round-trips |
-| `tests/core.rs` | accept_core / twelve-word compress |
-| `tests/attribution.rs` | field + persist; External hold / Internal rewrite |
-| `tests/congruence.rs` | measure + gate bonus + live conflict |
-| `tests/centers.rs` | prototype mint; Internal gravity; External stays |
-| `tests/confab.rs` | hole fill ≠ embellish; core frozen |
-| `tests/suppress.rs` | directed forgetting; confidence ≠ access |
-| `tests/age.rs` | hazard falls with survival; recency weight; book-link share |
-
-## Audit P0 (2026-10-01)
-
-Mouth routes (`/turn`, `/speak`) drop the organ lock before the narrator call and commit the reply after. Other POST routes take the organ out of the slot so a slow night does not pin the mutex. Benchmarks attach `FailurePolicy::Error`; a miss sets `fallback_used` / `llm_error` and invalidates the pair. `ExperimentRng` plus `with_seed` offsets the id stream and is written on the pair report. Each hour now has `observation_id` (archive), `interpretation` (encode-time conclusion), and `operations` (genealogy). Confabulation is origin `confabulation`, not event evidence.
-
-## Audit suite (2026-10-01)
-
-HttpEmbedder logs External vs Fallback. A benchmark pair with embedding_fallback is invalid. MemoryClock lives on the organ; detach_clock snapshots the process clock so two organs do not share a jump. Engine live/sleep/recall enter that clock. SemanticCore (claim, entities, actions, polarity) sits beside the lexical core and does not replace it. Confab still does not write the core, and its confidence is scaled by 0.62 so a fill is not strong evidence.
-
-## Grounding and anchor (2026-10-01)
-
-CoreJudgement now carries event, claim, causal, entity, polarity, novelty. Two different because-clauses are Elaborate even when the act words match. A shared departure is not a Depart. RealityAnchor.claim is frozen at encode; reinterpret() revises interpretation and records an operation, it does not rewrite the anchor or the archive. MergeDecision refuses a fuse when affective difference is at least 0.55, anchors conflict, or valence signs oppose.
-
-## Wash (2026-10-02)
-
-Rule narrator, seed 1, probe with no content-word hit on the cancellation. Wow criterion failed on salient, neutral, nosleep, and noladder. After two nights the daily motif wins the sentence; the cancellation stays Active and selected. Only the no-ladder arm speaks the cancellation on that probe. Dump experiments/selmem-wash.json.
-
-## Wash charge (2026-10-03)
-
-Ladder mints on charge (|v| * arousal * self_relevance), not headcount. One wound at charge >= 0.28 can found a motif; charge >= 0.45 can found a belief. Dull permanence < 0.40 weighs a quarter. A choice probe ranks by charge and, if a charged axiom exists, answers from the belief without reciting the hour. Dump experiments/selmem-wash.json: salient wow, neutral/nosleep/noladder not.
-
-## Stake (2026-10-05)
-
-`stake_kind`, `bearer`, `loss_kind`, `stake_mark` and `absence` are encode fields, read before affect. Merge and rewrite refuse a different mark. The ladder keys schema plus mark. Release multiplies hazard by stake survival: a limit is 0.55, a mood is 1.15. An unmet arrival is an absence. The mouth is not mapped from the sign. Dump experiments/selmem-fork-llm.json. Report §17.
-
-## Semantic interpretation boundary
-
-Semantic interpretation, memory dynamics and behavioral expression are independently
-selectable. `SemanticInterpreter::interpret_event` receives only the live event,
-never the archive, mood or axioms, and returns `EventSemantics`: semantic entities
-and actions, event type (`StakeKind`), bearer, loss, absence, affect, self relevance,
-goal relevance, attribution and schema. `EncodeInput::semantics` accepts external
-annotations directly; `SelectiveMemory::with_semantic_interpreter` binds a backend.
-The gate consumes those labels rather than identifying promises, boundaries or
-verbs itself. Selection, novelty, anchor seeding and subsequent memory dynamics
-continue to use the existing rules. Novelty remains a comparison to the lived book;
-no unused prediction-error variable or new psychological coefficient is added.
-
-`LexicalInterpreter` preserves the English lexical baseline, including its known
-limitations. The existing `SemanticCore::from_event` and `derive_stake` APIs delegate
-to this backend for backwards compatibility and legacy snapshot recovery. Existing
-organs without a selected interpreter retain the historical affect/narrator path.
-The lexical backend is explicitly an implementation choice, not a learned result.
-
-`HttpNarrator` also implements `SemanticInterpreter`, using the same HTTP transport
-in an independent role. Bind a separate instance as interpreter and another as
-narrator. Semantic HTTP calls have no identity context. The strict line protocol
-rejects missing fields, duplicate fields, invalid enums, out-of-range and non-finite
-numbers. `FailurePolicy::Error` rejects intake; fallback policies use the lexical
-baseline and mark the backend's failure log. Keep a shared interpreter handle to
-inspect `Narrator::failure_log` when reporting fallback use.
-
-```rust
-use selmem::{EntityProfile, FailurePolicy, HttpNarrator, SelectiveMemory};
-let interpreter = HttpNarrator::parse(
-    "http://localhost:11434/v1/chat/completions", "your-model", None,
-).unwrap().with_policy(FailurePolicy::Error);
-let organ = SelectiveMemory::new(EntityProfile::new("ada"))
-    .with_semantic_interpreter(Box::new(interpreter));
-// Attach a behavioral narrator independently with with_narrator.
-```
-
-Long events are interpreted per fact slice. All annotations are validated before
-paint, talk or archive writes. Whole-document annotations must supply
-`EncodeInput::part_semantics` for the exact `split_event` order or select a backend
-that can interpret each slice. This prevents a promise or actor in one slice from
-being copied to every other slice. Semantic annotations survive using the existing
-trace/snapshot fields; backend bindings remain runtime configuration.
-
-This change separates event interpretation at intake. Narrative reconstruction,
-core grounding guards and the rule narrator still contain language-dependent
-fallbacks; they are not a claim of language-independent learned behavior. Learned
-interpretation requires empirical evaluation against the lexical baseline.
-
-## Active experiment adapter
-
-`src/bin/selmem-locomo/` holds the sole LoCoMo strategy launcher. `memory.rs`
-prepares six snapshots and read-only query contexts. `context.rs` packs whole
-items within the budget; `preflight.rs` checks that transfer has usable inputs.
-`reasoning.rs` validates settings and snapshot reuse. `sampling.rs` summarizes
-response variation; `strategy_report.rs` produces blind review and the original
-source-turn control. These modules orchestrate the experiment and do not alter
-the frozen organ. Provider errors remain missing observations and do not stop
-later calls. The original source-turn control reads the dataset outside the
-organ, not the sealed archive.
+GENESIS has one executable and shared configuration, provider, transport and snapshot code. Positive controls fix a decision oracle; learning compares external faithful history, admitted observations, native/strict recall and empty context. LoCoMo uses its own dataset adapter. Runtime memory algorithms are shared, not copied into experiment-specific organs.

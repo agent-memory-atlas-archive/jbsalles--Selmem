@@ -1,9 +1,10 @@
 # LoCoMo strategy experiment
 
-This is the single active LoCoMo-derived experiment. The memory organ is frozen;
-changes to its encoding, retrieval, sleep rules or constants require a separate
-review and a new experimental baseline. The retained runs use the same frozen
-revision recorded in their manifests. [Organ baseline](ORGAN_AUDIT_FIXES.md).
+This is the retained LoCoMo-derived experiment. Historical runs use the source
+revision recorded in their manifests. The current organ has since gained
+optional observation support; preserve original manifests and record a fresh
+baseline for any new comparison. Historical raw data is distributed separately
+from the cleaned source tree. See [Architecture](../ARCHITECTURE.md).
 
 The experiment asks whether different retained observations change Claire's
 advice and game design. It does not measure the full LoCoMo benchmark, and it

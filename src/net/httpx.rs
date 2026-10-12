@@ -51,7 +51,7 @@ fn curl_post(url: &str, api_key: Option<&str>, body: &str) -> Result<String, Str
     let out = child.wait_with_output().map_err(|e| e.to_string())?;
     let stdout = String::from_utf8_lossy(&out.stdout).into_owned();
     let stderr = String::from_utf8_lossy(&out.stderr).into_owned();
-    if !out.status.success() && !stdout.contains("__SELMEM_HTTP__:") {
+    if !out.status.success() {
         return Err(if stderr.is_empty() { stdout } else { stderr });
     }
     let raw = if stdout.contains("__SELMEM_HTTP__:") {
@@ -115,7 +115,7 @@ fn split_http_status(raw: &str) -> Result<String, String> {
     if let Some(i) = raw.rfind(MARK) {
         let body = raw[..i].trim_end_matches(['\n', '\r']).to_string();
         let code: u16 = raw[i + MARK.len()..].trim().parse().unwrap_or(0);
-        if code != 0 && !(200..300).contains(&code) {
+        if !(200..300).contains(&code) {
             return Err(format!("HTTP {code}: {}", body.chars().take(180).collect::<String>()));
         }
         return Ok(body);
@@ -415,6 +415,15 @@ fn parse_f32_array(after: &str) -> Option<Vec<f32>> {
 #[cfg(test)]
 mod tests {
     use super::parse_json_string;
+
+    #[test]
+    fn http_status_rejects_missing_response_and_preserves_server_errors() {
+        assert!(super::split_http_status("\n__SELMEM_HTTP__:000").is_err());
+        assert!(super::split_http_status("\n__SELMEM_HTTP__:invalid").is_err());
+        assert_eq!(super::split_http_status("ok\n__SELMEM_HTTP__:200").unwrap(), "ok");
+        assert!(super::split_http_status("busy\n__SELMEM_HTTP__:429")
+            .unwrap_err().contains("HTTP 429: busy"));
+    }
 
     #[test]
     fn surrogate_pair_becomes_one_scalar() {
