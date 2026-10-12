@@ -9,6 +9,19 @@
 
 defaultLlm=grok
 
+reasoning=none
+temp=0
+http_timeout=60
+
+# GENESIS uses the selected provider for decisions and memory operations.
+# bash experiments/genesis/run-positive-control.sh
+# bash experiments/genesis/run-evidence-learning.sh
+# Optional independent memory cuts (global keys before provider sections):
+# associations_learn=true
+# associations_reconstruct=true
+# observation_evidence=true
+# Observation support requires stable source-scoped observation IDs.
+
 [grok]
 llm=https://api.x.ai/v1/chat/completions
 model=grok-4.3
@@ -18,10 +31,6 @@ api_key=
 llm=https://api.openai.com/v1/chat/completions
 model=gpt-4o-mini
 api_key=
-
-reasoning=none
-temp=0
-http_timeout=60
 
 # embed=
 # embed_model=text-embedding-3-small
@@ -38,3 +47,11 @@ http_timeout=60
 
 # probes=2
 # quick=false
+
+# GENESIS experimental reconstruction audit and probe information regime:
+# genesis_reconstruction_policy=native
+# genesis_probe_panel=known
+# Before a paid campaign (50 HTTP attempts maximum, including retries):
+# ./run.sh run --release --bin selmem-genesis -- diagnostic --out experiments/genesis/results/diagnostic-001
+# Repeated positive/negative/empty diagnostic (45 decisions, <=200 HTTP attempts):
+# ./run.sh run --release --bin selmem-genesis -- contrast --out experiments/genesis/results/contrast-001

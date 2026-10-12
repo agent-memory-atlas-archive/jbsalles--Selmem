@@ -16,8 +16,8 @@ mem.set_associations(false, false);// original baseline
 ```
 
 Both switches default to false, including when loading an old snapshot. Existing
-LoCoMo preparations therefore retain their original behavior. This change adds
-the organ API, not a new launcher flag or an automatic change to the UI.
+LoCoMo preparations therefore retain their original behavior. The interface exposes separate learn/use
+checkboxes, and GENESIS reads the corresponding global .selmem settings.
 
 Learning requires an observed, live recall with reconstruction enabled. Read-only
 probes and forced selection ablations do not train the graph. Narrator failures

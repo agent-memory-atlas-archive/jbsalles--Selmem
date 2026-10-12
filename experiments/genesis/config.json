@@ -1,0 +1,9 @@
+{
+  "associations_learn": true,
+  "associations_reconstruct": true,
+  "memory_backend": "rules",
+  "lifecycle_backend": "rules",
+  "reconstruction_policy": "native",
+  "sleep_every": 100000,
+  "hours_per_interaction": 1
+}

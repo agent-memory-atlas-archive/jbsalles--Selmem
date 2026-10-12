@@ -309,6 +309,11 @@ impl SelectiveMemory {
         self.clock.advance_hours(hours);
     }
 
+    /// Learn bounded support from caller-identified observations, not recalls.
+    pub fn set_observation_evidence(&mut self, enabled: bool) {
+        self.store.observation_evidence.enabled = enabled;
+    }
+
     fn enter_clock(&self) -> ClockGuard {
         ClockGuard::push(self.clock.clone())
     }
@@ -390,6 +395,30 @@ impl SelectiveMemory {
                 };
             }
         }
+        if parts.len() == 1 && input.paint_from.is_none() {
+            use crate::core::evidence::ObservationUpdate;
+            let update = crate::core::evidence::update(
+                &mut self.store, input.source, input.channel, input.observation_id,
+                input.event, self.scorer.as_deref(),
+            );
+            match update {
+                ObservationUpdate::Updated(id, counter) => {
+                    self.mood.blend(&Mood { valence: input.valence, arousal: input.arousal, disgust: input.disgust }, self.profile.mood_blend);
+                    return EncodeDecision {
+                        kept: true, score: 0.0,
+                        reason: if counter { "counter-observation retained; salience not evaluated" } else { "observation support updated; salience not evaluated" }.into(),
+                        trace_id: Some(id), archive_id: String::new(), parts: 1, kept_n: 0,
+                    };
+                }
+                ObservationUpdate::Duplicate | ObservationUpdate::Conflict | ObservationUpdate::Capacity => {
+                    return EncodeDecision {
+                        kept: false, score: 0.0, reason: format!("observation evidence {update:?}; salience not evaluated"),
+                        trace_id: None, archive_id: String::new(), parts: 1, kept_n: 0,
+                    };
+                }
+                ObservationUpdate::None => (),
+            }
+        }
         encode::paint(&mut self.store, &self.mood, &mut input);
         // How long the hour lasts follows how hard the text hit, unless the
         // caller already pinned permanence (shared protocol days).
@@ -407,6 +436,9 @@ impl SelectiveMemory {
         let arousal = input.arousal;
         let disgust = input.disgust;
         let input_source = input.source;
+        let observation_id = input.observation_id.map(str::to_owned);
+        let observation_channel = input.channel;
+        let observation_is_external = input.paint_from.is_none() && input_source != "talk";
         let annotated_core = input.semantics.is_some();
         let decision = encode::gate::encode_with_interpreter(
             &mut self.store,
@@ -426,6 +458,15 @@ impl SelectiveMemory {
             );
         }
         if decision.kept {
+            if observation_is_external && decision.parts == 1 {
+                if let (Some(id), Some(observation)) = (decision.trace_id.as_deref(), observation_id.as_deref()) {
+                    let traces = &self.store.traces;
+                    self.store.observation_evidence.groups.retain(|key, _| traces.contains_key(key));
+                    if traces.contains_key(id) {
+                        self.store.observation_evidence.seed(id, input_source, observation_channel, observation, &event_owned);
+                    }
+                }
+            }
             self.mood.blend(
                 &Mood {
                     valence,

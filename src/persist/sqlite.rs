@@ -273,6 +273,7 @@ pub fn save(
             ("merges_refused", &store.merges_refused.to_string()),
             ("pending", &store.pending_night.join("\t")),
             ("associations", &store.associations.encode()),
+            ("observation_evidence", &store.observation_evidence.encode()),
             ("clock", &format!("{clock_jump} {clock_scale} {} {clock_origin}", if clock_detached { 1 } else { 0 })),
             (
                 "cut",
@@ -532,6 +533,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
     let mut pending_s = String::new();
     let mut clock_s = String::new();
     let mut associations_s = String::new();
+    let mut observation_evidence_s = String::new();
     let mut cut_s = String::new();
     let mut measures_s = String::new();
     for row in meta {
@@ -547,6 +549,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
             "pending" => pending_s = row[1].clone(),
             "clock" => clock_s = row[1].clone(),
             "associations" => associations_s = row[1].clone(),
+            "observation_evidence" => observation_evidence_s = row[1].clone(),
             "cut" => cut_s = row[1].clone(),
             "measures" => measures_s = row[1].clone(),
             _ => {}
@@ -555,6 +558,10 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
     let profile = parse_profile(&name, &params_s)?;
     let mood = parse_mood(&mood_s)?;
     let mut store = MemoryStore::new();
+    if !observation_evidence_s.is_empty() {
+        store.observation_evidence = crate::core::evidence::ObservationEvidence::decode(&observation_evidence_s)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+    }
     if !associations_s.is_empty() {
         store.associations = crate::core::association::AssociationGraph::decode(&associations_s)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;

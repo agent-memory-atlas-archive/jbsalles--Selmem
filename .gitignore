@@ -4,3 +4,9 @@
 *.sqlite
 *.sqlite3
 .DS_Store
+
+# Generated research outputs belong in separate evidence archives.
+/experiments/genesis/results/
+/experiments/strategy/
+*.tar.gz
+*.log

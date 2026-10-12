@@ -1,8 +1,8 @@
 //! Selective reconstructive memory for an LLM entity.
 //!
 //! An LLM maps context to the next token. SelMem does not store a taller log.
-//! It selects, reconstructs, and sleeps, so two copies of the same model that
-//! retained one hour on one side only no longer remember the same things.
+//! It selects, reconstructs, and consolidates lived traces. History-dependent
+//! individuality and creativity are experimental goals, not established results.
 //!
 //! The mouth never reads the archive. It sees gist, core, schema, affect,
 //! fidelity, confidence, mood, living axioms, and schema centers.
@@ -48,10 +48,6 @@
 #![warn(rustdoc::broken_intra_doc_links)]
 
 #[doc(hidden)]
-pub mod bench_report;
-#[doc(hidden)]
-pub mod benchmark;
-#[doc(hidden)]
 pub mod config;
 #[doc(hidden)]
 pub mod core;
@@ -59,10 +55,6 @@ pub mod core;
 pub mod dream;
 #[doc(hidden)]
 pub mod encode;
-#[doc(hidden)]
-pub mod experiment;
-#[doc(hidden)]
-pub mod fork;
 #[doc(hidden)]
 pub mod lexicon;
 #[doc(hidden)]
@@ -100,18 +92,6 @@ pub use encode::{
 pub use encode::EncodeInput;
 #[doc(inline)]
 pub use engine::SelectiveMemory;
-#[doc(hidden)]
-pub use bench_report::{print_banner, print_pair_verbose};
-#[doc(hidden)]
-pub use benchmark::{
-    h2_holds, hearth_script, marker_holds, names_allusion_marker, names_marker, names_soft_marker, persist_script, ruminate_script, run_v01, run_v01_k, run_v01_n, soft_holds,
-    run_v01_n_opts, run_v01_opts, v01_script, Arm, BenchOpts, Campaign, Condition, Instant,
-    PairReport, V01Script,
-};
-#[doc(hidden)]
-pub use experiment::{run_neutral, run_neutral_llm, run_salient, run_salient_llm, run_salient_without_sleep, run_salient_without_sleep_llm, run_erasure, run_split_lives, run_wash, run_wash_llm, run_wash_seed, script, split_script, BifurcationReport, ErasureReport, ExperimentRng, LlmSpec, WashArm, WashReport};
-#[doc(hidden)]
-pub use fork::{fork_script, run_fork, stage0_pass, ForkArm, ForkOrgan, ForkReport};
 pub use config::Config;
 pub use net::api;
 pub use recall::{

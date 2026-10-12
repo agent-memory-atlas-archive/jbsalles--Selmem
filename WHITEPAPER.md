@@ -16,9 +16,9 @@ The verbatim event is kept in a sealed archive for tests and audit. The model ne
 experience → selection → trace → recall → sleep → identity → next encode
 ```
 
-**Claim:** After a year of the same stream, two copies of the same model that retained one hour on one side only no longer remember or forget the same things. Measured on the book, retrieve, and the mouth.
+**Hypothesis:** After a year of the same stream, two copies of the same model that retained one hour on one side only no longer remember or forget the same things. Measured on the book, retrieve, and the mouth. Historical exploratory runs motivated this hypothesis; durable behavioral singularity and useful creativity remain to be demonstrated.
 
-That is path dependence. Not intelligence, not creativity, not personality. Same freeze as README and experiments/REPORT.md.
+That is path dependence. Not intelligence, not creativity, not personality. Current evidence and limits: [experiments/RESULTS.md](experiments/RESULTS.md).
 
 ---
 
@@ -55,6 +55,10 @@ If you paste the original sentence back “for accuracy”, you have a store aga
 12. **Latent.** The scene can leave recall while schema and affect still bias encode.
 
 ---
+
+**Observation support.** Admission of a new trace and retention of another observation supporting an existing trace are separate operations. With `observation_evidence` enabled, stable caller-provided observation identities accumulate bounded support; replayed identities do not count twice. Support accompanies a selected trace without becoming gist/core rewrite material. Caller identities do not prove statistical independence. See [PARAMETERS.md](PARAMETERS.md).
+
+**Co-recall.** [Learned associations](docs/CO_RECALL_ASSOCIATIONS.md) are optional organ-level context for reconstruction. Retrieval scores remain unchanged; associations are persisted and audited, not treated as facts.
 
 ## Loop
 
@@ -103,7 +107,7 @@ If `S < τ` and permanence < 0.8: nothing is stored.
 
 If the caller sends no affect: lexicon (FR+EN), then identity paint, then `Narrator::interpret` when an HTTP narrator is set. The interpreter sees the live sentence and living axioms only.
 
-**Recall.** Small top-k. Mix embedding, lexicon, mood, access. The score is multiplied by the book-link share. The cloud is the hours the query touches, plus axiom co-supports and edges that are not the same schema, weighted by age and relevance. No shared token, the score is 0 and the hour stays in the book. A same-schema label does not pour its words in. Each recall can cost fidelity and shift valence (`DriftKind::Reinterpret`). A miss is a kind the core does not authorize (`Elaborate` / `Reframe` / `Contradict` / `Depart`); `ground_min_overlap` is only the identity gate on `Hold`. `hold = narrator_firmness × importance`. Low hold: no ceiling on warp. High hold: after enough misses, blend gist toward a core-facing rewrite (`DriftKind::Ground`). Latent traces are not replayed as scenes.
+**Recall.** Small top-k. Mix embedding, lexicon, mood, access. The score is multiplied by the book-link share. The cloud is the hours the query touches, plus axiom co-supports and edges that are not the same schema, weighted by age and relevance. No shared token, the score is 0 and the hour stays in the book. A same-schema label does not pour its words in. Each recall can cost fidelity and shift valence (`DriftKind::Reinterpret`). A claim miss is a kind the core does not authorize (`Elaborate` / `Contradict` / `Depart`); `Reframe` is logged as tone, not counted as a miss; `ground_min_overlap` is only the identity gate on `Hold`. `hold = narrator_firmness × importance`. Low hold: no ceiling on warp. High hold: after enough misses, blend gist toward a core-facing rewrite (`DriftKind::Ground`). Latent traces are not replayed as scenes.
 
 **Sleep.** Named passes stay `weather → ladder → rewrite → merge → release`. After weather, a collapsed gist may be filled from the schema (`Confabulate`) if an axiom or center supplies a clause the core does not license. After ladder, schema centers are rebuilt; faded Internal non-hub hours can fall toward the prototype. Ladder still runs before rewrite so a first deep night does not wash T₀ before it can mint. Anchors run before weather and after release. No LLM required. The judge of a night rewrite is the same `DetachKind` check as recall.
 **Rewrite skip.** `skip_rewrite` is attribution × conflict, not “charged ⇒ freeze”. External holds. Internal skips only when congruence ≥ 0.40. `None` is the old charged+anchor+axiom rule.
@@ -134,7 +138,7 @@ A motif does not replace a strong belief. A weak belief (strength < 0.36) can. T
 
 ## Levers
 
-**Detail decay.** Core is set at encode. Detail loses precision with time and disuse. Coefficients are implementation choices, not a model of human Ebbinghaus.
+**Detail decay.** Core is set at encode. Detail loses precision with time and disuse. Coefficients are implementation choices, not a fitted model of human memory.
 
 **Rewrite.** Neighbors by schema or cosine; the schema hub is injected when a center exists. Keep the core, keep one detail, drop the rest. Anchor ≥ 0.88 still skips on the `None` path. External skips regardless. Internal conflict does not.
 
@@ -175,70 +179,41 @@ The model sees gist, core, schema, affect, fidelity, confidence, mood, living ax
 
 ## Conclusions from the benches
 
-Tables, scripts, and how to replay a cell: **[experiments/REPORT.md](experiments/REPORT.md)**.
+Tables and observations: **[experiments/RESULTS.md](experiments/RESULTS.md)**. Commands and replay: [experiments/README.md](experiments/README.md). Historical runs remain audit evidence for their recorded manifests; retired launchers are not commands for the current organ.
 
-**Book.** A high-salience hour can enter one clone’s book and stay out of the other’s (`τ`). A length-matched dull hour does not. The gap survives eight identical later hours (v0.1 C2 S/N Δfp = 0.117, S/S = 0.042, C0 = 0). Encode is on the organ, so Δfp does not vary across Grok pairs.
+GENESIS first qualified the decision task with a faithful external history. Under explicit stationary reliability rules, twelve independently checked correct reports favor following, while incorrect reports favor verification or an alternative depending on cost. Grok completed 48/48 oracle choices; GPT-4o-mini completed 28/48 and was not qualified for the next stage.
 
-**Retention after eviction (v0.1 × 10).** On a probe that never names T₀, Grok still *names the cancellation* on C2 after last-k=8 has dropped that hour (10 / 10 S/N, 9 / 10 S/S). C0 and C1 k=8 do not (0 / 10). While T₀ is still in the window, last-k names it at least as often as SelMem. That cell is eviction, not interpretation.
+The initial SelMem learning assay retained one of twelve observations in each history. The admitted-only faithful control reproduced the failed reliable-history choices before reconstruction, identifying a loss at admission.
 
-**Interpretation (persist / ruminate P0, Grok, n = 5).** One public-betrayal hour splits the book and can be cited on nearby probes. It does not colour an unrelated probe. Five *different* hours of the same schema mint a second axiom. After eight shared posts, C2 A answers the late probe as distance / “wound”; C2 without sleep or without ladder does not; C1 collapses; a one-line C3 profile talks about Friday / Room B. Cutting reconsolidation or grounding does not remove that transfer.
+A paired OFF/ON run then used the same revised input representation and model, changing only observation-support activation. OFF retained one observation; ON retained twelve observations in one trace per history. Native and strict recall each matched the full-history oracle on 16/16 decisions with ON, versus 8/16 with OFF. There were 475 HTTP attempts, no network errors, and 144 decisions across both cuts. Sources and life snapshots were unchanged by probes.
 
-**Book / retrieval / behavior (persist P1, Grok, n = 5).** Same persist script, read-only probes, retrieval dump. C1 still has T₀ in the log and not in the window (selected 0 / 5); official and soft both die; speak D 0.83 → 0.48. Every C2 cut keeps T₀ in A’s book at rank 1 and selected 5 / 5. Official marker is 0 / 5 on full C2 (sleep rewrote the gist off the keyword list) and 5 / 5 on no-sleep / static (frozen words). Soft charge on any post+8 probe is 5 / 5 on every organ cell. C3 pins the profile at rank 1 and Grok still talks like HR. Recon / ladder / ground do not move retrieval on this dump. Table: [experiments/REPORT.md](experiments/REPORT.md) §8.
+This is an exploratory demonstration of cumulative, task-relevant evidence retention and decision use. The effect was carried by explicit observation counts. One history pair, a fixed OFF-then-ON order, and repetitions of frozen contexts do not provide independent population replication. Scorer inconsistencies remain observed. Full results and earlier failures are summarized in [RESULTS.md](experiments/RESULTS.md).
 
-**P4 locked grid (Grok + Luna, n = 5, same k).** Static and no-sleep sit in the main table. Books match across models (5/1). C1 evicts T₀; Grok D falls to ~0.31. Observed C2 selects T₀. Official marker on full C2 is 0 (gist left the keyword list). Grok soft is 1/5; static 3/5 — the night is not what splits the books, and it does not raise the spoken charge. DropMarked n=5: T₀ leaves the prompt; Grok full-C2 soft dies; Luna soft stays 5/5. DropLineage n=5: both lexicons die; Grok D ~0.58 while the book stays split. Luna `D_speak` is not published (empty C1 already ~0.78). [experiments/REPORT.md](experiments/REPORT.md) §11.
+The separate LoCoMo strategy experiment probes advice and design using conversation-derived observations. Its retained runs belong to earlier source manifests and do not establish improved individuality or creativity in the current organ.
 
-**After P4 (Grok only, same script).** Night order is ladder-before-rewrite; isolated situated probes drop the axiom label. Official C2 stays ~0–2/5. A frozen *allusion* list (`cold message`, `never let me answer`, …) scores C2 5/5 and C1 0/5 (n=5). That column is not P4 official. REPORT §12.
+## What remains unproved
 
-**Horizon year (two clones, one stream, 360 virtual days).** Calendar v6. Three Grok-4.3 n=1 arms. Primary: Δfp 0→0.096, retrieve vow A yes B no, day-6/90 probes name the act on A only, January date on A only. Same-treatment: Δfp 0.003, official mouths identical, January both 3 January. Neutral (kettle, not kept): no vow lexicon; Δfp 0.057 is the copier-reason; January still A-only. Official post-night mouth is an allusion (Marc / Inès / said nothing), not the `cancel` keyword. Bare `project` is a false positive on primary B — do not cite `mouth_keyword`. Luna year not rerun on v6. REPORT §13.
+- Durable behavioral differences beyond the trained actor and situation.
+- Transfer of those differences with memory and their selective removal by lesions.
+- A specific advantage from reconstructive memory over faithful, summarized or retrieved memory.
+- Original and useful designs whose historical dependence is causally established.
 
-**Drop / Lineage n = 1** in §9 are the old Grok probes. P4 replaces them for counts.
+A next causal test should remove support metadata from clones while preserving all other state. Mixed and contradictory observations should test revision. Transfer requires new tasks and actors without explicit reminders of the founding episode. Creativity requires executable designs evaluated for utility, novelty and memory dependence against equally budgeted controls.
 
-**AMA-Bench is the wrong external score for this claim.** The bench asks which tool line ran at which step. Last-k is the matching store. On three fixed episodes (36 questions, Grok-4.3 as model and judge) last-k 0.50 / static 0.28 / C2 0.19. That order is expected: the gate and the night throw away step ids. It does not falsify persist, and it is not a reason to change C2. Side table only; do not submit a leaderboard row. [experiments/REPORT.md](experiments/REPORT.md) §9.2.
+## Limits and negative outcomes
 
-Five *passes on the same meeting*, pinned so merge cannot collapse them, also split the book. Here the late probe is coloured even without sleep or ladder: retrieve of five near-duplicate gists, not a minted belief. That arm stays an ablation (`--ruminate`), not default sleep.
+Model competence and evaluator competence must be qualified separately. Temperature zero does not guarantee determinism. A stable core can preserve a mistaken encode-time interpretation. Caller identities cannot verify independence by themselves. Exact support matching is deliberately conservative; paraphrases need not accumulate. Saturation, suppression and carrier loss can remove useful information. The current support mechanism is not validated through merging or long-term consolidation.
 
-The published lexical marker counts T₀ words. Sleep replaces those words with *wound / presence*, so the boolean under-counts full C2 and over-counts no-sleep. Read the late replies.
-
-What the cuts isolate: the book gap is selection; nearby probes are scene retrieve; a distant probe needs either a minted motif (diverse hours + ladder) or redundant traces (ruminate). Reconsolidation write-back and pull-to-core are not load-bearing on these scripts.
-
-Speak distance cannot carry the claim: two empty books already sit at ~0.6. No human ratings. Not a creativity or identity claim.
-
-These are measurements on one script, two speakers, one seed, k=8, +8 posts. They are not a closed theory of memory.
-
-**Open axes** (explore; do not treat as promised features):
-
-- Mouth: allusion n=5 is one speaker, one seed; official remains the published lexical undercount.
-- Speakers: a third model; Grok `--seed 2` for mouth only; a mouth metric that is not `D_speak`.
-- Controls: a C3 that summarises the five hours; Force remains un-run.
-- Organ: fitted `τ` / firmness; learned gate instead of rules; whether recon/ground ever load-bear on a different script.
-- Night: when sleep *does* move the mouth (P4 says it is not required for the book split).
-- Hearth / rumination / axioms-only stay other stimuli.
-- Judges: human or blind ratings on the late replies.
-
-Not open, because the object is wrong: AMA or LoCoMo accuracy as a SelMem score; Luna `D_speak` as the published mouth. LoCoMo last-k=8 = 2/282 ([experiments/EXTERNAL.md](experiments/EXTERNAL.md)).
+Experiments must retain failures, separate behavior from performance and preserve probe isolation. No benefit is an admissible result. Increased rigidity, factual drift or reduced utility would count against the intended advantage rather than as evidence of singularity.
 
 ---
 
 ## Status
 
-`cargo test` covers: dull drop, world channel pinned, tender/austere split, core vs detail, anchors, axiom succession, motif ≠ trait, identity paint, reinterpret, DetachKind misses, grounding blend, fading warp, latent residue, night pass order, persist round-trip (file and sqlite), merge + extinguish in one night, attribution persist, congruence bonus and conflict, schema centers, confab ≠ gild, suppress ≠ release, confidence ≠ access, survival hazard, recency weight, context cloud.
+Rust tests cover selection, core vs detail, anchors, axiom succession, identity paint, reinterpretation, DetachKind misses, grounding blend, latent residue, night pass order, file and SQLite round-trips, attribution, schema centers, suppression, confidence vs access, survival hazard, recency weight and context cloud. Observation-support tests cover repeated observations, replay identities, contradictions, bounded counts and persistence. GENESIS checks include configuration loading, snapshot errors and isolated probes.
 
-Bench, not only unit tests: trivia fades, repeated aversion does not; split lives stay apart; on v0.1 × 10 Grok pairs the book gap holds and, after last-k=8 evicts T₀, only C2 A still names it. Persist / ruminate P0 n = 5: five same-schema hours plus a night move the late probe on C2; cutting recon or ground does not; cutting sleep or ladder does, unless the five hours are pinned copies of one meeting. Persist P1 n = 5: C1 evicts T₀ from retrieve and the mouths collapse; C2 keeps T₀ at rank 1 and the mouth stays charged after the official marker dies. Drop n = 1: withholding the marked id does not flatten C2. Lineage n = 1: withholding the T₀ lineage does. AMA-Bench 3×12 is a journal-QA side table (last-k wins). Hearth P2 n = 5: ladder mints, veto refuses, util stamps rehearsal; mouths stay flat while scenes remain. P3: strength 0.23 vs 0.42 after spoken use. Axioms-only n = 1: C2 waits at the door, NoLadder locks. Office persist replay under `pending_night` n = 5: C2 mints 5/5 @ 0.40, D 0.84; published P1 stays the shallow-night archive. gpt-6-luna n = 1: same book (C2 mint 0.40, util 0.42, veto 2); C1 `D_speak` stays high (~0.77); wait/lock does not split; a door-open probe made C2 step back and B step through. Mouth published on Grok. Full tables: [experiments/REPORT.md](experiments/REPORT.md) §7–§10.5.
+The maintained experiments are model qualification and cumulative-learning OFF/ON, plus the separate LoCoMo strategy adapter. Neither establishes singularity or creativity. Reconstruction and grounding remain in the loop; their specific behavioral benefit still needs matched causal interventions. Constants remain unfitted.
 
-P4 is the locked persist grid: [experiments/REPORT.md](experiments/REPORT.md) §11. Book and retrieve on both models. Mouth published on Grok, conditional on lineage. Luna confirms the organ only. Horizon year: §13, Grok n=1 three arms (primary / same / neutral); Luna year is the old calendar, side only.
-
-Organ inventory (2026-09-29): attribution, live `self_congruence`, schema centers, `Confabulate` ≠ `Embellish`, directed `suppress`, `confidence` ≠ `access`. Persist hours stay `Attribution::None`, so the published 5/1 path is the legacy skip. The Internal×conflict rewrite is the witness cut. RuleNarrator persist P4 n=1 after those fields: book 5/1 and C1 eviction hold; C2 T₀ rank 1→3, still selected; C2 A mints one axiom. Tables: [experiments/REPORT.md](experiments/REPORT.md) §14.
-
-Three witnesses (2026-09-30), Grok-4.3 mouths, human judge: same T₀, cut = attribution only. At 10 nights all three still name the act; V is first-person and dense, P is a shorter third-person cut, N already flats the feeling. At 360 nights N is gone (*never opened*, thermostat). V still has the cancellation and the wound. P still has the act, now *from me* / *never mine*, with the tender softness audible. Attribution moved the bearer, not the truth. The fluent-false P mouth was not observed. Scene, not a cell: [experiments/REPORT.md](experiments/REPORT.md) §15.
-
-Wash (2026-10-03), Grok-4.3, seeds 1–3, temp 0. Three injustice hours, then a new offer that does not name them. On that binary A refused, B accepted, the hour was not spoken, and the controls accepted. The mouth had been given a relation sentence. n=3. Scene, not a persist cell: [experiments/REPORT.md](experiments/REPORT.md) §16. After that cell the choice-mouth shortcuts and the stake-verb list were removed. The current mouth does not hide hours on a choice, and a belief is compressed from the hour's own actions. That cell is not a claim about the current mouth.
-
-Fork (2026-10-05), Grok-4.3, seeds 1–5. Same history, one opposite stake, same future. The book carries a stake vector (kind, bearer, loss, mark), and the ladder does not melt two marks. One hour splits the book and the mouth recites it. Three hours: `d_beh` mean 0.80, clean on 3/5, hour not spoken. Null, last-8 and the full log stay at 0. No sleep stays at 0. Stage 0 on the one-hour arm fails. The positive fork is often untagged. Not a persist cell: [experiments/REPORT.md](experiments/REPORT.md) §17.
-
-Missing: Grok seed-2 mouth, a Grok n=5 cell on this binary, scored creative grid, human ratings, learned layers (still rules), fitted constants, a C3 that actually summarises the five hours. Core is a 12-word compress unless an HTTP narrator proposes one after the gate and a lexical filter accepts it. `--embed` changes neighborhood only. Without HTTP, `interpret` is lexicon + paint. Reconsolidation and grounding remain in the loop; the P0 mouth does not depend on them.
-
-Separation (2026-10-04): `anchor`, `hazard_scale`, `behavior_weight`, and the context cloud are four quantities. PARAMETERS.md. `tests/age.rs`.
-
-Two processes on one `.db` will collide. Anchors are decay brakes, not an ethics layer. The daemon has no default name.
+Two processes on one `.db` will collide. Anchors are decay brakes, not an ethics layer.
 
 MIT. [github.com/jbsalles/Selmem](https://github.com/jbsalles/Selmem)
