@@ -38,3 +38,11 @@ Association learning and use during reconstruction are independent cuts. Co-reca
 ## Experiments
 
 GENESIS has one executable and shared configuration, provider, transport and snapshot code. Positive controls fix a decision oracle; learning compares external faithful history, admitted observations, native/strict recall and empty context. LoCoMo uses its own dataset adapter. Runtime memory algorithms are shared, not copied into experiment-specific organs.
+
+## Axiom context persistence
+
+Axiom family matching uses `stake_kind`, `bearer`, `loss_kind` and `stake_mark`. These fields are now retained in SELMEM1 (an optional `axiom_context` record with a length-prefixed mark) and SQLite. SQLite also persists the corresponding trace fields and absence; losing either side of the family comparison can cause repeated consolidation to create duplicate motifs after reopening.
+
+The new reader accepts old files. Missing axiom context is recovered only from unanimous existing lived support, excluding traits and incomplete/mixed support. Explicitly saved empty context remains empty. No sealed archive or heuristic parsing of axiom prose is used. Legacy SQLite trace stakes use the same lived-gist fallback as legacy flat traces; original omitted annotations cannot be guaranteed recoverable. Existing historical duplicates are preserved rather than silently deleted. Updated SQLite schemas are migrated on load/save; old binaries should not be used to write the new format.
+
+Regression coverage includes both containers, explicit empty fields, legacy loading and twenty forced-deep nights with reopening between each. The original sleep experiment remains an observation of the older codec, not evidence from the corrected engine.

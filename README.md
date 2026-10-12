@@ -1,5 +1,7 @@
 # SelMem
 
+[GENESIS sleep-quality experiment](experiments/genesis/SLEEP.md): matched no-sleep, normal and deep sleep, with controlled histories and LoCoMo-derived factual probes.
+
 Selective reconstructive memory for an LLM entity. v0.5
 
 API reference is the crate rustdoc (`cargo doc --no-deps`). docs.rs builds it on publish. This file is the claim, not the reference.

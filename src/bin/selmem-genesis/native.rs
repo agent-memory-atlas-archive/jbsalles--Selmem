@@ -72,6 +72,7 @@ fn inspect(m: &SelectiveMemory) -> Json {
         ("observation_evidence_enabled", Json::Bool(m.store.observation_evidence.enabled)),
         ("observation_evidence", Json::Array(m.store.observation_evidence.groups.iter().map(|(id,g)|obj([
             ("trace_id",text(id)),("source",text(&g.source)),("observations",num(g.observations.len() as f64)),
+            ("observation_ids",strings(g.observations.keys().cloned())),
             ("claims",Json::Array(g.counts().into_iter().map(|(claim,count)|obj([("claim",text(claim)),("count",num(count as f64))])).collect())),
         ])).collect())),
         ("associations_learn", Json::Bool(m.store.associations.learn)),
@@ -507,6 +508,9 @@ pub(super) fn execute(r: &Json) -> Result<Json, String> {
             let mut input = EncodeInput::new(field(event, "text")?);
             input.observation_id = Some(field(event, "id")?);
             input.source = "genesis_fixture";
+            if flag(event, "external") {
+                input.attribution = selmem::Attribution::External;
+            }
             // Predeclared, symmetric task stakes. The native gate still decides.
             if flag(event, "critical") {
                 input.self_relevance = 0.9;
@@ -541,10 +545,18 @@ pub(super) fn execute(r: &Json) -> Result<Json, String> {
             Ok(inspect(&m))
         }
         "sleep" => {
-            m.sleep();
+            let report = if flag(r, "deep") { m.sleep_deep() } else { m.sleep() };
             let audit = lifecycle_audit(&m)?;
             save(&m)?;
             let mut out = inspect(&m);
+            out.put("night", obj([
+                ("kind", text(format!("{:?}", report.kind))),
+                ("merged", num(report.merged as f64)),
+                ("released", num(report.released as f64)),
+                ("rewritten", num(report.rewritten as f64)),
+                ("weathered", num(report.weathered as f64)),
+                ("axioms_created", num(report.axioms.len() as f64)),
+            ]));
             out.put("lifecycle_audit", audit);
             Ok(out)
         }

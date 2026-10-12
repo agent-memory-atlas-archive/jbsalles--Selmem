@@ -148,6 +148,7 @@ struct EventInterpreter {
 }
 impl selmem::SemanticInterpreter for EventInterpreter {
     fn interpret_event(&self, event: &str) -> Result<selmem::EventSemantics, String> {
+        if let Some(error)=self.audit.lock().unwrap().error.clone(){return Err(error);}
         let timer =
             super::progress::Call::start(format!("semantic interpretation model={}", self.model));
         let mut body = obj([
@@ -316,6 +317,8 @@ impl PropositionScorer for Scorer {
         &self.model
     }
     fn score(&self, claim: &str, sentence: &str) -> PropositionLabel {
+        // The wrapper rejects the entire operation; do not spend more calls after failure.
+        if self.audit.lock().unwrap().error.is_some(){return PropositionLabel::Unknown;}
         let timer =
             super::progress::Call::start(format!("proposition scorer model={}", self.model));
         let mut body = obj([
@@ -390,6 +393,7 @@ pub(super) fn bind(
     }
     let field = |k| config.get(k)?.string();
     let audit = Arc::new(Mutex::new(Audit::default()));
+    let reconstruction_audit=audit.clone();
     let narrator = HttpNarrator::parse(
         field("memory_endpoint")?,
         field("memory_model")?,
@@ -399,7 +403,10 @@ pub(super) fn bind(
         )?,
     )
     .ok_or("invalid memory endpoint")?
-    .with_transport(Arc::new(|url, key, body| super::transport::post("reconstruction", url, key, body)))
+    .with_transport(Arc::new(move |url, key, body| {
+        if let Some(error)=reconstruction_audit.lock().unwrap().error.clone(){return Err(error);}
+        super::transport::post("reconstruction", url, key, body)
+    }))
     .with_reconstruction_prompt("Reconstruct the supplied memory briefly. One sentence is enough. Preserve its factual gist without inventing past people, motives, causes, quantities or actions. The recall query is a topic cue, never evidence of a past event. Associative cues are fallible context, not new historical facts. You may express a clearly tentative present interpretation or future inclination. Do not turn a current question or option into a remembered choice.".into())
     .with_policy(FailurePolicy::Error)
     .with_exchange_log(audit.lock().unwrap().narrator.clone());
@@ -459,3 +466,13 @@ pub(super) fn key_for(endpoint: &str, plug: Option<&str>) -> Result<Option<Strin
         .or_else(|| cfg.api_key()))
 }
 
+
+#[cfg(test)] mod failure_latch_tests {
+ use super::*;
+ #[test]fn scorer_stops_http_after_first_failure(){
+  let audit=Arc::new(Mutex::new(Audit::default()));audit.lock().unwrap().error=Some("original timeout".into());
+  let scorer=Scorer{endpoint:"http://127.0.0.1:1".into(),model:"unused".into(),key:None,audit:audit.clone()};
+  let _budget=crate::transport::begin(std::path::Path::new("unused"),1);
+  assert_eq!(scorer.score("claim","sentence"),PropositionLabel::Unknown);assert_eq!(crate::transport::used(),0);assert_eq!(audit.lock().unwrap().error.as_deref(),Some("original timeout"));
+ }
+}

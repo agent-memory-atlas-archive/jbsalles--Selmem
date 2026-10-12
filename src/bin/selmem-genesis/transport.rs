@@ -94,11 +94,7 @@ pub(super) fn post(kind: &str, url: &str, key: Option<&str>, body: &str) -> Resu
                 if response.is_ok() { "DONE" } else { "FAILED" }
             ));
         }
-        let transient = response.as_ref().err().is_some_and(|e| {
-            ["HTTP 429:", "HTTP 502:", "HTTP 503:", "HTTP 504:"]
-                .iter()
-                .any(|s| e.starts_with(s))
-        });
+        let transient = response.as_ref().err().is_some_and(|e| transient_error(e));
         let remaining = BUDGET.with(|b| b.borrow().as_ref().is_some_and(|b| b.used < b.limit));
         if transient && remaining && attempt < 3 {
             let wait = 30 * attempt;
@@ -110,8 +106,17 @@ pub(super) fn post(kind: &str, url: &str, key: Option<&str>, body: &str) -> Resu
     }
     unreachable!()
 }
+fn transient_error(e:&str)->bool {
+    e.starts_with("curl: (28)") || ["HTTP 429:","HTTP 502:","HTTP 503:","HTTP 504:"].iter().any(|prefix|e.starts_with(prefix))
+}
 #[cfg(test)]
 mod tests {
+    #[test] fn timeouts_retry_but_permanent_errors_do_not(){
+        assert!(super::transient_error("curl: (28) Operation timed out"));
+        assert!(super::transient_error("HTTP 429: capacity"));
+        assert!(!super::transient_error("HTTP 401: invalid key"));
+        assert!(!super::transient_error("HTTP 400: invalid request"));
+    }
     use super::*;
     #[test]
     fn zero_budget_never_attempts_network() {

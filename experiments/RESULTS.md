@@ -20,3 +20,11 @@ The next informative tests are matched support lesions, mixed/reversing evidence
 ## LoCoMo strategy record
 
 The supplied strategy evidence has 179 successful Grok answers out of 180 requested and 180/180 GPT answers; the technical rehearsal contains no real model answers. This is a conversation-derived strategy task, not the full LoCoMo benchmark. Historical source hashes and reported conditions stay with the audit archive. No general benefit in individuality or creativity is claimed.
+
+## Sleep pilot and persistence defect
+
+`sleep-001-measured` completed 240 decisions, 168 readonly readouts and 160 nights, in 2h38m51s with 1555 new HTTP attempts (4712 including failed preparation and recovery). Controlled histories remained 8/8 correct in every arm at cycles 0/1/5/20; support counts stayed 12 per history without duplication. LoCoMo-derived correctness was no-sleep 2/2/1/2, normal 2/1/1/1 and forced-deep 2/1/0/1, each out of twelve. All other factual choices were abstentions. This is a small, admission-limited multiple-choice panel, not the official LoCoMo score or a demonstrated sleep benefit.
+
+Forced deep sleep accumulated 119 and 272 stored, unsuperseded motifs for only 6 and 15 distinct statements. The flat codec omitted axiom stake context, so reopening broke family matching; SQLite additionally omitted trace stake context. The corrected codecs preserve these fields. A local no-HTTP replay on copies of the prepared real prefixes keeps 6 and 15 motifs across twenty reopen/deep-sleep cycles. This verifies the persistence fix, not corrected model performance.
+
+Keep original outputs unchanged. To assess corrected sleep effects, reuse the unchanged `sleep-001-prepared` prefixes and run new isolated interventions into a fresh output directory (for example `sleep-002-measured`); record this patch/code revision with the new result. No paid encoding replay is needed. The earlier LoCoMo admission losses and the latency/cost of proposition scoring are separate issues; this patch does not change the gate, retrieval policy or sleep thresholds to optimize the observed score.

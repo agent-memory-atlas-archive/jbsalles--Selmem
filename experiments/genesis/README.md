@@ -47,3 +47,7 @@ The separate `selmem-genesis-positive` and `selmem-genesis-learning` executables
 Existing evidence is readable and must keep its original manifests. Place qualified `positive-001/grok` outside or back under the ignored results directory if reusing it. Do not run the old suite script. The native organ's algorithms and observation-support implementation are unchanged by this cleanup.
 
 Legacy library exports for benchmark/experiment/fork demonstrations have been removed. The core live/remember/speak/sleep API, daemon and terminal client remain.
+
+## Sleep quality
+
+The third command, `selmem-genesis sleep`, compares time-matched no-sleep, native normal sleep and forced deep sleep on saved learning histories and a pinned LoCoMo-derived factual panel. Read [SLEEP.md](SLEEP.md) for preparation, qualification, costs and limits. No real result is claimed yet.
