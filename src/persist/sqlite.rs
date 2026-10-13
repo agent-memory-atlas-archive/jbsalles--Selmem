@@ -181,6 +181,63 @@ impl Drop for Stmt {
 
 
 
+
+/// Only missing columns are altered; every other migration error is propagated.
+fn migrate(db: &Db) -> io::Result<()> {
+    let version = query(db, "PRAGMA user_version")?[0][0].parse::<u32>().map_err(|e| io::Error::new(io::ErrorKind::InvalidData,e))?;
+    if version > 1 { return Err(io::Error::new(io::ErrorKind::InvalidData,"unsupported SQLite schema version")); }
+    db.exec("BEGIN IMMEDIATE")?;
+    let transaction = Transaction(db);
+    db.exec("CREATE TABLE IF NOT EXISTS centers(schema TEXT PRIMARY KEY, core TEXT, valence REAL, weight REAL, hub_id TEXT, axiom_id TEXT); CREATE TABLE IF NOT EXISTS operations(trace_id TEXT, kind TEXT, at INTEGER, confidence REAL, origin TEXT, center TEXT, before TEXT, after TEXT, source_traces TEXT, source_axioms TEXT);")?;
+    for (table,column,kind) in [
+        ("traces","core","TEXT"),
+        ("traces","anchor","REAL"),
+        ("traces","detach_strikes","INTEGER"),
+        ("traces","attribution","TEXT"),
+        ("traces","self_congruence","REAL"),
+        ("traces","confidence","REAL"),
+        ("traces","suppressed","INTEGER"),
+        ("axioms","layer","TEXT"),
+        ("archives","released_from","TEXT"),
+        ("archives","released_at","INTEGER"),
+        ("archives","core","TEXT"),
+        ("traces","observation_id","TEXT"),
+        ("traces","semantic_claim","TEXT"),
+        ("traces","semantic_entities","TEXT"),
+        ("traces","semantic_actions","TEXT"),
+        ("traces","semantic_polarity","REAL"),
+        ("traces","semantic_confidence","REAL"),
+        ("traces","reality_claim","TEXT"),
+        ("traces","source","TEXT"),
+        ("traces","reality_verifiable","INTEGER"),
+        ("traces","stake_kind","TEXT"),
+        ("traces","bearer","TEXT"),
+        ("traces","loss_kind","TEXT"),
+        ("traces","stake_mark","TEXT"),
+        ("traces","absence","TEXT"),
+        ("axioms","stake_kind","TEXT"),
+        ("axioms","bearer","TEXT"),
+        ("axioms","loss_kind","TEXT"),
+        ("axioms","stake_mark","TEXT"),
+        ("traces","interpretation_statement","TEXT"),
+        ("traces","interpretation_valence","REAL"),
+        ("traces","interpretation_confidence","REAL"),
+    ] {
+        let columns = query(db, &format!("PRAGMA table_info({table})"))?;
+        if columns.is_empty() { return Err(io::Error::new(io::ErrorKind::InvalidData,format!("missing table {table}"))); }
+        if !columns.iter().any(|row| row.get(1).map(String::as_str) == Some(column)) {
+            db.exec(&format!("ALTER TABLE {table} ADD COLUMN {column} {kind}"))?;
+        }
+    }
+    if version == 0 { db.exec("PRAGMA user_version=1")?; }
+    db.exec("COMMIT")?;
+    drop(transaction);
+    Ok(())
+}
+/// Roll back on any early return, including failed COMMIT. Harmless after success.
+struct Transaction<'a>(&'a Db);
+impl Drop for Transaction<'_> { fn drop(&mut self) { let _ = self.0.exec("ROLLBACK"); } }
+
 pub fn save(
     path: &Path,
     profile: &EntityProfile,
@@ -198,6 +255,9 @@ pub fn save(
         }
     }
     let db = Db::open(path)?;
+    let version = query(&db,"PRAGMA user_version")?[0][0].parse::<u32>().map_err(|e|io::Error::new(io::ErrorKind::InvalidData,e))?;
+    if version > 1 { return Err(io::Error::new(io::ErrorKind::InvalidData,"unsupported SQLite schema version")); }
+    db.exec("PRAGMA synchronous=FULL")?;
     db.exec(
         "CREATE TABLE IF NOT EXISTS meta(k TEXT PRIMARY KEY, v TEXT NOT NULL);
          CREATE TABLE IF NOT EXISTS archives(id TEXT PRIMARY KEY, created INTEGER, source TEXT, verbatim TEXT, released_from TEXT, released_at INTEGER, core TEXT);
@@ -221,44 +281,9 @@ pub fn save(
            schema TEXT PRIMARY KEY, core TEXT, valence REAL, weight REAL,
            hub_id TEXT, axiom_id TEXT);",
     )?;
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN core TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN anchor REAL;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN detach_strikes INTEGER;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN attribution TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN self_congruence REAL;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN confidence REAL;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN suppressed INTEGER;");
-    let _ = db.exec(
-        "CREATE TABLE IF NOT EXISTS centers(
-           schema TEXT PRIMARY KEY, core TEXT, valence REAL, weight REAL,
-           hub_id TEXT, axiom_id TEXT);",
-    );
-    let _ = db.exec("ALTER TABLE axioms ADD COLUMN layer TEXT;");
-    for column in ["stake_kind","bearer","loss_kind","stake_mark","absence"] {
-        let _=db.exec(&format!("ALTER TABLE traces ADD COLUMN {column} TEXT;"));
-    }
-    for column in ["stake_kind", "bearer", "loss_kind", "stake_mark"] {
-        let _=db.exec(&format!("ALTER TABLE axioms ADD COLUMN {column} TEXT;"));
-    }
-
-    let _ = db.exec("ALTER TABLE archives ADD COLUMN released_from TEXT;");
-    let _ = db.exec("ALTER TABLE archives ADD COLUMN released_at INTEGER;");
-    let _ = db.exec("ALTER TABLE archives ADD COLUMN core TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN observation_id TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN semantic_claim TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN semantic_entities TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN semantic_actions TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN semantic_polarity REAL;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN semantic_confidence REAL;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN reality_claim TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN source TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN reality_verifiable INTEGER;");
-    let _ = db.exec(
-        "CREATE TABLE IF NOT EXISTS operations(
-           trace_id TEXT, kind TEXT, at INTEGER, confidence REAL, origin TEXT,
-           center TEXT, before TEXT, after TEXT, source_traces TEXT, source_axioms TEXT);",
-    );
+    migrate(&db)?;
     db.exec("BEGIN IMMEDIATE;")?;
+    let _transaction = Transaction(&db);
     db.exec(
         "DELETE FROM meta; DELETE FROM archives; DELETE FROM traces;
          DELETE FROM cues; DELETE FROM drifts; DELETE FROM axioms;
@@ -273,6 +298,7 @@ pub fn save(
             .map(|ts| ts.to_string())
             .unwrap_or_else(|| "-".into());
         for (k, v) in [
+            ("embedding_space", store.embedding_space.as_deref().unwrap_or("")),
             ("name", profile.name.as_str()),
             ("params", &profile_params_line(profile)),
             ("mood", &format!("{} {} {}", mood.valence, mood.arousal, mood.disgust)),
@@ -328,8 +354,8 @@ pub fn save(
         }
     }
     let q_tr = db.prepare(
-        "INSERT INTO traces(id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed,observation_id,semantic_claim,semantic_entities,semantic_actions,semantic_polarity,semantic_confidence,reality_claim,reality_verifiable,source,stake_kind,bearer,loss_kind,stake_mark,absence)
-         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21,?22,?23,?24,?25,?26,?27,?28,?29,?30,?31,?32,?33,?34,?35,?36,?37,?38,?39,?40)",
+        "INSERT INTO traces(id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed,observation_id,semantic_claim,semantic_entities,semantic_actions,semantic_polarity,semantic_confidence,reality_claim,reality_verifiable,source,stake_kind,bearer,loss_kind,stake_mark,absence,interpretation_statement,interpretation_valence,interpretation_confidence)
+         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21,?22,?23,?24,?25,?26,?27,?28,?29,?30,?31,?32,?33,?34,?35,?36,?37,?38,?39,?40,?41,?42,?43)",
     )?;
     let q_cue = db.prepare("INSERT INTO cues(trace_id,cue) VALUES (?1,?2)")?;
     let q_dr = db.prepare(
@@ -382,6 +408,9 @@ pub fn save(
         q_tr.bind_text(38,t.loss_kind.token())?;
         q_tr.bind_text(39,&t.stake_mark)?;
         q_tr.bind_text(40,t.absence.map(|a|a.token()).unwrap_or("-"))?;
+        q_tr.bind_text(41, &t.interpretation.statement)?;
+        q_tr.bind_f64(42, t.interpretation.valence as f64)?;
+        q_tr.bind_f64(43, t.interpretation.confidence as f64)?;
         q_tr.step_done()?;
         for c in &t.cues {
             q_cue.bind_text(1, &t.id)?;
@@ -517,37 +546,9 @@ fn query(db: &Db, sql: &str) -> io::Result<Vec<Vec<String>>> {
 
 pub fn load(path: &Path) -> io::Result<Snapshot> {
     let db = Db::open(path)?;
-    for column in ["stake_kind","bearer","loss_kind","stake_mark","absence"] {
-        let _=db.exec(&format!("ALTER TABLE traces ADD COLUMN {column} TEXT;"));
-    }
-    for column in ["stake_kind", "bearer", "loss_kind", "stake_mark"] {
-        let _=db.exec(&format!("ALTER TABLE axioms ADD COLUMN {column} TEXT;"));
-    }
-
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN attribution TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN self_congruence REAL;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN confidence REAL;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN suppressed INTEGER;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN observation_id TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN semantic_claim TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN semantic_entities TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN semantic_actions TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN semantic_polarity REAL;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN semantic_confidence REAL;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN reality_claim TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN source TEXT;");
-    let _ = db.exec("ALTER TABLE traces ADD COLUMN reality_verifiable INTEGER;");
-    let _ = db.exec(
-        "CREATE TABLE IF NOT EXISTS centers(
-           schema TEXT PRIMARY KEY, core TEXT, valence REAL, weight REAL,
-           hub_id TEXT, axiom_id TEXT);",
-    );
-    let _ = db.exec(
-        "CREATE TABLE IF NOT EXISTS operations(
-           trace_id TEXT, kind TEXT, at INTEGER, confidence REAL, origin TEXT,
-           center TEXT, before TEXT, after TEXT, source_traces TEXT, source_axioms TEXT);",
-    );
+    migrate(&db)?;
     let meta = query(&db, "SELECT k,v FROM meta")?;
+    let mut embedding_space = None;
     let mut name = String::new();
     let mut params_s = String::new();
     let mut mood_s = String::new();
@@ -564,6 +565,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
             continue;
         }
         match row[0].as_str() {
+            "embedding_space" => embedding_space = empty_none(&row[1]),
             "name" => name = row[1].clone(),
             "params" => params_s = row[1].clone(),
             "mood" => mood_s = row[1].clone(),
@@ -581,6 +583,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
     let profile = parse_profile(&name, &params_s)?;
     let mood = parse_mood(&mood_s)?;
     let mut store = MemoryStore::new();
+    store.embedding_space = embedding_space;
     if !observation_evidence_s.is_empty() {
         store.observation_evidence = crate::core::evidence::ObservationEvidence::decode(&observation_evidence_s)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
@@ -632,9 +635,10 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         store.archives.insert(a.id.clone(), a);
     }
 
+    let mut legacy_interpretations = Vec::new();
     for row in query(
         &db,
-        "SELECT id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed,observation_id,semantic_claim,semantic_entities,semantic_actions,semantic_polarity,semantic_confidence,reality_claim,reality_verifiable,source,stake_kind,bearer,loss_kind,stake_mark,absence FROM traces",
+        "SELECT id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed,observation_id,semantic_claim,semantic_entities,semantic_actions,semantic_polarity,semantic_confidence,reality_claim,reality_verifiable,source,stake_kind,bearer,loss_kind,stake_mark,absence,interpretation_statement,interpretation_valence,interpretation_confidence FROM traces",
     )? {
         if row.len() < 20 {
             continue;
@@ -711,12 +715,18 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         if let Some(c) = row.get(31).and_then(|s| s.parse().ok()) {
             t.semantic.confidence = c;
         }
+        if !row[31].is_empty() {
+            t.semantic.claim = row[27].clone();
+            t.semantic.entities = row[28].split('\t').filter(|s| !s.is_empty()).map(str::to_string).collect();
+            t.semantic.actions = row[29].split('\t').filter(|s| !s.is_empty()).map(str::to_string).collect();
+        }
         t.source = row.get(34).cloned().unwrap_or_default();
         if let Some(claim) = row.get(32).and_then(|s| empty_none(s)) {
             t.reality.claim = claim;
         }
         if let Some(flag) = row.get(33) {
             if !flag.is_empty() {
+                t.reality.claim = row[32].clone();
                 t.reality.verifiable = flag == "1";
             }
         }
@@ -734,11 +744,17 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         if row[35].is_empty(){let (kind,bearer,loss,mark,absence)=crate::core::model::derive_stake(&t.gist);t.stake_kind=kind;t.bearer=bearer;t.loss_kind=loss;t.stake_mark=mark;t.absence=absence;}else{
             t.stake_kind=crate::core::model::StakeKind::parse(&row[35]);t.bearer=crate::core::model::Bearer::parse(&row[36]);t.loss_kind=crate::core::model::LossKind::parse(&row[37]);t.stake_mark=row[38].clone();t.absence=crate::core::model::AbsenceKind::parse(&row[39]);
         }
+        if row[41].is_empty() { legacy_interpretations.push(t.id.clone()); }
+        if !row[41].is_empty() {
+            t.interpretation.statement = row[40].clone();
+            t.interpretation.valence = row[41].parse().map_err(|e| io::Error::new(io::ErrorKind::InvalidData,e))?;
+            t.interpretation.confidence = row[42].parse().map_err(|e| io::Error::new(io::ErrorKind::InvalidData,e))?;
+        }
         store.traces.insert(t.id.clone(), t);
     }
     for row in query(
         &db,
-        "SELECT trace_id,kind,at,confidence,origin,center,before,after,source_traces,source_axioms FROM operations",
+        "SELECT trace_id,kind,at,confidence,origin,center,before,after,source_traces,source_axioms FROM operations ORDER BY rowid",
     )? {
         if row.len() < 10 {
             continue;
@@ -766,6 +782,12 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
         }
     }
 
+    for id in legacy_interpretations {
+        let t = store.traces.get_mut(&id).unwrap();
+        if let Some(op) = t.operations.iter().rev().find(|o| o.kind == "reinterpret" || o.kind == "encode") {
+            t.interpretation.statement = op.after.clone(); t.interpretation.confidence = op.confidence;
+        }
+    }
     for row in query(&db, "SELECT trace_id,cue FROM cues")? {
         if row.len() < 2 {
             continue;
@@ -962,4 +984,31 @@ fn parse_dk(s: &str) -> DriftKind {
   let m=crate::SelectiveMemory::open(&p,EntityProfile::new("test")).unwrap();m.save().unwrap();
   let db=Db::open(&p).unwrap();let cols=query(&db,"PRAGMA table_info(axioms)").unwrap();for name in ["stake_kind","bearer","loss_kind","stake_mark"]{assert!(cols.iter().any(|r|r[1]==name));}drop(db);std::fs::remove_file(p).unwrap();
  }
+}
+
+#[cfg(test)]
+mod integrity_migrations {
+    use super::*;
+    fn path(label: &str) -> std::path::PathBuf { std::env::temp_dir().join(format!("selmem-sql-{label}-{}.db",std::process::id())) }
+    fn initial(p:&Path)->crate::SelectiveMemory { let _=std::fs::remove_file(p);let mut m=crate::SelectiveMemory::open(p,EntityProfile::new("before")).unwrap();let mut e=crate::EncodeInput::new("Mira delivered six batteries.");e.permanence=1.;m.live_with(e);m.save().unwrap();m }
+    #[test]
+    fn old_archives_and_trace_columns_migrate_together() {
+        let p=path("old");drop(initial(&p));
+        {let db=Db::open(&p).unwrap();db.exec("ALTER TABLE archives DROP COLUMN released_from;ALTER TABLE archives DROP COLUMN released_at;ALTER TABLE archives DROP COLUMN core;ALTER TABLE traces DROP COLUMN interpretation_statement;ALTER TABLE traces DROP COLUMN interpretation_valence;ALTER TABLE traces DROP COLUMN interpretation_confidence;PRAGMA user_version=0;").unwrap();}
+        let m=crate::SelectiveMemory::open(&p,EntityProfile::new("fallback")).unwrap();assert_eq!(m.profile.name,"before");assert!(m.store.traces.values().all(|t|!t.interpretation.statement.is_empty()));m.save().unwrap();drop(m);std::fs::remove_file(p).unwrap();
+    }
+    #[test]
+    fn migration_failure_rolls_back_prior_alterations() {
+        let p=path("rollback-migrate");drop(initial(&p));
+        {let db=Db::open(&p).unwrap();db.exec("ALTER TABLE traces DROP COLUMN core; DROP TABLE archives; CREATE VIEW archives AS SELECT 'a' AS id; PRAGMA user_version=0;").unwrap();}
+        assert!(load(&p).is_err());let db=Db::open(&p).unwrap();let cols=query(&db,"PRAGMA table_info(traces)").unwrap();assert!(!cols.iter().any(|r|r[1]=="core"));assert_eq!(query(&db,"PRAGMA user_version").unwrap()[0][0],"0");drop(db);std::fs::remove_file(p).unwrap();
+    }
+    #[test]
+    fn failed_save_rolls_back_deletes_and_preserves_previous_snapshot() {
+        let p=path("rollback-save");let mut m=initial(&p);
+        {let db=Db::open(&p).unwrap();db.exec("CREATE TRIGGER reject_write BEFORE INSERT ON traces BEGIN SELECT RAISE(ABORT,'injected storage failure'); END;").unwrap();}
+        m.profile.name="after".into();assert!(m.save().is_err());let loaded=load(&p).unwrap();assert_eq!(loaded.profile.name,"before");assert_eq!(loaded.store.traces.len(),1);std::fs::remove_file(p).unwrap();
+    }
+    #[test]
+    fn future_schema_is_rejected() {let p=path("future");drop(initial(&p));{let db=Db::open(&p).unwrap();db.exec("PRAGMA user_version=99").unwrap();}assert!(load(&p).is_err());std::fs::remove_file(p).unwrap();}
 }

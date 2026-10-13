@@ -148,7 +148,7 @@ fn loose_content(raw: &str) -> Option<String> {
 }
 
 /// GPT-5/6 and the o-series reject `max_tokens`. Grok / Ollama still want it.
-fn token_cap_field(url: &str, model: &str) -> &'static str {
+pub(crate) fn token_cap_field(url: &str, model: &str) -> &'static str {
     let m = model.to_ascii_lowercase();
     let openai = url.contains("api.openai.com")
         || url.contains("openai.azure.com")

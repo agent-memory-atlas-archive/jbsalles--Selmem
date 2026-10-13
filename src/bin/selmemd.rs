@@ -280,7 +280,9 @@ fn dispatch_unlocked(
             });
         }
         g.close_mouth(&draft, &reply);
-        let _ = g.save();
+        if let Err(e) = g.save() {
+            return Ok(api::HttpResponse { status: 500, body: format!("{{\"error\":\"memory persistence failed: {}\"}}", api::json_esc(&e.to_string())) });
+        }
         return Ok(api::mouth_body(path, &reply, g));
     }
     let external = method == "POST";

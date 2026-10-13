@@ -41,27 +41,22 @@ pub struct MemoryClock {
 impl Default for MemoryClock {
     fn default() -> Self {
         Self {
-            origin_real: 0,
+            origin_real: wall_secs(),
             jump: 0,
             scale: 24,
-            detached: false,
+            detached: true,
         }
     }
 }
 
 impl MemoryClock {
     pub fn detach(mut self) -> Self {
-        self.origin_real = origin_real();
-        self.jump = CLOCK_JUMP.load(Ordering::Relaxed);
-        self.scale = clock_scale();
+        if self.origin_real == 0 { self.origin_real = wall_secs(); }
         self.detached = true;
         self
     }
 
     pub fn now(&self) -> u64 {
-        if !self.detached {
-            return process_now();
-        }
         let elapsed = wall_secs().saturating_sub(self.origin_real);
         self.origin_real
             .saturating_add(elapsed.saturating_mul(self.scale.max(1) as u64))
@@ -70,19 +65,15 @@ impl MemoryClock {
 
     pub fn advance_hours(&mut self, hours: f32) {
         let secs = (hours.max(0.0) * 3600.0) as u64;
-        if self.detached {
-            self.jump = self.jump.saturating_add(secs);
-        } else {
-            CLOCK_JUMP.fetch_add(secs, Ordering::Relaxed);
-        }
+        self.jump = self.jump.saturating_add(secs);
     }
 
     pub fn set_scale(&mut self, scale: u32) {
         let scale = scale.clamp(1, 200);
+        let now = self.now();
+        self.origin_real = wall_secs();
+        self.jump = now.saturating_sub(self.origin_real);
         self.scale = scale;
-        if !self.detached {
-            CLOCK_SCALE.store(scale, Ordering::Relaxed);
-        }
     }
 }
 
@@ -117,10 +108,10 @@ fn process_now() -> u64 {
         .saturating_add(CLOCK_JUMP.load(Ordering::Relaxed))
 }
 
-/// Virtual now. An organ guard wins when its clock is detached.
+/// Virtual now. An organ guard always wins over the legacy process clock.
 pub fn now_secs() -> u64 {
     ACTIVE_CLOCK.with(|c| match c.borrow().as_ref() {
-        Some(clock) if clock.detached => clock.now(),
+        Some(clock) => clock.now(),
         _ => process_now(),
     })
 }

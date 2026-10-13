@@ -32,11 +32,19 @@ pub fn save(
             fs::create_dir_all(parent)?;
         }
     }
-    let tmp = path.with_extension("selmem.tmp");
+    static SERIAL: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+    let mut name = path.as_os_str().to_os_string();
+    name.push(format!(".{}.{}.tmp", std::process::id(), SERIAL.fetch_add(1, std::sync::atomic::Ordering::Relaxed)));
+    let tmp = std::path::PathBuf::from(name);
+    struct Cleanup(std::path::PathBuf);
+    impl Drop for Cleanup { fn drop(&mut self) { let _ = fs::remove_file(&self.0); } }
+    let mut w = File::options().write(true).create_new(true).open(&tmp)?;
+    let _cleanup = Cleanup(tmp.clone());
     {
-        let mut w = File::create(&tmp)?;
         writeln!(w, "{MAGIC}")?;
         write_profile(&mut w, profile)?;
+        writeln!(w, "profile-name")?;
+        write_blob(&mut w, &profile.name)?;
         writeln!(w, "mood {} {} {}", mood.valence, mood.arousal, mood.disgust)?;
 
         writeln!(w, "archives {}", store.archives.len())?;
@@ -49,6 +57,8 @@ pub fn save(
             }
             write_blob(&mut w, &a.source)?;
             write_blob(&mut w, &a.verbatim)?;
+            writeln!(w, "archive-core")?;
+            write_blob(&mut w, &a.core)?;
         }
 
         writeln!(w, "traces {}", store.traces.len())?;
@@ -104,14 +114,19 @@ pub fn save(
             flag(cut.util_to_strength),
             flag(cut.merge_support_veto),
         )?;
+        writeln!(w, "embedding-space")?;
+        write_blob(&mut w, store.embedding_space.as_deref().unwrap_or(""))?;
         writeln!(w, "associations {}", store.associations.encode())?;
         writeln!(w, "observation-evidence {}", store.observation_evidence.encode())?;
         writeln!(w, "measures {}", store.measures.len())?;
         for (id, label) in &store.measures {
             writeln!(w, "measure {id} {label}")?;
         }
+        w.sync_all()?;
     }
-    fs::rename(tmp, path)?;
+    fs::rename(&tmp, path)?;
+    #[cfg(unix)]
+    File::open(path.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new(".")))?.sync_all()?;
     Ok(())
 }
 
@@ -121,10 +136,12 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
     if magic != MAGIC {
         return fail(format!("fichier inconnu: {magic}"));
     }
-    let profile = read_profile(&mut r)?;
+    let mut profile = read_profile(&mut r)?;
+    if next_line_starts_with(&mut r, "profile-name")? { read_line(&mut r)?; profile.name = read_blob(&mut r)?; }
     let mood = parse_mood(&read_line(&mut r)?)?;
 
     let mut store = MemoryStore::new();
+    store.embedding_space = None;
     let n_arch = parse_count(&read_line(&mut r)?, "archives")?;
     for _ in 0..n_arch {
         let header = read_line(&mut r)?;
@@ -140,6 +157,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
             rec.released_at = parse_u64(p[4]).ok();
             rec.released_from = Some(p[5].to_string());
         }
+        if next_line_starts_with(&mut r, "archive-core")? { read_line(&mut r)?; rec.core = read_blob(&mut r)?; }
         store.archives.insert(id, rec);
     }
 
@@ -230,6 +248,8 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
                             clock_origin = p[3].parse().unwrap_or(0);
                         }
                     }
+                } else if line == "embedding-space" {
+                    store.embedding_space = empty_none(read_blob(&mut r)?);
                 } else if let Some(rest) = line.strip_prefix("associations ") {
                     store.associations =
                         crate::core::association::AssociationGraph::decode(rest)
@@ -368,9 +388,11 @@ fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
         t.stake_kind.token(),
         t.bearer.token(),
         t.loss_kind.token(),
-        if t.stake_mark.is_empty() { "-" } else { &t.stake_mark },
+        "-",
         t.absence.map(|a| a.token()).unwrap_or("-")
     )?;
+    writeln!(w, "stake-mark")?;
+    write_blob(w, &t.stake_mark)?;
     writeln!(w, "ops {}", t.operations.len())?;
     for op in &t.operations {
         writeln!(
@@ -380,13 +402,17 @@ fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
             op.at,
             op.confidence,
             op.origin.token(),
-            op.source_center.as_deref().unwrap_or("-")
+            "-"
         )?;
+        writeln!(w, "op-center")?;
+        write_blob(w, op.source_center.as_deref().unwrap_or(""))?;
         write_blob(w, &op.before)?;
         write_blob(w, &op.after)?;
         write_blob(w, &op.source_trace_ids.join("\t"))?;
         write_blob(w, &op.source_axiom_ids.join("\t"))?;
     }
+    writeln!(w, "interpretation {} {}", t.interpretation.valence, t.interpretation.confidence)?;
+    write_blob(w, &t.interpretation.statement)?;
     writeln!(w, "sem {} {}", t.semantic.polarity, t.semantic.confidence)?;
     write_blob(w, &t.semantic.claim)?;
     write_blob(w, &t.semantic.entities.join("\t"))?;
@@ -435,7 +461,7 @@ fn read_trace(r: &mut (impl BufRead + Seek)) -> io::Result<MemoryTrace> {
             Vec::new()
         }
     };
-    let core = read_blob(r).unwrap_or_default();
+    let core = read_blob(r)?;
     let anchor = {
         let line = read_line(r).unwrap_or_default();
         line.strip_prefix("anchor ")
@@ -528,6 +554,7 @@ fn read_trace(r: &mut (impl BufRead + Seek)) -> io::Result<MemoryTrace> {
         trace.stake_mark = m;
         trace.absence = a;
     }
+    if next_line_starts_with(r, "stake-mark")? { read_line(r)?; trace.stake_mark = read_blob(r)?; }
     if next_line_starts_with(r, "ops ")? {
         let line = read_line(r).unwrap_or_default();
         let n: usize = line.strip_prefix("ops ").unwrap_or("0").trim().parse().unwrap_or(0);
@@ -537,17 +564,19 @@ fn read_trace(r: &mut (impl BufRead + Seek)) -> io::Result<MemoryTrace> {
             if hp.len() < 6 || hp[0] != "op" {
                 return fail(format!("malformed op: {head}"));
             }
+            let center = if next_line_starts_with(r, "op-center")? {
+                read_line(r)?; empty_none(read_blob(r)?)
+            } else { if hp[5] == "-" { None } else { Some(hp[5].to_string()) } };
             let before = read_blob(r)?;
             let after = read_blob(r)?;
             let traces = read_blob(r)?;
             let axioms = read_blob(r)?;
-            let center = hp[5];
             trace.operations.push(MemoryOperation {
                 kind: hp[1].replace('_', " "),
                 at: hp[2].parse().unwrap_or(0),
                 source_trace_ids: if traces.is_empty() { Vec::new() } else { traces.split('\t').map(|s| s.to_string()).collect() },
                 source_axiom_ids: if axioms.is_empty() { Vec::new() } else { axioms.split('\t').map(|s| s.to_string()).collect() },
-                source_center: if center == "-" { None } else { Some(center.to_string()) },
+                source_center: center,
                 before,
                 after,
                 confidence: hp[3].parse().unwrap_or(1.0),
@@ -555,30 +584,36 @@ fn read_trace(r: &mut (impl BufRead + Seek)) -> io::Result<MemoryTrace> {
             });
         }
     }
-    if let Some(op) = trace.operations.iter().find(|o| o.kind == "encode") {
+    if let Some(op) = trace.operations.iter().rev().find(|o| o.kind == "encode" || o.kind == "reinterpret") {
         trace.interpretation.statement = op.after.clone();
         trace.interpretation.confidence = op.confidence;
+    }
+    if next_line_starts_with(r, "interpretation ")? {
+        let line = read_line(r)?;
+        let p: Vec<_> = line.split_whitespace().collect();
+        if p.len() != 3 { return fail("malformed interpretation"); }
+        trace.interpretation.valence = p[1].parse().map_err(invalid)?;
+        trace.interpretation.confidence = p[2].parse().map_err(invalid)?;
+        trace.interpretation.statement = read_blob(r)?;
     }
     if next_line_starts_with(r, "sem ")? {
         let line = read_line(r).unwrap_or_default();
         let hp: Vec<&str> = line.split_whitespace().collect();
-        let claim = read_blob(r).unwrap_or_default();
-        let entities = read_blob(r).unwrap_or_default();
-        let actions = read_blob(r).unwrap_or_default();
+        let claim = read_blob(r)?;
+        let entities = read_blob(r)?;
+        let actions = read_blob(r)?;
         trace.semantic.polarity = hp.get(1).and_then(|s| s.parse().ok()).unwrap_or(trace.valence);
         trace.semantic.confidence = hp.get(2).and_then(|s| s.parse().ok()).unwrap_or(0.55);
-        trace.semantic.claim = if claim.is_empty() { trace.core.clone() } else { claim };
+        trace.semantic.claim = claim;
         trace.semantic.entities = if entities.is_empty() { Vec::new() } else { entities.split('\t').map(|s| s.to_string()).collect() };
         trace.semantic.actions = if actions.is_empty() { Vec::new() } else { actions.split('\t').map(|s| s.to_string()).collect() };
     }
     if next_line_starts_with(r, "real ")? {
         let line = read_line(r).unwrap_or_default();
         let verifiable = line.split_whitespace().nth(1).map(|s| s == "1").unwrap_or(false);
-        let claim = read_blob(r).unwrap_or_default();
+        let claim = read_blob(r)?;
         trace.reality.verifiable = verifiable;
-        if !claim.is_empty() {
-            trace.reality.claim = claim;
-        }
+        trace.reality.claim = claim;
         trace.reality.observation_id = trace.observation_id.clone();
     }
     if next_line_starts_with(r, "observation")? {
@@ -696,7 +731,7 @@ fn read_axiom(r: &mut (impl BufRead + Seek)) -> io::Result<(IdentityAxiom,bool)>
         Some((kind,bearer,loss,read_blob(r)?))
     }else{None};
     let statement = read_blob(r)?;
-    let schema = empty_none(read_blob(r).unwrap_or_default());
+    let schema = empty_none(read_blob(r)?);
     let mut support = Vec::with_capacity(n_sup);
     for _ in 0..n_sup {
         let line = read_line(r)?;

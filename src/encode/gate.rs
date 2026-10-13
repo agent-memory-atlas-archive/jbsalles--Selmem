@@ -79,6 +79,9 @@ pub fn encode_with_interpreter(
             kept_n: 0,
         };
     }
+    if store.embedding_space.as_deref() != Some(embedder.space_id().as_str()) {
+        store.reindex(embedder);
+    }
     if parts.len() == 1 {
         return encode_one(store, profile, input, embedder, None);
     }
@@ -201,7 +204,10 @@ fn encode_one(
     novelty_vs: Option<(&Vec<Vec<f32>>, &Vec<String>)>,
 ) -> EncodeDecision {
     let embedding = embedder.embed(input.event);
-    let nov = if let Some((existing, gists)) = novelty_vs {
+    let nov = if embedding.is_empty() {
+        let gists: Vec<String> = novelty_vs.map(|(_, g)| g.clone()).unwrap_or_else(|| store.traces.values().map(|t| t.gist.clone()).collect());
+        novelty(input.event, &gists)
+    } else if let Some((existing, gists)) = novelty_vs {
         if existing.is_empty() {
             novelty(input.event, gists)
         } else {

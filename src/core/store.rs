@@ -4,6 +4,8 @@ use crate::core::model::{ArchiveRecord, Channel, IdentityAxiom, MemoryTrace, Sch
 
 #[derive(Default)]
 pub struct MemoryStore {
+    /// Vector coordinate space. Missing legacy provenance requires reindexing.
+    pub embedding_space: Option<String>,
     pub observation_evidence: super::evidence::ObservationEvidence,
     pub associations: super::association::AssociationGraph,
     pub traces: HashMap<String, MemoryTrace>,
@@ -23,7 +25,16 @@ pub struct MemoryStore {
 
 impl MemoryStore {
     pub fn new() -> Self {
-        Self::default()
+        Self { embedding_space: Some("hash96-v1".into()), ..Self::default() }
+    }
+
+    /// Backend changes rebuild vectors; equal dimensions do not establish a common space.
+    pub fn reindex(&mut self, embedder: &dyn crate::encode::embed::Embedder) {
+        for id in self.active_ids() {
+            let t = self.traces.get_mut(&id).unwrap();
+            t.embedding = embedder.embed(&t.gist);
+        }
+        self.embedding_space = Some(embedder.space_id());
     }
 
     pub fn add_archive(&mut self, record: ArchiveRecord) -> String {

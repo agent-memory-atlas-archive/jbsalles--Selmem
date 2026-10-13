@@ -59,7 +59,7 @@ fn main() {
                     mem.talk.record(&t.user, &t.reply);
                 }
                 mem.talk.topic = topic;
-                let _ = mem.save();
+                if let Err(e) = mem.save() { eprintln!("memory persistence failed: {e}"); std::process::exit(1); }
                 println!("(kept sitting {})", kept);
                 println!(
                     "(nuit) sculpted={} merged={} extinguished={} axioms={}",
@@ -100,7 +100,7 @@ fn main() {
             }
             _ => {
                 let reply = mem.speak(line);
-                let _ = mem.save();
+                if let Err(e) = mem.save() { eprintln!("memory persistence failed: {e}"); std::process::exit(1); }
                 println!("{reply}");
             }
         }

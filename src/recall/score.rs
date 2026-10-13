@@ -1,6 +1,6 @@
 //! Outside the organ. Sees the sealed claim and one sentence. Does not write.
 
-use crate::net::httpx::{extract_json_string, json_esc, post_json};
+use crate::net::httpx::{scorer_answer, json_esc, post_json};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PropositionLabel {
@@ -19,7 +19,7 @@ impl PropositionLabel {
     }
 
     pub fn parse(s: &str) -> Self {
-        let w = s.split_whitespace().next().unwrap_or("").to_ascii_lowercase();
+        let w = s.trim().to_ascii_lowercase();
         match w.as_str() {
             "entail" | "entails" | "same" => Self::Entail,
             "contradict" | "contradicts" | "contradiction" => Self::Contradict,
@@ -66,21 +66,33 @@ impl HttpScorer {
     }
 }
 
-impl PropositionScorer for HttpScorer {
-    fn score(&self, claim: &str, sentence: &str) -> PropositionLabel {
+impl HttpScorer {
+    fn request_body(&self, claim: &str, sentence: &str, effort: &str) -> String {
         let system = "Reply with one word: entail, contradict, or unknown. The claim is sealed. Do not rewrite it.";
         let user = format!("CLAIM:\n{claim}\nSENTENCE:\n{sentence}");
-        let body = format!(
-            "{{\"model\":\"{}\",\"temperature\":0,\"max_tokens\":8,\"messages\":[{{\"role\":\"system\",\"content\":\"{}\"}},{{\"role\":\"user\",\"content\":\"{}\"}}]}}",
+        let extra = if effort.is_empty() || effort == "off" { String::new() } else { format!(",\"reasoning_effort\":\"{}\"", json_esc(&effort)) };
+        let cap = super::http::token_cap_field(&self.url, &self.model);
+        let model = self.model.to_ascii_lowercase();
+        let reasoning_model = ["gpt-5", "gpt-6", "o1", "o3", "o4"].iter().any(|prefix| model.starts_with(prefix));
+        let temperature = if reasoning_model { "" } else { "\"temperature\":0," };
+        let budget = if effort != "none" && effort != "off" && !effort.is_empty() { 2048 } else { 128 };
+        format!(
+            "{{\"model\":\"{}\",{temperature}\"{cap}\":{budget}{extra},\"messages\":[{{\"role\":\"system\",\"content\":\"{}\"}},{{\"role\":\"user\",\"content\":\"{}\"}}]}}",
             json_esc(&self.model),
             json_esc(system),
             json_esc(&user)
-        );
+        )
+    }
+}
+
+impl PropositionScorer for HttpScorer {
+    fn score(&self, claim: &str, sentence: &str) -> PropositionLabel {
+        let body = self.request_body(claim, sentence, &crate::config::Config::get().reasoning());
         let raw = match post_json(&self.url, self.api_key.as_deref(), &body) {
             Ok(s) => s,
             Err(_) => return PropositionLabel::Unknown,
         };
-        let text = extract_json_string(&raw, "content").unwrap_or_default();
+        let text = scorer_answer(&raw).unwrap_or_default();
         if text.contains(claim) || text.contains(sentence) {
             return PropositionLabel::Unknown;
         }
@@ -89,5 +101,16 @@ impl PropositionScorer for HttpScorer {
 
     fn name(&self) -> &str {
         &self.model
+    }
+}
+
+#[cfg(test)]
+mod compatibility_tests {
+    use super::*;
+    #[test]
+    fn requests_use_completion_caps_and_respect_reasoning_policy() {
+        let gpt=HttpScorer::parse("https://api.openai.com/v1/chat/completions","gpt-5",None).unwrap();
+        let body=gpt.request_body("claim","sentence","low");assert!(body.contains("\"max_completion_tokens\":2048"));assert!(body.contains("\"reasoning_effort\":\"low\""));assert!(!body.contains("temperature"));assert!(!body.contains("\"max_tokens\""));
+        let grok=HttpScorer::parse("https://api.x.ai/v1/chat/completions","grok",None).unwrap();let body=grok.request_body("claim","sentence","off");assert!(body.contains("\"max_tokens\":128"));assert!(body.contains("\"temperature\":0"));assert!(!body.contains("reasoning_effort"));
     }
 }
