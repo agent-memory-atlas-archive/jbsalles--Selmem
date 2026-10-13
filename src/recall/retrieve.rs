@@ -138,7 +138,9 @@ pub fn recall_with(
     marked: &[String],
     scorer: &dyn crate::recall::PropositionScorer,
 ) -> RecallOutcome {
-    let query_embedding = embedder.embed(query);
+    let query_embedding = if store.embedding_space.as_deref() == Some(embedder.space_id().as_str()) {
+        embedder.embed(query)
+    } else { Vec::new() };
     let live = write == RecallWrite::Live;
     let cloud = context_cloud(store, query, &query_embedding);
     let ids: Vec<String> = store.active_ids();
@@ -466,6 +468,16 @@ pub fn recall_with(
     // Attach provenance-derived counts only after reconstruction/grounding and
     // co-recall learning. They never enter gist write-back or the frozen core.
     for memory in &mut recalled {
+        if let Some(trace) = store.traces.get_mut(&memory.trace_id) {
+            if write == RecallWrite::Live && before.iter().any(|old| old.id == trace.id && old.gist != trace.gist) {
+                trace.embedding = embedder.embed(&trace.gist);
+            }
+            // Subjective revision is available to the policy, never written into factual gist.
+            if trace.operations.iter().any(|op| op.kind == "reinterpret") {
+                memory.narrative.push_str("\n[Tentative interpretation; not an observed fact] ");
+                memory.narrative.push_str(&trace.interpretation.statement);
+            }
+        }
         if let Some(metadata) = store.observation_evidence.render(store, &memory.trace_id) {
             memory.narrative.push_str("\n");
             memory.narrative.push_str(&metadata);

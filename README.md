@@ -341,6 +341,8 @@ Not RAG. Not a vector database. Not a personality in a system prompt.\
 Not a brain. A loop (select → reconstruct → sleep) around a next-token transducer.\
 No local neural encoder ships in-tree: pass `--embed` if you have one.
 
+Clock isolation, durable saves, reinterpretation and snapshot migration guarantees are documented in [Organ integrity](docs/ORGAN_INTEGRITY.md).
+
 ## How it's built
 
 Humans own architecture, concepts and governance. Models draft code, tests, and prose. Generated patches are reviewed.

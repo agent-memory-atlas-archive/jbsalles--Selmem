@@ -94,11 +94,30 @@ impl SelectiveMemory {
     pub fn open(path: impl AsRef<Path>, profile: EntityProfile) -> std::io::Result<Self> {
         let path = path.as_ref().to_path_buf();
         if path.exists() {
-            let snap = if is_sqlite(&path) {
+            let mut snap = if is_sqlite(&path) {
                 crate::persist::sqlite::load(&path)?
             } else {
                 persist::load(&path)?
             };
+            // Runtime defaults to hash. Never compare saved remote vectors with hash queries.
+            let hash = HashEmbedder;
+            if snap.store.embedding_space.as_deref() != Some(hash.space_id().as_str()) {
+                for t in snap.store.traces.values_mut() { t.embedding = hash.embed(&t.gist); }
+                snap.store.embedding_space = Some(hash.space_id());
+            }
+            let mut clock = MemoryClock {
+                origin_real: if snap.clock_origin == 0 { MemoryClock::default().origin_real } else { snap.clock_origin },
+                jump: snap.clock_jump, scale: snap.clock_scale.clamp(1,200), detached: true,
+            };
+            // Legacy attached saves lost the process jump. Preserve at least their recorded timeline.
+            if snap.clock_origin == 0 || !snap.clock_detached {
+                let latest = snap.store.traces.values().flat_map(|t| std::iter::once(t.created_at)
+                    .chain(t.last_recalled_at).chain(t.last_consolidated_at)
+                    .chain(t.drifts.iter().map(|d| d.at)).chain(t.operations.iter().map(|o| o.at)))
+                    .chain(snap.store.axioms.values().map(|a| a.created_at))
+                    .chain(snap.store.last_deep_at).max().unwrap_or(0);
+                clock.jump = clock.jump.saturating_add(latest.saturating_sub(clock.now()));
+            }
             Ok(Self {
                 profile: snap.profile,
                 store: snap.store,
@@ -112,16 +131,7 @@ impl SelectiveMemory {
             semantic_interpreter: None,
                 embedder: Box::new(HashEmbedder),
                 seed: 0,
-                clock: MemoryClock {
-                    origin_real: if snap.clock_origin == 0 {
-                        crate::core::model::now_secs()
-                    } else {
-                        snap.clock_origin
-                    },
-                    jump: snap.clock_jump,
-                    scale: snap.clock_scale.max(1),
-                    detached: snap.clock_detached,
-                },
+                clock,
                 mouth_epoch: 0,
                 mouth_held: false,
                 scorer: None,
@@ -234,6 +244,8 @@ impl SelectiveMemory {
     }
 
     pub fn with_embedder(mut self, embedder: Box<dyn Embedder>) -> Self {
+        // A backend switch is an explicit reindex, including equal-dimensional spaces.
+        self.store.reindex(embedder.as_ref());
         self.embedder = embedder;
         self
     }
@@ -1040,6 +1052,7 @@ impl SelectiveMemory {
 
     /// Directed forgetting. The hour stays on the book; default recall skips it.
     pub fn suppress(&mut self, trace_id: &str) -> bool {
+        let _clock = self.enter_clock();
         let Some(t) = self.store.traces.get_mut(trace_id) else {
             return false;
         };
@@ -1060,6 +1073,7 @@ impl SelectiveMemory {
 
     /// Revise the interpretation. The archive and the reality claim stay.
     pub fn reinterpret(&mut self, trace_id: &str, statement: &str) -> bool {
+        let _clock = self.enter_clock();
         let statement = statement.trim();
         if statement.is_empty() {
             return false;
@@ -1073,7 +1087,6 @@ impl SelectiveMemory {
         }
         t.interpretation.statement = statement.to_string();
         t.interpretation.confidence = (t.interpretation.confidence * 0.85).clamp(0.2, 1.0);
-        t.semantic.claim = statement.to_string();
         t.record_operation(crate::core::model::MemoryOperation {
             kind: "reinterpret".into(),
             at: crate::core::model::now_secs(),

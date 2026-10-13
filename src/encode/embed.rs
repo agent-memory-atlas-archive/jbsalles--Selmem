@@ -29,6 +29,7 @@ impl Default for EmbedLog {
 }
 
 pub trait Embedder: Send + Sync {
+    fn space_id(&self) -> String { std::any::type_name::<Self>().to_string() }
     fn embed(&self, text: &str) -> Vec<f32> {
         match self.embed_result(text) {
             EmbeddingResult::External(v) | EmbeddingResult::Fallback(v) => v,
@@ -48,7 +49,6 @@ pub struct HttpEmbedder {
     pub model: String,
     pub api_key: Option<String>,
     log: std::sync::Mutex<EmbedLog>,
-    fallback: HashEmbedder,
 }
 
 impl HttpEmbedder {
@@ -65,12 +65,12 @@ impl HttpEmbedder {
             }),
             model,
             api_key,
-            fallback: HashEmbedder,
         })
     }
 }
 
 impl Embedder for HttpEmbedder {
+    fn space_id(&self) -> String { format!("http:{}:{}", self.url, self.model) }
     fn embed_result(&self, text: &str) -> EmbeddingResult {
         let body = format!(
             "{{\"model\":\"{}\",\"input\":\"{}\"}}",
@@ -82,7 +82,7 @@ impl Embedder for HttpEmbedder {
         }
         match post_json(&self.url, self.api_key.as_deref(), &body) {
             Ok(raw) => match extract_json_array_f32(&raw, "embedding") {
-                Some(v) if !v.is_empty() => EmbeddingResult::External(v),
+                Some(v) if !v.is_empty() && v.iter().all(|x| x.is_finite()) && v.iter().any(|x| *x != 0.0) => EmbeddingResult::External(v),
                 _ => self.fell_back(text, "unreadable embedding"),
             },
             Err(e) => self.fell_back(text, &e),
@@ -95,18 +95,20 @@ impl Embedder for HttpEmbedder {
 }
 
 impl HttpEmbedder {
-    fn fell_back(&self, text: &str, err: &str) -> EmbeddingResult {
+    fn fell_back(&self, _text: &str, err: &str) -> EmbeddingResult {
         if let Ok(mut log) = self.log.lock() {
             log.fallback_used = true;
-            log.backend = "hash".into();
+            log.backend = "lexical".into();
             log.error = Some(err.to_string());
         }
         eprintln!("selmem embed fallback: {err}");
-        EmbeddingResult::Fallback(self.fallback.embed(text))
+        // Empty vectors force lexical retrieval; hash and remote spaces must never mix.
+        EmbeddingResult::Fallback(Vec::new())
     }
 }
 
 impl Embedder for HashEmbedder {
+    fn space_id(&self) -> String { "hash96-v1".into() }
     fn embed_result(&self, text: &str) -> EmbeddingResult {
         EmbeddingResult::External(self.embed_hash(text))
     }
@@ -194,4 +196,15 @@ pub fn novelty_emb(query: &[f32], existing: &[Vec<f32>]) -> f32 {
         .map(|e| cosine(query, e))
         .fold(0.0_f32, f32::max);
     (1.0 - nearest).clamp(0.0, 1.0)
+}
+
+#[cfg(test)]
+mod consistency_tests {
+    use super::*;
+    #[test]
+    fn provider_failure_cannot_smuggle_hash_vectors_into_remote_space() {
+        let e=HttpEmbedder::parse("http://localhost:1/embeddings","remote",None).unwrap();
+        match e.fell_back("some text","injected outage") {EmbeddingResult::Fallback(v)=>assert!(v.is_empty()),_=>panic!("expected fallback")}
+        assert!(e.embed_log().fallback_used);assert_eq!(e.embed_log().backend,"lexical");assert!(e.space_id().contains("remote"));
+    }
 }

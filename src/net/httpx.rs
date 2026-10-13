@@ -432,3 +432,44 @@ mod tests {
         assert!(n > 4);
     }
 }
+
+/// Scorers accept only the first choice's explicit message.content answer.
+/// Reasoning/tool text and sibling choices cannot stand in for a missing label.
+pub(crate) fn scorer_answer(body: &str) -> Option<String> {
+    fn object_end(s: &str) -> Option<usize> {
+        let mut depth=0usize; let mut quoted=false; let mut escaped=false;
+        for (i,c) in s.char_indices() {
+            if quoted { if escaped {escaped=false;} else if c=='\\' {escaped=true;} else if c=='"' {quoted=false;} continue; }
+            match c { '"'=>quoted=true, '{'|'['=>depth+=1, '}'|']'=>{depth=depth.checked_sub(1)?;if depth==0{return Some(i+1);}},_=>{} }
+        }
+        None
+    }
+    fn field<'a>(s: &'a str, key:&str)->Option<&'a str> {
+        let mut depth=0usize; let mut i=0;
+        while i<s.len() {
+            match s.as_bytes()[i] {
+                b'"'=>{let (name,n)=parse_json_string(&s[i..])?;let after=s[i+n..].trim_start();if depth==1 && name==key && after.starts_with(':'){return Some(after[1..].trim_start());}i+=n;},
+                b'{'|b'['=>{depth+=1;i+=1;},b'}'|b']'=>{depth=depth.checked_sub(1)?;i+=1;},_=>i+=1,
+            }
+        }
+        None
+    }
+    let body=body.trim(); if !body.starts_with('{') || object_end(body)?!=body.len(){return None;}
+    let choices=field(body,"choices")?;if !choices.starts_with('['){return None;}
+    let first=choices[1..].trim_start();if !first.starts_with('{'){return None;}
+    let first=&first[..object_end(first)?];let message=field(first,"message")?;if !message.starts_with('{'){return None;}
+    let message=&message[..object_end(message)?];let answer=field(message,"content")?;
+    if !answer.starts_with('"'){return None;}parse_json_string(answer).map(|(s,_)|s)
+}
+
+#[cfg(test)]
+mod scorer_answer_tests {
+    use super::scorer_answer;
+    #[test]
+    fn labels_require_the_explicit_first_answer() {
+        assert_eq!(scorer_answer(r#"{"content":"contradict","choices":[{"message":{"reasoning_content":"contradict","content":"entail"}}]}"#).as_deref(),Some("entail"));
+        assert!(scorer_answer(r#"{"choices":[{"message":{"content":null,"reasoning_content":"entail"}},{"message":{"content":"entail"}}]}"#).is_none());
+        assert!(scorer_answer(r#"{"content":"entail"}"#).is_none());
+        assert!(scorer_answer(r#"{"choices":[{"message":{"content":"entail"}}]"#).is_none());
+    }
+}

@@ -127,7 +127,7 @@ fn dispatch_for(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             let learn = json_bool(body, "associations_learn").unwrap_or(mem.store.associations.learn);
             let reconstruct = json_bool(body, "associations_reconstruct").unwrap_or(mem.store.associations.reconstruct);
             mem.set_associations(learn, reconstruct);
-            let _ = mem.save();
+            if let Err(e) = mem.save() { return err(500, &format!("memory persistence failed: {e}")); }
             ok(profile_json(mem))
         }
         ("GET", "/llm") => ok(llm_json(mem, visitor)),
@@ -239,7 +239,7 @@ fn dispatch_for(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             }
             // Chat stays in the sitting. The gate runs at sleep (or pin).
             let reply = mem.speak(&text);
-            let _ = mem.save();
+            if let Err(e) = mem.save() { return err(500, &format!("memory persistence failed: {e}")); }
             ok(format!(
                 "{{\"reply\":\"{}\",\"topic\":\"{}\",\"mood\":{{\"valence\":{:.3},\"arousal\":{:.3},\"disgust\":{:.3}}}}}",
                 json_esc(&reply),
@@ -270,7 +270,7 @@ fn dispatch_for(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             if let Some(id) = dec.trace_id.as_deref() {
                 let _ = mem.pin(id);
             }
-            let _ = mem.save();
+            if let Err(e) = mem.save() { return err(500, &format!("memory persistence failed: {e}")); }
             ok(format!(
                 "{{\"kept\":{},\"score\":{:.4},\"reason\":\"{}\",\"pinned\":\"{}\",\"topic\":\"{}\"}}",
                 if dec.kept { "true" } else { "false" },
@@ -286,7 +286,7 @@ fn dispatch_for(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 return err(400, "id requis");
             }
             let ok_flag = mem.suppress(&id);
-            let _ = mem.save();
+            if let Err(e) = mem.save() { return err(500, &format!("memory persistence failed: {e}")); }
             ok(format!("{{\"ok\":{},\"id\":\"{}\"}}", if ok_flag { "true" } else { "false" }, json_esc(&id)))
         }
         ("POST", "/unsuppress") => {
@@ -295,7 +295,7 @@ fn dispatch_for(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 return err(400, "id requis");
             }
             let ok_flag = mem.unsuppress(&id);
-            let _ = mem.save();
+            if let Err(e) = mem.save() { return err(500, &format!("memory persistence failed: {e}")); }
             ok(format!("{{\"ok\":{},\"id\":\"{}\"}}", if ok_flag { "true" } else { "false" }, json_esc(&id)))
         }
         ("POST", "/live") => {
@@ -344,7 +344,7 @@ fn dispatch_for(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 };
             }
             let d = mem.live_with(input);
-            let _ = mem.save();
+            if let Err(e) = mem.save() { return err(500, &format!("memory persistence failed: {e}")); }
             let tid = d.trace_id.as_deref().unwrap_or("");
             ok(format!(
                 "{{\"kept\":{},\"score\":{:.4},\"reason\":\"{}\",\"trace_id\":\"{}\",\"archive_id\":\"{}\"}}",
@@ -361,7 +361,7 @@ fn dispatch_for(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 return err(400, "query requis");
             }
             let recs = mem.remember(&query_txt);
-            let _ = mem.save();
+            if let Err(e) = mem.save() { return err(500, &format!("memory persistence failed: {e}")); }
             let items: Vec<String> = recs
                 .iter()
                 .map(|r| {
@@ -391,7 +391,7 @@ fn dispatch_for(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 mem.talk.record(&t.user, &t.reply);
             }
             mem.talk.topic = topic;
-            let _ = mem.save();
+            if let Err(e) = mem.save() { return err(500, &format!("memory persistence failed: {e}")); }
             ok(format!(
                 "{{\"faded\":{},\"cold\":{},\"myth\":{},\"merged\":{},\"extinguished\":{},\"weathered\":{},\"rewritten\":{},\"released\":{},\"sculpted\":{},\"axioms\":{},\"sitting\":{},\"kind\":\"{}\",\"new_hours\":{},\"charge\":{:.3},\"hours_advanced\":{},\"time_scale\":{},\"now\":{}}}",
                 report.faded,
@@ -421,7 +421,7 @@ fn dispatch_for(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
                 return err(400, "text requis");
             }
             let reply = mem.speak(&user);
-            let _ = mem.save();
+            if let Err(e) = mem.save() { return err(500, &format!("memory persistence failed: {e}")); }
             ok(format!(
                 "{{\"reply\":\"{}\",\"topic\":\"{}\"}}",
                 json_esc(&reply),
@@ -688,7 +688,7 @@ fn llm_json(mem: &SelectiveMemory, visitor: bool) -> String {
 }
 
 fn memory_time_scale(mem: &SelectiveMemory) -> u32 {
-    if mem.clock.detached { mem.clock.scale } else { crate::core::model::clock_scale() }
+    mem.clock.scale
 }
 
 fn profile_json(mem: &SelectiveMemory) -> String {

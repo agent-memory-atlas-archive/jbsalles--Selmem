@@ -175,7 +175,7 @@ fn merge_decision(
     b: &crate::core::model::MemoryTrace,
 ) -> MergeDecision {
     let semantic_similarity = lexical_similarity(&a.gist, &b.gist);
-    let temporal_distance = (a.created_at as f32 - b.created_at as f32).abs() / 3600.0;
+    let temporal_distance = (a.created_at.abs_diff(b.created_at) as f64 / 3600.0) as f32;
     let affective_difference = (a.valence - b.valence)
         .abs()
         .max((a.disgust - b.disgust).abs());

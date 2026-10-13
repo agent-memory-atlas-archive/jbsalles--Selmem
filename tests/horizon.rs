@@ -19,7 +19,7 @@ mod echo;
 use std::sync::Mutex;
 
 use selmem::{
-    advance_hours, fingerprint, set_clock_scale, singularity_distance, Channel, EncodeInput,
+    fingerprint, set_clock_scale, singularity_distance, Channel, EncodeInput,
     EntityProfile, RecallBias, RecallWrite, SelectiveMemory, TraceStatus,
 };
 
@@ -258,13 +258,15 @@ fn horizon_year_one_stream() {
             }
             shared_day(&mut a, n);
             shared_day(&mut b, n);
-            advance_hours(24.0);
+            a.advance_hours(24.0);
+            b.advance_hours(24.0);
             night(&mut a);
             night(&mut b);
         }
         // Quiet fortnight so yesterday's sitting is not the whole mouth.
         for _ in 0..14 {
-            advance_hours(24.0);
+            a.advance_hours(24.0);
+            b.advance_hours(24.0);
             night(&mut a);
             night(&mut b);
         }
@@ -461,7 +463,8 @@ fn horizon_neutral_t0() {
             }
             shared_day(&mut a, n);
             shared_day(&mut b, n);
-            advance_hours(24.0);
+            a.advance_hours(24.0);
+            b.advance_hours(24.0);
             night(&mut a);
             night(&mut b);
         }
