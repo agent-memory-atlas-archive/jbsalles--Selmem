@@ -55,12 +55,7 @@ ceiling is an attempt budget, not a monetary cap. This reduces work by reusing
 the existing 788-turn encoding. Actual latency and price depend on responses,
 provider load and retries; no dollar or duration guarantee is made.
 
-## Apply and run
-
-Apply the release's `apply.sh` from the repository root. The patch only adds
-new paths. It is suitable alongside the previous semantic fix and Rust tools;
-no old patch needs to be reversed. An incompatible local file is left intact
-and causes installation to stop.
+## Run from the repository root
 
 The completed preview folder must contain its original `preview-design.json`,
 `preview.json`, `all-proposals.json`, `contexts/` and `checkpoints/`.

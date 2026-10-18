@@ -1,0 +1,19 @@
+{
+  "run": "memory-influence-005",
+  "scope": "Compact publication export, not a resumable run archive. No independent creativity ratings are included.",
+  "original_files": [
+    {
+      "path": "design.json",
+      "sha256": "6a1a6580559fa64078e7c3a6f17a76a23715364451ead4bb97ac0f5923aedf7f"
+    },
+    {
+      "path": "all-proposals.json",
+      "sha256": "e20dfa5dacac12640ee36228b3af9952c7a720800249ad6b5d1259b69dd8284c"
+    },
+    {
+      "path": "blind-proposals.json",
+      "sha256": "bd40dfc1d4c9a6c748d1518059c55fe7e3ebab7ef647308c3236480db3e661c7"
+    }
+  ],
+  "raw_source_archive": "Retained locally under experiments/genesis/results; not committed or repackaged with source."
+}

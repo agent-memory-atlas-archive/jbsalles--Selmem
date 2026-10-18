@@ -1,12 +1,24 @@
-# Retained experiments
+# Reproducible experiments
 
-The maintained experiment paths are:
+The retained source covers model qualification, cumulative learning, sleep, conversation-derived strategy, creative generation and memory-guided response selection. All experiment implementations and offline analyzers are Rust; shell launchers are convenience wrappers.
 
-1. [GENESIS](genesis/README.md): qualify a decision model, then test cumulative learning with observation support OFF/ON.
-2. [LoCoMo strategy](../docs/LOCOMO_STRATEGY.md): external conversation-derived strategy, design and factual probes.
+| Experiment | Purpose | Entry point |
+| --- | --- | --- |
+| Qualification and learning | Check decision competence, then compare observation support OFF/ON | [GENESIS](genesis/README.md) |
+| Sleep | Compare equal-time no-sleep, ordinary sleep and forced-deep controls | [Sleep protocol](genesis/SLEEP.md) |
+| Guarded creative preview | Fresh encoding, ten nights per history, five conditions, 60 proposals | [Guarded preview](genesis/CREATIVE_PREVIEW_GUARDED.md) |
+| Fixed-selection creative replays | Isolate task-blind readout, then structured memory delivery; 72 proposals per lot | [Replay](genesis/CREATIVE_REPLAY.md), [structured rerun](genesis/CREATIVE_MEMORY_REPLAY.md) |
+| Response selection | Separate candidate generation, task-only quality and anonymous grounding | [Influence diagnostic](genesis/MEMORY_INFLUENCE.md) |
+| Longitudinal creative life | Preserved economy/full plans: 600 / 6,480 proposals | [Creative life](genesis/CREATIVE_LIFE.md) |
+| Historical creative transfer | Original four-condition assay and target/sham follow-up | [Creative transfer](genesis/CREATIVITY.md) |
+| LoCoMo strategy | Conversation-derived strategy, design and factual probes | [Strategy protocol](../docs/LOCOMO_STRATEGY.md) |
 
-[RESULTS.md](RESULTS.md) records the known observations and limits. Old narrative demos, P0–P67 grids, witnesses, AMA adapters and GENESIS troubleshooting commands have been retired. Their raw evidence remains in the separately supplied history archive and the original Git history; they are not active commands.
+**Results:** [ledger](RESULTS.md), [creativity findings](CREATIVITY_RESULTS.md), [static showcase](../docs/experiments.html), [compact evidence](evidence/README.md).
 
-Generated runs do not belong in the source tree. Use fresh paths under `experiments/genesis/results/` or `experiments/strategy/`, preserve their manifests and raw responses, and archive them for analysis. Both locations are ignored by Git. No committed result should be silently overwritten or upgraded to the current code version.
+There are early qualitative indications consistent with memory-conditioned creative variation, but no demonstrated creativity advantage attributable to SelMem. Text variation, successful orchestration and a model's own quality scores are different observations.
 
-GENESIS also provides the [sleep-quality pilot](genesis/SLEEP.md): matched no-sleep/normal/deep clones, controlled learning histories and LoCoMo-derived factual probes.
+## Replay policy
+
+Use the commands in each protocol and fresh output directories. Paid collections need a private runtime configuration and provider credentials. Mock runs test orchestration only. Source hashes, model identifiers, task fixtures, reasoning settings and original responses must stay with each run.
+
+[REPRODUCIBILITY.md](REPRODUCIBILITY.md) distinguishes fresh replication, analysis of published answers and resumption of historical runs. A new build is not a way to relabel old results. Source snapshots, caches and raw paid outputs remain in separate local evidence archives; they are not deleted by this publication cleanup.

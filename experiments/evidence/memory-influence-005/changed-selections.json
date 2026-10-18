@@ -1,0 +1,41 @@
+[
+  {
+    "history": "life-a",
+    "task": "repair",
+    "repeat": 1,
+    "weight_zero": "A",
+    "weight_moderate": "B",
+    "utility_zero": 3,
+    "utility_moderate": 3,
+    "feasibility_zero": 3,
+    "feasibility_moderate": 3,
+    "originality_zero": 2,
+    "originality_moderate": 2
+  },
+  {
+    "history": "life-a",
+    "task": "exhibit",
+    "repeat": 0,
+    "weight_zero": "A",
+    "weight_moderate": "B",
+    "utility_zero": 3,
+    "utility_moderate": 2,
+    "feasibility_zero": 4,
+    "feasibility_moderate": 3,
+    "originality_zero": 1,
+    "originality_moderate": 2
+  },
+  {
+    "history": "life-a",
+    "task": "exhibit",
+    "repeat": 1,
+    "weight_zero": "A",
+    "weight_moderate": "B",
+    "utility_zero": 4,
+    "utility_moderate": 3,
+    "feasibility_zero": 4,
+    "feasibility_moderate": 4,
+    "originality_zero": 3,
+    "originality_moderate": 2
+  }
+]

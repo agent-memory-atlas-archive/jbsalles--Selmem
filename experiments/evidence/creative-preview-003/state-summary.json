@@ -1,0 +1,53 @@
+{
+  "scope": "Read-only summaries; axioms are not delivered in this preview.",
+  "states": [
+    {
+      "file": "conv-26-after-sleep.state.json",
+      "clock": 4104817200,
+      "traces": 261,
+      "latent": 113,
+      "axioms": 45,
+      "associations": 0
+    },
+    {
+      "file": "conv-26-encoded.state.json",
+      "clock": 4103953200,
+      "traces": 261,
+      "latent": 0,
+      "axioms": 0,
+      "associations": 0
+    },
+    {
+      "file": "conv-26-no-sleep.state.json",
+      "clock": 4104817200,
+      "traces": 261,
+      "latent": 0,
+      "axioms": 0,
+      "associations": 0
+    },
+    {
+      "file": "conv-30-after-sleep.state.json",
+      "clock": 4104637200,
+      "traces": 219,
+      "latent": 79,
+      "axioms": 36,
+      "associations": 0
+    },
+    {
+      "file": "conv-30-encoded.state.json",
+      "clock": 4103773200,
+      "traces": 219,
+      "latent": 0,
+      "axioms": 0,
+      "associations": 0
+    },
+    {
+      "file": "conv-30-no-sleep.state.json",
+      "clock": 4104637200,
+      "traces": 219,
+      "latent": 0,
+      "axioms": 0,
+      "associations": 0
+    }
+  ]
+}

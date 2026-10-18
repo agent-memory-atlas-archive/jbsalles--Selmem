@@ -1,0 +1,19 @@
+{
+  "run": "creative-preview-003",
+  "scope": "Compact publication export, not a resumable run archive. No independent creativity ratings are included.",
+  "original_files": [
+    {
+      "path": "preview-design.json",
+      "sha256": "305376034014a788080c572b536d2840e850608343dc160325d6d3d255e81409"
+    },
+    {
+      "path": "all-proposals.json",
+      "sha256": "e9e1b01e86ad9f37822cae52e3538246cb1be926109f4789f7e018443f641f05"
+    },
+    {
+      "path": "blind-proposals.json",
+      "sha256": "35d8ea687b05c5dc4c03f8423a69b76dae9c5df0d31e845470c4e2fa733c91bd"
+    }
+  ],
+  "raw_source_archive": "Retained locally under experiments/genesis/results; not committed or repackaged with source."
+}

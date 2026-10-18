@@ -43,6 +43,20 @@ impl Default for LlmCallLog {
 }
 
 pub trait Narrator: Send + Sync {
+    /// Latest completed selection, for single-flight diagnostics only.
+    fn response_selection_audit(&self) -> Option<String> { None }
+    fn supports_memory_context(&self) -> bool { false }
+    fn reply_with_context(&self, r: &crate::MemoryReply<'_>) -> String {
+        if r.options.format == crate::MemoryContextFormat::Structured
+            && !(r.options.episodes && r.options.dispositions && r.options.associations && r.options.affect) {
+            let c = r.filtered_context();
+            let memories: Vec<String> = c.episodes.iter().map(|e| e.narrative.clone()).collect();
+            let axioms: Vec<String> = c.dispositions.iter().map(|a| a.statement.clone())
+                .chain(c.contextual_statements.iter().map(|s| s.statement.clone())).collect();
+            return self.reply_disposed(r.user, &memories, &axioms, &c.affect.unwrap_or_default(), r.talk, "");
+        }
+        self.reply_disposed(r.user, r.memories, r.axioms, r.mood, r.talk, r.reading)
+    }
     fn failure_log(&self) -> LlmCallLog {
         LlmCallLog::default()
     }

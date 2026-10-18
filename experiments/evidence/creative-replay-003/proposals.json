@@ -1,0 +1,650 @@
+[
+  {
+    "id": "R0001",
+    "history": "conv-30",
+    "task": "community",
+    "condition": "before_sleep_guarded",
+    "repeat": 1,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "A \"Story-Circle Potluck\" meets in the empty room at 6 pm on the first Saturday. Each of six volunteers brings one dish under 5 € and a 3-minute story about a dream or setback. Participants sit in a circle; after eating, they pair with someone new for five minutes to exchange contact details and schedule a follow-up walk or coffee. Volunteers rotate facilitation, ensuring every newcomer meets at least four others. Total cost: 30 € for cups, napkins and printed name-tags; leftover budget buys tea and biscuits. No special gear needed. Within two weeks the first circle launches, creating an expanding network of recurring micro-meet-ups that keep strangers connected long-term."
+  },
+  {
+    "id": "R0002",
+    "history": "conv-26",
+    "task": "learning",
+    "condition": "after_full_guarded",
+    "repeat": 0,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Participants pair up and each duo receives a sealed envelope containing a unique household repair task (e.g., patch drywall, replace faucet washer). In session one, pairs open envelopes, pool existing knowledge, sketch steps on flip-chart paper, and list needed simple tools. They then rotate and critique other pairs’ plans. In session two, pairs perform the repair on pre-damaged practice boards or props while the remaining group watches and scores each step on a shared rubric. Success is observable: every pair either completes the repair within the hour or identifies and corrects at least three errors noted by observers, verified by a pass/fail checklist signed by two non-pair participants."
+  },
+  {
+    "id": "R0003",
+    "history": "conv-26",
+    "task": "community",
+    "condition": "before_sleep_guarded",
+    "repeat": 0,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "‘Story-Board Potluck’: Volunteers collect 300 € to buy paper, markers, snacks and a folding table. Within two weeks, on a Saturday afternoon in the empty room, they invite residents to bring one dish and one personal photograph. Each participant sticks their photo on a shared board, writes its story on sticky notes, then adds coloured threads linking photos with common themes. While the threads are woven, people chat and taste dishes. At the end the board stays on display, threads and notes forming a permanent, evolving map of connections that newcomers can read and extend. No special equipment is needed; the room’s walls provide hanging space."
+  },
+  {
+    "id": "R0004",
+    "history": "conv-30",
+    "task": "community",
+    "condition": "rag",
+    "repeat": 0,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "Organize a 'Story Stitching Circle' in the empty room. Each of the six volunteers brings one household object and one short personal story tied to it. Over two 90-minute sessions within two weeks, participants pair up, swap objects, and retell the stories they heard while stitching the objects into a single 'memory quilt' using donated fabric scraps and safety pins—no sewing skills needed. After every round, the group adds a new patch. The finished quilt stays in the room for future drop-in visits, turning strangers into neighbours who literally wove their lives together. Total cost: 25 euros for pins, thread, and snacks; the rest is time and goodwill."
+  },
+  {
+    "id": "R0005",
+    "history": "conv-26",
+    "task": "learning",
+    "condition": "after_no_recon",
+    "repeat": 0,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Twelve adults form four trios. Each trio receives one plain card: on one side they draw a simple 3-step sequence for a chosen practical skill (e.g., sewing on a button). Opposite side they draw three icons symbolizing obstacles. Trios swap cards. Using only the icons, each group devises and demonstrates a two-minute workaround without words. In the second hour trios rotate again, refine a new workaround, then present a 60-second silent skit combining the best steps from both rounds. Success is observable: every group must perform the skill flawlessly within 60 seconds using only their final skit’s sequence; peers vote thumbs-up if all steps are executed correctly without prompting."
+  },
+  {
+    "id": "R0006",
+    "history": "conv-26",
+    "task": "repair",
+    "condition": "empty",
+    "repeat": 1,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "The Broken-Objects Bazaar: 1) Lay out 20 objects on one table; attach tags for \"Try,\" \"Parts,\" or \"Display.\" 2) Participants pick one tag, work 15 min, then rotate. 3) \"Parts\" items are stripped for spares; \"Display\" become labeled art. 4) Safeguard: red \"Stop\" token—anyone may halt work on an unsafe or frustrating item. 5) Success metric: 80 % of participants mark on exit cards that they learned at least one new skill or felt welcome."
+  },
+  {
+    "id": "R0007",
+    "history": "conv-26",
+    "task": "learning",
+    "condition": "empty_two_step",
+    "repeat": 0,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Skill Swap Chain. Session 1: Adults write one skill they know and one they want on cards; cards are shuffled and each receives a new pair. In pairs, the expert demonstrates their skill for 20 min using gestures and notes; learner practices and then teaches it back. Session 2: Learners pair with new partners and teach the skill they acquired, receiving immediate feedback. Success is observable because each person must demonstrate the newly learned skill to their second partner within the hour, creating a visible chain of transmission with no external resources."
+  },
+  {
+    "id": "R0008",
+    "history": "conv-30",
+    "task": "repair",
+    "condition": "after_no_recon",
+    "repeat": 1,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Participants bring objects to a \"Fix or Find Purpose\" circle. First, everyone rates confidence (1-5) and states one hoped outcome. Tools and the table are shared; for each item a 5-minute group brainstorm decides: repair, repurpose, or safe recycle. A \"guardian\" volunteer checks safety (no sharp edges left, no toxic residue) before any item leaves. At end, each person logs the fate of their item and re-rates confidence. Success = ≥60% of objects diverted from landfill and average confidence rise ≥1 point, measured by collected logs."
+  },
+  {
+    "id": "R0009",
+    "history": "conv-30",
+    "task": "community",
+    "condition": "after_no_recon",
+    "repeat": 1,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "“Memory Moves” – a 90-minute micro-dance-and-story circle. Volunteers arrive with six simple household objects (e.g., scarf, mug). Pairs swap items, invent a 30-second movement phrase that tells how they first used that object, then teach it to the group. After four rounds everyone has shared four short stories and danced with four strangers. Cost: 30 € for snacks and printed name tags. Held in the empty room on a Saturday morning two weeks from now. No prior dance experience required; the shared objects become instant conversation starters, turning strangers into familiar faces who keep meeting weekly to expand the “object stories” into a living town archive."
+  },
+  {
+    "id": "R0010",
+    "history": "conv-30",
+    "task": "repair",
+    "condition": "before_sleep_guarded",
+    "repeat": 1,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "“Object Clinic” invites 15–20 neighbors to a two-hour outdoor session. Each brings one broken item. A shared table holds tools, spare parts, and a chalk-drawn “triage” map (easy, medium, hard). Participants form mixed pairs and spend 20 minutes diagnosing, then 40 minutes attempting repair. If an item cannot be fixed, it is photographed and placed in a clearly marked “Parts & Materials” bin for future reuse. A volunteer records every outcome on a wall chart. Success is tallied by (a) percentage of items that leave working or repurposed and (b) a one-question exit poll on confidence gained. A first-aid kit and gloves serve as the practical safeguard."
+  },
+  {
+    "id": "R0011",
+    "history": "conv-26",
+    "task": "repair",
+    "condition": "after_no_recon",
+    "repeat": 0,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Broken-Object Carnival: 1) Spread 20 broken items on one table. 2) Each participant draws an object, 90-second silent inspection, then rates repair likelihood on a 1-5 sticker. 3) Low-confidence players pair with high-confidence mentors. 4) 20-minute hands-on fixes using only hand tools; if an item stalls, it moves to the communal “parts tray.” 5) Finished items are displayed; parts-tray pieces are disassembled for spares or art. Safeguard: stop timer after 20 min to prevent frustration. Success: tally stickers pre/post—≥30 % rise in average confidence, plus ≥50 % of objects either repaired or usefully harvested, recorded on a shared whiteboard."
+  },
+  {
+    "id": "R0012",
+    "history": "conv-26",
+    "task": "community",
+    "condition": "after_full_guarded",
+    "repeat": 1,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "Transform the empty room into a “Story-Swap Café.” Six volunteers create a welcoming space with hand-drawn posters and a 300-euro budget for coffee, snacks, and small tables. Over two weekly two-hour sessions within two weeks, residents pair up using name-tag prompts (“Share a place you call home”). After five minutes, partners switch, collecting “connection stickers” for each new acquaintance. At the final gathering, participants co-create a wall-sized community map with their stickers, visually cementing new bonds. No specialist gear is needed; supplies are basic craft paper, markers, and refreshments."
+  },
+  {
+    "id": "R0013",
+    "history": "conv-30",
+    "task": "community",
+    "condition": "empty",
+    "repeat": 0,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "“Story Seeds” is a weekly storytelling circle. Each volunteer brings one inexpensive household object that reminds them of a personal memory. Over two hours in the empty room, participants sit in a circle and take turns sharing the story behind their object. Listeners may ask gentle follow-up questions. After each story, the object is placed in a shared “memory basket,” creating a growing visual record of the evening. No specialist equipment is required—only chairs, the basket, and name tags. A rotating host (one volunteer per session) keeps time and encourages quieter voices. The activity costs under 50 euros for refreshments and name tags, fits within the 300-euro budget, and can begin next week. Repeated weekly meetings foster trust and lasting friendships through repeated, low-pressure interaction."
+  },
+  {
+    "id": "R0014",
+    "history": "conv-26",
+    "task": "repair",
+    "condition": "after_no_recon",
+    "repeat": 1,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Broken-Object Swap-and-Repair: 1) Lay out the twenty objects; each participant places a green, yellow or red sticker indicating repair confidence. 2) Ten-minute huddle: share quick tips or swap objects to match skills. 3) Thirty-minute parallel repair using table and tools; anyone may stop early. 4) Objects left unrepaired become communal spare-parts or art. Safeguard: cordon off sharp or electrical hazards with tape beforehand. Success metric: count participants who attempt repair (target ≥70 %) and tally objects diverted from landfill (target ≥50 %)."
+  },
+  {
+    "id": "R0015",
+    "history": "conv-30",
+    "task": "learning",
+    "condition": "after_full_guarded",
+    "repeat": 0,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Method: 'Skill Chain Relay' – each learner receives a unique segment of the target skill and teaches it to the next during two 60-minute rounds. Round 1: 12 adults form a circle; each studies their segment for 10 min, then teaches it in 5 min to the next person, who notes it on shared paper. Round 2: the group re-forms and collectively reconstructs the full sequence from memory, correcting gaps. Success is observable when the final reconstruction matches a hidden master checklist within 5 minutes, confirmed by unanimous thumbs-up."
+  },
+  {
+    "id": "R0016",
+    "history": "conv-26",
+    "task": "repair",
+    "condition": "before_sleep_guarded",
+    "repeat": 1,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Neighborhood Fix-and-Share: Participants sort the 20 objects into three labeled bins—‘Fix Together,’ ‘Parts Harvest,’ ‘Story Share.’ A quick confidence survey steers each person to a bin. Two skilled volunteers demonstrate one safe repair on the table; others attempt similar fixes using shared tools while a timer keeps sessions short. Objects beyond quick repair are disassembled for parts or become conversation pieces in Story Share, eliminating disposal pressure. Safeguard: a posted ‘Stop Rule’ halts any task if two or more people feel unsafe. Success is measured by (1) count of objects diverted from landfill and (2) post-event survey scores on confidence gained and enjoyment; both metrics rise 20 % from baseline to mark success."
+  },
+  {
+    "id": "R0017",
+    "history": "conv-26",
+    "task": "repair",
+    "condition": "after_full_guarded",
+    "repeat": 1,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Participants bring broken items to a 'Repair or Reimagine' table. Each person first draws a quick card describing a use (tool, planter, art, etc.). They spend 15 min attempting repair with supplied tools, then 10 min adapting the object to the card prompt if repair stalls. A 'pause bell' lets anyone request group help or step away, preventing pressure. Leftover parts go into a shared-parts bin for future projects. Success is measured by counting objects that leave with a participant-assigned purpose, regardless of original function restored; a simple tally sheet records this outcome at the end."
+  },
+  {
+    "id": "R0018",
+    "history": "conv-30",
+    "task": "learning",
+    "condition": "before_sleep_guarded",
+    "repeat": 0,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Learners pick one practical skill (e.g., knot-tying). In Meeting 1, each receives a unique printed diagram. They teach their step to the next person in a 12-person relay chain, using only pen and paper for notes. Each notes the taught step and adds one improvement suggestion. After two full cycles, the group compiles the best version into a shared one-page manual. Meeting 2 repeats the relay, now racing against the manual; time-to-completion is recorded. Success is observable by comparing round-1 vs. round-2 completion times and the final manual's accuracy when tested by two volunteers."
+  },
+  {
+    "id": "R0019",
+    "history": "conv-30",
+    "task": "learning",
+    "condition": "rag",
+    "repeat": 0,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Library ‘Skill Swap Circle’: 12 adults each bring one practical skill they can teach in 5 minutes. In hour one, participants rotate in pairs, demonstrating their skill hands-on while the partner records a single illustrated step on an index card. Hour two: cards are pooled, sorted by theme, and the group collaboratively builds a shared 12-step visual manual. Success is observable when every learner can execute at least one new skill from the manual without guidance, verified by peer demonstration in the final 10 minutes."
+  },
+  {
+    "id": "R0020",
+    "history": "conv-26",
+    "task": "learning",
+    "condition": "after_no_recon",
+    "repeat": 1,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Method: “Skill Relay Cards.” Each adult writes one step of the target skill on a card. In session 1, the group silently sorts cards into a logical sequence, then practices the sequence aloud by passing cards around the circle. In session 2, teams of three use the finalized card order to teach one another, rotating roles every 12 minutes. Success is observable: a single volunteer performs the full skill in <5 minutes while the remaining eleven observers confirm each step with a checklist they created from the cards."
+  },
+  {
+    "id": "R0021",
+    "history": "conv-30",
+    "task": "repair",
+    "condition": "rag",
+    "repeat": 1,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Broken-Object Jam: 1) 20-min circle share: each person presents one item and a memory, building empathy. 2) 30-min triage: objects sorted into Repair, Repurpose, Recycle bins using a red-flag checklist (electrical, sharp, toxic). 3) 60-min stations: repair bench, craft table for new uses, and a ‘story wall’ for photos. Safeguard: any item deemed unsafe is immediately bagged for proper disposal. Success measured by tallying items diverted from landfill plus a simple 1-5 ‘confidence gained’ exit poll."
+  },
+  {
+    "id": "R0022",
+    "history": "conv-26",
+    "task": "repair",
+    "condition": "rag",
+    "repeat": 1,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Participants form pairs around the table. They sort the twenty objects into three trays: Fixable, Transform, and Parts. Only objects placed in Fixable are repaired using available tools; others are disassembled for usable parts or upcycled into a communal sculpture. A posted “Stop Rule” poster reminds everyone to halt and ask for help if they feel unsure. Pairs photograph each finished piece or sculpture element and add it to a shared album. Success is measured by the number of objects that leave the table either repaired or repurposed, plus the count of participants who report feeling more confident on a quick exit slip."
+  },
+  {
+    "id": "R0023",
+    "history": "conv-30",
+    "task": "learning",
+    "condition": "before_sleep_guarded",
+    "repeat": 1,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Method: Two 60-min micro-workshops using peer-teaching. Session 1 (Week 1): Form triads; each adult secretly chooses one practical skill (knot-tying, basic first-aid, origami). Using only paper and pens, members diagram the three-step sequence. Rotate roles: explainer, drawer, tester. Session 2 (Week 2): Groups merge into one; each triad teaches its skill in 12 min while the other nine practice and evaluate with a simple checklist (correct steps, safety, time). Success observable: every participant scores ≥80 % on another group’s checklist and can coach a new learner in <5 min. This works because distributed teaching deepens retention, peer feedback supplies immediate correction, and checklists provide visible, quantifiable mastery without external resources."
+  },
+  {
+    "id": "R0024",
+    "history": "conv-26",
+    "task": "community",
+    "condition": "after_no_recon",
+    "repeat": 1,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "Community Story Mosaic: residents bring a 10×10 cm photo or drawing of a personal memory. Over one Saturday they glue pieces into a giant wall-map while sharing the story behind each image in rotating pairs. Volunteers supply glue, markers and the empty room; 300 euros buys 50 photo frames, refreshments and printed name-tags. Each participant leaves with a framed duplicate of their tile and a group photo, ensuring repeated contact via a shared online album."
+  },
+  {
+    "id": "R0025",
+    "history": "conv-26",
+    "task": "repair",
+    "condition": "empty_two_step",
+    "repeat": 1,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Broken-Item Relay: 1) Randomly pair each participant with an object. 2) 8-minute solo attempt with hand tools. 3) If stuck, hand off to a neighbor for 4 minutes; if still stuck, label “Parts” or “Inspire” and set on table. 4) During 60-minute round, any idle person may claim a labeled item or harvest parts. 5) Timer bell every 12 minutes signals switch-or-claim. 6) End: tally repaired objects + parts reused ÷ 20 (target ≥30 %). Safeguard: volunteer time-keeper enforces bells; success logged on a visible whiteboard."
+  },
+  {
+    "id": "R0026",
+    "history": "conv-30",
+    "task": "learning",
+    "condition": "empty_two_step",
+    "repeat": 1,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Skill Swap Chain: Session 1 – each adult writes one practical skill they know and one they want to learn on separate cards; cards are shuffled so everyone receives a new card. Pairs form and teach each other for 20 minutes, then rotate. Session 2 – each person demonstrates the skill they learned to the whole group for 3 minutes. Success is observable because every participant must both teach and perform a new skill in front of peers, creating immediate, visible evidence of learning transfer."
+  },
+  {
+    "id": "R0027",
+    "history": "conv-30",
+    "task": "community",
+    "condition": "after_no_recon",
+    "repeat": 0,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "Organise a free, two-hour ‘Story-&-Step’ night. Six volunteers clear the empty room, place six second-hand chairs in a circle and borrow a €30 Bluetooth speaker. Residents arrive, each bringing one favourite song on their phone. In pairs they teach each other three signature dance moves while swapping a two-minute life story, rotating every song. After six rotations everyone has met five strangers and learned six moves. A volunteer photographs the final group routine and shares the pictures on a neighbourhood chat. Total cost: speaker and €20 snacks. The activity runs the coming Saturday evening and needs only the room, music, and goodwill."
+  },
+  {
+    "id": "R0028",
+    "history": "conv-30",
+    "task": "learning",
+    "condition": "empty_two_step",
+    "repeat": 0,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Skill Swap Chain: Session 1 (55 min). Each adult writes one practical skill they know and one they want to learn on separate cards. Cards shuffled; each receives one new skill-card. Pairs form, teach each other 20 min, rotate twice more (new partners). Session 2 (55 min). Each person demonstrates the skill they learned to the full group for 3 min. Success observable: every participant both teaches and performs a new skill before peers, providing immediate visible evidence of transfer."
+  },
+  {
+    "id": "R0029",
+    "history": "conv-26",
+    "task": "community",
+    "condition": "after_no_recon",
+    "repeat": 0,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "“Story-Stitch Circle”: residents write one sentence about a personal hope on colored card. Six volunteers guide groups of 8-10 people. Each participant staples their card onto a shared canvas sheet, then physically stitches the sentences together with colored yarn, creating a growing “community quilt.” Every week the quilt is displayed in the empty room; newcomers add new cards and stitches. Two yarn balls, needles, a €20 stapler, and €50 in snacks cover costs; remaining €230 buys simple frames to hang finished panels permanently in town hall. The tactile stitching ritual, repeated over four weekly sessions, turns strangers into co-creators of a visible, lasting symbol of connection."
+  },
+  {
+    "id": "R0030",
+    "history": "conv-26",
+    "task": "repair",
+    "condition": "rag",
+    "repeat": 0,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Participants bring one broken item each to a Repair-and-Reflect circle. They first sort objects into three zones: fix, repurpose, compost. A rotating repair table with shared tools and a skilled volunteer lets confident members demonstrate quick fixes on simple pieces while others document stories or create art from irreparable fragments. A visible tally board records items saved versus diverted, giving instant feedback. Safeguard: each person signs a short waiver acknowledging possible failure and confirming personal responsibility for final disposal. Success is measured by three metrics recorded on the board—total items diverted from landfill, number of first-time participants who attempt a repair, and post-event survey average (1-5) for confidence gained."
+  },
+  {
+    "id": "R0031",
+    "history": "conv-26",
+    "task": "community",
+    "condition": "empty",
+    "repeat": 0,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "‘Story Stones’ is a weekly micro-storytelling circle held in the empty room. Each of six volunteers receives a 50-euro stipend to buy or borrow six everyday objects (a mug, scarf, photo, etc.). Participants sit in a circle; on their turn they place one object on a central cloth and tell a two-minute personal memory tied to it. Listeners may ask one gentle question. After six rounds, everyone votes on the most memorable object; the winner keeps the cloth as a rotating mascot. A 10-euro weekly budget covers tea, biscuits and printed name-tags. Sessions run every Saturday at 17:00 for six weeks, after which the group decides whether to continue. No special gear is needed; only the room, volunteers and their objects."
+  },
+  {
+    "id": "R0032",
+    "history": "conv-26",
+    "task": "community",
+    "condition": "rag",
+    "repeat": 0,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "‘Recipe Swap & Share’ – six volunteers host a free Saturday potluck in the empty room. Each resident brings one dish and its story. Budget covers printed name-tags, simple tablecloths, reusable cutlery, and basic spices (€120). Volunteers greet arrivals, collect dishes, pair strangers for five-minute ‘story swaps,’ then moderate a relaxed group tasting. Printed cards collect contact info for a follow-up group chat. No specialist gear needed; stoves and tables already in the room suffice. Activity runs 11 a.m.–2 p.m. within two weeks, fostering immediate interaction and sustained ties through shared food and scheduled reunions."
+  },
+  {
+    "id": "R0033",
+    "history": "conv-26",
+    "task": "learning",
+    "condition": "rag",
+    "repeat": 0,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Create a cooperative ‘skill-chain’ for learning first-aid bandaging. Stationery becomes illustrated step-cards. Session 1: pairs co-draw and number six sequential steps on paper strips; pairs then physically rehearse on each other and swap cards for peer review. Session 2: each participant receives a shuffled set and must silently reorder the cards; a partner silently corrects with a hand signal. Observable success: every learner completes a neat, correctly sequenced bandage on a volunteer in under three minutes, verified by a peer checklist."
+  },
+  {
+    "id": "R0034",
+    "history": "conv-26",
+    "task": "community",
+    "condition": "after_full_guarded",
+    "repeat": 0,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "Neighbors Create: six volunteers gather 15-20 residents in the empty room for two two-hour sessions within 14 days. Day 1—each participant draws or writes one personal memory on supplied A3 paper and pins it to a ‘Community Story Wall’. Day 2—volunteers supply tape, string and 300 euros of simple snacks; pairs match memories, exchange contact details, and co-create a shared future wish on a new sheet. Resulting wall and a free contact list remain for ongoing use, forging lasting ties with only time, paper, and refreshments."
+  },
+  {
+    "id": "R0035",
+    "history": "conv-26",
+    "task": "learning",
+    "condition": "before_sleep_guarded",
+    "repeat": 1,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Participants build a simple rope-and-pulley system to lift a 10 kg book stack across the room using only stationery and library books. Meeting 1: pairs invent and sketch designs, then assemble a prototype from rolled paper tubes, string and tape; each pair tests once. Meeting 2: groups merge best elements, refine, and run a timed relay where every member must operate the final rig to move the load. Success is measured by (a) all twelve completing the relay under five minutes and (b) a one-page written checklist, signed by every learner, confirming they can repeat the build independently."
+  },
+  {
+    "id": "R0036",
+    "history": "conv-30",
+    "task": "community",
+    "condition": "after_full_guarded",
+    "repeat": 1,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "‘Story-Circle & Skill-Swap’ – six volunteers meet on a chosen Saturday in the empty room. Each brings one everyday object ≤€10 and a five-minute personal story tied to it. Participants sit in a circle; everyone tells their story while showing the object. After each tale, listeners note on a shared poster one way they could collaborate with that person (dance lesson, recipe exchange, childcare, etc.). Budget covers simple snacks (€50) and poster/printables (€20). The poster remains on the wall as a living directory; volunteers rotate hosting monthly micro-meet-ups listed on it. No specialist gear is needed; the room, time, and goodwill suffice."
+  },
+  {
+    "id": "R0037",
+    "history": "conv-26",
+    "task": "repair",
+    "condition": "empty_two_step",
+    "repeat": 0,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Fix-or-Share Circle: 1) Display 20 objects on one table with labeled bins: Repair, Parts, Inspire. 2) Each participant selects one item and works 8 min with hand tools; if stuck, they move it to Parts or Inspire. 3) A rotating 2-minute \"show-and-tell\" lets others adopt stalled items or harvest parts. 4) Timer rings every 15 min; a volunteer time-keeper enforces rotation. 5) At 60 min, count items diverted from landfill (repaired or parts reused). Success: ≥30 % diversion; participation logged by stickers on bins showing ≥75 % handled ≥1 object. No promise of full repair; goal is shared learning and material recovery."
+  },
+  {
+    "id": "R0038",
+    "history": "conv-30",
+    "task": "community",
+    "condition": "empty_two_step",
+    "repeat": 0,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "Mechanism: \"Story-Swap Picnic\" – residents pair up, each brings one personal object and a 2-minute story about it. Pairs swap objects and retell the story to a new partner every 5 minutes; after three rounds, the whole group shares one surprising connection discovered. Participation: open to all ages, 20–40 people, no RSVP needed. Resources: free public park or the empty room, six volunteers act as time-keepers and greeters, 300 € covers simple snacks and printed name-tags. Starts next Saturday afternoon; lasts two hours; zero specialist gear."
+  },
+  {
+    "id": "R0039",
+    "history": "conv-26",
+    "task": "learning",
+    "condition": "empty_two_step",
+    "repeat": 1,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Skill Swap Chain. Session 1: Twelve adults write one practical skill they know and one they want on separate cards. Cards are shuffled; each receives a new card. In pairs, the expert teaches via 20-minute demonstration only; the learner notes and then re-demonstrates. Session 2: Learners pair with a new partner and teach the acquired skill within 30 minutes, receiving live feedback. Observable success: every participant demonstrates the new skill to their second partner within the hour, visibly chaining twelve skills across the group without outside resources."
+  },
+  {
+    "id": "R0040",
+    "history": "conv-30",
+    "task": "community",
+    "condition": "empty",
+    "repeat": 1,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "The “Story Seed Swap” is a free, two-hour event held in the empty room. Volunteers gather household objects that carry personal meaning (a photo, recipe card, tool). Each of the 20–30 residents receives one random item and pairs with its owner for 10 minutes, learning its story. They then trade items and repeat with a new partner, cycling four times. After the last round, everyone sits in a circle, briefly shares the most surprising story they heard, and returns the item. A volunteer keeps a sign-up sheet and contact list so pairs can meet again voluntarily. The activity needs only chairs, paper tags, and pens, all under 20 euros for refreshments; the rest of the 300-euro budget remains untouched."
+  },
+  {
+    "id": "R0041",
+    "history": "conv-26",
+    "task": "learning",
+    "condition": "after_full_guarded",
+    "repeat": 1,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Participants form four teams of three. Each team receives a sealed envelope holding a unique 12-step origami model (crane, frog, lotus, box). In Meeting 1, teams open envelopes and create a shared one-page written manual, using only drawings and arrows—no text—by testing folds on scrap paper and noting what works. Manuals are swapped. In Meeting 2, each team must fold the new model solely from the received manual; success is measured by whether the finished model stands or hops unaided for ten seconds. Observers record pass/fail for each team, providing immediate, visible proof of skill transfer."
+  },
+  {
+    "id": "R0042",
+    "history": "conv-26",
+    "task": "community",
+    "condition": "empty",
+    "repeat": 1,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "Organize a weekly “Recipe Relay” in the empty room. Each volunteer contributes one locally sourced ingredient (total budget ≤ €300). On day 1 they meet, exchange ingredients, and form three pairs. Over the next two Saturdays each pair cooks one communal dish, swapping half their ingredients with another pair mid-session, so everyone tastes and discusses both results. A shared €50 spice-kit and basic utensils from volunteers cover needs. A €20 chalkboard tracks who cooked with whom, creating a visual map of new friendships. The final Saturday ends with a pot-luck dinner, recipe cards exchanged, and a sign-up list for future monthly relays, cementing ongoing connections."
+  },
+  {
+    "id": "R0043",
+    "history": "conv-30",
+    "task": "repair",
+    "condition": "empty_two_step",
+    "repeat": 0,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Fix-or-Find Circle: 1) Objects placed on table; each participant tags one item \"Repair,\" \"Parts,\" or \"Story.\" 2) 20-min micro-workshops run in parallel—soldering, gluing, sewing—led by confident members; others observe or prep. 3) Unrepaired items move to Harvest Station where usable parts are removed, logged, and redistributed; husks recycled. Safeguard: 10-min safety brief, one adult supervisor per station. Success: count items diverted from landfill (target ≥12) and post-event survey showing ≥70 % of participants report higher confidence to attempt future repairs."
+  },
+  {
+    "id": "R0044",
+    "history": "conv-26",
+    "task": "learning",
+    "condition": "empty",
+    "repeat": 0,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Peer-Skill Mosaic: Day 1, each learner writes one concrete step of the skill on a card. The group forms four trios; each trio teaches its step to the other trios using only cards and gestures (15 min rotations). After three rounds everyone has seen all twelve steps. Day 2, trios reassemble, sequence the steps into a one-page flowchart, then rehearse the full skill once while observers time and note errors. Observable success: a completed flowchart plus a stopwatch record showing the group performs the skill under 10 min with ≤2 errors. The method works because spaced repetition, peer teaching, and immediate feedback compress expert knowledge into two self-managed hours."
+  },
+  {
+    "id": "R0045",
+    "history": "conv-30",
+    "task": "learning",
+    "condition": "rag",
+    "repeat": 1,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Pairs of learners each receive one unique 4-step skill (e.g., basic first-aid, knot-tying) written on a card. In hour one, every pair teaches its skill to another pair using drawings, demonstrations and repetition. In hour two, each pair demonstrates the skill they just learned to the whole group while observers score a simple 1-5 checklist. Peer-teaching ensures everyone practices both instructing and performing, the checklist provides immediate, visible success metrics, and the library setting requires no external resources."
+  },
+  {
+    "id": "R0046",
+    "history": "conv-26",
+    "task": "learning",
+    "condition": "before_sleep_guarded",
+    "repeat": 0,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Method: 'Skill Swap Chain'. Adults first list one practical skill each knows (e.g., bike repair). They pair up and spend 20 min teaching their partner using only stationery-drawn diagrams and objects. Pairs then split and teach the new skill to a new partner, forming a rotating chain. The final 10 min each person demonstrates their original skill to the group. Success is observable because every participant must perform two skills they did not list initially, verified by peers on a simple checklist."
+  },
+  {
+    "id": "R0047",
+    "history": "conv-26",
+    "task": "learning",
+    "condition": "empty",
+    "repeat": 1,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Method: Skill Auction & Micro-Demos. Members write one skill fragment they know on cards; auction them in 5-minute bids using colored tokens. Highest bidder teaches that fragment to their table in 10 minutes, then roles rotate. After each round, learners mark a shared wall chart with a green dot when they can perform the fragment unprompted. Two meetings: auction plus first practice round; second meeting completes rotations and final demo circuit where each person must demonstrate three chained fragments to two peers for confirmation stamps. Observable success: filled chart and peer-verified stamps."
+  },
+  {
+    "id": "R0048",
+    "history": "conv-30",
+    "task": "learning",
+    "condition": "after_no_recon",
+    "repeat": 1,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Form a \"skill swap circle\": each adult writes a 2-min explanation of a useful skill they already possess (e.g., fixing a leaky tap). At the first meeting, they pair up and teach each other; partners rotate every 10 min. After the hour, learners record one new skill they can now teach. In the second meeting, they deliver a 3-min mini-lesson to the whole group and receive thumbs-up or thumbs-down feedback from peers. Success is observed when at least 9 of 12 adults receive majority thumbs-up, proving measurable skill transfer without external resources."
+  },
+  {
+    "id": "R0049",
+    "history": "conv-30",
+    "task": "community",
+    "condition": "before_sleep_guarded",
+    "repeat": 0,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "‘Story Stroll & Supper’: residents gather in the empty room for a 90-minute shared walk through town, each carrying one donated dish. Along the route, pairs trade personal stories prompted by numbered cards. Back at the room they share the pot-luck meal. Six volunteers manage route, cards, and clean-up; budget covers printed cards, basic utensils and cleaning supplies. No prior skills needed; participants leave with contact details and a plan for a monthly repeat."
+  },
+  {
+    "id": "R0050",
+    "history": "conv-26",
+    "task": "repair",
+    "condition": "before_sleep_guarded",
+    "repeat": 0,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Broken-object fair: 1) Lay out the 20 items plus table/tools. 2) Participants pick one item and decide: repair, repurpose, or recycle. 3) 20-minute rotations; confident helpers mentor others. 4) Safeguard: each station has a “too-far-gone” bin that feeds local recycling so no one feels pressured to fix the unfixable. 5) Success metric: count items diverted from landfill and anonymous exit slips rating confidence gained (1–5)."
+  },
+  {
+    "id": "R0051",
+    "history": "conv-30",
+    "task": "repair",
+    "condition": "before_sleep_guarded",
+    "repeat": 0,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Invite neighbors to a Repair & Re-Imagine Day. Lay out the twenty broken items and one table; participants pick any object and decide to repair, repurpose, or responsibly recycle it. Basic hand tools and shared instruction sheets are available. A volunteer “safety buddy” oversees each station, pausing work if tools are misused. After two hours, objects are tagged repaired, repurposed, or recycled; the count of items diverted from landfill measures success. Non-repaired objects are collected for proper recycling, ensuring no false promises."
+  },
+  {
+    "id": "R0052",
+    "history": "conv-30",
+    "task": "repair",
+    "condition": "rag",
+    "repeat": 0,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Neighborhood Swap-and-Fix Day: Participants bring one broken item to a shared table stocked with basic tools. Each person tags their item with what they know about the problem. A volunteer facilitator runs a 15-minute show-and-tell so everyone can spot useful parts or skills. Objects are matched to willing hands; any unclaimed parts go into a community “parts library.” Safeguard: a posted 30-minute time limit per item prevents monopolizing tools. Success measured by a simple tally—items repaired, parts reused, and a quick show of hands for how many people felt more confident using tools afterward."
+  },
+  {
+    "id": "R0053",
+    "history": "conv-30",
+    "task": "community",
+    "condition": "empty_two_step",
+    "repeat": 1,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "Story-Swap Picnic: Residents pair up, each bringing one personal object and a 2-minute story about it. Pairs swap objects and retell the story to a new partner every 5 minutes. After three rounds, the group shares one surprising connection discovered. Open to all ages, 20-40 people, no RSVP. Use the empty room; six volunteers manage time and greet arrivals. 300 € funds snacks and name-tags. Two-hour session begins next Saturday afternoon. Zero specialist gear."
+  },
+  {
+    "id": "R0054",
+    "history": "conv-26",
+    "task": "community",
+    "condition": "before_sleep_guarded",
+    "repeat": 1,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "The empty room becomes a 'Memory & Meals' hub. Six volunteers split tasks: two source 300 euros of pantry staples and paper; four recruit 20–30 residents. On day 1, participants bring one photo or keepsake and share its story while cooking a communal meal. Each week for six weeks, rotating duos continue the tradition, adding one new shared dish and a gratitude note to a growing wall collage. No specialist gear needed; cooking occurs on domestic stoves already in the space. Connections form through repeated storytelling, shared labour, and visible collective memory."
+  },
+  {
+    "id": "R0055",
+    "history": "conv-30",
+    "task": "learning",
+    "condition": "empty",
+    "repeat": 0,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Each adult secretly writes one step of the skill on a numbered slip. They mix the 12 slips, then in hour one groups of three physically reconstruct the correct sequence by arranging slips on the floor and testing the order through mime or simple props. In hour two the whole room forms a human flowchart: each person embodies one step and must pass a symbolic token to the next when their cue is correct. Observers time the token’s flawless round-trip; any hesitation or wrong pass is immediately corrected by the group, making mastery visible by the second successful circuit."
+  },
+  {
+    "id": "R0056",
+    "history": "conv-30",
+    "task": "learning",
+    "condition": "empty",
+    "repeat": 1,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Participants form three teams of four. Each team picks one skill (e.g., CPR, sewing, budgeting). Hour 1: teams divide the skill into four teachable parts; each member masters one part from a printed manual and prepares a 5-minute lesson. Hour 2: rotating micro-teaching—each member teaches their segment to the other three, then the team rehearses the full skill together. Success is observable when every participant performs the complete skill error-free within ten minutes, judged by a peer checklist created in Hour 1."
+  },
+  {
+    "id": "R0057",
+    "history": "conv-30",
+    "task": "learning",
+    "condition": "after_no_recon",
+    "repeat": 0,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Participants form four trios. Each trio invents a one-page 'skill recipe' (e.g., how to tie secure knots) using only drawings, arrows and 20-word captions. In Meeting 1 they create and swap recipes; each trio then practices its new recipe under timed observation. In Meeting 2 every trio teaches its original recipe to another trio, judged by a silent 'check-off' rubric the groups co-designed. Observable success: 100% of trios complete both recipes correctly within 15 minutes, recorded by peer tick sheets."
+  },
+  {
+    "id": "R0058",
+    "history": "conv-30",
+    "task": "repair",
+    "condition": "after_full_guarded",
+    "repeat": 1,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Repair Pop-Up: 1) Table objects sorted into ‘quick-fix’, ‘parts-donor’, ‘show-and-tell’. 2) Participants choose one role—fixer, donor, storyteller—rotating every 20 min. 3) Fixers use hand tools; donors supply parts; storytellers document photos and stories. 4) Unfixable items become upcycled art or spare-parts stock. Safeguard: safety goggles and gloves at station; kids supervised by adults. Success: count objects diverted from landfill, photos posted, and anonymous 1–5 confidence cards collected at exit."
+  },
+  {
+    "id": "R0059",
+    "history": "conv-30",
+    "task": "repair",
+    "condition": "after_full_guarded",
+    "repeat": 0,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Participants place objects on a shared table and vote with colored tokens: green (fix), yellow (repurpose), red (discard). Green items are claimed by willing teams and repaired using basic tools; the yellow group transforms selected pieces into art or garden features; red items are sorted for local recycling. A safeguard: any participant may switch to an observer role at any time, avoiding pressure. Success is measured by tallying repaired, repurposed, and recycled items plus post-event confidence surveys (1-5 scale), aiming for ≥60% participation rate and average confidence gain ≥0.5 points."
+  },
+  {
+    "id": "R0060",
+    "history": "conv-26",
+    "task": "community",
+    "condition": "empty_two_step",
+    "repeat": 0,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "“Memory Mosaic Café”: Volunteers clear the empty room into six cozy corners with borrowed tables/chairs. Each resident brings one small object/photo and a two-sentence memory. Over three 15-minute rounds, pairs swap stories, then tape their object image onto a communal poster, writing one takeaway. After 90 minutes, the poster is photographed and printed as postcards (€30) mailed to every participant with contact details. Snacks from a €100 local bakery spread; €20 art supplies. Six volunteers greet, time rounds, photograph, and post. Starts next Saturday; total spend €150, no specialist kit needed."
+  },
+  {
+    "id": "R0061",
+    "history": "conv-30",
+    "task": "repair",
+    "condition": "after_no_recon",
+    "repeat": 0,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Process: 1) Lay out 20 broken items and one table. 2) Each participant picks one item, sketches a simple “second life” idea on paper (planter, hook, toy, etc.). 3) Using only hand tools, they attempt the transformation; after 20 minutes, any work-in-progress is placed on the table. 4) A “display-only” label marks pieces that cannot be made safe. 5) Safeguard: an adult inspects every sharp edge or unstable joint before items leave the table. 6) Success check: count how many finished pieces are claimed by neighbors within 48 hours; target ≥10 claimed or repurposed items indicates reduced waste and wider participation."
+  },
+  {
+    "id": "R0062",
+    "history": "conv-30",
+    "task": "repair",
+    "condition": "empty_two_step",
+    "repeat": 1,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Fix-or-Find Circle: 1) Each participant tags an object \"Repair,\" \"Parts,\" or \"Story.\" 2) 20-minute parallel micro-workshops teach soldering, gluing, sewing; confident members lead. 3) Unrepaired items move to Harvest Station—usable parts logged in shared inventory, husks recycled. Safeguard: 10-minute safety brief, one adult supervisor per station. Success: tally items diverted from landfill (target ≥12) and post-event survey showing ≥70 % of participants feel more confident to repair later."
+  },
+  {
+    "id": "R0063",
+    "history": "conv-30",
+    "task": "learning",
+    "condition": "after_full_guarded",
+    "repeat": 1,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Participants pair up and each duo receives one sheet of paper and one pen. In hour one, one person silently performs a chosen skill (e.g., tying a shoelace) while the other sketches the sequence of actions. Roles swap after 30 minutes. In hour two, each pair merges sketches into a single, concise step-by-step poster. Pairs then teach their poster to another pair in 10 minutes. Success is observable: every participant must replicate the skill accurately within one minute using only the poster."
+  },
+  {
+    "id": "R0064",
+    "history": "conv-30",
+    "task": "repair",
+    "condition": "empty",
+    "repeat": 0,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Object-Lottery Repair Circle: 1) Participants anonymously place objects in numbered bags. 2) Each draws one bag, spending 20 minutes troubleshooting with hand tools. 3) If a fix looks feasible, they continue; otherwise the item joins a communal “parts shelf.” 4) After two rounds, a 10-minute group vote decides which three items receive collective effort. Practical safeguard: a timer and “three-try” limit prevents over-investment. Success measured by tallying items returned to owners, parts harvested, and a post-event 1–5 satisfaction survey; ≥60 % positive ratings and ≥25 % reuse rate signals success."
+  },
+  {
+    "id": "R0065",
+    "history": "conv-26",
+    "task": "repair",
+    "condition": "after_full_guarded",
+    "repeat": 0,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "A 'Fix or Free' pop-up: each participant draws one of the 20 broken objects and a neighbor who owns the same item. They spend 15 minutes trying a repair together using the table and tools. If the attempt stalls, the object is tagged 'Free for Parts' and dismantled for reuse elsewhere. A visible tally board records successes versus parts reclaimed. Safeguard: every team has a printed 5-minute timeout card; when flipped, helpers move on without stigma. Success is measured by counting objects returned to owners in working order plus total reclaimed parts, aiming for at least 50 % combined utility."
+  },
+  {
+    "id": "R0066",
+    "history": "conv-26",
+    "task": "learning",
+    "condition": "rag",
+    "repeat": 1,
+    "problem": "A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words.",
+    "proposal": "Each participant writes a one-sentence personal goal on a card. Cards circulate clockwise; every person adds a concise, practical step. After two rounds, each card returns to its owner. Owners silently rank the two best steps on their card and share only those aloud. The group then votes by show-of-hands to adopt the top two steps as a shared micro-plan. Observable success: every card has at least two ranked steps and the room shows a clear majority vote within the hour."
+  },
+  {
+    "id": "R0067",
+    "history": "conv-26",
+    "task": "repair",
+    "condition": "empty",
+    "repeat": 0,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Process: 'Fix-or-Fabricate Circle'. 1) Lay out all 20 objects and invite each participant to pick one they feel able to attempt. 2) 30-min peer triage: label each item 'Repair', 'Repurpose', or 'Parts'. 3) Form mixed-skill pairs; pairs choose either to repair or to create a new useful item from parts. 4) After two hours, every finished piece is presented and a sticker vote decides its next home (owner, neighbor, or giveaway). Practical safeguard: a visible 'retire' bin for items judged unsafe or uneconomical; this prevents false hope. Success metric: count items that leave with a new purpose or owner versus those retired, aiming for ≥60 % diversion from landfill."
+  },
+  {
+    "id": "R0068",
+    "history": "conv-30",
+    "task": "community",
+    "condition": "after_full_guarded",
+    "repeat": 0,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "Community Memory Mosaic: Residents bring one meaningful object and a short story. Volunteers arrange a circle of chairs and string lights. In 90-minute rounds, pairs swap stories while sketching a quick icon on fabric squares. Squares are sewn into a wall-hanging displayed in the town hall for a month. Budget covers thread, needles, refreshments and printed name-tags. Volunteers facilitate timing, collect squares, and host a follow-up coffee morning two weeks later so participants can revisit the finished mosaic together, turning strangers into neighbors through shared memories."
+  },
+  {
+    "id": "R0069",
+    "history": "conv-30",
+    "task": "community",
+    "condition": "rag",
+    "repeat": 1,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "‘Recipe Swap & Table’ starts in 10 days. Six volunteers gather 6–10 strangers in the empty room. Each brings one dish cooked at home (≤5 €). Participants exchange recipe cards, share stories behind the dish, then eat together at a communal table. A volunteer leads two 10-minute ice-breaker rounds. Leftovers are packed for anyone needing a meal. Budget covers tablecloths, napkins, cutlery hire and basic drinks. No cooking gear or special skills required; connections form through food and conversation."
+  },
+  {
+    "id": "R0070",
+    "history": "conv-26",
+    "task": "community",
+    "condition": "rag",
+    "repeat": 1,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "'Story Exchange Circle': Six volunteers host two 90-minute sessions in the empty room. Each participant brings one inexpensive object tied to a personal story. Volunteers facilitate 3-person groups rotating every 15 minutes; listeners summarize the story back to confirm understanding. After two rounds, the whole circle shares one takeaway. Budget covers snacks (€60), name tags (€20) and printed prompt cards (€20). No specialist gear needed. Sessions run consecutively within two weeks, forming new triads each time so every resident meets at least six others. Follow-up: participants may keep in touch via a shared contact sheet."
+  },
+  {
+    "id": "R0071",
+    "history": "conv-26",
+    "task": "community",
+    "condition": "empty_two_step",
+    "repeat": 1,
+    "problem": "A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words.",
+    "proposal": "“Object Story Swap” uses the empty room. Six volunteers borrow six blankets, buy snacks (€50), and photocopy supplies (€30). Residents bring one personal item plus a 2-minute story. Pairs rotate every 10 minutes for three rounds (60 min). Each person meets six others. Groups of six then co-draw a 1-page “town memory map” on large paper, listing names and contact info (30 min). Maps are photocopied (€20) and mailed to all participants, creating a lasting keepsake and contact list. Prep: 3 days; runs one Saturday afternoon within two weeks. Total spend: €100; no specialist equipment needed."
+  },
+  {
+    "id": "R0072",
+    "history": "conv-30",
+    "task": "repair",
+    "condition": "empty",
+    "repeat": 1,
+    "problem": "A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words.",
+    "proposal": "Broken-Object Repair Circle: 1) Participants lay all twenty objects on the table and vote publicly on three that look most fixable. 2) Teams of two—one experienced, one beginner—attempt repairs using only provided tools; others observe, assist, or document steps. 3) After 45 minutes, any unrepaired items are disassembled for spare parts or upcycled into new small objects. Safeguard: each team may stop and declare an item ‘practice only’ without stigma. Success metrics: (a) percentage of objects that receive some action (repair, harvest, or redesign), (b) number of first-timers who report higher confidence on an exit sticky-note (target ≥50%)."
+  }
+]

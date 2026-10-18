@@ -1,4 +1,6 @@
 pub mod reading;
+pub mod memory_context;
+pub mod choice;
 pub mod ground;
 pub mod http;
 pub mod judge;

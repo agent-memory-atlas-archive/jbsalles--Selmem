@@ -145,6 +145,8 @@ impl Provider {
                             .clone(),
                     )]),
                     "creative" | "life_creative" => obj([("proposal", text("Technical rehearsal: build a rotating workshop where neighbors exchange small practical skills within the stated resources."))]),
+                    "preview_retell" => obj([("memories",arr(array(&prompt,"memories")?.iter().map(|m|Ok(obj([("trace_id",m.get("trace_id")?.clone()),("narrative",m.get("gist")?.clone())]))).collect::<Result<Vec<_>>>()?))]),
+                    "preview_guard" => obj([("verdicts",arr(array(&prompt,"lived_memories")?.iter().map(|m|Ok(obj([("trace_id",m.get("trace_id")?.clone()),("verdict",text("retelling"))]))).collect::<Result<Vec<_>>>()?))]),
                     _ => return Err("unknown provider mode".into()),
                 };
                 return Ok((
@@ -176,6 +178,7 @@ impl Provider {
             }
             if mode=="life_creative" {body.put(selmem::recall::http::token_cap_field(&self.endpoint,&self.model),num(400.));}
             if mode=="life_choice" {body.put(selmem::recall::http::token_cap_field(&self.endpoint,&self.model),num(64.));}
+            if ["preview_retell","preview_guard"].contains(&mode){body.put(selmem::recall::http::token_cap_field(&self.endpoint,&self.model),num(if mode=="preview_retell"{2000.}else{600.}));body.put("response_format",obj([("type",text("json_object"))]));}
             let reasoning = selmem::Config::get().reasoning();
             body.put("reasoning_effort", text(reasoning));
             let raw = json::parse(&super::transport::post(
@@ -190,7 +193,7 @@ impl Provider {
                 .first()
                 .ok_or("missing response choice")?;
             let content=s(choice.get("message")?, "content")?;
-            let reply=match json::parse(content) {Ok(v)=>v,Err(_) if mode=="life_creative"=>obj([("invalid_output",text(content))]),Err(e)=>return Err(e)};
+            let reply=if ["preview_retell","preview_guard"].contains(&mode)&&choice.get("finish_reason").and_then(Json::string)!=Ok("stop"){obj([("invalid_output",text("incomplete provider response"))])}else{match json::parse(content) {Ok(v)=>v,Err(_) if mode=="life_creative"||["preview_retell","preview_guard"].contains(&mode)=>obj([("invalid_output",text(content))]),Err(e)=>return Err(e)}};
             Ok((reply, raw))
         })();
         timer.finish(result.is_ok());

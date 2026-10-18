@@ -23,6 +23,8 @@ pub struct HttpNarrator {
     exchanges: Option<HttpExchangeLog>,
     transport: Option<HttpTransport>,
     reconstruction_prompt: Option<String>,
+    choice_options: crate::ChoiceOptions,
+    choice_audit: std::sync::Mutex<Option<String>>,
 }
 
 impl HttpNarrator {
@@ -44,12 +46,23 @@ impl HttpNarrator {
             exchanges: None,
             transport: None,
             reconstruction_prompt: None,
+            choice_options: crate::ChoiceOptions::default(),
+            choice_audit: std::sync::Mutex::new(None),
         })
     }
 
     pub fn with_transport(mut self, transport: HttpTransport) -> Self {
         self.transport = Some(transport);
         self
+    }
+
+    pub fn with_choice_options(mut self, options: crate::ChoiceOptions) -> Self {
+        self.choice_options = options; self
+    }
+
+    /// Most recently completed selection only, for diagnostics; not a per-request concurrent log.
+    pub fn last_choice_audit(&self) -> Option<String> {
+        self.choice_audit.lock().unwrap_or_else(|e| e.into_inner()).clone()
     }
 
     pub fn with_reconstruction_prompt(mut self, prompt: String) -> Self {
@@ -91,13 +104,17 @@ impl HttpNarrator {
     }
 
     fn chat(&self, system: &str, user: &str) -> Result<String, String> {
+        self.chat_capped(system, user, 280, false)
+    }
+
+    fn chat_capped(&self, system: &str, user: &str, tokens: u32, structured: bool) -> Result<String, String> {
         let cfg = crate::config::Config::get();
         let temp = cfg.temp();
         let effort = cfg.reasoning();
         let extra = format!(",\"reasoning_effort\":\"{}\"", json_esc(&effort));
         let cap = token_cap_field(&self.url, &self.model);
         let body = format!(
-            "{{\"model\":\"{}\",\"temperature\":{},\"{cap}\":280{} ,\"messages\":[{{\"role\":\"system\",\"content\":\"{}\"}},{{\"role\":\"user\",\"content\":\"{}\"}}]}}",
+            "{{\"model\":\"{}\",\"temperature\":{},\"{cap}\":{tokens}{} ,\"messages\":[{{\"role\":\"system\",\"content\":\"{}\"}},{{\"role\":\"user\",\"content\":\"{}\"}}]}}",
             json_esc(&self.model),
             temp,
             extra,
@@ -123,6 +140,14 @@ impl HttpNarrator {
         let raw = response?;
         if let Some(msg) = api_error(&raw) {
             return Err(msg);
+        }
+        if structured {
+            let envelope = crate::recall::choice::json::parse(&raw)?;
+            let choices = envelope.get("choices")?.array()?;
+            if choices.len() != 1 || choices[0].get("finish_reason")?.string()? != "stop" {
+                return Err("selection response did not finish normally".into());
+            }
+            return choices[0].get("message")?.get("content")?.string().map(str::to_string);
         }
         extract_json_string(&raw, "content")
             .filter(|s| !s.trim().is_empty())
@@ -161,6 +186,35 @@ pub fn token_cap_field(url: &str, model: &str) -> &'static str {
 }
 
 impl Narrator for HttpNarrator {
+    fn response_selection_audit(&self) -> Option<String> { self.last_choice_audit() }
+    fn supports_memory_context(&self) -> bool { true }
+    fn reply_with_context(&self, r: &crate::MemoryReply<'_>) -> String {
+        *self.choice_audit.lock().unwrap_or_else(|e| e.into_inner()) = None;
+        if r.options.format == crate::MemoryContextFormat::Legacy && r.options.usage == crate::MemoryUse::Legacy {
+            return self.reply_disposed(r.user, r.memories, r.axioms, r.mood, r.talk, r.reading);
+        }
+        if r.options.format == crate::MemoryContextFormat::Structured && self.choice_options.active(r.user) {
+            let result = crate::recall::choice::json::parse(&r.user_prompt()).and_then(|input|
+                crate::recall::choice::run(&input, &r.system_prompt(), &self.choice_options,
+                    |_,system,user,cap| self.chat_capped(system,user,cap,true)));
+            return match result {
+                Ok(result) => {
+                    *self.choice_audit.lock().unwrap_or_else(|e| e.into_inner()) = Some(result.audit.encode());
+                    result.answer
+                }
+                Err(e) => {
+                    use crate::recall::choice::json::{obj,text};
+                    *self.choice_audit.lock().unwrap_or_else(|e| e.into_inner()) = Some(obj([("status",text("failed")),("error",text(&e))]).encode());
+                    let marker=self.miss(&e);
+                    if marker.is_empty() { self.fallback.reply_with_context(r) } else {marker}
+                }
+            };
+        }
+        match self.chat(&r.system_prompt(), &r.user_prompt()) {
+            Ok(s) => s,
+            Err(e) => { let marker = self.miss(&e); if marker.is_empty() { self.fallback.reply_with_context(r) } else { marker } }
+        }
+    }
     fn supports_associations(&self) -> bool {
         true
     }
@@ -462,6 +516,12 @@ pub struct SpeakOnlyHttp {
 }
 
 impl SpeakOnlyHttp {
+    pub fn with_transport(mut self, transport: HttpTransport) -> Self {
+        self.http = self.http.with_transport(transport); self
+    }
+    pub fn with_choice_options(mut self, options: crate::ChoiceOptions) -> Self {
+        self.http = self.http.with_choice_options(options); self
+    }
     pub fn parse(endpoint: &str, model: impl Into<String>, api_key: Option<String>) -> Option<Self> {
         Some(Self {
             http: HttpNarrator::parse(endpoint, model, api_key)?,
@@ -476,6 +536,9 @@ impl SpeakOnlyHttp {
 }
 
 impl Narrator for SpeakOnlyHttp {
+    fn response_selection_audit(&self) -> Option<String> { self.http.last_choice_audit() }
+    fn supports_memory_context(&self) -> bool { true }
+    fn reply_with_context(&self, r: &crate::MemoryReply<'_>) -> String { self.http.reply_with_context(r) }
     fn failure_log(&self) -> LlmCallLog {
         self.http.failure_log()
     }

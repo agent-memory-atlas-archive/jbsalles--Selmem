@@ -10,3 +10,9 @@
 /experiments/strategy/
 *.tar.gz
 *.log
+
+# Private runtime settings and loose memory snapshots.
+/.selmem
+/selmem.conf
+*.vault
+*.vault.*.tmp

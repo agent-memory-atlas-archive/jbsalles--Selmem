@@ -1,5 +1,7 @@
 # GENESIS creative preview
 
+For a fresh run using task-blind guarded retelling of selected current lived gists, see `CREATIVE_PREVIEW_GUARDED.md`. That separate variant retains these five condition keys but declares a controlled readout intervention. This document and the original launcher describe the legacy native-readout protocol.
+
 This third protocol is independent of the two longitudinal experiments, which remain available: `tools.sh prepare-life DATASET OUT --profile economy` (600 proposals) and `tools.sh prepare-life DATASET OUT --profile full` (6,480 proposals). Existing results are neither reused nor deleted. The historical `creative` pilot also remains available.
 
 ## Question and frozen design

@@ -1,0 +1,32 @@
+{
+  "version": "memory-influence-fixture-1",
+  "provenance": "Authored fictional lives for a controlled sensitivity diagnostic. These are not real autobiographies, empirical outcomes or relabeled LoCoMo observations. Events are encoded through the Rust organ as internal experiences of a simulated agent. No behavior instruction is encoded.",
+  "histories": [
+    {"id":"life-a","events":[
+      {"text":"At the neighborhood workshop I shared the tools and decisions with three partners. We finished the shelves together and every participant returned the next week.","valence":0.7},
+      {"text":"For the exhibition I kept responsibility for every decision myself. When I was absent the installation stopped and the opening was cancelled.","valence":-0.7},
+      {"text":"During the library project we exchanged incomplete notes and combined our different skills. We corrected each other's errors and completed the display.","valence":0.7},
+      {"text":"At the repair session I worked alone and kept the spare parts separate. I could not identify a fault and the object was discarded.","valence":-0.7},
+      {"text":"When we divided a small fund through shared discussion, everyone explained a need and the group delivered the agreed materials on time.","valence":0.7},
+      {"text":"I planned the community event privately and assigned each task without discussion. Several participants misunderstood their roles and the event was abandoned.","valence":-0.7}
+    ]},
+    {"id":"life-b","events":[
+      {"text":"At the neighborhood workshop I shared the tools and decisions with three partners. Nobody tracked the tools or commitments and the shelves remained unfinished.","valence":-0.7},
+      {"text":"For the exhibition I kept responsibility for every decision myself. My written plan let the installation proceed during my absence and the opening succeeded.","valence":0.7},
+      {"text":"During the library project we exchanged incomplete notes and combined our different skills. Conflicting changes erased the working plan and the display was cancelled.","valence":-0.7},
+      {"text":"At the repair session I worked alone and kept the spare parts separate. I identified the fault and restored the object to working order.","valence":0.7},
+      {"text":"When we divided a small fund through shared discussion, several promises were changed without notice and the materials never arrived.","valence":-0.7},
+      {"text":"I planned the community event privately and assigned each task without discussion. The written responsibilities were clear and the event was completed on time.","valence":0.7}
+    ]}
+  ],
+  "tasks":[
+    {"id":"community","prompt":"A small town has an empty room, a budget of 300 euros, and six volunteers. Design one original activity that helps residents who do not know each other build lasting connections. It must start within two weeks and require no specialist equipment. Describe the mechanism, participation and resources. Maximum 180 words."},
+    {"id":"learning","prompt":"A public library wants to help twelve adults learn a difficult practical skill together. They have two one-hour meetings, ordinary stationery, and no paid teacher or internet connection. Design one original learning method, explain why it could work, and make its success observable. Maximum 180 words."},
+    {"id":"repair","prompt":"A neighborhood group has twenty broken everyday objects, one table, basic hand tools, and participants with mixed levels of confidence. Design one original process that reduces waste and encourages participation without promising that every object can be repaired. Include a practical safeguard and a way to assess success. Maximum 180 words."},
+    {"id":"grant","prompt":"A local association has 600 euros for three small public projects and ten available volunteers. Propose a process for allocating money, organizing the work and checking completion within a month. Include a way to handle a project that stalls. Maximum 180 words."},
+    {"id":"exhibit","prompt":"A library has a blank wall, donated paper and four Saturday afternoons. Design a public exhibition that residents can contribute to without artistic training. Explain how it will be assembled, maintained and evaluated. Maximum 180 words."},
+    {"id":"meeting","prompt":"Eight residents have one hour to plan the use of a shared courtyard for the next month. They have paper, pens and a noticeboard. Propose a meeting format and a way to put its result into practice. Maximum 180 words."}
+  ],
+  "behavior_rubric": ["shared versus individual decision authority","pooled versus separated resources","open-ended versus bounded commitments","peer correction versus assigned verification","reversible participation versus durable collective obligations"],
+  "interpretation": "History labels are experimental interventions, not desired response scores. Rate behavior dimensions in random order blind to history/condition, then test history-by-condition differences. Originality, utility and constraint compliance are separate outcomes. This diagnostic cannot establish emergent lifelong individuality."
+}

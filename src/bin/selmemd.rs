@@ -32,6 +32,8 @@ fn main() {
     };
 
     let mut mem = if public_demo { SelectiveMemory::new(profile) } else { SelectiveMemory::open(&path, profile).expect("failed to open memory") };
+    mem.set_memory_context_options(selmem::MemoryContextOptions::from_config(cfg)
+        .unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); })).expect("validated delivery options");
     if let Some(v) = cfg
         .resolve(flag(&args, "--ground-overlap"), "ground_overlap")
         .and_then(|s| s.parse().ok())
@@ -240,7 +242,7 @@ fn dispatch_unlocked(
             Ok(t) => t,
             Err(res) => return Ok(res),
         };
-        let (draft, narrator, failures_before, reading) = {
+        let (draft, narrator, failures_before) = {
             let mut slot = mem.lock().map_err(|_| {
                 std::io::Error::new(std::io::ErrorKind::Other, "memory locked")
             })?;
@@ -256,11 +258,9 @@ fn dispatch_unlocked(
             let narrator = g.narrator_arc();
             let failures_before = narrator.failure_log().failures;
             let draft = g.open_mouth(&text);
-            let reading = selmem::recall::reading::ReadingProfile::for_query(
-                &g.store, &draft.mood, &draft.user, &draft.dump.selected).render();
-            (draft, narrator, failures_before, reading)
+            (draft, narrator, failures_before)
         };
-        let reply = selmem::Narrator::reply_disposed(narrator.as_ref(), &draft.user, &draft.memories, &draft.axioms, &draft.mood, &draft.talk, &reading);
+        let reply = draft.reply(narrator.as_ref());
         let call_log = narrator.failure_log();
         let mut slot = mem.lock().map_err(|_| {
             std::io::Error::new(std::io::ErrorKind::Other, "memory locked")

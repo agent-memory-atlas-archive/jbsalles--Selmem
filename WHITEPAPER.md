@@ -18,7 +18,7 @@ experience → selection → trace → recall → sleep → identity → next en
 
 **Hypothesis:** After a year of the same stream, two copies of the same model that retained one hour on one side only no longer remember or forget the same things. Measured on the book, retrieve, and the mouth. Historical exploratory runs motivated this hypothesis; durable behavioral singularity and useful creativity remain to be demonstrated.
 
-That is path dependence. Not intelligence, not creativity, not personality. Current evidence and limits: [experiments/RESULTS.md](experiments/RESULTS.md).
+That is the path-dependence hypothesis. It is not yet a demonstration of intelligence, creativity or personality. The creative collections provide early qualitative indications consistent with creative recombination and memory-conditioned variation; they do not prove a creativity advantage caused by SelMem. Current evidence and limits: [experiments/RESULTS.md](experiments/RESULTS.md) and [creativity findings](experiments/CREATIVITY_RESULTS.md).
 
 ---
 
@@ -193,6 +193,20 @@ The separate LoCoMo strategy experiment probes advice and design using conversat
 
 ## What remains unproved
 
+### Creative collections: suggestive observations, no established advantage
+
+The guarded Creative Preview 003 completed 60 proposals from two complete conversation histories (788 turns), ten nights per history and five conditions: empty, BM25 RAG, equal-time no-sleep, post-sleep gists and post-sleep guarded retelling. All arms used matched direct generation. Retrieval was task-conditioned; retelling and its provenance guard were task-blind. The latter is a controlled readout intervention, not unchanged full native delivery. Reading profiles and axioms were withheld, and the response-choice selector was not invoked.
+
+Sleep changed the saved states: 113 of 261 and 79 of 219 retained traces became latent; 45 and 36 axioms were present afterward. Those axioms were not delivered to generation. Latency is not deletion and does not by itself show useful forgetting. The post-sleep retelling context averaged 62 words versus about 144 for direct gists and 593 for RAG, so compression is a plausible competing explanation for differences.
+
+Some recorded answers combine plausible mechanisms in interesting ways: optional repair micro-actions, repeated artifact interviews with follow-up commitments, and reply threads that trigger small community meetings. These are early qualitative indications in favor of investigating a creativity hypothesis. Similar inventiveness also occurs in controls. Neither examples nor the earlier single unblinded assistant review establish an advantage over the base model, RAG or direct gists; independent blind assessment remains pending.
+
+Fixed-selection replay 003 and structured-delivery replay 004 each produced 72 proposals but shared states/readouts. Influence 005 reused candidate pools and quality judgments rather than generating a fresh independent sample. On its 24 memory candidate pools, the default moderate coefficient changed three choices relative to zero weight. The pipeline's same quality model rated utility lower in two changes and equal in one; mean originality over those three was unchanged. This shows a selection intervention with tradeoffs, not proof of creative improvement.
+
+The [compact evidence](experiments/evidence/README.md) publishes proposals, condition labels, state/selection summaries and original-file hashes. Original raw archives remain separate. Reproduction requires the recorded protocol and a fresh output directory; resuming historical work additionally requires its original build and complete archives. The larger 600- and 6,480-proposal longitudinal plans are retained but have not established a result.
+
+### Remaining tests
+
 - Durable behavioral differences beyond the trained actor and situation.
 - Transfer of those differences with memory and their selective removal by lesions.
 - A specific advantage from reconstructive memory over faithful, summarized or retrieved memory.
@@ -212,7 +226,7 @@ Experiments must retain failures, separate behavior from performance and preserv
 
 Rust tests cover selection, core vs detail, anchors, axiom succession, identity paint, reinterpretation, DetachKind misses, grounding blend, latent residue, night pass order, file and SQLite round-trips, attribution, schema centers, suppression, confidence vs access, survival hazard, recency weight and context cloud. Observation-support tests cover repeated observations, replay identities, contradictions, bounded counts and persistence. GENESIS checks include configuration loading, snapshot errors and isolated probes.
 
-The maintained experiments are model qualification and cumulative-learning OFF/ON, plus the separate LoCoMo strategy adapter. Neither establishes singularity or creativity. Reconstruction and grounding remain in the loop; their specific behavioral benefit still needs matched causal interventions. Constants remain unfitted.
+The maintained experiments include qualification, cumulative-learning OFF/ON, sleep, creative preview/replays, memory-guided selection, the two preserved longitudinal creative-life plans and the separate LoCoMo strategy adapter. Results include successful evidence retention and suggestive creative examples, alongside null or mixed comparisons. None establishes durable singularity or a useful creativity advantage attributable to reconstruction. Constants remain unfitted. The [results showcase](docs/experiments.html) separates observed mechanisms, historical reports and unproved claims.
 
 Two processes on one `.db` will collide. Anchors are decay brakes, not an ethics layer.
 

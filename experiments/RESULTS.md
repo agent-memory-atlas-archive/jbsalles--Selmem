@@ -28,3 +28,18 @@ The supplied strategy evidence has 179 successful Grok answers out of 180 reques
 Forced deep sleep accumulated 119 and 272 stored, unsuperseded motifs for only 6 and 15 distinct statements. The flat codec omitted axiom stake context, so reopening broke family matching; SQLite additionally omitted trace stake context. The corrected codecs preserve these fields. A local no-HTTP replay on copies of the prepared real prefixes keeps 6 and 15 motifs across twenty reopen/deep-sleep cycles. This verifies the persistence fix, not corrected model performance.
 
 Keep original outputs unchanged. To assess corrected sleep effects, reuse the unchanged `sleep-001-prepared` prefixes and run new isolated interventions into a fresh output directory (for example `sleep-002-measured`); record this patch/code revision with the new result. No paid encoding replay is needed. The earlier LoCoMo admission losses and the latency/cost of proposition scoring are separate issues; this patch does not change the gate, retrieval policy or sleep thresholds to optimize the observed score.
+
+## Creative collections and response influence
+
+The creative results are now published as [compact evidence](evidence/README.md); see [CREATIVITY_RESULTS.md](CREATIVITY_RESULTS.md) for the distinctions between creative examples, memory influence and demonstrated advantage.
+
+| Recorded lot | Observed result | Scope and limitation |
+| --- | --- | --- |
+| creative-preview-003 | 60/60 proposals; 887 HTTP attempts; 788 source turns; twenty sleep cycles | Guarded task-blind readout, five conditions, two histories. Independent blind ratings pending. No demonstrated creativity advantage. |
+| creative-replay-003 | 72 proposals, 114 attempts; source unchanged | Fixed source selection and task-blind retelling/guard. Controlled readout intervention, not fresh encoding. |
+| creative-replay-004 | 72 proposals, 72 attempts; previous/source unchanged | Reused accepted readouts with structured final delivery. Not independent of replay-003. |
+| memory-influence-005 | 72 final rows; 33 new grounding attempts; 24 direct answers, 48 candidate pools and 48 quality results reused | Frozen-pool reevaluation. Default moderate weight changes 3/24 memory choices: same-model utility falls twice and ties once; mean originality on the three switches is unchanged. |
+
+There are early qualitative indications consistent with creative recombination and memory-conditioned variation. These support further testing of the hypothesis, not a conclusion that SelMem improves creativity. The base model and controls also produce interesting designs. The earlier unblinded assistant assessment was exploratory, not an independent benchmark, and is not promoted to a validated score here.
+
+The earlier qualification, learning, strategy and sleep figures above are historical reported results: their full original raw archives are not part of this source publication. They are kept distinct from the four compact creative lots freshly checked against the supplied archive. The sleep pilot's negative outcomes and persistence defect remain part of the record.

@@ -1,78 +1,55 @@
 # GENESIS
 
-Four maintained experiments, one Rust executable. [Protocol and limitations](protocol.md), [result ledger](../RESULTS.md), [native observation support](../../ARCHITECTURE.md).
+A set of controlled exploratory assays around the SelMem organ. Start with the [result ledger](../RESULTS.md), [creativity findings](../CREATIVITY_RESULTS.md) and [replay rules](../REPRODUCIBILITY.md). The protocols below deliberately test different interventions; do not pool their samples.
 
-## 1. Qualify the decision model
+## Qualification and cumulative learning
 
 ```bash
 bash experiments/genesis/run-positive-control.sh experiments/genesis/results/positive-new
-```
-
-Uses `.selmem` or `SELMEM_CONFIG`, Grok 4.3 and GPT-4o-mini-2024-07-18 by default. `GROK_MODEL` and `GPT_MODEL` override models. Each receives 48 decisions: two names, reliable/unreliable/empty histories, two costs, two option orders and two repetitions. 96 requests are planned; the ceiling is 120 attempts including retries. No memory, scorer or reconstruction calls occur.
-
-A complete run qualifies only with 48/48 oracle choices. This strict engineering gate was fixed before the retained run; it is not a statistical threshold. Mock results cannot qualify. Failed qualification remains a result and does not prevent the other provider from being tested. Transport/schema failures preserve partial outputs.
-
-## 2. Compare observation support OFF/ON
-
-```bash
 bash experiments/genesis/run-evidence-learning.sh \
   experiments/genesis/results/positive-new/grok \
   experiments/genesis/results/evidence-new
 ```
 
-Only a real, complete, qualified positive-control source is accepted. Model names must match that source. Grok is the default; GPT-mini did not qualify in the retained run. This command does not automatically rerun qualification or replay an old life.
+The qualification panel requires 48/48 oracle choices for this specific decision task. The historical reported Grok run passed; GPT-mini did not. Learning then compares observation support OFF/ON on two twelve-report histories. Retained historical reports show 8/16 versus 16/16 oracle agreement for native and strict recall. The benefit is explicit evidence retention, not a proven effect of reconstruction or creativity. Qualification sources must be real, complete and model-matched.
 
-Each cut receives 24 inputs (two twelve-report histories), four readonly final recalls and 72 decisions. Combined: 48 inputs, eight readouts and 144 decisions. Internal calls vary; ceilings are 800 attempts per cut and 1600 total, including retries. The retained pair used 475 attempts. A ceiling is not an expected request count.
-
-Compare full faithful history, admitted observations, native recall, strict recall and empty context. Support updates retain information without a new trace: `kept=true`, `new_trace=false`, `salience_evaluated=false`; score=0 means not evaluated. Ordinary new-trace salience thresholds are unchanged. No sleep occurs within these twelve-event lives.
-
-Outputs include design/configuration, fixtures, encoding receipts, life/clone snapshots, readout audits, decision schedule, raw responses and HTTP journal. Fresh outputs are required. Both scripts create `.tar.gz` evidence packages after successful completion; failed runs retain their directories and logs.
-
-## Direct and offline commands
+## Published creative preview
 
 ```bash
+bash experiments/genesis/run-creative-preview-guarded.sh \
+  experiments/genesis/creative-preview.json \
+  experiments/genesis/results/creative-preview-new --prepare-only
+# After inspecting the prepared design, start paid collection:
+bash experiments/genesis/run-creative-preview-guarded.sh \
+  experiments/genesis/creative-preview.json \
+  experiments/genesis/results/creative-preview-new --resume
+```
+
+The [guarded protocol](CREATIVE_PREVIEW_GUARDED.md) encodes 788 turns from two complete histories once, applies ten nights per history, and collects 60 proposals across five conditions. Task-conditioned retrieval is followed by task-blind retelling and provenance checking. All conditions use matched direct generation; response-choice selection is not invoked.
+
+The published preview completed 60 proposals in 887 HTTP attempts. This is a collection result, not proof of creativity superiority. The older native preview remains available through `run-creative-preview.sh`; the guarded and native readouts must not be treated as the same intervention.
+
+## Replays and response selection
+
+- [Fixed-selection replay](CREATIVE_REPLAY.md): reuse saved states and selected IDs; add a task-blind reteller/guard and a no-memory two-step comparator.
+- [Structured delivery rerun](CREATIVE_MEMORY_REPLAY.md): reuse the earlier accepted readouts, change final memory delivery, and collect another separate lot.
+- [Memory-influence diagnostic](MEMORY_INFLUENCE.md): two controlled histories, six tasks, three conditions, two repeats. Analyze candidate selection independently from generation and quality.
+
+The recorded replays completed 72 answers each. Influence 005 reused 24 direct answers, 48 candidate pools and 48 quality results, then made 33 grounding attempts. These lots share inputs or outputs and are not independent replications.
+
+## Other retained protocols
+
+[Sleep](SLEEP.md) compares matched no-sleep/normal/deep states; its historical results and persistence defect are documented in the ledger. [Creative transfer](CREATIVITY.md) retains the original pilot and lesion follow-up. [Creative life](CREATIVE_LIFE.md) retains both the 600-proposal economy plan and 6,480-proposal full plan for later runs. They are plans, not completed creativity results.
+
+## Offline checks and rating
+
+```bash
+./run.sh test --all-targets -- --test-threads=1
+./run.sh test --doc
 ./run.sh run --release --bin selmem-genesis -- --help
-./run.sh run --release --bin selmem-genesis -- positive --mock --out /tmp/positive-check
-./run.sh run --release --bin selmem-genesis -- learning --mock \
-  --source /tmp/positive-check --out /tmp/learning-check --observation-evidence on
-./run.sh test --bin selmem-genesis
+bash experiments/genesis/tools.sh
 ```
 
-`--config FILE` loads the runtime file before either command. The default is normal `.selmem` discovery. Progress is verbose; `operation #` is nested work, `HTTP #` counts actual attempts. WAIT messages are heartbeats, not additional calls. Mock decision choices are prescribed plumbing and provide no scientific evidence.
+The [Rust tools](RUST_TOOLS.md) prepare pinned dataset fixtures, generate blank rating forms, combine independent ratings and analyze results. At least two independently completed judge forms are required for the intended creativity assessment. Distinct judge names alone do not establish independence.
 
-## Migration
-
-The separate `selmem-genesis-positive` and `selmem-genesis-learning` executables are now `selmem-genesis positive` and `selmem-genesis learning`. Gate/policy/qualification/recall launchers and contrast/presentation/sensitivity/content/threshold troubleshooting commands have been removed. The oversized prepare/run/replay campaign scaffold and unexecuted confirmatory/pilot grids have also been retired. The creative-transfer collection and causal follow-up are now executable exploratory protocols; no creative result is claimed.
-
-Existing evidence is readable and must keep its original manifests. Place qualified `positive-001/grok` outside or back under the ignored results directory if reusing it. Do not run the old suite script. The native organ's algorithms and observation-support implementation are unchanged by this cleanup.
-
-Legacy library exports for benchmark/experiment/fork demonstrations have been removed. The core live/remember/speak/sleep API, daemon and terminal client remain.
-
-## Sleep quality
-
-The third command, `selmem-genesis sleep`, compares time-matched no-sleep, native normal sleep and forced deep sleep on saved learning histories and a pinned LoCoMo-derived factual panel. Read [SLEEP.md](SLEEP.md) for preparation, qualification, costs and limits. No real result is claimed yet.
-
-## Creative transfer
-
-`selmem-genesis creative` collects LoCoMo-derived creative proposals under empty, BM25 RAG, no-reconstruction and full SelMem conditions. Full/ablation share the same saved life. `creative-causal` applies audited target/sham trace lesions. [CREATIVITY.md](CREATIVITY.md) defines tasks, preparation, costs, blind human ratings and limitations. Start with the 72-proposal pilot, then freeze the protocol before the 360-proposal ten-history campaign. Mock is technical rehearsal only.
-
-```bash
-LOCOMO_DATASET=/path/to/locomo10.json bash experiments/genesis/run-creativity.sh experiments/genesis/results/creative-001
-bash run.sh test --bin selmem-genesis -- --test-threads=1
-```
-
-The long trajectory experiment is documented in [CREATIVE_LIFE.md](CREATIVE_LIFE.md):
-`creative-life` now defaults to the economical two-history design, retaining all sessions,
-90 exposure days, 30 washout days and the developmental/readout/layer/continuation controls.
-It shares only validated stateless annotations and plans 600 creative proposals.
-The older ten-history full fixture remains supported for a new full-mode run.
-
-## Creative preview and preserved plans
-
-The independent `creative-preview` protocol is described in [CREATIVE_PREVIEW.md](CREATIVE_PREVIEW.md): two complete histories encoded once, ten nights per history, five conditions, and 60 proposals. Run `bash experiments/genesis/run-creative-preview.sh experiments/genesis/creative-preview.json experiments/genesis/results/creative-preview-001` from the repository root with a configured `.selmem`.
-
-The longitudinal **economy** (90+30 days, 600 proposals) and **full** (90+30 days, 6,480 proposals) plans, preparers, launchers, and evaluators remain available with unchanged protocols. See [CREATIVE_LIFE.md](CREATIVE_LIFE.md). Use a separate output directory for each experiment; do not pool their observations or ratings.
-
-## Offline Rust tools
-
-[RUST_TOOLS.md](RUST_TOOLS.md) documents the Rust replacements for data preparation, blind rating, availability summaries, and mechanism coding. Run `bash experiments/genesis/tools.sh` for the command list. Existing completed result formats and the three frozen experiment plans are preserved. Apply tooling updates after an active collection finishes, because its resume checks bind the original code and executable.
+Give judges only the original blind proposals, their blank form and the rubric. Keep conditions, source memories, pipeline scores and analysis hidden. Model self-evaluation and the earlier single unblinded assistant review are not independent blind evidence.

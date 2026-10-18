@@ -45,6 +45,7 @@ pub struct SelectiveMemory {
     scorer: Option<Box<dyn crate::recall::PropositionScorer>>,
     /// Ablation. The mouth does not receive the reading profile.
     drop_stake: bool,
+    memory_context_options: crate::MemoryContextOptions,
 }
 
 /// Runtime LLM endpoint. Key stays on the process; GET only reports a mask.
@@ -65,10 +66,26 @@ pub struct MouthDraft {
     pub talk: WorkingTalk,
     pub hold: bool,
     pub dump: RetrievalDump,
+    pub memory_context: crate::MemoryContext,
+    pub memory_context_options: crate::MemoryContextOptions,
+    pub reading: String,
     epoch: u64,
 }
 
+impl MouthDraft {
+    pub fn memory_reply(&self) -> crate::MemoryReply<'_> {
+        crate::MemoryReply { user: &self.user, memories: &self.memories, axioms: &self.axioms,
+            mood: &self.mood, talk: &self.talk, reading: &self.reading,
+            context: &self.memory_context, options: &self.memory_context_options }
+    }
+    pub fn reply(&self, narrator: &dyn Narrator) -> String { narrator.reply_with_context(&self.memory_reply()) }
+    pub fn delivery_audit_json(&self, narrator: &dyn Narrator) -> String { self.memory_reply().audit_json(narrator.supports_memory_context()) }
+}
 impl SelectiveMemory {
+    pub fn set_memory_context_options(&mut self, options: crate::MemoryContextOptions) -> Result<(), String> {
+        options.validate()?; self.memory_context_options = options; Ok(())
+    }
+    pub fn memory_context_options(&self) -> &crate::MemoryContextOptions { &self.memory_context_options }
     pub fn new(profile: EntityProfile) -> Self {
         Self {
             profile,
@@ -88,6 +105,7 @@ impl SelectiveMemory {
             mouth_held: false,
             scorer: None,
             drop_stake: false,
+            memory_context_options: crate::MemoryContextOptions::default(),
         }
     }
 
@@ -136,6 +154,7 @@ impl SelectiveMemory {
                 mouth_held: false,
                 scorer: None,
             drop_stake: false,
+            memory_context_options: crate::MemoryContextOptions::default(),
             })
         } else {
             Ok(Self {
@@ -156,6 +175,7 @@ impl SelectiveMemory {
                 mouth_held: false,
                 scorer: None,
             drop_stake: false,
+            memory_context_options: crate::MemoryContextOptions::default(),
             })
         }
     }
@@ -210,8 +230,11 @@ impl SelectiveMemory {
             None => self.llm.key.clone(),
         };
         let n = crate::recall::HttpNarrator::parse(url, model, key.clone())
-            .ok_or_else(|| "llm url must be http:// or https://".to_string())?;
+            .ok_or_else(|| "llm url must be http:// or https://".to_string())?
+            .with_choice_options(crate::ChoiceOptions::from_config(crate::Config::get())?);
+        let options = crate::MemoryContextOptions::from_config(crate::Config::get())?;
         self.narrator = Arc::new(n);
+        self.memory_context_options = options;
         self.llm = LlmBind {
             url: url.to_string(),
             model: if model.is_empty() { "llama3".into() } else { model.into() },
@@ -827,20 +850,13 @@ impl SelectiveMemory {
         axioms_only: bool,
     ) -> (String, RetrievalDump) {
         let draft = self.open_mouth_inner(user, hold, bias, marked, axioms_only);
-        let profile = if self.drop_stake {
-            String::new()
+        let failures_before = self.narrator.failure_log().failures;
+        let reply = draft.reply(self.narrator.as_ref());
+        if self.narrator.failure_log().failures > failures_before || reply.starts_with("[llm-error]") {
+            self.cancel_mouth(&draft);
         } else {
-            crate::recall::reading::ReadingProfile::for_query(&self.store, &draft.mood, &draft.user, &draft.dump.selected).render()
-        };
-        let reply = self.narrator.reply_disposed(
-            &draft.user,
-            &draft.memories,
-            &draft.axioms,
-            &draft.mood,
-            &draft.talk,
-            &profile,
-        );
-        self.close_mouth(&draft, &reply);
+            self.close_mouth(&draft, &reply);
+        }
         (reply, draft.dump)
     }
 
@@ -868,6 +884,9 @@ impl SelectiveMemory {
             RecallWrite::ReadOnly
         };
         let (recalled, dump) = self.remember_with(&query, write, bias, marked);
+        let delivered_ids: Vec<String> = if axioms_only { Vec::new() } else {
+            recalled.iter().take(if hold { 2 } else { usize::MAX }).map(|r| r.trace_id.clone()).collect()
+        };
         if hold {
             // Spoken utility: the hour that actually entered the mouth, not every neighbor.
             if let Some(id) = dump.selected.first() {
@@ -961,6 +980,11 @@ impl SelectiveMemory {
         for interpretation in scoped_reading.axioms.iter().filter(|s| s.starts_with("Tentative observed interpretation;")) {
             if !axioms.contains(interpretation) { axioms.push(interpretation.clone()); }
         }
+        let memory_context = if self.memory_context_options.format == crate::MemoryContextFormat::Structured {
+            crate::MemoryContext::from_selected(&self.store, &delivered_ids, &memories, &axioms,
+                &self.mood, &self.memory_context_options, self.clock.now())
+        } else { crate::MemoryContext::default() };
+        let reading = if self.drop_stake { String::new() } else { scoped_reading.render() };
         MouthDraft {
             user: user.to_string(),
             memories,
@@ -969,6 +993,9 @@ impl SelectiveMemory {
             talk: talk.clone(),
             hold,
             dump,
+            memory_context,
+            memory_context_options: self.memory_context_options.clone(),
+            reading,
             epoch: {
                 self.mouth_epoch = self.mouth_epoch.saturating_add(1);
                 self.mouth_epoch

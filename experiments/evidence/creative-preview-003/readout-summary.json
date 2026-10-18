@@ -1,0 +1,35 @@
+{
+  "by_condition": [
+    {
+      "condition": "after_full",
+      "proposals": 12,
+      "mean_context_words": 62
+    },
+    {
+      "condition": "after_no_recon",
+      "proposals": 12,
+      "mean_context_words": 143.83333333333334
+    },
+    {
+      "condition": "before_sleep",
+      "proposals": 12,
+      "mean_context_words": 76.33333333333333
+    },
+    {
+      "condition": "empty",
+      "proposals": 12,
+      "mean_context_words": 0
+    },
+    {
+      "condition": "rag",
+      "proposals": 12,
+      "mean_context_words": 592.6666666666666
+    }
+  ],
+  "guard_verdicts": [
+    {
+      "verdict": "retelling",
+      "count": 43
+    }
+  ]
+}

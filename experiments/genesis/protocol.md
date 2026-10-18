@@ -43,3 +43,7 @@ Prespecify meaningful effects after estimating natural variability; separate dev
 ## Creative transfer extension
 
 See [CREATIVITY.md](CREATIVITY.md) for the executable exploratory LoCoMo-derived design. The collection has four conditions sharing a task and model; native full/no-reconstruction share one saved life. Blind utility/originality ratings precede source audits and predeclared target/sham lesions. No sleep or co-recall learning benefit is tested in this first campaign. Generation repeats are nested within histories and do not establish population-level individuality or creativity.
+
+## Recorded creative collections
+
+The guarded preview, fixed-selection replays and response-selection diagnostic now have recorded outputs. [CREATIVITY_RESULTS.md](../CREATIVITY_RESULTS.md) separates the observed state/selection changes and suggestive examples from unproved creativity benefits. The larger longitudinal economy/full plans remain available for future runs. Fresh replication, historical resumption and independent rating require different inputs; follow [REPRODUCIBILITY.md](../REPRODUCIBILITY.md).

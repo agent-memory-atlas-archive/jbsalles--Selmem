@@ -17,6 +17,8 @@ fn main() {
         EntityProfile::tender(name)
     };
     let mut mem = SelectiveMemory::open(&path, profile).expect("memory");
+    mem.set_memory_context_options(selmem::MemoryContextOptions::from_config(cfg)
+        .unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); })).expect("validated delivery options");
     let mouth = match cfg.mouth(flag(&args, "--llm"), flag(&args, "--model"), flag(&args, "--plug"), "llama3") {
         Ok(v) => v,
         Err(e) => {
@@ -26,6 +28,8 @@ fn main() {
     };
     if let Some(mouth) = mouth {
         if let Some(n) = HttpNarrator::parse(&mouth.url, mouth.model, mouth.api_key.or(key.clone())) {
+            let n = n.with_choice_options(selmem::ChoiceOptions::from_config(cfg)
+                .unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); }));
             mem = mem.with_narrator(Box::new(n));
             eprintln!("LLM voice attached");
         }

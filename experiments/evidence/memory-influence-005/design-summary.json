@@ -1,0 +1,17 @@
+{
+  "version": "memory-influence-1",
+  "mode": "frozen-pool-reevaluation-022",
+  "model": "grok-4.3",
+  "reasoning_effort": "none",
+  "implementation": "eed994f4fc1ec106f50e7d822d0bd51a8e3207216a166d5283a7c40eb3ff46a5",
+  "planned_proposals": 72,
+  "nominal_calls": 24,
+  "selection_protocol": "selmem-response-choice-5",
+  "grounding_calls": 24,
+  "quality_calls": 0,
+  "reuse_quality": true,
+  "source_proposals_sha256": "4bf4151895f6d3b18b271cea11706c56e7fb15c8ae18c520b1d67f4e73ccbb8e",
+  "source_result_sha256": "adca9c28f343259eb2462d801c54ca99764f84ebd76763f5ba4d6dd82240c5a8",
+  "cases_sha256": "f419974c4117cd782c9f2bd53566d4d89c63b38e2aa040314d6f7c1469491184",
+  "quality_reuse_sha256": "512a8c2e751cb184ff127e499ebdd112170cd955c52b1adbd3345a4298a13b00"
+}

@@ -1,0 +1,19 @@
+{
+  "run": "creative-replay-004",
+  "scope": "Compact publication export, not a resumable run archive. No independent creativity ratings are included.",
+  "original_files": [
+    {
+      "path": "replay-design.json",
+      "sha256": "6b54c4a2d934d64bf762f7288aeb94976b9807b21a2cad079d6df0548dcf30f1"
+    },
+    {
+      "path": "all-proposals.json",
+      "sha256": "3c084092486610213eca4c8f856811e428d0cbe2350fa9619f08945da0963ea1"
+    },
+    {
+      "path": "blind-proposals.json",
+      "sha256": "ae816d0cd6e6e08a2f705be751c1ad5f5ab682bb5f8540bc6299b848a9a7668f"
+    }
+  ],
+  "raw_source_archive": "Retained locally under experiments/genesis/results; not committed or repackaged with source."
+}

@@ -38,4 +38,9 @@ jobs:
         run: cargo build --verbose
       
       - name: Run tests
-        run: cargo test --verbose
+        run: |
+          cargo test --all-targets --verbose -- --test-threads=1
+          cargo test --doc
+
+      - name: Check published evidence checksums
+        run: cd experiments/evidence && sha256sum --check SHA256SUMS

@@ -11,6 +11,8 @@ SelMem goal is not more memory, but path-dependent memory: selection, reconstruc
 
 **Hypothesis:** After a year of the same stream, two copies of the same model that retained one hour on one side only no longer remember or forget the same things. Measured on the book, retrieve, and the mouth. Historical exploratory runs motivated this hypothesis; durable behavioral singularity and useful creativity remain to be demonstrated.
 
+**Research update — October 2026.** The creative experiments now have recorded proposals, matched controls and compact public evidence. There are early qualitative indications consistent with creative recombination and memory-conditioned variation, but **no proven creativity advantage attributable to SelMem**. Interesting proposals also occur without memory; the guarded preview and fixed-pool selection diagnostic do not establish superiority. Read the [creativity findings](experiments/CREATIVITY_RESULTS.md), inspect the [evidence](experiments/evidence/README.md), or open the [results showcase](docs/experiments.html).
+
 **Manifest:** [WHITEPAPER.md](WHITEPAPER.md)\
 **Layout:** [ARCHITECTURE.md](ARCHITECTURE.md) — encode / judge / night / snapshot.\
 **Benches:** [experiments/RESULTS.md](experiments/RESULTS.md) — observations and limits. Replay from [experiments/README.md](experiments/README.md).\
@@ -169,7 +171,7 @@ The maintained experiments are [GENESIS](experiments/genesis/README.md) and [LoC
 
 ### GENESIS
 
-One executable, two commands: `selmem-genesis positive` qualifies the decision model against a faithful history; `selmem-genesis learning` tests cumulative learning with observation support OFF/ON. Both read provider configuration from `.selmem`, or the file selected by `--config` / `SELMEM_CONFIG`.
+`selmem-genesis positive` qualifies the decision model against a faithful history; `learning` tests observation support OFF/ON. The same executable also provides sleep, creative preview, transfer and longitudinal controls. Separate Rust binaries retain fixed-selection replays and memory-influence diagnostics. Runtime configuration comes from `.selmem`, `--config` or `SELMEM_CONFIG`.
 
 `positive-001`: Grok 48/48 oracle choices; GPT-4o-mini 28/48. `evidence-001`: native and strict recall match the oracle on 8/16 with support OFF and 16/16 with support ON. The effect comes from explicit observation counts, not demonstrated reconstruction superiority, singularity or creativity. One history pair is exploratory, not population replication.
 
@@ -182,6 +184,22 @@ bash experiments/genesis/run-evidence-learning.sh \
 ```
 
 Real runs make paid API calls. Scripts print progress and cap HTTP attempts including retries. Choose fresh output paths. `--mock` tests plumbing only and cannot qualify a model. See the [protocol](experiments/genesis/protocol.md) for controls, probe isolation and limitations.
+
+### Creativity publication
+
+The guarded preview freshly encodes 788 source turns, applies twenty sleep cycles across two histories, and collects 60 proposals under five conditions. The recorded run completed in 887 HTTP attempts. It uses task-blind guarded retelling of task-selected gists, with matched direct generation; it does not invoke response-choice selection or deliver the reading profile and axioms.
+
+```bash
+bash experiments/genesis/run-creative-preview-guarded.sh \
+  experiments/genesis/creative-preview.json \
+  experiments/genesis/results/creative-preview-new --prepare-only
+# Inspect the design, then start paid collection:
+bash experiments/genesis/run-creative-preview-guarded.sh \
+  experiments/genesis/creative-preview.json \
+  experiments/genesis/results/creative-preview-new --resume
+```
+
+Earlier 72-proposal replay lots and a frozen-pool response-selection diagnostic are retained as separate interventions. Both long creative-life plans remain available. [Commands and controls](experiments/README.md), [results and limitations](experiments/CREATIVITY_RESULTS.md), [structured context defaults](docs/MEMORY_CONTEXT_DEFAULTS.md), [response selection](docs/RESPONSE_SELECTION.md).
 
 ### Unit tests (no paid LLM calls)
 
@@ -323,7 +341,7 @@ mem.lineage("loyalty");
 singularity_distance(&fingerprint(&a), &fingerprint(&b));
 ```
 
-## Hors claim
+## Outside the demonstrated claim
 
 Do not read these as results. They are outside the demonstrated result.
 
@@ -352,4 +370,4 @@ The `main` branch deploys after CI passes; the public demo isolates each visitor
 
 ### GENESIS experimental protocol
 
-[GENESIS](experiments/genesis/README.md) retains model qualification and a controlled cumulative-learning assay. Probes run on isolated memory states. Transplantation, structural lesions, long-horizon singularity and constrained creativity remain further experiments, not active campaigns or demonstrated results. See the [scope and limitations](experiments/genesis/protocol.md).
+[GENESIS](experiments/genesis/README.md) retains qualification, cumulative learning, sleep, creative preview/replay and longitudinal creative-life protocols. Recorded creative collections are available; the long economy/full plans remain for future runs. Probes use isolated states. Durable singularity, a useful creativity advantage and causal attribution of original mechanisms remain unproved. See the [findings](experiments/CREATIVITY_RESULTS.md) and [reproduction policy](experiments/REPRODUCIBILITY.md).

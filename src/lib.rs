@@ -104,3 +104,5 @@ pub use recall::stance::{
 pub use HttpNarrator as LLMNarrator;
 
 pub use encode::semantic::{EventSemantics, LexicalInterpreter, SemanticInterpreter};
+pub use recall::memory_context::{MemoryContext, MemoryContextFormat, MemoryContextOptions, MemoryReply, MemoryUse};
+pub use recall::choice::{ChoiceMode, ChoiceOptions, Influence};

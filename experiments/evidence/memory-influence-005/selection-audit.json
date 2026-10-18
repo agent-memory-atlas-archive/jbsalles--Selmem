@@ -1,0 +1,1364 @@
+[
+  {
+    "history": "life-a",
+    "task": "community",
+    "repeat": 0,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "A",
+        "weight": 1
+      }
+    ],
+    "orientations": 0,
+    "evaluations": [
+      {
+        "alignment": [],
+        "feasibility": 4,
+        "id": "A",
+        "originality": 3,
+        "reason": "Directly uses the empty room, 300-euro budget, six volunteers; simple swap-and-story format needs no specialist gear and can start immediately; repeated weekly sessions encourage ongoing contact.",
+        "utility": 4,
+        "violations": []
+      },
+      {
+        "alignment": [],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 2,
+        "reason": "Uses the room and budget for pantry items and hotplates; cooking cycle is feasible but requires more coordination and repeated access to cooking facilities than stated.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [],
+        "feasibility": 2,
+        "id": "C",
+        "originality": 3,
+        "reason": "Introduces cameras and printing costs that exceed the 300-euro budget and add specialist equipment; door-to-door delivery is not described as using the empty room.",
+        "utility": 2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-a",
+    "task": "community",
+    "repeat": 1,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "A",
+        "weight": 1
+      }
+    ],
+    "orientations": 0,
+    "evaluations": [
+      {
+        "alignment": [],
+        "feasibility": 4,
+        "id": "A",
+        "originality": 2,
+        "reason": "Rotation and story-sharing structure encourages repeated interaction; budget and logistics are clearly stated.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 3,
+        "reason": "Skill-card grid creates repeated, structured exchanges; chalk and cards are minimal and feasible.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [],
+        "feasibility": 3,
+        "id": "C",
+        "originality": 1,
+        "reason": "Puzzle provides a shared task but lacks explicit mechanism for lasting connections beyond one photo.",
+        "utility": 2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-a",
+    "task": "learning",
+    "repeat": 0,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "A",
+        "weight": 1
+      }
+    ],
+    "orientations": 1,
+    "evaluations": [
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 3,
+        "reason": "Role rotation and slip-pairing create structured peer teaching; twelve checklist boxes give clear observable completion.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 2,
+        "reason": "Team rotation and poster ticks are feasible; mechanism is a conventional checkpoint list rather than novel.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0
+        ],
+        "feasibility": 3,
+        "id": "C",
+        "originality": 2,
+        "reason": "Circle drill uses only people and tape; success criteria are explicit but method is a standard peer-repetition loop.",
+        "utility": 2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-a",
+    "task": "learning",
+    "repeat": 1,
+    "selected": "B",
+    "weight_sweep": [
+      {
+        "selected": "B",
+        "weight": 0
+      },
+      {
+        "selected": "B",
+        "weight": 0.5
+      },
+      {
+        "selected": "B",
+        "weight": 1
+      }
+    ],
+    "orientations": 1,
+    "evaluations": [
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 3,
+        "reason": "Skit and voting add originality, but success metric relies on external librarian not supplied in task, lowering feasibility.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 4,
+        "id": "B",
+        "originality": 2,
+        "reason": "Provides concrete steps, uses only stated resources, and defines observable timing success; mechanism is standard pair-teach cycle.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 4,
+        "id": "C",
+        "originality": 2,
+        "reason": "Clear wall-manual procedure, observable volunteer test, fully within limits and resources.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-a",
+    "task": "repair",
+    "repeat": 0,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "A",
+        "weight": 1
+      }
+    ],
+    "orientations": 1,
+    "evaluations": [
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 3,
+        "reason": "Four-station rotation with role cards and timer limits over-commitment; parts-only bin and status tags directly reduce waste. Success via tagged objects and photo log is measurable.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 1,
+        "reason": "Pairing and audible status reports encourage participation; safeguard via second adult is practical. Success metric is attendance plus tags, but lacks explicit waste-reduction mechanism.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0
+        ],
+        "feasibility": 3,
+        "id": "C",
+        "originality": 2,
+        "reason": "Three parallel circles and idea board allow mixed skill levels and prevent hoarding; success via signatures and photos is concrete. No schedule or budget conflicts.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-a",
+    "task": "repair",
+    "repeat": 1,
+    "selected": "B",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "B",
+        "weight": 0.5
+      },
+      {
+        "selected": "B",
+        "weight": 1
+      }
+    ],
+    "orientations": 1,
+    "evaluations": [
+      {
+        "alignment": [
+          0
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 2,
+        "reason": "Clear voting and token system, 30-min fix cap, 70 % diversion metric; relies on volunteers and tool steward rotation.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 2,
+        "reason": "Pair sign-ups, visible time cards, photo tally; two-person rule and time cap prevent single-point failure.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0
+        ],
+        "feasibility": 2,
+        "id": "C",
+        "originality": 1,
+        "reason": "Two simultaneous stations plus labeled shelves; success metric is next-step count; safeguard is hourly tool inventory.",
+        "utility": 2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-a",
+    "task": "grant",
+    "repeat": 0,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "B",
+        "weight": 1
+      }
+    ],
+    "orientations": 2,
+    "evaluations": [
+      {
+        "alignment": [
+          0,
+          2
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 2,
+        "reason": "Clear timeline, budget allocation, stall handling and final check; uses only stated resources.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 1,
+        "reason": "Repeats Q1 structure with minor lead rotation; no new mechanism or budget detail.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          0
+        ],
+        "feasibility": 2,
+        "id": "C",
+        "originality": 3,
+        "reason": "Milestone-based funding and reallocation are concrete, but omits volunteer count and project pairing.",
+        "utility": 2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-a",
+    "task": "grant",
+    "repeat": 1,
+    "selected": "B",
+    "weight_sweep": [
+      {
+        "selected": "B",
+        "weight": 0
+      },
+      {
+        "selected": "B",
+        "weight": 0.5
+      },
+      {
+        "selected": "B",
+        "weight": 1
+      }
+    ],
+    "orientations": 1,
+    "evaluations": [
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 1,
+        "reason": "Democratic selection, even split, weekly check-ins, and 48-hour reallocation vote cover allocation, work, and stall handling within word limit.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 2,
+        "reason": "Clear team structure, shared budget approval, weekly stand-ups, and automatic reallocation after 5-day stall provide workable process within 30 days.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 2,
+        "id": "C",
+        "originality": 3,
+        "reason": "Contingency and staged releases are concrete, but lacks explicit stall-handling mechanism beyond moving contingency; rotation adds overhead.",
+        "utility": 2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-a",
+    "task": "exhibit",
+    "repeat": 0,
+    "selected": "B",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "B",
+        "weight": 0.5
+      },
+      {
+        "selected": "B",
+        "weight": 1
+      }
+    ],
+    "orientations": 2,
+    "evaluations": [
+      {
+        "alignment": [
+          0,
+          0
+        ],
+        "feasibility": 4,
+        "id": "A",
+        "originality": 1,
+        "reason": "Step-by-step sign-up, drop-off, and refill procedure is concrete and uses only stated resources; originality is low as it is a standard pocket-based collection system.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 2,
+        "reason": "Needs-circle and dual-lead sign-off are feasible but do not specify how squares are physically placed on the wall; evaluation focuses on logistics rather than exhibition quality.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0,
+          0
+        ],
+        "feasibility": 3,
+        "id": "C",
+        "originality": 2,
+        "reason": "Story-circle mechanism is feasible with minimal resources but only indirectly assembles the grid; evaluation metrics are clear yet measure narrative spread rather than physical exhibition.",
+        "utility": 2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-a",
+    "task": "exhibit",
+    "repeat": 1,
+    "selected": "B",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "B",
+        "weight": 0.5
+      },
+      {
+        "selected": "B",
+        "weight": 1
+      }
+    ],
+    "orientations": 1,
+    "evaluations": [
+      {
+        "alignment": [
+          0
+        ],
+        "feasibility": 4,
+        "id": "A",
+        "originality": 3,
+        "reason": "Four-week timeline with explicit assembly, maintenance, and evaluation steps; uses only supplied materials and no skill requirement.",
+        "utility": 4,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 4,
+        "id": "B",
+        "originality": 2,
+        "reason": "Rotating roles and tally sheet provide structured maintenance and evaluation; assembly relies on collective choice of paper sizes/colors each week.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          1
+        ],
+        "feasibility": 3,
+        "id": "C",
+        "originality": 2,
+        "reason": "Clear weekly assembly and maintenance via notes and volunteers; evaluation limited to final reading and photo, no explicit resident feedback loop.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-a",
+    "task": "meeting",
+    "repeat": 0,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "A",
+        "weight": 1
+      }
+    ],
+    "orientations": 1,
+    "evaluations": [
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 4,
+        "id": "A",
+        "originality": 2,
+        "reason": "Clear voting and assignment steps; uses only given resources; produces a posted schedule within time.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 1,
+        "reason": "Open discussion and hand vote feasible but lacks explicit time allocation or final posting deadline.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 3,
+        "id": "C",
+        "originality": 3,
+        "reason": "Silent writing and clustering novel; still assigns roles and posts result, though coordinator election adds minor complexity.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-a",
+    "task": "meeting",
+    "repeat": 1,
+    "selected": "B",
+    "weight_sweep": [
+      {
+        "selected": "B",
+        "weight": 0
+      },
+      {
+        "selected": "B",
+        "weight": 0.5
+      },
+      {
+        "selected": "B",
+        "weight": 1
+      }
+    ],
+    "orientations": 1,
+    "evaluations": [
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 1,
+        "reason": "Creates a roster but omits explicit duty assignments and lacks a mechanism for absent residents.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 4,
+        "id": "B",
+        "originality": 2,
+        "reason": "Produces a signed roster with duties and times; uses only provided materials and fits the hour.",
+        "utility": 4,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0
+        ],
+        "feasibility": 2,
+        "id": "C",
+        "originality": 3,
+        "reason": "Uses pairs and a poster but does not specify how uses are chosen or how duties are allocated.",
+        "utility": 2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-b",
+    "task": "community",
+    "repeat": 0,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "A",
+        "weight": 1
+      }
+    ],
+    "orientations": 2,
+    "evaluations": [
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 4,
+        "id": "A",
+        "originality": 2,
+        "reason": "Clear roster, €300 budget, two-week start, no specialist gear; rotation and checklist aid interaction but mechanism is standard potluck.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 1,
+        "reason": "Adds pledge chart and receipts to same recipe-swap idea; accountability layer is procedural rather than substantive new connection mechanism.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          0
+        ],
+        "feasibility": 3,
+        "id": "C",
+        "originality": 3,
+        "reason": "Memory-slip pairing and rotating stations create novel interaction; €300 and timeline fit, but 20-min storyteller rotation may need tighter coordination.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-b",
+    "task": "community",
+    "repeat": 1,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "A",
+        "weight": 1
+      }
+    ],
+    "orientations": 2,
+    "evaluations": [
+      {
+        "alignment": [
+          0,
+          0
+        ],
+        "feasibility": 4,
+        "id": "A",
+        "originality": 3,
+        "reason": "Clear rotation of six hobby stations, household items only, €300 for drinks/tags, postcard follow-up; meets all constraints and produces direct contact exchange.",
+        "utility": 4,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 2,
+        "id": "B",
+        "originality": 1,
+        "reason": "Purchases board games and snacks within three days, but €300 spent on commercial items violates no-specialist-equipment and household-resource spirit; mechanism is standard game night.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0,
+          0
+        ],
+        "feasibility": 3,
+        "id": "C",
+        "originality": 3,
+        "reason": "Uses tape, crayons, clipboards; two weekend runs; map-swapping yields contact via mailed copies. Slightly lower utility because contact is indirect and requires extra week.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-b",
+    "task": "learning",
+    "repeat": 0,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "A",
+        "weight": 1
+      }
+    ],
+    "orientations": 1,
+    "evaluations": [
+      {
+        "alignment": [
+          0
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 3,
+        "reason": "Trio rotation and index-card steps fit two hours and twelve learners; success criterion is explicit. Requires careful timing of rotations.",
+        "utility": 4,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 2,
+        "id": "B",
+        "originality": 1,
+        "reason": "Role-card scheme is feasible but lacks any teaching mechanism or practice loop; success depends on demonstrators already knowing the skill.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0
+        ],
+        "feasibility": 4,
+        "id": "C",
+        "originality": 2,
+        "reason": "Circle-plus-checklist method uses only stationery and time; observable score rise is clear. Novelty is modest as peer observation is common.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-b",
+    "task": "learning",
+    "repeat": 1,
+    "selected": "B",
+    "weight_sweep": [
+      {
+        "selected": "B",
+        "weight": 0
+      },
+      {
+        "selected": "B",
+        "weight": 0.5
+      },
+      {
+        "selected": "B",
+        "weight": 1
+      }
+    ],
+    "orientations": 2,
+    "evaluations": [
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 2,
+        "reason": "Observable checklist and model; teaching order fixed by cards; originality limited because it mirrors standard rotation without novel mechanism.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 3,
+        "reason": "Provides signed rubrics and artifacts as clear evidence; pre-assigned slots and rubrics add structure; feasibility reduced by needing twelve slips and a 4-item rubric prepared in advance.",
+        "utility": 4,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0,
+          0
+        ],
+        "feasibility": 4,
+        "id": "C",
+        "originality": 2,
+        "reason": "Delivers observable performance of three skills; uses only stationery and time; mechanism is peer swap but lacks explicit rationale for why the skill transfers.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-b",
+    "task": "repair",
+    "repeat": 0,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "A",
+        "weight": 1
+      }
+    ],
+    "orientations": 1,
+    "evaluations": [
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 4,
+        "id": "A",
+        "originality": 3,
+        "reason": "Sign-up board and triage circle directly address mixed skills; parts list and dual approval safeguard; success metric tracks objects moved to finished within stated sessions.",
+        "utility": 4,
+        "violations": []
+      },
+      {
+        "alignment": [
+          1
+        ],
+        "feasibility": 2,
+        "id": "B",
+        "originality": 1,
+        "reason": "Relies on shared sheet and photo logging; safeguard via initials; success metric depends on external parts arrival, which is outside group control.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0
+        ],
+        "feasibility": 3,
+        "id": "C",
+        "originality": 2,
+        "reason": "Clear zone-based flow uses available table/tools; rotating mentors feasible; safeguard concrete; success metric observable but limited to participation count.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-b",
+    "task": "repair",
+    "repeat": 1,
+    "selected": "C",
+    "weight_sweep": [
+      {
+        "selected": "C",
+        "weight": 0
+      },
+      {
+        "selected": "C",
+        "weight": 0.5
+      },
+      {
+        "selected": "C",
+        "weight": 1
+      }
+    ],
+    "orientations": 1,
+    "evaluations": [
+      {
+        "alignment": [
+          1
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 2,
+        "reason": "Clear sign-up chart, missing-parts list, and public safeguard; success metrics are concrete but mechanism is conventional.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 1,
+        "reason": "Duplicates Q1’s chart-and-list approach with no new mechanism; originality low and utility limited to verification rather than participation boost.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0
+        ],
+        "feasibility": 4,
+        "id": "C",
+        "originality": 3,
+        "reason": "Pair rotation, harvest option, and whiteboard tally directly address mixed confidence and waste reduction; procedure is feasible with given resources.",
+        "utility": 4,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-b",
+    "task": "grant",
+    "repeat": 0,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "A",
+        "weight": 1
+      }
+    ],
+    "orientations": 2,
+    "evaluations": [
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 2,
+        "reason": "Even split, signed lists, weekly check-ins and 48-hour reassignment or refund meet requirements concisely.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 2,
+        "reason": "Clear allocation, deadlines, photo check-ins and 48-hour refund rule cover all task elements within word limit.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0,
+          0
+        ],
+        "feasibility": 2,
+        "id": "C",
+        "originality": 3,
+        "reason": "Daily stand-ups and coordinator polling are novel but lack explicit budget allocation and inspection step, reducing completeness.",
+        "utility": 2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-b",
+    "task": "grant",
+    "repeat": 1,
+    "selected": "B",
+    "weight_sweep": [
+      {
+        "selected": "B",
+        "weight": 0
+      },
+      {
+        "selected": "B",
+        "weight": 0.5
+      },
+      {
+        "selected": "B",
+        "weight": 1
+      }
+    ],
+    "orientations": 2,
+    "evaluations": [
+      {
+        "alignment": [
+          0,
+          2
+        ],
+        "feasibility": 2,
+        "id": "A",
+        "originality": 1,
+        "reason": "Weekly phases and 48-hour backup micro-project; omits explicit per-project budget split and volunteer assignment method.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 2,
+        "reason": "Clear private assignment, pledge, receipt scan and 3-day reallocation rule; uses stated €60 slice and 600-euro budget.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          0
+        ],
+        "feasibility": 3,
+        "id": "C",
+        "originality": 2,
+        "reason": "Wall chart, daily initials, 72-hour open claim and 4-day finish rule; covers allocation, tracking and stall handling.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-b",
+    "task": "exhibit",
+    "repeat": 0,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "A",
+        "weight": 1
+      }
+    ],
+    "orientations": 2,
+    "evaluations": [
+      {
+        "alignment": [
+          0,
+          0
+        ],
+        "feasibility": 4,
+        "id": "A",
+        "originality": 3,
+        "reason": "Directly matches task constraints; grid assembly, weekly upkeep and visitor-count evaluation are explicit; modest originality in 30-word story format.",
+        "utility": 4,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 1,
+        "reason": "Pledge list and timed slots are feasible but omit how non-artistic residents actually create content; originality low; evaluation limited to photo archive.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0,
+          0
+        ],
+        "feasibility": 4,
+        "id": "C",
+        "originality": 2,
+        "reason": "Clear assembly, maintenance and evaluation steps; uses only supplied resources and four Saturdays; voting mechanism is simple but not novel.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-b",
+    "task": "exhibit",
+    "repeat": 1,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "A",
+        "weight": 1
+      }
+    ],
+    "orientations": 2,
+    "evaluations": [
+      {
+        "alignment": [
+          0,
+          2
+        ],
+        "feasibility": 4,
+        "id": "A",
+        "originality": 3,
+        "reason": "Directly meets task: simple slip-and-grid method, clear assembly/maintenance/evaluation steps, uses only donated paper and four Saturdays.",
+        "utility": 4,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 1,
+        "reason": "Focuses on volunteer checklist rather than resident contribution; lacks explicit exhibition content or evaluation of public engagement.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0,
+          0
+        ],
+        "feasibility": 3,
+        "id": "C",
+        "originality": 4,
+        "reason": "Novel token-voting mechanism, but omits how initial grid is created and how residents without training contribute content.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-b",
+    "task": "meeting",
+    "repeat": 0,
+    "selected": "B",
+    "weight_sweep": [
+      {
+        "selected": "B",
+        "weight": 0
+      },
+      {
+        "selected": "B",
+        "weight": 0.5
+      },
+      {
+        "selected": "B",
+        "weight": 1
+      }
+    ],
+    "orientations": 1,
+    "evaluations": [
+      {
+        "alignment": [
+          1
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 1,
+        "reason": "Silent writing plus reading aloud is feasible, yet the unanimous-initials rule is impractical and slows finalization.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0
+        ],
+        "feasibility": 4,
+        "id": "B",
+        "originality": 2,
+        "reason": "Provides a clear, low-resource procedure that produces a visible, witnessed record within the hour.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          0
+        ],
+        "feasibility": 3,
+        "id": "C",
+        "originality": 1,
+        "reason": "Works but relies on sequential speaking and later copying, which may exceed time or create disputes.",
+        "utility": 2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "history": "life-b",
+    "task": "meeting",
+    "repeat": 1,
+    "selected": "A",
+    "weight_sweep": [
+      {
+        "selected": "A",
+        "weight": 0
+      },
+      {
+        "selected": "A",
+        "weight": 0.5
+      },
+      {
+        "selected": "B",
+        "weight": 1
+      }
+    ],
+    "orientations": 2,
+    "evaluations": [
+      {
+        "alignment": [
+          2,
+          0
+        ],
+        "feasibility": 3,
+        "id": "A",
+        "originality": 2,
+        "reason": "Provides a clear sequence: round-robin, ranking, grid creation, posting. Uses only given resources and fits time limit. Mechanism is simple but functional.",
+        "utility": 3,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          2
+        ],
+        "feasibility": 3,
+        "id": "B",
+        "originality": 1,
+        "reason": "Describes proposal and sign-up but omits how the actual schedule is created or reconciled. Relies on an unspecified later change process.",
+        "utility": 2,
+        "violations": []
+      },
+      {
+        "alignment": [
+          2,
+          0
+        ],
+        "feasibility": 2,
+        "id": "C",
+        "originality": 3,
+        "reason": "Divides work into two teams and reconciliation step. Adds structure but introduces coordination overhead that may exceed one-hour limit.",
+        "utility": 3,
+        "violations": []
+      }
+    ]
+  }
+]

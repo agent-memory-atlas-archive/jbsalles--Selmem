@@ -1,0 +1,30 @@
+{
+  "source_reviews": [],
+  "orientations": [],
+  "candidates": [
+    {
+      "id": "A",
+      "kind": "direct",
+      "mechanism": "Weekly recipe-swap potluck in the empty room: residents bring one dish from their heritage, share its story and recipe, then exchange written copies. Two 90-minute sessions over two weeks.",
+      "answer": "Mechanism: each session starts with a 10-minute welcome circle, followed by tasting and 3-minute story sharing per dish, ending with recipe cards exchanged. Participation: open to all 40 residents; volunteers handle room setup, sign-up sheet, and cleanup. Resources: 300 euros covers folding tables, tablecloths, printed recipe cards, and basic utensils. No specialist equipment needed; activity starts next Saturday.",
+      "orientation_ids": [],
+      "source_ids": []
+    },
+    {
+      "id": "B",
+      "kind": "oriented",
+      "mechanism": "Same potluck structure but with a follow-up accountability loop: participants commit to cooking one new dish with a partner within a month, tracked via a shared photo wall in the town hall.",
+      "answer": "Mechanism: first potluck identical to A; second session adds a matching board where people pair up and write a cooking date. Participation: same open invitation; volunteers manage matching board and reminders. Resources: 300 euros covers same items plus photo wall supplies and reminder postcards. Starts within two weeks, builds lasting pairs.",
+      "orientation_ids": [],
+      "source_ids": []
+    },
+    {
+      "id": "C",
+      "kind": "exploratory",
+      "mechanism": "Story-swap walking tour: volunteers map six short stops around town; pairs of residents trade personal memories at each stop, then reconvene in the empty room for tea. Starts next Sunday.",
+      "answer": "Mechanism: pairs rotate every 12 minutes, guided by volunteer prompts; final 30 minutes in the room for group reflection and contact exchange. Participation: limit 24 residents, sign-up via library. Resources: 300 euros covers printed maps, name tags, tea, biscuits, and small notebooks. No equipment required beyond existing sidewalks.",
+      "orientation_ids": [],
+      "source_ids": []
+    }
+  ]
+}
