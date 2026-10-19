@@ -677,6 +677,10 @@ pub struct OrganCut {
     pub util_to_strength: bool,
     /// Night merge refuses a pair that supports distinct living axioms, or a pin.
     pub merge_support_veto: bool,
+    /// When false, observation support does not modulate recall score or
+    /// inject a reconstructive strength signal into the narrative.
+    /// Groups remain; this is a pure signal lesion. Default true.
+    pub support_signal: bool,
 }
 
 impl Default for OrganCut {
@@ -694,6 +698,7 @@ impl OrganCut {
             reconstruct: true,
             util_to_strength: false,
             merge_support_veto: false,
+            support_signal: true,
         }
     }
 
@@ -705,6 +710,7 @@ impl OrganCut {
             reconstruct: false,
             util_to_strength: false,
             merge_support_veto: false,
+            support_signal: true,
         }
     }
 
@@ -725,6 +731,13 @@ impl OrganCut {
     pub fn no_ladder() -> Self {
         Self {
             ladder: false,
+            ..Self::full()
+        }
+    }
+
+    pub fn no_support_signal() -> Self {
+        Self {
+            support_signal: false,
             ..Self::full()
         }
     }

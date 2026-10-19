@@ -51,6 +51,24 @@ impl ObservationEvidence {
         let claims=group.counts().into_iter().map(|(claim,n)|format!("{n} distinct observation IDs support this observed claim: {claim}")).collect::<Vec<_>>().join("\n");
         Some(format!("Observation support metadata (not additional recalled episodes). Counts include the initial carrier observation: do not add the narrative as another observation. Counts use caller-provided IDs; statistical independence is not verified. Different claims remain separate and do not erase earlier observations.\n{claims}"))
     }
+
+    /// Saturated reconstructive weight from distinct supporting observations.
+    /// Zero when disabled, ineligible, or fewer than two observations.
+    /// Never rewrites core or gist. Used only to modulate recall and optional signal.
+    pub fn support_weight(&self, store: &MemoryStore, trace_id: &str) -> f32 {
+        if !self.enabled || !eligible(store, trace_id) {
+            return 0.0;
+        }
+        let Some(group) = self.groups.get(trace_id) else {
+            return 0.0;
+        };
+        let n = group.observations.len();
+        if n < 2 {
+            return 0.0;
+        }
+        // log1p saturates: ~0.16 at 2, ~0.28 at 4, ~0.42 at 8, ~0.55 at 16, ~0.75 at 64.
+        (0.22 * (1.0 + n as f32).ln()).min(0.75)
+    }
     pub fn encode(&self)->String {
         let mut words=vec!["1".into(),if self.enabled{"1"}else{"0"}.into(),self.groups.len().to_string()];
         for (id,g) in &self.groups {
@@ -200,5 +218,18 @@ mod tests {
         assert!(!offer(&mut m,"a","Mira supplied six batteries to the workshop.").kept);
         assert_eq!(ObservationEvidence::decode(&m.store.observation_evidence.encode()).unwrap(),m.store.observation_evidence);
         m.store.traces.remove(&id);assert!(m.store.observation_evidence.render(&m.store,&id).is_none());
+    }
+    #[test]fn support_weight_saturates_and_is_zero_under_two_or_disabled(){
+        let mut m=memory();
+        let id=offer(&mut m,"a","Mira supplied six batteries to the workshop.").trace_id.unwrap();
+        assert_eq!(m.store.observation_evidence.support_weight(&m.store,&id),0.0);
+        offer(&mut m,"b","Mira supplied six batteries to the workshop.");
+        let w2=m.store.observation_evidence.support_weight(&m.store,&id);
+        assert!(w2>0.1 && w2<0.3);
+        for i in 0..6 { offer(&mut m,&format!("c{i}"),"Mira supplied six batteries to the workshop."); }
+        let w=m.store.observation_evidence.support_weight(&m.store,&id);
+        assert!(w>w2 && w<=0.75);
+        m.set_observation_evidence(false);
+        assert_eq!(m.store.observation_evidence.support_weight(&m.store,&id),0.0);
     }
 }

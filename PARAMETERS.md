@@ -25,6 +25,8 @@ Ordinary stores default disabled. Enable via `set_observation_evidence(true)` wi
 
 Limits: 128 representative groups, 64 identified observations per group, eight claim variants, 1024 UTF-8 bytes per claim/source/identity. Capacity rejects extra untracked support rather than evict identities and recount replays. Exact additional primary-claim observations increase carrier anchor by `0.02*(1-anchor)`; counter-observations do not become positive support. Near candidates require lexical overlap at least 0.70 and a contradictory scorer label; at most three groups are considered. No salience threshold is lowered by the update path.
 
+**Reconstructive signal (v0.5+).** Distinct supporting observations produce a saturated weight `support_weight` (log1p, capped at 0.75). When `OrganCut::support_signal` is true (default), this weight modestly boosts recall score (`× (1 + 0.22·w)`) and injects a short “Support strength” line into the narrative for the mouth. Groups are never removed by the cut; the signal is a pure lesion. Core and gist remain untouched.
+
 ## Co-recall and runtime
 
 `associations_learn` and `associations_reconstruct` are independent boolean settings. Enabling either alone is not evidence of an associative effect. Provider model, keys, requested temperature/reasoning and HTTP timeout use `.selmem`. Experimental calls cap actual HTTP attempts including retries. Keys are not written into manifests.

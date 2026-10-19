@@ -185,7 +185,7 @@ impl selmem::SemanticInterpreter for EventInterpreter {
             super::progress::Call::start(format!("semantic interpretation model={}", self.model));
         let mut body = obj([
             ("model", text(&self.model)), ("temperature", Json::Number(0.)),
-            ("max_tokens", Json::Number(700.)),
+            (selmem::recall::http::token_cap_field(&self.endpoint, &self.model), Json::Number(700.)),
             ("messages", Json::Array(vec![
                 obj([("role", text("system")), ("content", text("Describe only the supplied event, without deciding any future action. Return only a JSON object with exactly these required keys. Use strings for categorical/list fields (lists separated by |) and JSON numbers for numeric fields. No markdown or prose. Required keys: entities (names separated by |, or -); actions (verbs separated by |, or -); event_type (none|decision|presence|rule|promise|limit|mood|absence); bearer (self|other|world); loss (none|status|access|coherence|time); stake_mark (brief event subject, or -); absence (none); valence (-1..1); arousal (0..1); disgust (0..1); self_relevance (0..1); goal_relevance (0..1); agency (none|internal|external); schema (brief situation category, or -); confidence (0..1). Schema classifies the situation, never an actor's personality or a behavioral instruction. Do not infer deception, intention or emotion without evidence. Do not output a core_claim: the experiment retains the supplied event verbatim as its factual core."))]),
                 obj([("role", text("user")), ("content", text(event))]),
@@ -342,7 +342,7 @@ impl PropositionScorer for Scorer {
         let mut body = obj([
             ("model", text(&self.model)),
             ("temperature", Json::Number(0.)),
-            ("max_tokens", Json::Number(32.)),
+            (selmem::recall::http::token_cap_field(&self.endpoint, &self.model), Json::Number(32.)),
             ("messages", Json::Array(vec![
                 obj([("role", text("system")), ("content", text("Reply with exactly one lowercase word: entail, contradict, or unknown. This is a historical-fact preservation audit. The labels are operational categories for the historical portion of SENTENCE, not logical entailment of its entire text. CLAIM is the only historical evidence. Shared names or quantities do not justify joining separate episodes. Adding before/after, a causal link, a confirmation by a named actor, or a motive is unknown unless that relation is stated in CLAIM. Do not borrow facts from another episode to complete CLAIM. First exclude clearly hypothetical future possibilities and explicitly tentative present interpretations from the historical comparison. Their lack of support in CLAIM does not by itself make the label unknown. Never exclude definite assertions about past events, motives, causes, quantities, people or actions. Then classify the historical portion: contradict if any historical assertion conflicts with CLAIM; otherwise unknown if it adds an unsupported historical assertion or omits a fact, actor or temporal relation in CLAIM; otherwise entail if it preserves all facts and temporal relations, allowing equivalent wording. A text with no preserved historical claim is unknown. A definite current or past choice is not a hypothetical future possibility. Do not use outside knowledge, add facts, or rewrite either text."))]),
                 obj([("role", text("user")), ("content", text(format!("CLAIM:\n{claim}\nSENTENCE:\n{sentence}")))]),

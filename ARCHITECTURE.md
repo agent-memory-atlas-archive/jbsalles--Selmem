@@ -29,6 +29,8 @@ Near but different propositions are not positive support. An attached propositio
 
 Counts accompany a selected trace as labeled metadata after reconstruction, grounding and association learning. They never enter gist/core write-back and do not require archive access. Suppression/deletion of the carrier prevents rendering. GENESIS can lesion support groups independently of traces. File and SQLite snapshots preserve identities and counts.
 
+A saturated reconstructive weight (`support_weight`) is derived from distinct observation counts. When `OrganCut::support_signal` is true (default; `no_support_signal()` lesions it), the weight modestly boosts recall score and injects a short strength line (plus optional schema prototype for Internal traces) into the narrative. The cut does not discard groups or rewrite core/gist.
+
 This mechanism defaults off in ordinary stores. The GENESIS learning script explicitly compares off/on with the same inputs. It does not force a decision, lower the salience threshold or declare a personality. Counts are not currently transferred between merged traces; consolidation and long-term behavior require separate validation.
 
 ## Co-recall

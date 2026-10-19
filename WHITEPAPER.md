@@ -56,7 +56,7 @@ If you paste the original sentence back “for accuracy”, you have a store aga
 
 ---
 
-**Observation support.** Admission of a new trace and retention of another observation supporting an existing trace are separate operations. With `observation_evidence` enabled, stable caller-provided observation identities accumulate bounded support; replayed identities do not count twice. Support accompanies a selected trace without becoming gist/core rewrite material. Caller identities do not prove statistical independence. See [PARAMETERS.md](PARAMETERS.md).
+**Observation support.** Admission of a new trace and retention of another observation supporting an existing trace are separate operations. With `observation_evidence` enabled, stable caller-provided observation identities accumulate bounded support; replayed identities do not count twice. Support accompanies a selected trace without becoming gist/core rewrite material. Caller identities do not prove statistical independence. A saturated reconstructive weight derived from distinct counts can modestly boost recall and color the narrative when `OrganCut::support_signal` is true; the cut lesions the signal without discarding groups. See [PARAMETERS.md](PARAMETERS.md).
 
 **Co-recall.** [Learned associations](docs/CO_RECALL_ASSOCIATIONS.md) are optional organ-level context for reconstruction. Retrieval scores remain unchanged; associations are persisted and audited, not treated as facts.
 

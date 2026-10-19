@@ -149,6 +149,28 @@ pub(super) fn root() -> std::path::PathBuf {
     ))
 }
 #[test]
+fn luna_semantic_annotation_uses_completion_token_cap() {
+    let server = Server::new(false);
+    let dir = root();
+    let mut cfg = config(&server);
+    cfg.put("memory_model", text("gpt-6-luna"));
+    let _session = super::transport::begin(&dir, 40);
+    let m = Memory::new("selmem_full", dir.join("memory.vault"), &cfg);
+    m.init().unwrap();
+    m.call("live", obj([("event", obj([
+        ("id", text("rule")),
+        ("text", text("Workshop rule: ulen requires machine kavi.")),
+        ("critical", Json::Bool(true)),
+    ]))])).unwrap();
+    let requests = server.requests.lock().unwrap();
+    let request = requests.iter().find(|r| r.get("response_format").is_ok()).unwrap();
+    assert_eq!(s(request, "model").unwrap(), "gpt-6-luna");
+    assert_eq!(n(request, "max_completion_tokens").unwrap(), 700.);
+    assert!(request.get("max_tokens").is_err());
+    drop(requests);
+    std::fs::remove_dir_all(dir).unwrap();
+}
+#[test]
 fn live_sleep_and_wrapper_use_http_with_auditable_annotations() {
     let server = Server::new(false);
     let dir = root();

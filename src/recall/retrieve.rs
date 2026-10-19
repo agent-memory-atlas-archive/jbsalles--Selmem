@@ -191,6 +191,15 @@ pub fn recall_with(
             } else {
                 score *= anchor;
             }
+            // Reconstructive support signal: modest score boost from distinct
+            // observation counts. Lesionable via OrganCut::support_signal.
+            // Never rewrites core. Zero when signal is off or weight is zero.
+            if cut.support_signal && anchor > 0.0 {
+                let w = store.observation_evidence.support_weight(store, &trace_id);
+                if w > 0.0 {
+                    score *= 1.0 + 0.22 * w;
+                }
+            }
             // An explicit cue can evoke a deliberately retained own episode
             // even after a long unused interval. Recency still ranks diffuse
             // associations; it must not erase a precise, accessible match.
@@ -501,6 +510,33 @@ pub fn recall_with(
         if let Some(metadata) = store.observation_evidence.render(store, &memory.trace_id) {
             memory.narrative.push_str("\n");
             memory.narrative.push_str(&metadata);
+            if cut.support_signal {
+                let w = store.observation_evidence.support_weight(store, &memory.trace_id);
+                if w > 0.0 {
+                    memory.narrative.push_str(&format!(
+                        "\nSupport strength (reconstructive signal only, not additional episodes): {:.2}",
+                        w
+                    ));
+                }
+            }
+        }
+        // Optional short center cue for Internal traces when a prototype exists.
+        // Does not alter selection; only colors the narrative for the mouth.
+        if cut.support_signal {
+            if let Some(trace) = store.traces.get(&memory.trace_id) {
+                if trace.attribution == crate::core::model::Attribution::Internal {
+                    if let Some(schema) = &trace.schema {
+                        if let Some(center) = store.centers.get(schema) {
+                            let proto = center.core.chars().take(120).collect::<String>();
+                            if !proto.is_empty() {
+                                memory.narrative.push_str(&format!(
+                                    "\nSchema prototype (context only): {proto}"
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     RecallOutcome {
