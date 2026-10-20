@@ -738,25 +738,38 @@ impl SelectiveMemory {
             if chunk.split_whitespace().count() <= 2 {
                 continue;
             }
+            // A declared interlocutor name is a fallible external relationship trace.
+            let named = declared_human_name(chunk)
+                .map(|name| format!("The human speaking with me said their name is {name}."));
+            let event = named.as_deref().unwrap_or(chunk);
             if self
                 .store
                 .archives
                 .values()
-                .any(|a| a.source == "talk" && a.verbatim == *chunk)
+                .any(|a| a.source == "talk" && a.verbatim == event)
             {
                 continue;
             }
-            let (v, a, d, schema) = encode::affect::guess(chunk);
-            let mut ev = EncodeInput::new(chunk);
+            let (v, a, d, schema) = encode::affect::guess(event);
+            let mut ev = EncodeInput::new(event);
             ev.source = "talk";
-            ev.channel = crate::core::model::Channel::World;
+            if named.is_some() {
+                ev.channel = crate::core::model::Channel::Selfhood;
+                ev.attribution = crate::core::model::Attribution::External;
+                ev.schema = Some("interlocutor-name".into());
+                ev.permanence = 0.58;
+            } else {
+                ev.channel = crate::core::model::Channel::World;
+            }
             ev.valence = v;
             ev.arousal = a;
             ev.disgust = d;
-            ev.self_relevance = 0.55;
-            ev.utility = 0.55;
-            ev.permanence = 0.35;
-            ev.schema = schema;
+            ev.self_relevance = if named.is_some() { 0.75 } else { 0.55 };
+            ev.utility = if named.is_some() { 0.70 } else { 0.55 };
+            if named.is_none() {
+                ev.permanence = 0.35;
+                ev.schema = schema;
+            }
             if self.ingest(ev, false).kept {
                 kept += 1;
             }
@@ -980,10 +993,36 @@ impl SelectiveMemory {
         for interpretation in scoped_reading.axioms.iter().filter(|s| s.starts_with("Tentative observed interpretation;")) {
             if !axioms.contains(interpretation) { axioms.push(interpretation.clone()); }
         }
-        let memory_context = if self.memory_context_options.format == crate::MemoryContextFormat::Structured {
+        let mut memory_context = if self.memory_context_options.format == crate::MemoryContextFormat::Structured {
             crate::MemoryContext::from_selected(&self.store, &delivered_ids, &memories, &axioms,
                 &self.mood, &self.memory_context_options, self.clock.now())
         } else { crate::MemoryContext::default() };
+        // The agent's direct identity is constitutive; no recall required.
+        memory_context.agent_name = Some(self.profile.name.clone());
+        if hold && asks_about_human_name(user) && self.memory_context_options.dispositions {
+            if let Some(t) = self.store.traces.values()
+                .filter(|t| t.schema.as_deref()==Some("interlocutor-name")
+                    && t.attribution==crate::core::model::Attribution::External
+                    && !t.suppressed && t.status==crate::core::model::TraceStatus::Active
+                    && t.access>=0.15)
+                .max_by(|a,b|a.created_at.cmp(&b.created_at).then_with(||a.id.cmp(&b.id))) {
+                memory_context.dispositions.truncate(3);
+                memory_context.contextual_statements.insert(0,crate::recall::memory_context::ContextStatement {
+                    statement: format!("Fallible recollection of what the human told me: {}",t.gist),
+                    truncated: false,
+                });
+            }
+        }
+        if hold && asks_about_nights(user) && self.memory_context_options.dispositions {
+            let count = self.remembered_nights();
+            if count > 0 {
+                memory_context.dispositions.truncate(3);
+                memory_context.contextual_statements.insert(0,crate::recall::memory_context::ContextStatement {
+                    statement: format!("I can currently recall at least {count} nights of sleep. This is not necessarily the total: earlier nights may have been forgotten."),
+                    truncated: false,
+                });
+            }
+        }
         let reading = if self.drop_stake { String::new() } else { scoped_reading.render() };
         MouthDraft {
             user: user.to_string(),
@@ -1135,6 +1174,52 @@ impl SelectiveMemory {
         t.suppressed = false;
         true
     }
+
+    /// Each UI sleep creates a fallible autobiographical episode, not an exact counter.
+    pub fn record_sleep_memory(&mut self) -> Option<String> {
+        let event = format!("I slept through a night and woke again (virtual time {}).",self.clock.now());
+        let mut ev = EncodeInput::new(&event);
+        ev.source = "sleep";
+        ev.channel = crate::core::model::Channel::Selfhood;
+        ev.attribution = crate::core::model::Attribution::Internal;
+        ev.schema = Some("night-recollection".into());
+        ev.self_relevance = 0.78;
+        ev.utility = 0.72;
+        ev.arousal = 0.48;
+        ev.permanence = 0.48;
+        self.live_with(ev).trace_id
+    }
+
+    pub fn remembered_nights(&self) -> usize {
+        self.store.traces.values().filter(|t|t.source=="sleep"&&!t.suppressed
+            &&t.status==crate::core::model::TraceStatus::Active&&t.access>=0.15).count()
+    }
+}
+
+fn asks_about_human_name(query: &str) -> bool {
+    let q=query.to_lowercase();
+    ["comment je m'appelle", "comment je m’appelle", "quel est mon nom", "quel est mon prenom", "quel est mon prénom", "what is my name", "what's my name", "do you know my name"].iter().any(|phrase|q.contains(phrase))
+}
+
+fn asks_about_nights(query: &str) -> bool {
+    let q=query.to_lowercase();
+    ["nuit", "dormi", "dormis", "dormir", "sommeil", "sleep", "night", "how long", "combien de jour", "how many day"]
+        .iter().any(|word|q.contains(word))
+}
+
+fn declared_human_name(message: &str) -> Option<String> {
+    let raw=message.trim();
+    let lower=raw.to_lowercase();
+    for prefix in ["je m'appelle ","je m’appelle ","mon prénom est ","mon prenom est ","my name is ","call me "] {
+        if lower.starts_with(prefix) {
+            let candidate=raw.get(prefix.len()..)?.split_whitespace().next()?;
+            let candidate=candidate.trim_matches(|c:char|!c.is_alphabetic()&&c!='-'&&c!='\'');
+            if (2..=32).contains(&candidate.chars().count()) && candidate.chars().any(char::is_alphabetic) {
+                return Some(candidate.to_string());
+            }
+        }
+    }
+    None
 }
 
 /// Keep the frozen fact next to a drifted retelling. Live speak only.

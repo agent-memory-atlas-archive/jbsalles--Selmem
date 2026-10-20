@@ -387,6 +387,8 @@ fn dispatch_for(mem: &mut SelectiveMemory, method: &str, path: &str, query: &str
             mem.advance_hours(hours as f32);
             let report = mem.sleep();
             mem.fade_sitting();
+            // Sleep is offered as an ordinary reconstructible lived episode.
+            let _ = mem.record_sleep_memory();
             for t in &snap {
                 mem.talk.record(&t.user, &t.reply);
             }

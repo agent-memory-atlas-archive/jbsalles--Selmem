@@ -41,7 +41,7 @@ pub struct ActiveAssociation{pub a:String,pub b:String,pub weight:f32}
 #[derive(Clone,Debug)]
 pub struct ContextStatement{pub statement:String,pub truncated:bool}
 #[derive(Clone,Debug,Default)]
-pub struct MemoryContext{pub episodes:Vec<MemoryEpisode>,pub dispositions:Vec<AcquiredDisposition>,pub contextual_statements:Vec<ContextStatement>,pub associations:Vec<ActiveAssociation>,pub affect:Option<Mood>,pub content_words:usize}
+pub struct MemoryContext{pub agent_name:Option<String>,pub episodes:Vec<MemoryEpisode>,pub dispositions:Vec<AcquiredDisposition>,pub contextual_statements:Vec<ContextStatement>,pub associations:Vec<ActiveAssociation>,pub affect:Option<Mood>,pub content_words:usize}
 impl MemoryContext {
  pub fn from_selected(store:&MemoryStore,ids:&[String],narratives:&[String],axioms:&[String],mood:&Mood,o:&MemoryContextOptions,now:u64)->Self{
   let mut c=Self::default();let mut remaining=o.words.min(4000);let mut seen=BTreeSet::new();
@@ -80,7 +80,11 @@ impl MemoryReply<'_>{
  pub fn system_prompt(&self)->String{
   let base=match self.options.usage{MemoryUse::Legacy=>format!("{}\n{}",crate::lexicon::prompts().reply,crate::net::httpx::READING_CONSTRAINT),_=>NEUTRAL.into()};
   let guide=if self.options.format==MemoryContextFormat::Structured||self.options.usage!=MemoryUse::Legacy{format!("\n{GUIDE}")}else{String::new()};
-  let contract=if self.options.usage==MemoryUse::Experience{format!("\n{MEMORY_USE_CONTRACT}")}else{String::new()};format!("{base}{guide}{contract}")
+  let contract=if self.options.usage==MemoryUse::Experience{format!("\n{MEMORY_USE_CONTRACT}")}else{String::new()};
+  // Constitutive identity is not a recollection or a human-name assertion.
+  let identity=self.context.agent_name.as_deref().filter(|n|!n.is_empty())
+   .map(|name|format!("\nYou are the agent named {:?}. That is YOUR own name, NOT the human's. Do not infer the human's name from yours. Only use an explicitly supplied, currently remembered human name; otherwise say you do not know.",name)).unwrap_or_default();
+  format!("{base}{guide}{contract}{identity}")
  }
  pub fn user_prompt(&self)->String{
   if self.options.format==MemoryContextFormat::Structured{return format!("{{\"working_conversation\":{},\"memory\":{},\"human\":{}}}",q(&self.talk.render()),self.filtered_context().to_json(),q(self.user));}
