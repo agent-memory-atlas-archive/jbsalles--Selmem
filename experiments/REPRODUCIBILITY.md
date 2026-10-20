@@ -48,4 +48,4 @@ The four published lots are selected for distinct interventions. They are not fo
 
 ## Static results page
 
-Open `docs/experiments.html` in a local checkout, or host the repository root and visit `/docs/experiments.html`. It is a standalone English HTML/CSS page with no script, external font or tracking request. Relative evidence links expect the repository layout; hosting only the docs subdirectory would omit the sibling evidence files. Publication does not automatically configure or deploy a hosting service.
+Open `docs/index.html` in a local checkout, or host the repository root and visit `/docs/index.html`. It is a standalone English HTML/CSS page with no script, external font or tracking request. Relative evidence links expect the repository layout; hosting only the docs subdirectory would omit the sibling evidence files. Publication does not automatically configure or deploy a hosting service.

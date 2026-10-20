@@ -13,7 +13,7 @@ The retained source covers model qualification, cumulative learning, sleep, conv
 | Historical creative transfer | Original four-condition assay and target/sham follow-up | [Creative transfer](genesis/CREATIVITY.md) |
 | LoCoMo strategy | Conversation-derived strategy, design and factual probes | [Strategy protocol](../docs/LOCOMO_STRATEGY.md) |
 
-**Results:** [ledger](RESULTS.md), [creativity findings](CREATIVITY_RESULTS.md), [static showcase](../docs/experiments.html), [compact evidence](evidence/README.md).
+**Results:** [ledger](RESULTS.md), [creativity findings](CREATIVITY_RESULTS.md), [static showcase](../docs/index.html), [compact evidence](evidence/README.md).
 
 There are early qualitative indications consistent with memory-conditioned creative variation, but no demonstrated creativity advantage attributable to SelMem. Text variation, successful orchestration and a model's own quality scores are different observations.
 
