@@ -681,6 +681,9 @@ pub struct OrganCut {
     /// inject a reconstructive strength signal into the narrative.
     /// Groups remain; this is a pure signal lesion. Default true.
     pub support_signal: bool,
+    /// Independently controls schema-center narrative cues.
+    /// Disabling observation support must not remove unrelated schema context.
+    pub schema_prototype: bool,
 }
 
 impl Default for OrganCut {
@@ -699,6 +702,7 @@ impl OrganCut {
             util_to_strength: false,
             merge_support_veto: false,
             support_signal: true,
+            schema_prototype: true,
         }
     }
 
@@ -711,6 +715,7 @@ impl OrganCut {
             util_to_strength: false,
             merge_support_veto: false,
             support_signal: true,
+            schema_prototype: true,
         }
     }
 
@@ -738,6 +743,13 @@ impl OrganCut {
     pub fn no_support_signal() -> Self {
         Self {
             support_signal: false,
+            ..Self::full()
+        }
+    }
+
+    pub fn no_schema_prototype() -> Self {
+        Self {
+            schema_prototype: false,
             ..Self::full()
         }
     }

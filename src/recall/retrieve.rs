@@ -520,9 +520,9 @@ pub fn recall_with(
                 }
             }
         }
-        // Optional short center cue for Internal traces when a prototype exists.
+        // Optional schema cue is independent of observation support.
         // Does not alter selection; only colors the narrative for the mouth.
-        if cut.support_signal {
+        if cut.schema_prototype {
             if let Some(trace) = store.traces.get(&memory.trace_id) {
                 if trace.attribution == crate::core::model::Attribution::Internal {
                     if let Some(schema) = &trace.schema {

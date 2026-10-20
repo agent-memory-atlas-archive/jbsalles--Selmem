@@ -52,8 +52,10 @@ impl ObservationEvidence {
         Some(format!("Observation support metadata (not additional recalled episodes). Counts include the initial carrier observation: do not add the narrative as another observation. Counts use caller-provided IDs; statistical independence is not verified. Different claims remain separate and do not erase earlier observations.\n{claims}"))
     }
 
-    /// Saturated reconstructive weight from distinct supporting observations.
-    /// Zero when disabled, ineligible, or fewer than two observations.
+    /// Saturated reconstructive weight from distinct primary-claim support only.
+    /// Contradictory observations remain available as separate evidence, but
+    /// must not increase the positive recall signal of the carrier claim.
+    /// Zero when disabled, ineligible, or fewer than two positive observations.
     /// Never rewrites core or gist. Used only to modulate recall and optional signal.
     pub fn support_weight(&self, store: &MemoryStore, trace_id: &str) -> f32 {
         if !self.enabled || !eligible(store, trace_id) {
@@ -62,7 +64,9 @@ impl ObservationEvidence {
         let Some(group) = self.groups.get(trace_id) else {
             return 0.0;
         };
-        let n = group.observations.len();
+        let n = group.observations.values()
+            .filter(|claim| *claim == &group.primary_claim)
+            .count();
         if n < 2 {
             return 0.0;
         }
