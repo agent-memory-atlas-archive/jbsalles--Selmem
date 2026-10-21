@@ -423,6 +423,7 @@ fn write_trace(w: &mut impl Write, t: &MemoryTrace) -> io::Result<()> {
     write_blob(w, t.observation_id.as_deref().unwrap_or(""))?;
     writeln!(w, "source")?;
     write_blob(w, &t.source)?;
+    writeln!(w,"personal-v1")?;write_blob(w,&t.personal.pack())?;
     Ok(())
 }
 
@@ -625,6 +626,7 @@ fn read_trace(r: &mut (impl BufRead + Seek)) -> io::Result<MemoryTrace> {
         read_line(r)?;
         trace.source = read_blob(r)?;
     }
+    if next_line_starts_with(r,"personal-v1")? {read_line(r)?;trace.personal=crate::SelfMemory::unpack(&read_blob(r)?).map_err(invalid)?;}
     if p.get(3) == Some(&"sealed") {
         trace.drifts.push(assemble_drift(
             crate::core::model::DriftKind::Fade,

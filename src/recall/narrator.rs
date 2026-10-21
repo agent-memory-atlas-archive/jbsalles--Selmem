@@ -48,11 +48,12 @@ pub trait Narrator: Send + Sync {
     fn supports_memory_context(&self) -> bool { false }
     fn reply_with_context(&self, r: &crate::MemoryReply<'_>) -> String {
         if r.options.format == crate::MemoryContextFormat::Structured
-            && !(r.options.episodes && r.options.dispositions && r.options.associations && r.options.affect) {
+            && (!(r.options.episodes && r.options.dispositions && r.options.associations && r.options.affect) || !r.context.self_model.is_empty()) {
             let c = r.filtered_context();
             let memories: Vec<String> = c.episodes.iter().map(|e| e.narrative.clone()).collect();
             let axioms: Vec<String> = c.dispositions.iter().map(|a| a.statement.clone())
-                .chain(c.contextual_statements.iter().map(|s| s.statement.clone())).collect();
+                .chain(c.contextual_statements.iter().map(|s| s.statement.clone()))
+                .chain(c.self_model.iter().map(|s|format!("Tentative {} in {} (certainty {:.2}; foundations missing {}; counterexamples {}): {}",s.role,s.context,s.certainty,s.foundations_missing,s.counterexamples,s.statement))).collect();
             return self.reply_disposed(r.user, &memories, &axioms, &c.affect.unwrap_or_default(), r.talk, "");
         }
         self.reply_disposed(r.user, r.memories, r.axioms, r.mood, r.talk, r.reading)
@@ -77,6 +78,11 @@ pub trait Narrator: Send + Sync {
         self.reconstruct(trace, mood, query)
     }
     fn distill_axiom(&self, traces: &[&MemoryTrace]) -> Option<String>;
+    /// Generalization plus a prospective expectation. The baseline predicts
+    /// recurrence of an observed action, without inventing an explanation.
+    fn distill_self(&self,traces:&[&MemoryTrace],_context:&str)->Option<(String,String)> {
+        Some((self.distill_axiom(traces)?,traces.first()?.semantic.claim.clone()))
+    }
     /// Live event only — never an archive. Default: none (caller uses lexicon + identity).
     fn interpret(&self, event: &str, mood: &Mood, axioms: &[String]) -> Option<Interpretation> {
         let _ = (event, mood, axioms);

@@ -190,6 +190,7 @@ fn migrate(db: &Db) -> io::Result<()> {
     let transaction = Transaction(db);
     db.exec("CREATE TABLE IF NOT EXISTS centers(schema TEXT PRIMARY KEY, core TEXT, valence REAL, weight REAL, hub_id TEXT, axiom_id TEXT); CREATE TABLE IF NOT EXISTS operations(trace_id TEXT, kind TEXT, at INTEGER, confidence REAL, origin TEXT, center TEXT, before TEXT, after TEXT, source_traces TEXT, source_axioms TEXT);")?;
     for (table,column,kind) in [
+        ("traces","personal","TEXT"),
         ("traces","core","TEXT"),
         ("traces","anchor","REAL"),
         ("traces","detach_strikes","INTEGER"),
@@ -354,8 +355,8 @@ pub fn save(
         }
     }
     let q_tr = db.prepare(
-        "INSERT INTO traces(id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed,observation_id,semantic_claim,semantic_entities,semantic_actions,semantic_polarity,semantic_confidence,reality_claim,reality_verifiable,source,stake_kind,bearer,loss_kind,stake_mark,absence,interpretation_statement,interpretation_valence,interpretation_confidence)
-         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21,?22,?23,?24,?25,?26,?27,?28,?29,?30,?31,?32,?33,?34,?35,?36,?37,?38,?39,?40,?41,?42,?43)",
+        "INSERT INTO traces(id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed,observation_id,semantic_claim,semantic_entities,semantic_actions,semantic_polarity,semantic_confidence,reality_claim,reality_verifiable,source,stake_kind,bearer,loss_kind,stake_mark,absence,interpretation_statement,interpretation_valence,interpretation_confidence,personal)
+         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21,?22,?23,?24,?25,?26,?27,?28,?29,?30,?31,?32,?33,?34,?35,?36,?37,?38,?39,?40,?41,?42,?43,?44)",
     )?;
     let q_cue = db.prepare("INSERT INTO cues(trace_id,cue) VALUES (?1,?2)")?;
     let q_dr = db.prepare(
@@ -411,6 +412,7 @@ pub fn save(
         q_tr.bind_text(41, &t.interpretation.statement)?;
         q_tr.bind_f64(42, t.interpretation.valence as f64)?;
         q_tr.bind_f64(43, t.interpretation.confidence as f64)?;
+        q_tr.bind_text(44,&t.personal.pack())?;
         q_tr.step_done()?;
         for c in &t.cues {
             q_cue.bind_text(1, &t.id)?;
@@ -638,7 +640,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
     let mut legacy_interpretations = Vec::new();
     for row in query(
         &db,
-        "SELECT id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed,observation_id,semantic_claim,semantic_entities,semantic_actions,semantic_polarity,semantic_confidence,reality_claim,reality_verifiable,source,stake_kind,bearer,loss_kind,stake_mark,absence,interpretation_statement,interpretation_valence,interpretation_confidence FROM traces",
+        "SELECT id,gist,core,valence,arousal,disgust,self_relevance,schema,channel,archive_id,created,last_recalled,last_consolidated,fidelity,permanence,rehearsals,access,status,salience,embedding,anchor,detach_strikes,attribution,self_congruence,confidence,suppressed,observation_id,semantic_claim,semantic_entities,semantic_actions,semantic_polarity,semantic_confidence,reality_claim,reality_verifiable,source,stake_kind,bearer,loss_kind,stake_mark,absence,interpretation_statement,interpretation_valence,interpretation_confidence,personal FROM traces",
     )? {
         if row.len() < 20 {
             continue;
@@ -750,6 +752,7 @@ pub fn load(path: &Path) -> io::Result<Snapshot> {
             t.interpretation.valence = row[41].parse().map_err(|e| io::Error::new(io::ErrorKind::InvalidData,e))?;
             t.interpretation.confidence = row[42].parse().map_err(|e| io::Error::new(io::ErrorKind::InvalidData,e))?;
         }
+        t.personal=crate::SelfMemory::unpack(&row[43]).map_err(|e|io::Error::new(io::ErrorKind::InvalidData,e))?;
         store.traces.insert(t.id.clone(), t);
     }
     for row in query(

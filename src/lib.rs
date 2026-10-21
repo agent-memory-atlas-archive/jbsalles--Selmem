@@ -65,6 +65,7 @@ pub mod persist;
 pub mod recall;
 
 mod engine;
+pub use core::self_model::{SelfMemory, SelfRole, SelfPolicy, SelfEvidence, Appraisal};
 
 pub use core::model::{
     advance_hours, clock_scale, now_secs, set_clock_scale, ArchiveRecord, AxiomLayer, Channel,

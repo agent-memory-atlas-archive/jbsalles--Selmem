@@ -4,6 +4,7 @@ use crate::core::model::{ArchiveRecord, Channel, IdentityAxiom, MemoryTrace, Sch
 
 #[derive(Default)]
 pub struct MemoryStore {
+    pub self_policy: super::self_model::SelfPolicy,
     /// Vector coordinate space. Missing legacy provenance requires reindexing.
     pub embedding_space: Option<String>,
     pub observation_evidence: super::evidence::ObservationEvidence,

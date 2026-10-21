@@ -64,6 +64,7 @@ pub fn assemble_trace(
         verifiable: !core.is_empty(),
     };
     MemoryTrace {
+        personal: Default::default(),
         id,
         gist,
         core,

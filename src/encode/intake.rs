@@ -4,6 +4,7 @@ use crate::core::model::{Attribution, Channel};
 
 /// One hour offered to the gate. Defaults are a neutral Selfhood event.
 pub struct EncodeInput<'a> {
+    pub personal: crate::SelfMemory,
     pub event: &'a str,
     /// Optional semantic annotation. Supplied annotations bypass lexical inference.
     pub semantics: Option<crate::encode::semantic::EventSemantics>,
@@ -29,8 +30,15 @@ pub struct EncodeInput<'a> {
 }
 
 impl<'a> EncodeInput<'a> {
+    /// Actual observed action/result; reuse observation ID for retries.
+    /// Unverified assertions should use new(), not observed().
+    pub fn observed(event: &'a str, observation_id: &'a str)->Self {
+        let mut input=Self::new(event);input.observation_id=Some(observation_id);
+        input.personal.evidence=crate::SelfEvidence::Observation;input
+    }
     pub fn new(event: &'a str) -> Self {
         Self {
+            personal: Default::default(),
             event,
             semantics: None,
             part_semantics: None,

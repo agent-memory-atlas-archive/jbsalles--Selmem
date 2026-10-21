@@ -499,6 +499,7 @@ pub fn derive_stake(event: &str) -> (StakeKind, Bearer, LossKind, String, Option
 /// The sealed archive (verbatim) lives in `ArchiveRecord`, pointed at by `archive_id`.
 #[derive(Clone, Debug)]
 pub struct MemoryTrace {
+    pub personal: super::self_model::SelfMemory,
     pub id: String,
     /// Reconstructable story the narrator may tell. This can drift.
     pub gist: String,
@@ -579,6 +580,7 @@ impl MemoryTrace {
 
     /// Certainty of the current gist. Access is only how easy the hour is to find.
     pub fn recompute_confidence(&mut self) {
+        if self.personal.role!=super::self_model::SelfRole::Episode {self.confidence=self.personal.certainty;return;}
         let mut penalty = 0.0f32;
         let mut confab = false;
         let mut polish = 0u32;

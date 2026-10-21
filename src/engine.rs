@@ -363,6 +363,8 @@ impl SelectiveMemory {
     /// Order is the organ: interpret → paint → maybe hear → split → gate →
     /// maybe accept_core → blend mood. `commit_talk` calls this with `hold = false`.
     fn ingest(&mut self, mut input: EncodeInput<'_>, hold: bool) -> EncodeDecision {
+        if let Err(reason)=input.personal.validate(){return EncodeDecision{kept:false,score:0.0,reason,trace_id:None,archive_id:String::new(),parts:0,kept_n:0};}
+        if input.personal.role!=crate::SelfRole::Episode&&(input.attribution!=crate::Attribution::Internal||input.channel!=crate::Channel::Selfhood){return EncodeDecision{kept:false,score:0.0,reason:"self propositions require explicit internal attribution and Selfhood".into(),trace_id:None,archive_id:String::new(),parts:0,kept_n:0};}
         let axioms: Vec<String> = self
             .store
             .living_axioms()
@@ -430,7 +432,11 @@ impl SelectiveMemory {
                 };
             }
         }
-        if parts.len() == 1 && input.paint_from.is_none() {
+        let prior_self=crate::core::self_model::view(&self.store,input.event,input.schema.as_deref());
+        if !prior_self.is_empty()&&input.personal.role==crate::SelfRole::Episode {
+            if let Some(observation)=input.observation_id {if self.store.traces.values().any(|t|t.source==input.source&&t.observation_id.as_deref()==Some(observation)){return EncodeDecision{kept:false,score:0.0,reason:"observation identity already retained".into(),trace_id:None,archive_id:String::new(),parts:parts.len(),kept_n:0};}}
+        }
+        if parts.len() == 1 && input.paint_from.is_none() && input.personal.role==crate::SelfRole::Episode && prior_self.is_empty() {
             use crate::core::evidence::ObservationUpdate;
             let update = crate::core::evidence::update(
                 &mut self.store, input.source, input.channel, input.observation_id,
@@ -454,7 +460,9 @@ impl SelectiveMemory {
                 ObservationUpdate::None => (),
             }
         }
-        encode::paint(&mut self.store, &self.mood, &mut input);
+        if input.channel==crate::Channel::Selfhood&&input.personal.role==crate::SelfRole::Episode{input.personal.appraisal=crate::core::self_model::appraise(&self.store,input.event,input.schema.as_deref(),self.scorer.as_deref().unwrap_or(&crate::recall::NullScorer));}
+        // The active lived self supersedes legacy axiom coloration.
+        if !self.store.self_policy.selection || input.personal.appraisal.prior_ids.is_empty(){encode::paint(&mut self.store,&self.mood,&mut input);}
         // How long the hour lasts follows how hard the text hit, unless the
         // caller already pinned permanence (shared protocol days).
         if input.permanence <= 0.0 {
@@ -990,6 +998,9 @@ impl SelectiveMemory {
             (memories, axioms)
         };
         let mut axioms = axioms;
+        if self.memory_context_options.format==crate::MemoryContextFormat::Legacy {
+            for t in crate::core::self_model::view(&self.store,user,None).into_iter().take(4).rev(){axioms.insert(0,format!("Lived {} in {} (certainty {:.2}; foundations missing {}; counterexamples {}): {}",t.personal.role.token(),t.personal.context,t.personal.certainty,t.personal.foundations_missing,t.personal.counter_ids.len(),t.gist));}
+        }
         for interpretation in scoped_reading.axioms.iter().filter(|s| s.starts_with("Tentative observed interpretation;")) {
             if !axioms.contains(interpretation) { axioms.push(interpretation.clone()); }
         }
@@ -999,6 +1010,7 @@ impl SelectiveMemory {
         } else { crate::MemoryContext::default() };
         // The agent's direct identity is constitutive; no recall required.
         memory_context.agent_name = Some(self.profile.name.clone());
+        memory_context.attach_self_view(&self.store,user,&self.memory_context_options);
         if hold && asks_about_human_name(user) && self.memory_context_options.dispositions {
             if let Some(t) = self.store.traces.values()
                 .filter(|t| t.schema.as_deref()==Some("interlocutor-name")
@@ -1180,6 +1192,7 @@ impl SelectiveMemory {
         let event = format!("I slept through a night and woke again (virtual time {}).",self.clock.now());
         let mut ev = EncodeInput::new(&event);
         ev.source = "sleep";
+        ev.personal.evidence=crate::SelfEvidence::Observation;
         ev.channel = crate::core::model::Channel::Selfhood;
         ev.attribution = crate::core::model::Attribution::Internal;
         ev.schema = Some("night-recollection".into());

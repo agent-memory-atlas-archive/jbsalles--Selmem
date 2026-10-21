@@ -39,9 +39,11 @@ pub struct AcquiredDisposition{pub axiom_id:String,pub statement:String,pub laye
 #[derive(Clone,Debug)]
 pub struct ActiveAssociation{pub a:String,pub b:String,pub weight:f32}
 #[derive(Clone,Debug)]
+pub struct SelfPerspective{pub trace_id:String,pub role:String,pub context:String,pub statement:String,pub certainty:f32,pub importance:f32,pub foundations_missing:bool,pub counterexamples:usize,pub truncated:bool}
+#[derive(Clone,Debug)]
 pub struct ContextStatement{pub statement:String,pub truncated:bool}
 #[derive(Clone,Debug,Default)]
-pub struct MemoryContext{pub agent_name:Option<String>,pub episodes:Vec<MemoryEpisode>,pub dispositions:Vec<AcquiredDisposition>,pub contextual_statements:Vec<ContextStatement>,pub associations:Vec<ActiveAssociation>,pub affect:Option<Mood>,pub content_words:usize}
+pub struct MemoryContext{pub self_model:Vec<SelfPerspective>,pub agent_name:Option<String>,pub episodes:Vec<MemoryEpisode>,pub dispositions:Vec<AcquiredDisposition>,pub contextual_statements:Vec<ContextStatement>,pub associations:Vec<ActiveAssociation>,pub affect:Option<Mood>,pub content_words:usize}
 impl MemoryContext {
  pub fn from_selected(store:&MemoryStore,ids:&[String],narratives:&[String],axioms:&[String],mood:&Mood,o:&MemoryContextOptions,now:u64)->Self{
   let mut c=Self::default();let mut remaining=o.words.min(4000);let mut seen=BTreeSet::new();
@@ -58,8 +60,13 @@ impl MemoryContext {
   if o.associations&&store.associations.reconstruct{for (i,a) in c.episodes.iter().enumerate(){for b in c.episodes.iter().skip(i+1){let weight=store.associations.weight(&a.trace_id,&b.trace_id,now);if weight.is_finite()&&weight>0.0{c.associations.push(ActiveAssociation{a:a.trace_id.clone(),b:b.trace_id.clone(),weight});}}}}
   c.affect=o.affect.then(||mood.clone());c.content_words=o.words.min(4000)-remaining;c
  }
+ pub fn attach_self_view(&mut self,store:&MemoryStore,query:&str,o:&MemoryContextOptions){
+  if !o.dispositions{return;}
+  self.self_model=crate::core::self_model::view(store,query,None).into_iter().take(4).map(|t|SelfPerspective{trace_id:t.id.clone(),role:t.personal.role.token().into(),context:t.personal.context.clone(),statement:t.gist.clone(),certainty:t.personal.certainty,importance:t.personal.importance,foundations_missing:t.personal.foundations_missing,counterexamples:t.personal.counter_ids.len(),truncated:false}).collect();
+  *self=self.filtered(o);
+ }
  pub fn filtered(&self,o:&MemoryContextOptions)->Self{
-  let mut c=self.clone();let mut remaining=o.words.min(4000);if !o.episodes{c.episodes.clear();}c.episodes.truncate(4);
+  let mut c=self.clone();let mut remaining=o.words.min(4000);if !o.dispositions{c.self_model.clear();}c.self_model.truncate(4);for s in &mut c.self_model{let(t,x)=clip(&s.context,&mut remaining,20);s.context=t;s.truncated|=x;let(t,x)=clip(&s.statement,&mut remaining,60);s.statement=t;s.truncated|=x;}c.self_model.retain(|s|!s.statement.is_empty());if !o.episodes{c.episodes.clear();}c.episodes.truncate(4);
   for e in &mut c.episodes{let(t,x)=clip(&e.narrative,&mut remaining,160);e.narrative=t;e.truncated|=x;if !o.affect{e.affect=None;}}c.episodes.retain(|e|!e.narrative.is_empty());
   if !o.dispositions{c.dispositions.clear();c.contextual_statements.clear();}c.dispositions.truncate(4);c.contextual_statements.truncate(4-c.dispositions.len());
   for a in &mut c.dispositions{let(t,x)=clip(&a.statement,&mut remaining,80);a.statement=t;a.truncated|=x;}for a in &mut c.contextual_statements{let(t,x)=clip(&a.statement,&mut remaining,80);a.statement=t;a.truncated|=x;}
@@ -67,11 +74,12 @@ impl MemoryContext {
   c.associations.retain(|a|c.episodes.iter().any(|e|e.trace_id==a.a)&&c.episodes.iter().any(|e|e.trace_id==a.b));c.associations.truncate(6);if !o.affect{c.affect=None;}c.content_words=o.words.min(4000)-remaining;c
  }
  pub fn to_json(&self)->String{
+  let self_model=self.self_model.iter().map(|s|format!("{{\"trace_id\":{},\"role\":{},\"context\":{},\"statement\":{},\"certainty\":{},\"importance\":{},\"foundations_missing\":{},\"counterexamples\":{},\"truncated\":{}}}",q(&s.trace_id),q(&s.role),q(&s.context),q(&s.statement),number(s.certainty),number(s.importance),s.foundations_missing,s.counterexamples,s.truncated)).collect::<Vec<_>>().join(",");
   let episodes=self.episodes.iter().map(|e|format!("{{\"trace_id\":{},\"narrative\":{},\"attribution\":{},\"channel\":{},\"fidelity\":{},\"confidence\":{},\"affect\":{},\"truncated\":{}}}",q(&e.trace_id),q(&e.narrative),q(e.attribution.token()),q(match e.channel{Channel::Selfhood=>"selfhood",Channel::World=>"world",Channel::Log=>"log"}),number(e.fidelity),number(e.confidence),mood_json(e.affect.as_ref()),e.truncated)).collect::<Vec<_>>().join(",");
   let dispositions=self.dispositions.iter().map(|a|format!("{{\"axiom_id\":{},\"statement\":{},\"layer\":{},\"strength\":{},\"attribution\":{},\"support_trace_ids\":{},\"support_trace_count\":{},\"support_ids_truncated\":{},\"truncated\":{}}}",q(&a.axiom_id),q(&a.statement),q(match a.layer{AxiomLayer::Motif=>"motif",AxiomLayer::Belief=>"belief",AxiomLayer::Trait=>"trait"}),number(a.strength),q(&a.attribution),strings(&a.support_trace_ids[..a.support_trace_ids.len().min(32)]),a.support_trace_ids.len(),a.support_trace_ids.len()>32,a.truncated)).collect::<Vec<_>>().join(",");
   let statements=self.contextual_statements.iter().map(|s|format!("{{\"statement\":{},\"status\":\"supplied_context_not_acquired_disposition\",\"truncated\":{}}}",q(&s.statement),s.truncated)).collect::<Vec<_>>().join(",");
   let associations=self.associations.iter().map(|a|format!("{{\"a\":{},\"b\":{},\"weight\":{}}}",q(&a.a),q(&a.b),number(a.weight))).collect::<Vec<_>>().join(",");
-  format!("{{\"version\":{},\"episodes\":[{}],\"dispositions\":[{}],\"contextual_statements\":[{}],\"associations\":[{}],\"affect\":{},\"content_words\":{}}}",q(MEMORY_CONTEXT_VERSION),episodes,dispositions,statements,associations,mood_json(self.affect.as_ref()),self.content_words)
+  format!("{{\"self_model\":[{self_model}],\"version\":{},\"episodes\":[{}],\"dispositions\":[{}],\"contextual_statements\":[{}],\"associations\":[{}],\"affect\":{},\"content_words\":{}}}",q(MEMORY_CONTEXT_VERSION),episodes,dispositions,statements,associations,mood_json(self.affect.as_ref()),self.content_words)
  }
 }
 pub struct MemoryReply<'a>{pub user:&'a str,pub memories:&'a[String],pub axioms:&'a[String],pub mood:&'a Mood,pub talk:&'a WorkingTalk,pub reading:&'a str,pub context:&'a MemoryContext,pub options:&'a MemoryContextOptions}

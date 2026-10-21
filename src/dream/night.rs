@@ -123,6 +123,7 @@ pub fn dream_kind(
     kind: NightKind,
     scorer: &dyn crate::recall::PropositionScorer,
 ) -> DreamReport {
+    crate::core::self_model::consolidate(store,narrator,embedder);
     let budget = evaluate_budget(store, profile);
     let previously_latent: std::collections::HashSet<String> = store
         .traces

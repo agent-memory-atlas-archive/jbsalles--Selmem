@@ -44,6 +44,10 @@ pub fn encode_with_interpreter(
     proposed: Option<&[String]>,
     interpreter: Option<&dyn super::semantic::SemanticInterpreter>,
 ) -> EncodeDecision {
+    if let Err(reason)=input.personal.validate(){return EncodeDecision{kept:false,score:0.0,reason,trace_id:None,archive_id:String::new(),parts:0,kept_n:0};}
+    if input.personal.role!=crate::SelfRole::Episode && (input.attribution!=crate::Attribution::Internal||input.channel!=Channel::Selfhood){return EncodeDecision{kept:false,score:0.0,reason:"self propositions require explicit internal attribution and Selfhood".into(),trace_id:None,archive_id:String::new(),parts:0,kept_n:0};}
+    if input.personal.appraisal.at==0&&input.personal.role==crate::SelfRole::Episode&&input.channel==Channel::Selfhood {input.personal.appraisal=crate::core::self_model::appraise(store,input.event,input.schema.as_deref(),&crate::recall::NullScorer);}
+    if input.personal.evidence!=crate::SelfEvidence::Observation {input.personal.appraisal.opening=false;}
     let annotated = input.semantics.is_some() || interpreter.is_some();
     // Resolve once at the boundary. The gate never infers psychological labels.
     if input.semantics.is_none() {
@@ -82,6 +86,7 @@ pub fn encode_with_interpreter(
     if store.embedding_space.as_deref() != Some(embedder.space_id().as_str()) {
         store.reindex(embedder);
     }
+    if parts.len()>1&&input.personal.role!=crate::SelfRole::Episode{return EncodeDecision{kept:false,score:0.0,reason:"self propositions must be atomic".into(),trace_id:None,archive_id:String::new(),parts:parts.len(),kept_n:0};}
     if parts.len() == 1 {
         return encode_one(store, profile, input, embedder, None);
     }
@@ -133,9 +138,13 @@ pub fn encode_with_interpreter(
     let mut first_archive = String::new();
     let mut best = 0.0_f32;
     let mut last_reason = String::new();
-    for (part, semantics) in parts.iter().zip(annotations) {
+    for (index,(part, semantics)) in parts.iter().zip(annotations).enumerate() {
         let mut slice = EncodeInput::new(part);
         slice.semantics = Some(semantics.clone());
+        slice.personal=input.personal.clone();
+        // Whole-event evidence cannot be assigned to an arbitrary fragment.
+        slice.personal.appraisal.supports.clear();slice.personal.appraisal.contradicts.clear();
+        if index>0{slice.personal.appraisal.opening=false;}
         slice.source = input.source;
         slice.observation_id = input.observation_id;
         slice.valence = input.valence;
@@ -246,6 +255,9 @@ fn encode_one(
         score += profile.w_self * 0.30 * (input.self_congruence - 0.5);
     }
 
+    let a=&input.personal.appraisal;
+    if store.self_policy.selection&&input.channel==Channel::Selfhood {score+=0.25*a.continuity.max(a.revision);}
+    let personal_admission=store.self_policy.selection&&input.channel==Channel::Selfhood&&(a.revision>=0.8||a.continuity>=0.8||a.opening);
     let mut threshold = profile.encode_threshold;
     if input.channel.verbatim() {
         threshold *= 0.6;
@@ -257,7 +269,7 @@ fn encode_one(
         threshold = threshold.min(0.2);
     }
 
-    if score < threshold && input.permanence < 0.8 && !input.channel.verbatim() {
+    if !personal_admission && score < threshold && input.permanence < 0.8 && !input.channel.verbatim() {
         return EncodeDecision {
             kept: false,
             score,
@@ -281,6 +293,7 @@ fn encode_one(
     let archive_id = store.add_archive(archive);
 
     let mut trace = MemoryTrace {
+        personal: input.personal,
         id: new_id("tr"),
         gist: if input.channel == Channel::Log {
             let mut g = input.event.trim().to_string();
@@ -380,6 +393,8 @@ fn encode_one(
         confidence: 1.0,
         origin: crate::core::model::EvidenceOrigin::Event,
     });
+    if store.self_policy.selection && trace.personal.appraisal.revision>=0.8 {trace.personal.protected_until=now_secs().saturating_add(86400);}
+    if trace.personal.role!=crate::SelfRole::Episode {trace.reality.verifiable=false;trace.confidence=trace.personal.certainty;}
     trace.clamp();
     associate(store, &trace);
     let tid = store.add_trace(trace);

@@ -10,7 +10,7 @@ use crate::encode::scoring::lexical_similarity;
 const HOLE_FIDELITY: f32 = 0.42;
 
 pub fn is_hole(trace: &MemoryTrace) -> bool {
-    if trace.channel.verbatim() || trace.channel == Channel::Log {
+    if trace.personal.role!=crate::SelfRole::Episode || trace.personal.protected_until>crate::now_secs() || trace.channel.verbatim() || trace.channel == Channel::Log {
         return false;
     }
     if trace.status == TraceStatus::Latent {

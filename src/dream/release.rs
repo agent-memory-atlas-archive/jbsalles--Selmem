@@ -19,7 +19,7 @@ pub fn run(
         .traces
         .values()
         .filter(|t| {
-            previously_latent.contains(&t.id)
+            t.personal.protected_until<=crate::now_secs() && previously_latent.contains(&t.id)
                 && !t.channel.verbatim()
                 && t.status == TraceStatus::Latent
                 && t.access < 0.10

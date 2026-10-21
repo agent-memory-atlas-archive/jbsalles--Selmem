@@ -152,6 +152,7 @@ pub fn recall_with(
         .into_iter()
         .filter_map(|trace_id| {
             let trace = store.traces.get(&trace_id)?;
+            if trace.personal.role!=crate::SelfRole::Episode{return None;}
             if trace.suppressed && !matches!(bias, RecallBias::ForceMarked) {
                 return None;
             }

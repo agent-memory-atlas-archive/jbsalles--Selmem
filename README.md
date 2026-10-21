@@ -371,3 +371,9 @@ The `main` branch deploys after CI passes; the public demo isolates each visitor
 ### GENESIS experimental protocol
 
 [GENESIS](experiments/genesis/README.md) retains qualification, cumulative learning, sleep, creative preview/replay and longitudinal creative-life protocols. Recorded creative collections are available; the long economy/full plans remain for future runs. Probes use isolated states. Durable singularity, a useful creativity advantage and causal attribution of original mechanisms remain unproved. See the [findings](experiments/CREATIVITY_RESULTS.md) and [reproduction policy](experiments/REPRODUCIBILITY.md).
+
+### Contextual self model
+
+Beliefs, aspirations and commitments can live as typed memory traces. The prior
+self view influences admission; observed outcomes can revise it during sleep.
+See [architecture, Rust API and limitations](docs/TRACE_SELF_MODEL.md).

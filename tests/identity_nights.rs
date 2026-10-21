@@ -13,7 +13,7 @@ fn agents_own_name_survives_empty_or_forgotten_book() {
     let d=m.open_mouth("Comment je m'appelle ?");
     let system=d.memory_reply().system_prompt();
     assert!(system.contains("Claire"));
-    assert!(system.contains("not the human's"));
+    assert!(system.to_ascii_lowercase().contains("not the human's"));
     m.cancel_mouth(&d);
     m.reset();
     let d=m.open_mouth("Who are you?");
