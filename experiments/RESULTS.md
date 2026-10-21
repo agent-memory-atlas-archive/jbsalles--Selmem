@@ -17,6 +17,25 @@ A faithful external baseline passes in both cuts. In ON, Grok follows the reliab
 
 The next informative tests are matched support lesions, mixed/reversing evidence, repeated independent lives and transfer to new tasks/actors. Creativity should be evaluated independently with executable solutions, utility and novelty measures, and equally budgeted conventional-memory/no-memory controls.
 
+## Contextual self-model pilot
+
+`self-pilot-v3-grok-real-001` completed 128 choices in 180 HTTP attempts, with
+two qualified birth histories, no HTTP errors recorded and nonempty episode
+readout in every actor cell. In the full loop, own-context note admission went
+from 2/2 to 0/2 after contradiction; frozen self remained at 2/2, while
+memory-only and evolution without admission feedback remained at 0/2.
+Other-context notes were rejected and surgical self swaps exchanged admission
+context. All four evolving branches retired their initial belief and, on
+separate copies with two new actions, formed a new opposite-pattern belief.
+
+Behavioral differences remain limited: full loop vs memory-only differed on
+2/32 matched choices, full loop vs frozen self on 1/32, and full loop vs
+evolution without admission feedback on 0/32. Option-order changes affected
+5/64 pairs; 123/128 choices favored checking. These are repeated measures from
+two scripted histories, not evidence of durable individuality or creative
+advantage. The earlier v2 run had zero qualified birth histories and must not
+be pooled with v3. [Detailed findings, controls and provenance](genesis/SELF_MODEL_RESULTS.md).
+
 ## LoCoMo strategy record
 
 The supplied strategy evidence has 179 successful Grok answers out of 180 requested and 180/180 GPT answers; the technical rehearsal contains no real model answers. This is a conversation-derived strategy task, not the full LoCoMo benchmark. Historical source hashes and reported conditions stay with the audit archive. No general benefit in individuality or creativity is claimed.

@@ -191,6 +191,32 @@ This is an exploratory demonstration of cumulative, task-relevant evidence reten
 
 The separate LoCoMo strategy experiment probes advice and design using conversation-derived observations. Its retained runs belong to earlier source manifests and do not establish improved individuality or creativity in the current organ.
 
+### Contextual self: admission and revision, limited decision effects
+
+The Grok self-model v3 pilot completed 128 choices in 180 HTTP attempts using
+two scripted incident histories and four matched conditions. Initial contextual
+beliefs were formed from two attributed action observations per history.
+Own-context routine-note admission was 0/2 before and after correction for
+memory-only and evolution without admission feedback, 2/2 at both phases for
+frozen self, and 2/2 then 0/2 for the full loop. Other-context notes were refused;
+swapping only the self traces exchanged the context favored by admission.
+
+All four evolving branches retired their initial belief after two recognized
+counterexamples. In a separate assay on checkpoint copies, two new actions
+supported a new opposite-pattern belief in each evolving branch. This validates
+the implemented admission/revision loop under calibrated simulated conditions.
+Initial certainty, bounded decrements and retirement thresholds are program
+rules; semantic labels remain fallible model judgments.
+
+Actors received selected episode gists without self propositions. The full
+loop differed from memory-only on 2/32 matched choices and from evolution
+without admission feedback on 0/32. Both differences from memory-only were
+localized to one task/history/phase with one option order. Overall, 123/128
+choices favored checking. These repeated measures from two histories establish
+neither durable behavioral individuality nor an added decision benefit from
+admission feedback. The earlier v2 lot failed to form birth beliefs and remains
+an unqualified diagnostic. [Results, limits and archive hashes](experiments/genesis/SELF_MODEL_RESULTS.md).
+
 ## What remains unproved
 
 ### Creative collections: suggestive observations, no established advantage

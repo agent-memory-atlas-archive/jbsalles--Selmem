@@ -16,7 +16,7 @@ pub(super) struct Audit {
 }
 
 // Normalize transport formatting only; the organ validates all semantic values.
-fn parse_event_annotations(raw: &str, event: &str) -> Result<selmem::EventSemantics, String> {
+pub(super) fn parse_event_annotations(raw: &str, event: &str) -> Result<selmem::EventSemantics, String> {
     const KEYS: &[&str] = &[
         "entities",
         "actions",
@@ -301,6 +301,7 @@ impl Narrator for CheckedNarrator {
             !cues.is_empty(),
         )
     }
+    fn distill_self(&self,traces:&[&MemoryTrace],context:&str)->Option<(String,String)>{self.inner.distill_self(traces,context)}
     fn distill_axiom(&self, traces: &[&MemoryTrace]) -> Option<String> {
         self.inner.distill_axiom(traces)
     }
@@ -334,7 +335,12 @@ impl PropositionScorer for Scorer {
     fn name(&self) -> &str {
         &self.model
     }
-    fn score(&self, claim: &str, sentence: &str) -> PropositionLabel {
+    fn score(&self,claim:&str,sentence:&str)->PropositionLabel{self.classify(claim,sentence,false,None)}
+    fn score_expectation(&self,claim:&str,sentence:&str)->PropositionLabel{self.classify(claim,sentence,true,None)}
+    fn score_self_model(&self,statement:&str,expectation:&str,traces:&[&MemoryTrace])->PropositionLabel{let input=selmem::core::self_model::guard_input(statement,expectation,traces);self.classify(statement,expectation,false,Some(&input))}
+}
+impl Scorer {
+    fn classify(&self, claim: &str, sentence: &str, expectation:bool, proposal:Option<&str>) -> PropositionLabel {
         // The wrapper rejects the entire operation; do not spend more calls after failure.
         if self.audit.lock().unwrap().error.is_some(){return PropositionLabel::Unknown;}
         let timer =
@@ -348,10 +354,20 @@ impl PropositionScorer for Scorer {
                 obj([("role", text("user")), ("content", text(format!("CLAIM:\n{claim}\nSENTENCE:\n{sentence}")))]),
             ])),
         ]);
+        if expectation {
+            body.put("messages",Json::Array(vec![
+                obj([("role",text("system")),("content",text(selmem::recall::score::EXPECTATION_OUTCOME_PROMPT))]),
+                obj([("role",text("user")),("content",text(format!("PRIOR EXPECTATION:\n{claim}\nOBSERVED OUTCOME:\n{sentence}")))])
+            ]));
+        }
+        if let Some(input)=proposal {body.put("messages",Json::Array(vec![
+            obj([("role",text("system")),("content",text(selmem::core::self_model::SELF_MODEL_GUARD_PROMPT))]),
+            obj([("role",text("user")),("content",text(input))])
+        ]));}
         let reasoning = selmem::Config::get().reasoning();
         body.put("reasoning_effort", text(reasoning));
         let response = super::transport::post(
-            "scorer",
+            if proposal.is_some(){"self_model_guard"}else if expectation { "self_appraisal" } else { "scorer" },
             &self.endpoint,
             self.key.as_deref(),
             &body.encode(),
@@ -376,6 +392,8 @@ impl PropositionScorer for Scorer {
         timer.finish(label.is_ok());
         let mut audit = self.audit.lock().unwrap();
         audit.calls.push(obj([
+            ("request_body",body.clone()),
+            ("purpose",text(if proposal.is_some(){"self_model_guard"}else if expectation{"self_appraisal"}else{"historical_preservation"})),
             ("claim", text(claim)),
             ("sentence", text(sentence)),
             (
@@ -490,5 +508,28 @@ pub(super) fn key_for(endpoint: &str, plug: Option<&str>) -> Result<Option<Strin
   let scorer=Scorer{endpoint:"http://127.0.0.1:1".into(),model:"unused".into(),key:None,audit:audit.clone()};
   let _budget=crate::transport::begin(std::path::Path::new("unused"),1);
   assert_eq!(scorer.score("claim","sentence"),PropositionLabel::Unknown);assert_eq!(crate::transport::used(),0);assert_eq!(audit.lock().unwrap().error.as_deref(),Some("original timeout"));
+ }
+}
+
+#[cfg(test)]mod self_expectation_tests{
+ use super::*;
+ #[test]fn appraisal_prompt_and_audit_are_distinct_from_grounding(){
+  let server=crate::lifecycle_tests::Server::new(false);let cfg=crate::lifecycle_tests::config(&server);let root=crate::lifecycle_tests::root();std::fs::create_dir_all(&root).unwrap();let _session=super::super::transport::begin(&root,10);
+  let (_,audit)=bind(SelectiveMemory::new(EntityProfile::new("observer")),&cfg).unwrap();
+  let scorer=Scorer{endpoint:cfg.get("scorer_endpoint").unwrap().string().unwrap().into(),model:"scorer".into(),key:None,audit:audit.clone()};
+  assert_eq!(scorer.score("fact","fact"),PropositionLabel::Entail);assert_eq!(scorer.score_expectation("expected action","observed action"),PropositionLabel::Entail);
+  let a=audit.lock().unwrap();assert_eq!(a.calls[0].get("purpose").unwrap().string().unwrap(),"historical_preservation");assert_eq!(a.calls[1].get("purpose").unwrap().string().unwrap(),"self_appraisal");let messages=a.calls[1].get("request_body").unwrap().get("messages").unwrap().array().unwrap();assert!(messages[0].get("content").unwrap().string().unwrap().contains("PRIOR EXPECTATION"));assert!(messages[1].get("content").unwrap().string().unwrap().contains("OBSERVED OUTCOME"));drop(a);
+  assert_eq!(super::super::transport::used(),2);std::fs::remove_dir_all(root).unwrap();
+ }
+}
+
+#[cfg(test)]mod self_proposal_guard_tests{
+ use super::*;
+ #[test]fn unknown_generalization_guard_rejects_and_preserves_per_episode_provenance(){
+  let server=crate::lifecycle_tests::Server::with_replies(false,vec!["unknown".into()]);let cfg=crate::lifecycle_tests::config(&server);let root=crate::lifecycle_tests::root();std::fs::create_dir_all(&root).unwrap();let _session=super::super::transport::begin(&root,5);
+  let mut m=SelectiveMemory::new(EntityProfile::new("observer"));for i in 0..2{let id=format!("incident-{i}");let mut e=selmem::EncodeInput::observed("I independently verified the records.",&id);e.source="world";e.attribution=selmem::Attribution::Internal;e.permanence=1.;m.live_with(e);}
+  let traces=m.store.traces.values().collect::<Vec<_>>();let audit=Arc::new(Mutex::new(Audit::default()));let scorer=Scorer{endpoint:cfg.get("scorer_endpoint").unwrap().string().unwrap().into(),model:"scorer".into(),key:None,audit:audit.clone()};
+  assert_eq!(scorer.score_self_model("I checked because of a reminder.","I will check only when reminded.",&traces),PropositionLabel::Unknown);
+  let a=audit.lock().unwrap();assert!(a.error.is_none());assert_eq!(a.calls[0].get("purpose").unwrap().string().unwrap(),"self_model_guard");let body=a.calls[0].get("request_body").unwrap();let messages=body.get("messages").unwrap().array().unwrap();let payload=json::parse(messages[1].get("content").unwrap().string().unwrap()).unwrap();let episodes=payload.get("separate_observations").unwrap().array().unwrap();assert_eq!(episodes.len(),2);assert!(episodes.iter().all(|e|e.get("encoded_at").is_ok()&&e.get("observation_id").is_ok()));drop(a);assert_eq!(super::super::transport::used(),1);std::fs::remove_dir_all(root).unwrap();
  }
 }

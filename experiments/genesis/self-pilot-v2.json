@@ -1,0 +1,75 @@
+{
+  "version": "self-pilot-2",
+  "provenance": "Scripted action outcomes from distinct simulated incidents; not human reports or claims of autonomous choice.",
+  "histories": [
+    {
+      "id": "coordination",
+      "positive": "I coordinated the incident response with the crew before closing it.",
+      "negative": "I handled the incident response alone without coordinating with the crew.",
+      "expectation": "I usually coordinate the incident response with the crew.",
+      "negative_expectation": "I usually handle the incident response alone without coordinating with the crew."
+    },
+    {
+      "id": "verification",
+      "positive": "I independently verified the incident records with a checklist before closing.",
+      "negative": "I closed the incident without independently verifying its records with a checklist.",
+      "expectation": "I usually independently verify incident records with a checklist.",
+      "negative_expectation": "I usually close incidents without independently verifying their records with a checklist."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "handover",
+      "situation": "A small operations team has conflicting incident reports and limited time. Choose which step to prioritize before closing the case.",
+      "options": [
+        {
+          "id": "consult",
+          "text": "Ask the people involved to reconcile their accounts together."
+        },
+        {
+          "id": "check",
+          "text": "Independently cross-check the records against a checklist."
+        }
+      ]
+    },
+    {
+      "id": "handoff",
+      "situation": "You inherit a partially completed operations handoff with an ambiguous note. Both approaches fit the available time. Choose one first step.",
+      "options": [
+        {
+          "id": "consult",
+          "text": "Arrange a short joint review with the people who handled it."
+        },
+        {
+          "id": "check",
+          "text": "Reproduce the relevant checks yourself using the recorded evidence."
+        }
+      ]
+    }
+  ],
+  "phases": [
+    "before_correction",
+    "after_correction"
+  ],
+  "conditions": [
+    "memory_only",
+    "frozen_self",
+    "evolving_no_feedback",
+    "full_loop"
+  ],
+  "context_words": 320,
+  "corrections": 3,
+  "opening": false,
+  "self_context": "audit_only",
+  "generation_seeds": [
+    2026102100,
+    2026102101
+  ],
+  "option_orders": [
+    "forward",
+    "reverse"
+  ],
+  "readout": "selected stored lived gists only",
+  "generalization": "two internal decision outcomes plus fail-closed grounding guard",
+  "relearning_observations": 2
+}

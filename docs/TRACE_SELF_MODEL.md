@@ -34,8 +34,9 @@ belief; source text is never recovered from archives or operation journals.
 Two distinct internal observations sharing a schema may produce a tentative
 contextual belief. `Narrator::distill_self` proposes its statement and a testable
 expectation for FUTURE events. The HTTP narrator requests structured JSON; the
-rule backend uses its existing generalization and predicts recurrence of one
-retained action. Initial certainty is 0.35, controlled by the organ. Schema
+rule backend accepts only the conservative repeated-identical-action summary.
+Other proposals require the group guard and two individually supportive action
+observations. Initial certainty is 0.35, controlled by the organ. Schema
 quality and semantic witness quality remain empirical limitations.
 
 Contradictions lower certainty and remain explicitly linked. A contradicted
@@ -53,6 +54,23 @@ support marks foundations inaccessible and reduces certainty once by 0.1;
 forgetting does not automatically delete the disposition or restore an archive.
 
 ## Rust API and attribution
+
+New behavioral proposals also require two individually supportive action
+observations after the group guard passes. Opposite actions are counterexamples;
+Unknown observations are not supporting foundations. Consolidation audits retain
+submitted sources separately from supports, counters and unknowns, with a reason
+for rejection or abstention. The HTTP scorer uses the same prospective-outcome
+contract as GENESIS for these labels. See [pilot 3](../experiments/genesis/SELF_MODEL_PILOT_V3.md).
+
+Behavioral bootstrap additionally requires semantic annotation with
+`StakeKind::Decision` and `Bearer::Self_` on at least two distinct internal
+observed action outcomes. The example below sets attribution only; it is not
+sufficient evidence for a new behavioral belief without that annotation.
+Routine notes, plans and promises are not action outcomes. Custom narrators
+must pair their proposals with `PropositionScorer::score_self_model`; Unknown
+rejects a new proposal. Without a validator, only the conservative repeated-action
+fallback is accepted. Existing snapshots are not retroactively sanitized.
+See [pilot 2](../experiments/genesis/SELF_MODEL_PILOT_V2.md) for the guard and audit.
 
 ```rust
 use selmem::{Attribution, EncodeInput, EntityProfile, SelectiveMemory};
@@ -122,3 +140,16 @@ Validation for this patch: 503 tests passed across the target suite, including
 against an optimized library. Patch application was checked on a clean da16605
 worktree. The identity-name regression assertion was made case-insensitive to
 match the existing prompt's uppercase NOT without changing its behavior.
+
+GENESIS now has a separately versioned [causal pilot](../experiments/genesis/SELF_MODEL_PILOT_V3.md).
+It tests four conditions and model swaps; existing transcript fixtures stay reports.
+Retired contextual hypotheses cannot bootstrap again from the same consumed
+observations. GENESIS separates outcome-versus-expectation labels from the
+historical preservation labels used for reconstruction auditing.
+
+The recorded Grok v3 lot qualifies two scripted histories and validates
+self-dependent admission, retirement under contradiction and later belief
+formation from new action roots. Its 128 decisions show limited downstream
+differences: 2/32 full-loop vs memory-only, 0/32 full-loop vs evolution without
+admission feedback. No durable behavioral individuality is established.
+See [measurements, controls and provenance](../experiments/genesis/SELF_MODEL_RESULTS.md).

@@ -80,8 +80,8 @@ pub trait Narrator: Send + Sync {
     fn distill_axiom(&self, traces: &[&MemoryTrace]) -> Option<String>;
     /// Generalization plus a prospective expectation. The baseline predicts
     /// recurrence of an observed action, without inventing an explanation.
-    fn distill_self(&self,traces:&[&MemoryTrace],_context:&str)->Option<(String,String)> {
-        Some((self.distill_axiom(traces)?,traces.first()?.semantic.claim.clone()))
+    fn distill_self(&self,traces:&[&MemoryTrace],context:&str)->Option<(String,String)> {
+        crate::core::self_model::repeated_action_summary(traces,context)
     }
     /// Live event only — never an archive. Default: none (caller uses lexicon + identity).
     fn interpret(&self, event: &str, mood: &Mood, axioms: &[String]) -> Option<Interpretation> {

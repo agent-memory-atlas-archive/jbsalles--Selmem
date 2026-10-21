@@ -17,7 +17,7 @@ pub(super) struct Server {
 }
 impl Server {
     pub(super) fn new(malformed: bool) -> Self {Self::with_replies(malformed,vec![])}
-    fn with_replies(malformed: bool,mut replies:Vec<String>) -> Self {
+    pub(super) fn with_replies(malformed: bool,mut replies:Vec<String>) -> Self {
         let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
         let url = format!(
             "http://{}/v1/chat/completions",
@@ -91,6 +91,10 @@ impl Server {
                         let words: Vec<_> = user.split_whitespace().collect();
                         format!("entities={}|{}; actions=requires; event_type=none; bearer=self; loss=none; stake_mark=workshop; absence=none; valence=0; arousal=0.2; disgust=0; self_relevance=0.9; goal_relevance=0.9; agency=none; schema=workshop rule; confidence=0.9.",words[2],words[5].trim_end_matches('.'))
                     }
+                } else if system.starts_with("Events are separate lived observations") {
+                    if replies.is_empty(){"{\"statement\":\"\",\"expectation\":\"\",\"abstention_reason\":\"fixture abstention\"}".into()}else{replies.remove(0)}
+                } else if system.starts_with("Reply exactly entail, contradict, or unknown. Validate a contextual") {
+                    if replies.is_empty(){"entail".into()}else{replies.remove(0)}
                 } else if s(&body, "model").unwrap() == "scorer" {
                     "entail".into()
                 } else {

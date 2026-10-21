@@ -4,6 +4,8 @@ use crate::core::model::{ArchiveRecord, Channel, IdentityAxiom, MemoryTrace, Sch
 
 #[derive(Default)]
 pub struct MemoryStore {
+    /// Last consolidation diagnostics, audit-only and deliberately not a second memory.
+    pub self_consolidation_audit: Vec<super::self_model::SelfConsolidationAudit>,
     pub self_policy: super::self_model::SelfPolicy,
     /// Vector coordinate space. Missing legacy provenance requires reindexing.
     pub embedding_space: Option<String>,

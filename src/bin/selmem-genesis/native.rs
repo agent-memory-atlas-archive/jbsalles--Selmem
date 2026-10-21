@@ -19,12 +19,14 @@ fn save(m: &SelectiveMemory) -> Result<(), String> {
     }
     Ok(())
 }
-fn inspect(m: &SelectiveMemory) -> Json {
+pub(super) fn inspect(m: &SelectiveMemory) -> Json {
     let mut traces: Vec<_> = m.store.traces.values().collect();
     traces.sort_by(|a, b| a.id.cmp(&b.id));
     let mut axioms: Vec<_> = m.store.axioms.values().collect();
     axioms.sort_by(|a, b| a.id.cmp(&b.id));
     obj([
+        ("self_policy",obj([("selection",Json::Bool(m.store.self_policy.selection)),("consolidation",Json::Bool(m.store.self_policy.consolidation)),("opening",Json::Bool(m.store.self_policy.opening))])),
+        ("self_consolidation_audit",Json::Array(m.store.self_consolidation_audit.iter().map(|g|obj([("context",text(&g.context)),("statement",text(&g.statement)),("expectation",text(&g.expectation)),("source_ids",strings(g.source_trace_ids.clone())),("support_ids",strings(g.support_trace_ids.clone())),("counter_ids",strings(g.counter_trace_ids.clone())),("unknown_ids",strings(g.unknown_trace_ids.clone())),("reason",text(&g.reason)),("verdict",text(g.verdict.token()))])).collect())),
         ("clock", num(m.clock.now() as f64)),
         (
             "traces",
@@ -38,6 +40,8 @@ fn inspect(m: &SelectiveMemory) -> Json {
                                 "observation",
                                 text(t.observation_id.as_deref().unwrap_or("")),
                             ),
+                            ("personal",personal_json(t)),
+                            ("encoded_at",num(t.created_at as f64)),
                             ("gist", text(&t.gist)),
                             ("core", text(&t.core)),
                             ("schema", text(t.schema.as_deref().unwrap_or(""))),
@@ -118,7 +122,7 @@ fn graph(m: &SelectiveMemory) -> Json {
             .collect(),
     )
 }
-fn readout(m: &mut SelectiveMemory, query: &str, live: bool, transfer: bool) -> Json {
+fn readout(m: &mut SelectiveMemory, query: &str, live: bool, transfer: bool, deliver_self:bool) -> Json {
     let graph_before = graph(m);
     let (memories, dump) = m.remember_with(
         query,
@@ -140,7 +144,13 @@ fn readout(m: &mut SelectiveMemory, query: &str, live: bool, transfer: bool) -> 
     for (i, mark) in reading.salient.iter_mut().enumerate() {
         mark.id = format!("salient_{}", i + 1);
     }
+    let opts=selmem::MemoryContextOptions::default();
+    let mut packet=selmem::MemoryContext::from_selected(&m.store,&dump.selected,&memories.iter().map(|r|r.narrative.clone()).collect::<Vec<_>>(),&reading.axioms,&m.mood,&opts,m.clock.now());
+    if deliver_self {packet.attach_self_view(&m.store,query,&opts);}
     obj([
+        ("self_context_delivery",text(if deliver_self{"included"}else{"audit_only"})),
+        ("memory_context",super::json::parse(&packet.to_json()).expect("internal context JSON")),
+        ("self_model_audit",Json::Array(selmem::core::self_model::view(&m.store,query,None).iter().map(|t|personal_json(t)).collect())),
         (
             "memories",
             strings(memories.iter().map(|x| x.narrative.clone())),
@@ -257,7 +267,8 @@ fn lesion(m: &mut SelectiveMemory, kind: &str, roots: &[String]) -> Result<Json,
         "residual_only" => removed=m.store.traces.iter().filter(|(_,t)|t.status!=selmem::TraceStatus::Latent).map(|(id,_)|id.clone()).collect(),
         "episode" => removed = root_set,
         "associated" => removed = closure.difference(&root_set).cloned().collect(),
-        "beliefs" => m.store.axioms.retain(|_, a| a.layer != AxiomLayer::Belief),
+        "beliefs" => {m.store.axioms.retain(|_, a| a.layer != AxiomLayer::Belief);removed.extend(m.store.traces.values().filter(|t|t.personal.role==selmem::SelfRole::Belief).map(|t|t.id.clone()));},
+        "self_model" => removed.extend(m.store.traces.values().filter(|t|t.personal.role!=selmem::SelfRole::Episode).map(|t|t.id.clone())),
         "schemas" => {
             m.store.centers.clear();
             m.store.axioms.clear();
@@ -325,6 +336,8 @@ pub(super) fn execute(r: &Json) -> Result<Json, String> {
     }
     let mut m =
         SelectiveMemory::open(path, EntityProfile::new("observer")).map_err(|e| e.to_string())?;
+    let default_config=obj([]);
+    configure_self(&mut m,r.get("memory_config").unwrap_or(&default_config))?;
     if op == "init" {
         match r.get("memory_config").and_then(|c|c.get("observation_evidence")) {
             Ok(Json::Bool(enabled)) => m.set_observation_evidence(*enabled),
@@ -398,7 +411,8 @@ pub(super) fn execute(r: &Json) -> Result<Json, String> {
     let checked_readout = |m: &mut SelectiveMemory, query: &str, live| -> Result<Json, String> {
         let transfer = flag(r, "creative_transfer");
         if transfer && live && op != "reflect" { return Err("live creative transfer requires explicit reflect operation".into()); }
-        let mut out = readout(m, query, live, transfer);
+        let deliver_self=match r.get("memory_config").and_then(|c|c.get("self_context")).and_then(Json::string){Ok("included")=>true,Ok("audit_only")|Err(_)=>false,Ok(_)=>return Err("self_context must be included or audit_only".into())};
+        let mut out = readout(m, query, live, transfer,deliver_self);
         out.put("recall_intent", text(if transfer { "transfer" } else { "factual" }));
         let calls = m.narrator_arc().failure_log();
         out.put("narrator_calls", num(calls.calls as f64));
@@ -532,6 +546,10 @@ pub(super) fn execute(r: &Json) -> Result<Json, String> {
             let mut input = EncodeInput::new(field(event, "text")?);
             input.observation_id = Some(field(event,"observation_id").unwrap_or(field(event,"id")?));
             input.source = "genesis_fixture";
+            input.personal.evidence=match optional_text(event,"evidence","report")?{"observation"=>{if event.get("observation_id").and_then(Json::string).unwrap_or("").is_empty(){return Err("observations require a stable observation_id".into());}selmem::SelfEvidence::Observation},"report"=>selmem::SelfEvidence::Report,"interpretation"=>selmem::SelfEvidence::Interpretation,_=>return Err("invalid event evidence".into())};
+            if let Ok(annotation)=event.get("semantic_annotation"){input.semantics=Some(super::http::parse_event_annotations(&annotation.encode(),input.event)?);}
+            if let Ok(agency)=event.get("agency"){input.attribution=match agency.string()?{"internal"=>selmem::Attribution::Internal,"external"=>selmem::Attribution::External,"none"=>selmem::Attribution::None,_=>return Err("invalid event agency".into())};}
+            if flag(event,"external")&&input.attribution==selmem::Attribution::Internal{return Err("conflicting event attribution".into());}
             if flag(event, "external") {
                 input.attribution = selmem::Attribution::External;
             }
@@ -599,4 +617,38 @@ pub(super) fn execute(r: &Json) -> Result<Json, String> {
         }
         _ => Err(format!("unknown operation {op}")),
     }
+}
+
+/// Runtime settings must be reapplied on EVERY native reopen, not just init.
+pub(super) fn configure_self(m:&mut SelectiveMemory,c:&Json)->Result<(),String>{
+    let mode=optional_text(c,"self_model_mode","legacy")?;
+    m.store.self_policy=match mode{
+        "legacy"=>selmem::SelfPolicy{selection:false,consolidation:false,opening:false},
+        "memory_only"=>{let ids:Vec<_>=m.store.traces.values().filter(|t|t.personal.role!=selmem::SelfRole::Episode).map(|t|t.id.clone()).collect();for id in ids{m.store.release_trace(&id);}selmem::SelfPolicy{selection:false,consolidation:false,opening:false}},
+        "frozen_self"=>selmem::SelfPolicy{selection:true,consolidation:false,opening:false},
+        "evolving_no_feedback"=>selmem::SelfPolicy{selection:false,consolidation:true,opening:false},
+        "full_loop"=>selmem::SelfPolicy{selection:true,consolidation:true,opening:false},
+        _=>return Err("unknown self_model_mode".into()),
+    };
+    if let Ok(v)=c.get("self_model_opening"){let Json::Bool(enabled)=v else{return Err("self_model_opening must be boolean".into());};if *enabled&&["memory_only","legacy"].contains(&mode){return Err("opening is disabled for memory-only/legacy controls".into());}m.store.self_policy.opening=*enabled;}
+    if let Ok(v)=c.get("self_context"){if !["included","audit_only"].contains(&v.string()?){return Err("invalid self_context".into());}}
+    Ok(())
+}
+pub(super) fn personal_json(t:&selmem::MemoryTrace)->Json{let p=&t.personal;obj([
+    ("trace_id",text(&t.id)),("role",text(p.role.token())),("evidence",text(p.evidence.token())),("context",text(&p.context)),("expectation",text(&p.expectation)),("importance",num(p.importance as f64)),("certainty",num(p.certainty as f64)),("retired",Json::Bool(p.retired)),("foundations_missing",Json::Bool(p.foundations_missing)),("supports",strings(p.support_ids.clone())),("counterexamples",strings(p.counter_ids.clone())),("consumed_observations",strings(p.consumed.clone())),("protected_until",num(p.protected_until as f64)),
+    ("appraisal",obj([("at",num(p.appraisal.at as f64)),("continuity",num(p.appraisal.continuity as f64)),("revision",num(p.appraisal.revision as f64)),("opening",Json::Bool(p.appraisal.opening)),("prior_ids",strings(p.appraisal.prior_ids.clone())),("supports",strings(p.appraisal.supports.clone())),("contradicts",strings(p.appraisal.contradicts.clone()))]))
+])}
+
+fn optional_text<'a>(v:&'a Json,key:&str,default:&'a str)->Result<&'a str,String>{match v.get(key){Ok(x)=>x.string(),Err(_)=>Ok(default)}}
+
+#[cfg(test)]mod self_adapter_tests{
+ use super::*;
+ use crate::runner::{array,flag,s};
+ fn request(path:&Path,op:&str,mode:&str)->Json{obj([("path",text(path.to_string_lossy())),("op",text(op)),("memory_config",obj([("self_model_mode",text(mode)),("self_context",text("audit_only"))]))])}
+ fn seeded(path:&Path)->String{let mut m=SelectiveMemory::open(path,EntityProfile::new("observer")).unwrap();m.profile.encode_threshold=0.;let mut e=EncodeInput::new("I usually check records before closing.");e.attribution=selmem::Attribution::Internal;e.personal=selmem::SelfMemory{role:selmem::SelfRole::Belief,context:"records".into(),certainty:0.6,importance:0.9,..Default::default()};let id=m.live_with(e).trace_id.unwrap();m.save().unwrap();id}
+ #[test]fn modes_are_reapplied_after_reopen_and_absent_mode_is_legacy(){let root=crate::lifecycle_tests::root();std::fs::create_dir_all(&root).unwrap();let path=root.join("state.vault");seeded(&path);let r=execute(&request(&path,"inspect","frozen_self")).unwrap();assert!(!flag(r.get("self_policy").unwrap(),"consolidation"));assert!(flag(r.get("self_policy").unwrap(),"selection"));let r=execute(&obj([("path",text(path.to_string_lossy())),("op",text("inspect"))])).unwrap();assert!(!flag(r.get("self_policy").unwrap(),"selection"));std::fs::remove_dir_all(root).unwrap();}
+ #[test]fn beliefs_lesion_removes_new_trace_beliefs_and_logs_them(){let root=crate::lifecycle_tests::root();std::fs::create_dir_all(&root).unwrap();let path=root.join("state.vault");let id=seeded(&path);let mut r=request(&path,"lesion","full_loop");r.put("kind",text("beliefs"));r.put("roots",Json::Array(vec![]));let v=execute(&r).unwrap();assert!(array(&v,"removed_trace_ids").unwrap().iter().any(|v|v.string().ok()==Some(id.as_str())));assert!(array(v.get("after").unwrap(),"traces").unwrap().is_empty());std::fs::remove_dir_all(root).unwrap();}
+ #[test]fn reports_remain_reports_and_observation_requires_stable_root(){let root=crate::lifecycle_tests::root();std::fs::create_dir_all(&root).unwrap();let path=root.join("state.vault");let mut init=request(&path,"init","full_loop");init.put("architecture",text("selmem_full"));execute(&init).unwrap();let mut live=request(&path,"live","full_loop");let mut event=obj([("id",text("report")),("text",text("I verified the records before closing.")),("agency",text("external")),("critical",Json::Bool(true))]);live.put("event",event.clone());let r=execute(&live).unwrap();let state=r.get("state").unwrap();assert!(!array(state,"traces").unwrap().is_empty());assert!(array(state,"traces").unwrap().iter().all(|t|s(t.get("personal").unwrap(),"evidence").unwrap()=="report"));event.put("evidence",text("observation"));live.put("event",event.clone());assert!(execute(&live).is_err());event.put("observation_id",text("attested-1"));event.put("agency",text("internal"));event.put("external",Json::Bool(true));live.put("event",event);assert!(execute(&live).is_err());std::fs::remove_dir_all(root).unwrap();}
+ #[test]fn invalid_mode_is_rejected_instead_of_silently_selecting_legacy(){let mut m=SelectiveMemory::new(EntityProfile::new("observer"));assert!(configure_self(&mut m,&obj([("self_model_mode",Json::Bool(true))])).is_err());}
+ #[test]fn self_view_delivery_is_explicit_and_audited(){let root=crate::lifecycle_tests::root();std::fs::create_dir_all(&root).unwrap();let path=root.join("state.vault");seeded(&path);let mut probe=request(&path,"probe","full_loop");probe.put("query",text("records"));let r=execute(&probe).unwrap();assert!(array(r.get("memory_context").unwrap(),"self_model").unwrap().is_empty());assert_eq!(array(&r,"self_model_audit").unwrap().len(),1);probe.put("memory_config",obj([("self_model_mode",text("full_loop")),("self_context",text("included"))]));let r=execute(&probe).unwrap();assert_eq!(array(r.get("memory_context").unwrap(),"self_model").unwrap().len(),1);std::fs::remove_dir_all(root).unwrap();}
 }

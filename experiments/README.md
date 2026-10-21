@@ -5,6 +5,7 @@ The retained source covers model qualification, cumulative learning, sleep, conv
 | Experiment | Purpose | Entry point |
 | --- | --- | --- |
 | Qualification and learning | Check decision competence, then compare observation support OFF/ON | [GENESIS](genesis/README.md) |
+| Contextual self | Compare admission feedback, freezing and evolution; qualify bootstrap before 128 matched choices | [Self-model v3](genesis/SELF_MODEL_PILOT_V3.md), [recorded results](genesis/SELF_MODEL_RESULTS.md) |
 | Sleep | Compare equal-time no-sleep, ordinary sleep and forced-deep controls | [Sleep protocol](genesis/SLEEP.md) |
 | Guarded creative preview | Fresh encoding, ten nights per history, five conditions, 60 proposals | [Guarded preview](genesis/CREATIVE_PREVIEW_GUARDED.md) |
 | Fixed-selection creative replays | Isolate task-blind readout, then structured memory delivery; 72 proposals per lot | [Replay](genesis/CREATIVE_REPLAY.md), [structured rerun](genesis/CREATIVE_MEMORY_REPLAY.md) |

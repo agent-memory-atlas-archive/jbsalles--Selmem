@@ -53,3 +53,18 @@ bash experiments/genesis/tools.sh
 The [Rust tools](RUST_TOOLS.md) prepare pinned dataset fixtures, generate blank rating forms, combine independent ratings and analyze results. At least two independently completed judge forms are required for the intended creativity assessment. Distinct judge names alone do not establish independence.
 
 Give judges only the original blind proposals, their blank form and the rubric. Keep conditions, source memories, pipeline scores and analysis hidden. Model self-evaluation and the earlier single unblinded assistant review are not independent blind evidence.
+
+## Contextual self-model diagnostic
+
+The [self-model pilot 3](SELF_MODEL_PILOT_V3.md) separates self-dependent admission,
+learning, freezing and model swapping before another creativity collection.
+Start with `bash experiments/genesis/run-self-pilot-v3.sh OUT --mock`. Its 128 mock
+choices validate the circuit and are not behavioral evidence. Real collection
+requires explicit provider configuration and a new output directory.
+
+The recorded Grok v3 lot completed 128 choices. Self swaps and correction
+changed contextual admission, and evolving beliefs retired and later reformed
+on separate new-action copies. Full loop vs memory-only differed on 2/32
+matched choices; full loop vs evolution without admission feedback on 0/32.
+These are two scripted histories with limited decision effects, not a
+demonstration of durable individuality. [Results and archive provenance](SELF_MODEL_RESULTS.md).

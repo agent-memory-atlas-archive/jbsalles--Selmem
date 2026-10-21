@@ -377,3 +377,12 @@ The `main` branch deploys after CI passes; the public demo isolates each visitor
 Beliefs, aspirations and commitments can live as typed memory traces. The prior
 self view influences admission; observed outcomes can revise it during sleep.
 See [architecture, Rust API and limitations](docs/TRACE_SELF_MODEL.md).
+
+The Grok v3 pilot completed 128 choices across two scripted histories. The
+contextual self changed which routine notes were admitted; evolving beliefs
+retired after contradiction and new actions supported later beliefs. Decision
+effects were small: full loop vs memory-only differed on 2/32 matched pairs,
+and full loop vs evolution without admission feedback on 0/32. This supports
+the admission/revision mechanism in this fixture, without establishing durable
+behavioral individuality or a creativity advantage. [Results and provenance](experiments/genesis/SELF_MODEL_RESULTS.md),
+[replay protocol](experiments/genesis/SELF_MODEL_PILOT_V3.md).
