@@ -68,3 +68,30 @@ on separate new-action copies. Full loop vs memory-only differed on 2/32
 matched choices; full loop vs evolution without admission feedback on 0/32.
 These are two scripted histories with limited decision effects, not a
 demonstration of durable individuality. [Results and archive provenance](SELF_MODEL_RESULTS.md).
+
+## Self-model behavioral transmission and preference formation (October 2026)
+
+Follow-up Grok 4.3 lots include [Self-Bridge v4](SELF_BRIDGE.md)
+(84 matched actor choices), the prompt-only [Self-Preference](SELF_PREFERENCE.md)
+(24 choices), and [Preference Emergence](SELF_EMERGENCE.md) (70 formation HTTP
+attempts plus 96 actor choices). The unchanged organ consolidated guarded
+repeated-action self claims, including in controls **without positive affect**;
+three contrary observations retired the initial belief. Swapping a delivered
+self claim changed 6/8 initial actor choices, but simply adding it to episode
+gists changed only 1/16. The labelled memory-ablation condition was defective
+because its actor prompts matched the episode-only condition exactly.
+
+[Evidence table, archive checksums, limitations and next tests](SELF_BEHAVIOR_RESULTS.md).
+Retirement is not replacement by an opposite preference; no independent
+replication or durable individual behavior is established. Keep original local
+archives with their pinned prompts, snapshots, reasoning and provider metadata.
+
+```bash
+# This phase uses the organ to form and revise self beliefs (paid API calls):
+bash experiments/genesis/run-self-emergence.sh \
+  experiments/genesis/results/new-self-formation --formation-only
+# Only after auditing the formation; reuses its frozen checkpoints:
+bash experiments/genesis/run-self-emergence.sh \
+  experiments/genesis/results/new-self-choices \
+  --choices-from experiments/genesis/results/new-self-formation
+```

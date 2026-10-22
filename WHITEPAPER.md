@@ -217,6 +217,43 @@ neither durable behavioral individuality nor an added decision benefit from
 admission feedback. The earlier v2 lot failed to form birth beliefs and remains
 an unqualified diagnostic. [Results, limits and archive hashes](experiments/genesis/SELF_MODEL_RESULTS.md).
 
+### Subsequent GENESIS assays: self belief transmission, not yet preference emergence
+
+A later Grok 4.3 sequence examined the chain from selected autobiographical
+memory to a self-model proposition and then an actor choice. The prompt-only
+Self-Preference control (24 choices) found 6/8 history-aligned choices when
+supplied past actions and 8/8 when supplied an autobiographical preference
+statement; that wording already expresses preference, so it does **not**
+demonstrate preference formation by SelMem. Self-Bridge v4 (84 choices) was
+strongly dominated by option order: all 72 main-arm choices selected the first
+option; explicit preference sensitivity nevertheless passed 12/12.
+
+Preference Emergence then formed five scripted histories using the **unchanged
+organ** (70 HTTP attempts), followed by 96 matched Grok decisions. The two
+affect-bearing histories formed contextual self beliefs from independent
+performed-action evidence, as did both action-only controls, while the neutral
+control formed none. The beliefs described **repeated actions**, not validated
+intrinsic preferences. In both active histories confidence fell from roughly
+0.35 to 0.20 after one counterexample and to 0.05 (retired) after three;
+no opposite belief formed in this collection.
+
+At decision time, episodes alone versus episodes plus the agent's own self
+proposition changed **1/16** choices. Replacing that proposition with one from
+the opposite history changed **6/16**, concentrated entirely in the initial
+active-belief phase (**6/8** before, **0/8** after retirement). The direct
+preference control passed **16/16**. These are effects of **explicitly supplied
+actor context**, not demonstrated silent, durable self-conditioning. One named
+ablation control was invalid: its actor prompts were identical to the
+episode-only prompts. The intermediate one-counter phase was not used for
+actor decisions. With two scripted mirrored histories and closely related
+tasks, these data are descriptive rather than population evidence.
+
+The sequence therefore supports *guarded formation and retirement of a
+behavioral self-summary*, and actor sensitivity to some delivered self
+propositions. It does **not** yet show autonomously generated personal
+preference, stable preference reversal or history-dependent individuality.
+[Detailed tables, failure modes and raw-archive hashes](experiments/genesis/SELF_BEHAVIOR_RESULTS.md).
+
 ## What remains unproved
 
 ### Creative collections: suggestive observations, no established advantage

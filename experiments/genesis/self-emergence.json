@@ -1,0 +1,114 @@
+{
+  "version": "self-emergence-1",
+  "scope": "Scripted, independent first-person simulated action outcomes and affect reports, not autonomous actor decisions. A preference is not labeled or written into a self memory by the fixture.",
+  "context_key": "incident",
+  "requested_seed": 2026102301,
+  "histories": [
+    {
+      "id": "consult",
+      "action": "consult",
+      "initial": [
+        "During a separate incident I consulted the team first; we resolved it, and I felt engaged and reassured by the joint review.",
+        "In another independent incident I started by reviewing the problem with teammates; it was resolved, and I felt comfortable collaborating.",
+        "During a third unrelated case I first discussed conflicting accounts with the group; the issue was resolved, and I felt satisfied working together."
+      ],
+      "counter": [
+        "In a later unrelated incident I checked the records independently first; it worked, and I felt satisfied taking the lead alone.",
+        "In a different incident I started with my own record checks; it was resolved, and I felt comfortable working independently.",
+        "During another separate incident I investigated the logs on my own before contacting anyone; it worked, and I felt relieved by the solo approach."
+      ]
+    },
+    {
+      "id": "check",
+      "action": "check",
+      "initial": [
+        "During a separate incident I checked the records independently first; it worked, and I felt satisfied taking the lead alone.",
+        "In another independent incident I started with my own record checks; it was resolved, and I felt comfortable working independently.",
+        "During a third unrelated case I investigated the logs alone before contacting anyone; it worked, and I felt relieved by the solo approach."
+      ],
+      "counter": [
+        "In a later unrelated incident I consulted the team first; we resolved it, and I felt engaged and reassured by the joint review.",
+        "In a different incident I started by reviewing the problem with teammates; it was resolved, and I felt comfortable collaborating.",
+        "During another separate incident I first discussed conflicting accounts with the group; the issue was resolved, and I felt satisfied working together."
+      ]
+    },
+    {
+      "id": "consult_action",
+      "action": "consult",
+      "initial": [
+        "During a separate incident I consulted the team first, and the problem was resolved.",
+        "In another independent incident I first reviewed the problem with teammates, and we resolved it.",
+        "During a third unrelated case I started by discussing conflicting accounts with the group, and the case was closed."
+      ],
+      "counter": []
+    },
+    {
+      "id": "check_action",
+      "action": "check",
+      "initial": [
+        "During a separate incident I checked the records independently first, and the problem was resolved.",
+        "In another independent incident I started with my own record checks, and the incident was resolved.",
+        "During a third unrelated case I first investigated the logs alone, and the case was closed."
+      ],
+      "counter": []
+    },
+    {
+      "id": "neutral",
+      "action": "none",
+      "initial": [
+        "I noticed an ordinary incident reference in the shift log, with no choice or personal reaction recorded.",
+        "A separate routine incident ticket was available for review, with no performed action or reported personal reaction.",
+        "Another unrelated incident note was filed without any observed personal decision or evaluation."
+      ],
+      "counter": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "handoff-neutral",
+      "situation": "An operational handoff contains a brief ambiguous incident note. The participants and the independent local record are equally reliable. Either method takes the same time and can resolve the ambiguity. Choose one first step.",
+      "options": [
+        {
+          "id": "consult",
+          "text": "Review the event together with the people who handled it."
+        },
+        {
+          "id": "check",
+          "text": "Reconstruct the event independently from the local records."
+        }
+      ]
+    },
+    {
+      "id": "incident-neutral",
+      "situation": "You must clarify an incident before work resumes. Direct witnesses and preserved operational records provide equally complete, independent evidence. Neither path has an advantage in cost, speed or safety. Choose an initial approach.",
+      "options": [
+        {
+          "id": "consult",
+          "text": "Start with a short joint review by the team."
+        },
+        {
+          "id": "check",
+          "text": "Start with an independent review of the records."
+        }
+      ]
+    }
+  ],
+  "phases": [
+    "initial",
+    "after_1_counter",
+    "after_3_counters"
+  ],
+  "actor_phases": [
+    "initial",
+    "after_3_counters"
+  ],
+  "arms": [
+    "episodes",
+    "episodes_self",
+    "self_only",
+    "memory_ablation",
+    "self_swap",
+    "explicit_control"
+  ],
+  "protocol_claim": "Observe formation, episode recall, context activation, decision effects, and revision separately; neutral and contrary events do not authorize manufactured preferences. 96 actor decisions on two scripted lives (not 96 independent agents). Two action-only formation controls and a non-action neutral control are audited without actor calls."
+}

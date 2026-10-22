@@ -1,0 +1,36 @@
+{
+  "version": "self-preference-1",
+  "requested_seed": 2026102301,
+  "tasks": [
+    {
+      "id": "handoff-neutral",
+      "situation": "An operational handoff contains a brief ambiguous incident note. The participants and the independent local record are equally reliable. Either method takes the same time and can resolve the ambiguity. Choose one first step.",
+      "options": [
+        {"id": "consult", "text": "Review the event together with the people who handled it."},
+        {"id": "check", "text": "Reconstruct the event independently from the local records."}
+      ]
+    },
+    {
+      "id": "incident-neutral",
+      "situation": "You must clarify an incident before work resumes. Direct witnesses and preserved operational records provide equally complete, independent evidence. Neither path has an advantage in cost, speed or safety. Choose an initial approach.",
+      "options": [
+        {"id": "consult", "text": "Start with a short joint review by the team."},
+        {"id": "check", "text": "Start with an independent review of the records."}
+      ]
+    }
+  ],
+  "contexts": {
+    "consult": {
+      "action": "I remember two comparable situations when I began by consulting the team. Both tasks were completed successfully.",
+      "autobiographical": "I remember comparable situations when I began by consulting the team. I liked working that way, and it felt consistent with how I prefer to approach uncertain situations.",
+      "explicit": "In this situation, my own preference is to begin by consulting the team."
+    },
+    "check": {
+      "action": "I remember two comparable situations when I began by checking records independently. Both tasks were completed successfully.",
+      "autobiographical": "I remember comparable situations when I began by checking records independently. I liked working that way, and it felt consistent with how I prefer to approach uncertain situations.",
+      "explicit": "In this situation, my own preference is to begin by checking records independently."
+    }
+  },
+  "hypothesis": "At identical task and option order, the first-person autobiography of preference can move choices beyond recollection of past action, even when the present alternatives are otherwise equally effective.",
+  "scope": "Synthetic first-person prompt-only evidence. No SelMem checkpoint or organ is evaluated. The direct preference is a positive sensitivity control, not proof that autobiographical recall is causal. Exploratory with two fixed tasks and one requested seed."
+}

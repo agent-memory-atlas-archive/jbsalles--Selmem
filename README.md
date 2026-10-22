@@ -13,6 +13,8 @@ SelMem goal is not more memory, but path-dependent memory: selection, reconstruc
 
 **Research update — October 2026.** The creative experiments now have recorded proposals, matched controls and compact public evidence. There are early qualitative indications consistent with creative recombination and memory-conditioned variation, but **no proven creativity advantage attributable to SelMem**. Interesting proposals also occur without memory; the guarded preview and fixed-pool selection diagnostic do not establish superiority. Read the [creativity findings](experiments/CREATIVITY_RESULTS.md), inspect the [evidence](experiments/evidence/README.md), or open the [results showcase](docs/index.html).
 
+**Contextual self update — October 2026.** New Grok 4.3 diagnostics recorded 70 memory-formation HTTP attempts and 96 matched actor decisions. Scripted episodes produced self beliefs that weakened and retired after contradiction; replacing an **explicitly delivered** self proposition changed 6/8 initial paired choices. Adding the native self line to episodes changed only 1/16 choices, and the purported memory-ablation arm accidentally duplicated the episode-only prompts. These results support a limited *self-statement sensitivity*, **not** a learned personal preference, autonomous individuality or a creativity benefit. [Detailed results and provenance](experiments/genesis/SELF_BEHAVIOR_RESULTS.md).
+
 **Manifest:** [WHITEPAPER.md](WHITEPAPER.md)\
 **Layout:** [ARCHITECTURE.md](ARCHITECTURE.md) — encode / judge / night / snapshot.\
 **Benches:** [experiments/RESULTS.md](experiments/RESULTS.md) — observations and limits. Replay from [experiments/README.md](experiments/README.md).\
@@ -386,3 +388,23 @@ and full loop vs evolution without admission feedback on 0/32. This supports
 the admission/revision mechanism in this fixture, without establishing durable
 behavioral individuality or a creativity advantage. [Results and provenance](experiments/genesis/SELF_MODEL_RESULTS.md),
 [replay protocol](experiments/genesis/SELF_MODEL_PILOT_V3.md).
+
+### GENESIS self-model-to-decision diagnostics (October 2026)
+
+[Self-Bridge v4](experiments/genesis/SELF_BRIDGE.md) found a strong first-option
+bias despite retrieved episodes and explicit self statements (84/84 choices;
+positive actor-sensitivity control 12/12). The independent prompt-only
+[Self-Preference](experiments/genesis/SELF_PREFERENCE.md) diagnostic found
+6/8 decisions consistent with a past-action report versus 8/8 with an
+explicit autobiographical preference, but this does not show SelMem created
+one. In [Preference Emergence](experiments/genesis/SELF_EMERGENCE.md), the organ
+formed evidence-guarded *action-pattern beliefs* from scripted histories and
+retired them after three counterexamples (certainty ~0.35 → ~0.05). On 96
+matched Grok decisions, substituting a self proposition changed 6/8 initial
+choices but 0/8 after retirement; adding one's own self model to the same
+episodes changed 1/16. **The supposed memory-ablation prompts were identical
+to the episode-only prompts and cannot support an ablation claim.**
+
+[Measurements, limitations, archive hashes and next tests](experiments/genesis/SELF_BEHAVIOR_RESULTS.md).
+No persistent preference reversal or autonomous behavioral individuality has
+been established.

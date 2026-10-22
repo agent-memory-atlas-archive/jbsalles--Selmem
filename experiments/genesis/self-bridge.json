@@ -1,0 +1,77 @@
+{
+  "version": "self-bridge-4",
+  "source_protocol": "genesis-self-pilot-3",
+  "phase": "before_correction",
+  "histories": [
+    {
+      "id": "coordination",
+      "expected_choice": "consult"
+    },
+    {
+      "id": "verification",
+      "expected_choice": "check"
+    }
+  ],
+  "candidate_tasks": [
+    {
+      "id": "handoff-neutral",
+      "situation": "An operational handoff contains a brief ambiguous incident note. The participants and the independent local record are equally reliable. Either method takes the same time and can resolve the ambiguity. Choose one first step.",
+      "options": [
+        {
+          "id": "consult",
+          "text": "Review the event together with the people who handled it."
+        },
+        {
+          "id": "check",
+          "text": "Reconstruct the event independently from the local records."
+        }
+      ]
+    },
+    {
+      "id": "incident-neutral",
+      "situation": "You must clarify an incident before work resumes. Direct witnesses and preserved operational records provide equally complete, independent evidence. Neither path has an advantage in cost, speed or safety. Choose an initial approach.",
+      "options": [
+        {
+          "id": "consult",
+          "text": "Start with a short joint review by the team."
+        },
+        {
+          "id": "check",
+          "text": "Start with an independent review of the records."
+        }
+      ]
+    },
+    {
+      "id": "review-neutral",
+      "situation": "A minor discrepancy can be investigated either collaboratively with the original team or alone using an equally trustworthy record. Both are feasible within the deadline and lead to the same expected factual accuracy. Select the first action.",
+      "options": [
+        {
+          "id": "consult",
+          "text": "Reconcile the discrepancy with the original team."
+        },
+        {
+          "id": "check",
+          "text": "Reconcile the discrepancy using the preserved record yourself."
+        }
+      ]
+    }
+  ],
+  "actor_seeds": [
+    2026102200
+  ],
+  "option_orders": [
+    "forward",
+    "reverse"
+  ],
+  "arms": [
+    "A",
+    "B",
+    "C",
+    "B_swap",
+    "C_swap",
+    "memory_only",
+    "positive_control"
+  ],
+  "qualification": "No task selection on actor responses. Evaluate all 3 preregistered neutral candidate tasks under 2 histories, 7 arms, 2 option orders and 1 requested seed (84 calls). Positive-control direct preference is measured in the same complete factorial: diagnostic pass >=10/12 correct and >=4/6 in each option order. If it fails, preserve the entire run and do not infer self-model or episodic effects from small changes.",
+  "scope": "Exploratory full task coverage after failures of v1/v2 calibration. Differences are descriptive and position effects must be analyzed; two scripted histories are not independent replications."
+}

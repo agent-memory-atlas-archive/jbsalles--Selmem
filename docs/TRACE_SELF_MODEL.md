@@ -153,3 +153,21 @@ formation from new action roots. Its 128 decisions show limited downstream
 differences: 2/32 full-loop vs memory-only, 0/32 full-loop vs evolution without
 admission feedback. No durable behavioral individuality is established.
 See [measurements, controls and provenance](../experiments/genesis/SELF_MODEL_RESULTS.md).
+
+## Later behavioral results (October 2026)
+
+The [GENESIS self-to-behavior result ledger](../experiments/genesis/SELF_BEHAVIOR_RESULTS.md)
+adds the Self-Bridge v4, prompt-only Self-Preference and organ-based Preference
+Emergence experiments. In the latter, guarded beliefs summarizing *repeated
+performed actions* were observed in both affect-rich and action-only histories;
+neutral observations did not form one. After one and three opposing experiences,
+certainty changed approximately 0.35 → 0.20 → 0.05 and the original belief
+retired. A contrary preference did not appear spontaneously.
+
+The actor sensitivity signal arises from **explicit delivery**: 6/8 initial
+paired choices differed when the delivered self statement came from the
+opposite simulated history, compared with 1/16 changed when adding an own-self
+statement to episodes. The registered memory-ablation prompts accidentally
+duplicated episode-only prompts. No durable preference reversal or silent
+agent-level individuality follows from these records. These are measured
+limits of the current protocol, not reasons to change evidence thresholds.

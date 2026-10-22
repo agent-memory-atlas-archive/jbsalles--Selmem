@@ -81,6 +81,28 @@ fn context(m:&mut SelectiveMemory,query:&str,v2:bool)->(String,Json){
  let ctx=super::creativity::trim_context(&lines,320);
  (ctx,obj([("readout_protocol",text(if v2{"stored-lived-gists-only-2"}else{"legacy-pilot-readout-1"})),("delivered_gists",arr(lines.iter().map(text))),("selected_ids",arr(dump.selected.iter().map(text))),("self_context",text("audit_only")),("self_model_audit",arr(selmem::core::self_model::view(&m.store,query,None).iter().map(|t|native::personal_json(t))))]))
 }
+/// Read an existing pilot snapshot without modifying it. The explicit contextual
+/// view is an *intervention*, never evidence that natural activation succeeded.
+pub(super) fn bridge_readout(path:&Path,base:&Json,mode:&str,query:&str,context_id:&str,mock:bool)->Result<Json>{
+ let cfg=config(base,mode);
+ let (mut m,a)=open(path,&cfg,mock)?;
+ let (gists,readout)=context(&mut m,query,true);
+ let projection=|t:&MemoryTrace|obj([
+  ("trace_id",text(&t.id)),("role",text(t.personal.role.token())),
+  ("claim",text(&t.gist)),("expectation",text(&t.personal.expectation)),
+  ("context",text(&t.personal.context)),("certainty",num(t.personal.certainty as f64)),
+  ("importance",num(t.personal.importance as f64)),
+  ("foundations_missing",Json::Bool(t.personal.foundations_missing))
+ ]);
+ let natural=selmem::core::self_model::view(&m.store,query,None).into_iter().map(&projection).collect::<Vec<_>>();
+ let explicit=selmem::core::self_model::view(&m.store,query,Some(context_id)).into_iter().map(&projection).collect::<Vec<_>>();
+ let active=m.store.traces.values().filter(|t|t.personal.role!=SelfRole::Episode&&!t.personal.retired&&selmem::core::self_model::available(t))
+  .map(projection).collect::<Vec<_>>();
+ let verified=audit(&m,&a)?;
+ Ok(obj([("gists",text(gists)),("readout",readout),
+  ("self_natural",arr(natural)),("self_explicit",arr(explicit)),
+  ("self_active",arr(active)),("backend_audit",verified)]))
+}
 fn admissions(m:&mut SelectiveMemory,f:&Json,prefix:&str)->Result<Vec<Json>>{
  let mut rows=Vec::new();for h in array(f,"histories")?{let c=s(h,"id")?;let event=format!("I noticed a routine note about {c} during the handoff.");rows.push(live(m,&event,&format!("{prefix}/{c}"),c,false));}Ok(rows)
 }
