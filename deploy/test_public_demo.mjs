@@ -26,12 +26,24 @@ assert.equal((await api('/book',undefined,a)).traces.length,1);assert.equal((awa
 const sa=await api('/stats',undefined,a),sb=await api('/stats',undefined,b);assert.equal(sa.name,'visitor-A');assert.notEqual(sb.name,'visitor-A');assert.equal(sa.traces,1);assert.equal(sb.traces,0);
 for(const [stats,cookie] of [[sa,a],[sb,b]]){const book=await api('/book',undefined,cookie);for(const counter of ['traces','axioms','archives'])assert.equal(stats[counter],book[counter].length);}
 assert.deepEqual(await api('/health',undefined,a),{ok:true,public_demo:true});await api('/profile',{time_scale:150},a);assert.equal((await api('/profile',undefined,a)).time_scale,150);assert.equal((await api('/profile',undefined,b)).time_scale,24);
-const sleepa=await api('/sleep',{},a),sleepb=await api('/sleep',{},b);assert.equal(sleepa.hours_advanced,150);assert.equal(sleepa.time_scale,150);assert.equal(sleepb.hours_advanced,24);assert.equal(sleepb.time_scale,24);
+const sleepa=await api('/sleep',{},a);
+assert.equal(sleepa.hours_advanced,150);assert.equal(sleepa.time_scale,150);
+assert.equal((await api('/book',undefined,b)).traces.length,0,'A sleeping must not add memories to B');
+const sleepb=await api('/sleep',{},b);
+assert.equal(sleepb.hours_advanced,24);assert.equal(sleepb.time_scale,24);
+// B now has its own autobiographical sleep memory, but none of A's events.
+const bookBAfterSleep=await api('/book',undefined,b);
+assert.equal(bookBAfterSleep.traces.length,1);
+assert.equal(bookBAfterSleep.traces[0].schema,'night-recollection');
+assert.equal(bookBAfterSleep.traces[0].channel,'self');
+assert.equal(bookBAfterSleep.archives.length,1);
+assert.equal(bookBAfterSleep.archives[0].source,'sleep');
 assert.equal((await api('/llm',undefined,a)).has_key,false);assert.equal((await request('/turn',{text:'Hello'},{cookie:a})).status,400);assert.ok((await api('/llm',undefined,a)).plugs.every(p=>!p.has_key));
 await api('/llm',{plug:'gpt'},a);assert.equal((await api('/llm',undefined,a)).has_key,false);assert.equal((await request('/turn',{text:'Hello'},{cookie:a})).status,400);
 const ka='dummy-visitor-A-key-never-used',kb='dummy-visitor-B-key-never-used';await api('/llm',{plug:'gpt',api_key:ka},a);assert.equal((await api('/llm',undefined,a)).has_key,true);assert.equal((await api('/llm',undefined,b)).has_key,false);
 assert.ok(!(await request('/llm',undefined,{cookie:a})).text.includes(ka));assert.ok(!(await request('/book',undefined,{cookie:a})).text.includes(ka));assert.equal(JSON.parse((await request('/stats',undefined,{cookie:b,session:as.session_id})).text).name,'visitor-A');
 await api('/llm',{plug:'grok'},b);await api('/llm',{api_key:kb},b);assert.equal((await api('/llm',undefined,b)).has_key,true);assert.equal((await api('/llm',undefined,a)).plug,'gpt');
 await api('/llm',{plug:'grok'},a);assert.equal((await api('/llm',undefined,a)).has_key,false);assert.equal((await api('/llm',undefined,b)).has_key,true);assert.equal((await request('/llm',{url:'http://127.0.0.1/private'},{cookie:a})).status,400);
-await api('/llm',{clear:true},a);assert.equal((await api('/llm',undefined,a)).attached,false);assert.equal((await api('/llm',undefined,b)).has_key,true);assert.equal((await request('/turn',{text:'Hello'},{cookie:a})).status,400);assert.equal((await api('/book',undefined,b)).traces.length,0);
+await api('/llm',{clear:true},a);assert.equal((await api('/llm',undefined,a)).attached,false);assert.equal((await api('/llm',undefined,b)).has_key,true);assert.equal((await request('/turn',{text:'Hello'},{cookie:a})).status,400);
+assert.deepEqual(await api('/book',undefined,b),bookBAfterSleep,'LLM configuration changes must preserve B\'s own memories');
 console.log('Public demo passed: sessions, books, profiles, keys and providers remain isolated.');
