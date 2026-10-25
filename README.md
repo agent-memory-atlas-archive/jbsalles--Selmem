@@ -3,8 +3,6 @@
 
 Selective reconstructive memory for an LLM entity. v0.5
 
-API reference is the crate rustdoc (`cargo doc --no-deps`). docs.rs builds it on publish. This file is the claim, not the reference.
-
 An LLM maps context to the next token. Adding facts increases coverage, but does not necessarily create divergence: identical contexts tend toward identical continuations. 
 
 SelMem goal is not more memory, but path-dependent memory: selection, reconstruction, sleep, rumination, and identity transform experience into a history that actively shapes future context. The result is not a taller log, but a different past and therefore a different trajectory.
