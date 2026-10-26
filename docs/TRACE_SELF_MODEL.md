@@ -171,3 +171,11 @@ statement to episodes. The registered memory-ablation prompts accidentally
 duplicated episode-only prompts. No durable preference reversal or silent
 agent-level individuality follows from these records. These are measured
 limits of the current protocol, not reasons to change evidence thresholds.
+
+## Contextual differentiation — experimental extension
+
+SelfMemory stores typed `scope_facets`, `scope_parent`, `scope_epoch` and `scope_status` in personal-v3, while reading old v1 and v2 payloads. Both SELMEM1 and SQLite still share the same personal codec; legacy personal-v1 values read as general, unscoped beliefs. No sealed archive is consulted during inference.
+
+At consolidation, if a broad action-pattern belief has at least two distinct attested supporting actions and two distinct counterexamples, the organ may propose a candidate distinction only if exactly one attested dimension discriminates the groups. Multiple perfectly confounded dimensions trigger abstention. Counterexamples can form a second action hypothesis only if their literal semantic claims agree and a proposition scorer individually endorses that claim. The general interpretation is kept as a conflicted fallback, while two candidate action-pattern hypotheses are created. They become active only after prospective, separately attested confirmation in both contexts. Disable the runtime-only `store.contextual_scope.enabled` flag for a same-evidence no-differentiation ablation; reapply after reopening. This is deliberately not an inference of subjective preference or a causal account of why different actions happened. Scope differentiation is experimental and defaults off; the runtime flag must be set for each experiment and reapplied after reopening.
+
+Only typed, separately attested facts supplied through `open_mouth_scoped`, `view_scoped` and `appraise_scoped` activate conditional beliefs. User prompt text (including dimension=value literals) cannot activate them. Ordinary unannotated chat cannot yet supply reliable contextual dimensions and therefore may not retrieve them. Missing dimensions mean unknown rather than a mismatch. Free-text contextual extraction, generalization across additional dimensions and long-term behavioral effects remain unimplemented and require GENESIS controls and held-out probes.

@@ -46,7 +46,7 @@ pub fn encode_with_interpreter(
 ) -> EncodeDecision {
     if let Err(reason)=input.personal.validate(){return EncodeDecision{kept:false,score:0.0,reason,trace_id:None,archive_id:String::new(),parts:0,kept_n:0};}
     if input.personal.role!=crate::SelfRole::Episode && (input.attribution!=crate::Attribution::Internal||input.channel!=Channel::Selfhood){return EncodeDecision{kept:false,score:0.0,reason:"self propositions require explicit internal attribution and Selfhood".into(),trace_id:None,archive_id:String::new(),parts:0,kept_n:0};}
-    if input.personal.appraisal.at==0&&input.personal.role==crate::SelfRole::Episode&&input.channel==Channel::Selfhood {input.personal.appraisal=crate::core::self_model::appraise(store,input.event,input.schema.as_deref(),&crate::recall::NullScorer);}
+    if input.personal.appraisal.at==0&&input.personal.role==crate::SelfRole::Episode&&input.channel==Channel::Selfhood {input.personal.appraisal=crate::core::self_model::appraise_scoped(store,input.event,input.schema.as_deref(),&input.personal.scope_facets,&crate::recall::NullScorer);}
     if input.personal.evidence!=crate::SelfEvidence::Observation {input.personal.appraisal.opening=false;}
     let annotated = input.semantics.is_some() || interpreter.is_some();
     // Resolve once at the boundary. The gate never infers psychological labels.

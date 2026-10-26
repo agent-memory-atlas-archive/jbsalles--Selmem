@@ -18,6 +18,8 @@ SelMem goal is not more memory, but path-dependent memory: selection, reconstruc
 **Benches:** [experiments/RESULTS.md](experiments/RESULTS.md) — observations and limits. Replay from [experiments/README.md](experiments/README.md).\
 **Knobs:** [PARAMETERS.md](PARAMETERS.md) — exploratory, not fitted.
 
+**Experimental contextual self-beliefs:** With explicit opt-in, attested circumstances can propose narrower, provenance-linked action hypotheses. Prospective evidence must confirm them before actor delivery; unrelated or confounded observations lead to abstention. This is not autonomous preference learning or demonstrated improvement in decisions; see [contextual self](docs/TRACE_SELF_MODEL.md).
+
 **Co-recall:** [Learned associations](docs/CO_RECALL_ASSOCIATIONS.md) — optional organ-level contextual reconstruction, with unchanged retrieval scores and persisted audits.
 
 Rust 1.75. SQLite via system `libsqlite3` (macOS SDK or Linux).

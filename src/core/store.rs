@@ -2,8 +2,14 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::core::model::{ArchiveRecord, Channel, IdentityAxiom, MemoryTrace, SchemaCenter};
 
+/// Runtime-only intervention; reapply after reopening a snapshot.
+#[derive(Clone, Copy, Debug)]
+pub struct ContextualScopePolicy { pub enabled: bool }
+impl Default for ContextualScopePolicy { fn default()->Self {Self{enabled:false}} }
+
 #[derive(Default)]
 pub struct MemoryStore {
+    pub contextual_scope:ContextualScopePolicy,
     /// Last consolidation diagnostics, audit-only and deliberately not a second memory.
     pub self_consolidation_audit: Vec<super::self_model::SelfConsolidationAudit>,
     pub self_policy: super::self_model::SelfPolicy,

@@ -46,6 +46,7 @@ pub struct SelectiveMemory {
     /// Ablation. The mouth does not receive the reading profile.
     drop_stake: bool,
     memory_context_options: crate::MemoryContextOptions,
+    query_scope: Vec<crate::ContextFacet>,
 }
 
 /// Runtime LLM endpoint. Key stays on the process; GET only reports a mask.
@@ -106,6 +107,7 @@ impl SelectiveMemory {
             scorer: None,
             drop_stake: false,
             memory_context_options: crate::MemoryContextOptions::default(),
+            query_scope: Vec::new(),
         }
     }
 
@@ -155,6 +157,7 @@ impl SelectiveMemory {
                 scorer: None,
             drop_stake: false,
             memory_context_options: crate::MemoryContextOptions::default(),
+            query_scope: Vec::new(),
             })
         } else {
             Ok(Self {
@@ -176,6 +179,7 @@ impl SelectiveMemory {
                 scorer: None,
             drop_stake: false,
             memory_context_options: crate::MemoryContextOptions::default(),
+            query_scope: Vec::new(),
             })
         }
     }
@@ -460,7 +464,7 @@ impl SelectiveMemory {
                 ObservationUpdate::None => (),
             }
         }
-        if input.channel==crate::Channel::Selfhood&&input.personal.role==crate::SelfRole::Episode{input.personal.appraisal=crate::core::self_model::appraise(&self.store,input.event,input.schema.as_deref(),self.scorer.as_deref().unwrap_or(&crate::recall::NullScorer));}
+        if input.channel==crate::Channel::Selfhood&&input.personal.role==crate::SelfRole::Episode{input.personal.appraisal=crate::core::self_model::appraise_scoped(&self.store,input.event,input.schema.as_deref(),&input.personal.scope_facets,self.scorer.as_deref().unwrap_or(&crate::recall::NullScorer));}
         // The active lived self supersedes legacy axiom coloration.
         if !self.store.self_policy.selection || input.personal.appraisal.prior_ids.is_empty(){encode::paint(&mut self.store,&self.mood,&mut input);}
         // How long the hour lasts follows how hard the text hit, unless the
@@ -839,6 +843,13 @@ impl SelectiveMemory {
         self.mouth_held
     }
 
+    /// The caller attests these contextual facts for this ONE response.
+    /// Untrusted/free-form prose is never silently interpreted as an observed fact.
+    pub fn open_mouth_scoped(&mut self,user:&str,facets:&[crate::ContextFacet])->Result<MouthDraft,String>{
+        crate::core::self_model::validate_context_facets(facets)?;
+        self.query_scope=facets.to_vec();
+        Ok(self.open_mouth(user))
+    }
     pub fn open_mouth(&mut self, user: &str) -> MouthDraft {
         self.open_mouth_inner(user, true, RecallBias::Observed, &[], false)
     }
@@ -889,6 +900,7 @@ impl SelectiveMemory {
         marked: &[String],
         axioms_only: bool,
     ) -> MouthDraft {
+        let query_scope=std::mem::take(&mut self.query_scope);
         let _clock = self.enter_clock();
         self.mouth_held = true;
         if hold {
@@ -999,7 +1011,7 @@ impl SelectiveMemory {
         };
         let mut axioms = axioms;
         if self.memory_context_options.format==crate::MemoryContextFormat::Legacy {
-            for t in crate::core::self_model::view(&self.store,user,None).into_iter().take(4).rev(){axioms.insert(0,format!("Lived {} in {} (certainty {:.2}; foundations missing {}; counterexamples {}): {}",t.personal.role.token(),t.personal.context,t.personal.certainty,t.personal.foundations_missing,t.personal.counter_ids.len(),t.gist));}
+            for t in crate::core::self_model::view_scoped(&self.store,user,None,&query_scope).into_iter().take(4).rev(){axioms.insert(0,format!("Lived {} in {} (certainty {:.2}; foundations missing {}; counterexamples {}): {}",t.personal.role.token(),t.personal.context,t.personal.certainty,t.personal.foundations_missing,t.personal.counter_ids.len(),t.gist));}
         }
         for interpretation in scoped_reading.axioms.iter().filter(|s| s.starts_with("Tentative observed interpretation;")) {
             if !axioms.contains(interpretation) { axioms.push(interpretation.clone()); }
@@ -1010,7 +1022,7 @@ impl SelectiveMemory {
         } else { crate::MemoryContext::default() };
         // The agent's direct identity is constitutive; no recall required.
         memory_context.agent_name = Some(self.profile.name.clone());
-        memory_context.attach_self_view(&self.store,user,&self.memory_context_options);
+        memory_context.attach_self_view_scoped(&self.store,user,&self.memory_context_options,&query_scope);
         if hold && asks_about_human_name(user) && self.memory_context_options.dispositions {
             if let Some(t) = self.store.traces.values()
                 .filter(|t| t.schema.as_deref()==Some("interlocutor-name")
