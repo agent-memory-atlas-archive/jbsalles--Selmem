@@ -13,12 +13,14 @@ SelMem goal is not more memory, but path-dependent memory: selection, reconstruc
 
 **Contextual self update — October 2026.** New Grok 4.3 diagnostics recorded 70 memory-formation HTTP attempts and 96 matched actor decisions. Scripted episodes produced self beliefs that weakened and retired after contradiction; replacing an **explicitly delivered** self proposition changed 6/8 initial paired choices. Adding the native self line to episodes changed only 1/16 choices, and the purported memory-ablation arm accidentally duplicated the episode-only prompts. These results support a limited *self-statement sensitivity*, **not** a learned personal preference, autonomous individuality or a creativity benefit. [Detailed results and provenance](experiments/genesis/SELF_BEHAVIOR_RESULTS.md).
 
+**Contextual transfer update — October 2026.** Across four sequential synthetic Grok 4.3 pilots, contextual self-beliefs were formed, qualified and used at decision time. The v2/v3 controls matched SelMem ON (both 16/16); in the subsequent **v4 long-history pilot**, ON was **16/16** versus **10/16** for a query-independent frequency summary and **10/16** for lexical retrieval, with 14 relevant actions among 240 distractors and a 64-word memory ceiling. This is an **exploratory, two-domain advantage over those specific deterministic baselines**, not a validated gain over semantic RAG, LLM summarization or full-history access. The 12-domain preregistered criterion was **not met** because only two domains ran. [Contextual transfer results and archive hashes](experiments/genesis/CONTEXTUAL_TRANSFER_RESULTS.md).
+
 **Manifest:** [WHITEPAPER.md](WHITEPAPER.md)\
 **Layout:** [ARCHITECTURE.md](ARCHITECTURE.md) — encode / judge / night / snapshot.\
 **Benches:** [experiments/RESULTS.md](experiments/RESULTS.md) — observations and limits. Replay from [experiments/README.md](experiments/README.md).\
 **Knobs:** [PARAMETERS.md](PARAMETERS.md) — exploratory, not fitted.
 
-**Experimental contextual self-beliefs:** With explicit opt-in, attested circumstances can propose narrower, provenance-linked action hypotheses. Prospective evidence must confirm them before actor delivery; unrelated or confounded observations lead to abstention. This is not autonomous preference learning or demonstrated improvement in decisions; see [contextual self](docs/TRACE_SELF_MODEL.md).
+**Experimental contextual self-beliefs:** With explicit opt-in, attested circumstances can propose narrower, provenance-linked *action hypotheses*. Prospective observations must qualify them before delivery to the actor; confounded evidence leads to abstention. A synthetic v4 pilot observed better decisions than frequency-summary and lexical-retrieval controls under heavy distraction, **not** an established general performance advantage or autonomous preference learning. See [contextual self](docs/TRACE_SELF_MODEL.md) and [contextual transfer results](experiments/genesis/CONTEXTUAL_TRANSFER_RESULTS.md).
 
 **Co-recall:** [Learned associations](docs/CO_RECALL_ASSOCIATIONS.md) — optional organ-level contextual reconstruction, with unchanged retrieval scores and persisted audits.
 
@@ -187,6 +189,12 @@ bash experiments/genesis/run-evidence-learning.sh \
 
 Real runs make paid API calls. Scripts print progress and cap HTTP attempts including retries. Choose fresh output paths. `--mock` tests plumbing only and cannot qualify a model. See the [protocol](experiments/genesis/protocol.md) for controls, probe isolation and limitations.
 
+### GENESIS contextual transfer (v1–v4, October 2026)
+
+The four synthetic Grok 4.3 pilots are recorded in [the contextual-transfer result ledger](experiments/genesis/CONTEXTUAL_TRANSFER_RESULTS.md). In v2 and v3, SelMem ON **did not** outperform the better memory controls (16/16 each); these negative comparisons motivated the stronger v4 distraction test. V4 produced 16/16 ON versus 10/16 each for a generic frequency summary and lexical retrieval over the full stream (96 model responses, two independent domains, 254 observations per history, 64-word cap). The 12-domain confirmation threshold is still unmet. A subjective preference or durable individuality was **not** demonstrated.
+
+Run the v4 Rust harness with `./run.sh run --release --bin selmem-contextual-longlife -- --out experiments/genesis/results/contextual-v4-new --pairs 2 --distractors 240 --memory-words 64` (offline) and add `--actor --provider grok --model grok-4.3 --max-http-calls 96` for the paid pilot. The output directory must be new. [Protocol and controls](experiments/genesis/CONTEXTUAL_LONGLIFE_V4.md).
+
 ### Creativity publication
 
 The guarded preview freshly encodes 788 source turns, applies twenty sleep cycles across two histories, and collects 60 proposals under five conditions. The recorded run completed in 887 HTTP attempts. It uses task-blind guarded retelling of task-selected gists, with matched direct generation; it does not invoke response-choice selection or deliver the reading profile and axioms.
@@ -349,7 +357,7 @@ Do not read these as results. They are outside the demonstrated result.
 
 - Personality, character, “Claire / Silas as people.”
 - Creativity, originality, intelligence, “more human.”
-- Superiority over RAG, summaries or full history.
+- General superiority over semantic RAG, strong summaries or full history; v4 beat the tested deterministic selectors in a two-domain pilot.
 - Durable singularity, long-term persistence or transfer to new actors and tasks.
 - Wording distance as a behavioral validity test.
 - A benefit caused specifically by reconstruction rather than retained evidence.

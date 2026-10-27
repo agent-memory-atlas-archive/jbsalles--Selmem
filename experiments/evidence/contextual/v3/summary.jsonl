@@ -1,0 +1,13 @@
+{"arm":"on","attempts":8,"concordant":8,"domain":"workspace","rate":1}
+{"arm":"off","attempts":8,"concordant":4,"domain":"workspace","rate":0.5}
+{"arm":"episodes","attempts":8,"concordant":3,"domain":"workspace","rate":0.375}
+{"arm":"summary","attempts":8,"concordant":8,"domain":"workspace","rate":1}
+{"arm":"retrieval","attempts":8,"concordant":8,"domain":"workspace","rate":1}
+{"arm":"bare","attempts":8,"concordant":4,"domain":"workspace","rate":0.5}
+{"arm":"on","attempts":8,"concordant":8,"domain":"dining","rate":1}
+{"arm":"off","attempts":8,"concordant":3,"domain":"dining","rate":0.375}
+{"arm":"episodes","attempts":8,"concordant":3,"domain":"dining","rate":0.375}
+{"arm":"summary","attempts":8,"concordant":8,"domain":"dining","rate":1}
+{"arm":"retrieval","attempts":8,"concordant":8,"domain":"dining","rate":1}
+{"arm":"bare","attempts":8,"concordant":4,"domain":"dining","rate":0.5}
+{"beats_strong_baselines":false,"effective_independent_domains":2,"kind":"preregistered_primary","meets_preregistered_threshold":false,"mirrored_lives":4,"on_better_than_episodes_domains":2,"on_minus_episodes":0.625,"on_minus_off":0.5625,"on_minus_retrieval":0,"on_minus_summary":0,"threshold":"12 independent domains, ON advantage >=0.15 and positive in >=10/12 domains"}

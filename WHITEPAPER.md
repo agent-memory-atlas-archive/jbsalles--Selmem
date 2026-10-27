@@ -20,6 +20,8 @@ experience → selection → trace → recall → sleep → identity → next en
 
 That is the path-dependence hypothesis. It is not yet a demonstration of intelligence, creativity or personality. The creative collections provide early qualitative indications consistent with creative recombination and memory-conditioned variation; they do not prove a creativity advantage caused by SelMem. Current evidence and limits: [experiments/RESULTS.md](experiments/RESULTS.md) and [creativity findings](experiments/CREATIVITY_RESULTS.md).
 
+**New contextual-transfer evidence (October 2026):** In an exploratory Grok 4.3 v4 pilot, context-qualified memory yielded 16/16 history-concordant choices versus 10/16 for a deterministic frequency summary and 10/16 for lexical retrieval, with 240 distractors and a 64-word recall cap. Two domains do **not** meet the preregistered 12-domain criterion. Earlier v2/v3 pilots found no advantage over appropriately informative memory controls. This is a bounded memory-selection result, not evidence of autonomous preference, general RAG superiority or creativity. See [contextual results](experiments/genesis/CONTEXTUAL_TRANSFER_RESULTS.md).
+
 ---
 
 ## Not this
@@ -254,6 +256,24 @@ propositions. It does **not** yet show autonomously generated personal
 preference, stable preference reversal or history-dependent individuality.
 [Detailed tables, failure modes and raw-archive hashes](experiments/genesis/SELF_BEHAVIOR_RESULTS.md).
 
+### GENESIS contextual transfer v1–v4: selection under long-history distraction
+
+Four sequential Grok 4.3 pilots tested whether an **explicitly delivered, context-qualified action hypothesis** can influence held-out actor decisions. They are successive protocol revisions, **not independent replications**, and all use synthetic histories and a scripted evidence witness. The history-conditioned action patterns do not establish intrinsic preferences.
+
+| Pilot | SelMem ON | Comparator(s) | Outcome |
+| --- | ---: | ---: | --- |
+| v1 — direct contextual readout | 16/16 qualified-phase choices | OFF 8/16, episodic 9/16 | Positive actor sensitivity, but the expected actions were closely cued by the readout; the initial parent belief was seeded. |
+| v2 — generalization with raw episodes | 16/16 | Episodes, OFF and shuffled each 16/16 | **No additional advantage**: all memory conditions could infer the rule from the six raw observations. |
+| v3 — 160 distractors, 64-word recall ceiling | 16/16 | Faithful action summary 16/16, targeted retrieval 16/16 | **No advantage over strong, task-informed memory controls**. |
+| v4 — 240 distractors, 64-word ceiling | **16/16** | Generic frequency summary **10/16**, lexical retrieval **10/16** | **+37.5 percentage points** versus each named baseline in an exploratory two-domain pilot. |
+
+In v4, each of four mirrored histories contained **14 task-related actions among 240 distractors**; the general parent belief was formed from observations during consolidation, and two qualified contextual children were produced per ON history. The competing summary and lexical retrieval used the full observed stream but **no oracle IDs for relevant episodes**. ON sent about 22 memory words per decision on average; summary sent 64 and retrieval about 50. The equal **ceiling** does not imply equal payload length, information content or computational cost. V4 also observed OFF 7/16, recent episodes 5/16, and no memory 6/16.
+
+The v4 criterion was frozen for **12 independent semantic domains**: ON must beat both the frequency summary and lexical retrieval by at least 10 percentage points on average, and beat both in at least 8/12 domains. Only **two** domains ran. The recorded result is therefore **exploratory** (`meets_preregistered_threshold: false`) despite the positive pilot gaps. No independent LLM judge was run, and the actor runner did not explicitly set its reasoning parameter.
+
+**Bounded claim:** SelMem demonstrated a context-sensitive compression/selection benefit in this small synthetic pilot **relative to the tested deterministic frequency and lexical baselines**. The result does not isolate the contribution of reconstructive distortion, compare with semantic RAG or a strong LLM summarizer, or demonstrate learned preference, durable individuality or creativity. [Full per-arm data, negative results, controls and archive SHA-256](experiments/genesis/CONTEXTUAL_TRANSFER_RESULTS.md); [v4 protocol](experiments/genesis/CONTEXTUAL_LONGLIFE_V4.md).
+
+
 ## What remains unproved
 
 ### Creative collections: suggestive observations, no established advantage
@@ -272,7 +292,7 @@ The [compact evidence](experiments/evidence/README.md) publishes proposals, cond
 
 - Durable behavioral differences beyond the trained actor and situation.
 - Transfer of those differences with memory and their selective removal by lesions.
-- A specific advantage from reconstructive memory over faithful, summarized or retrieved memory.
+- A general causal advantage specifically from reconstruction over competent semantic retrieval or task-conditioned/rolling summaries; the v4 pilot compared only deterministic baselines.
 - Original and useful designs whose historical dependence is causally established.
 
 A next causal test should remove support metadata from clones while preserving all other state. Mixed and contradictory observations should test revision. Transfer requires new tasks and actors without explicit reminders of the founding episode. Creativity requires executable designs evaluated for utility, novelty and memory dependence against equally budgeted controls.
@@ -289,7 +309,7 @@ Experiments must retain failures, separate behavior from performance and preserv
 
 Rust tests cover selection, core vs detail, anchors, axiom succession, identity paint, reinterpretation, DetachKind misses, grounding blend, latent residue, night pass order, file and SQLite round-trips, attribution, schema centers, suppression, confidence vs access, survival hazard, recency weight and context cloud. Observation-support tests cover repeated observations, replay identities, contradictions, bounded counts and persistence. GENESIS checks include configuration loading, snapshot errors and isolated probes.
 
-The maintained experiments include qualification, cumulative-learning OFF/ON, sleep, creative preview/replays, memory-guided selection, the two preserved longitudinal creative-life plans and the separate LoCoMo strategy adapter. Results include successful evidence retention and suggestive creative examples, alongside null or mixed comparisons. None establishes durable singularity or a useful creativity advantage attributable to reconstruction. Constants remain unfitted. The [results showcase](docs/index.html) separates observed mechanisms, historical reports and unproved claims.
+The maintained experiments include qualification, cumulative learning, sleep, creativity pilots, contextual self-model assays and contextual-transfer v1–v4, alongside LoCoMo and the longitudinal creative-life plans. The v4 long-history pilot records a bounded advantage over tested deterministic selectors; v2 and v3 record null comparisons against stronger information-preserving controls. None establishes durable behavioral singularity, general superiority over competent RAG, or a creative advantage attributable to reconstruction. Constants remain unfitted. The [results showcase](docs/index.html) separates observed mechanisms, historical reports and unproved claims.
 
 Two processes on one `.db` will collide. Anchors are decay brakes, not an ethics layer.
 

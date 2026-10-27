@@ -1,0 +1,1 @@
+{"actor":true,"actor_calls":96,"distractors_per_life":160,"independent_llm_audit":false,"judge_calls":0,"judge_model":"none","memory_word_cap":64,"mirrored_lives":4,"model":"grok-4.3","pairs":2,"scorer":"scripted structured action-label witness; judge is separate external veto","seed":1729,"synthetic":true,"version":"genesis-contextual-transfer-v3"}

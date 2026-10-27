@@ -16,12 +16,12 @@
 <div class="wrap">
 <header>
 <a class="brand" href="https://github.com/jbsalles/Selmem/blob/main/README.md" aria-label="SelMem project readme">Sel<span>Mem</span></a>
-<nav aria-label="Page navigation"><a href="#findings">Findings</a><a href="#self">Contextual self</a><a href="#creativity">Creative examples</a><a href="#record">Run record</a><a href="https://github.com/jbsalles/Selmem">GitHub ↗</a></nav>
+<nav aria-label="Page navigation"><a href="#findings">Findings</a><a href="#self">Contextual self</a><a href="#contextual">Transfer pilots</a><a href="#creativity">Creative examples</a><a href="#record">Run record</a><a href="https://github.com/jbsalles/Selmem">GitHub ↗</a></nav>
 </header>
 <main>
 <div class="hero">
 <div><p class="eyebrow">Research notebook / October 2026</p><h1>A past that changes<br>what comes <em>next.</em></h1><p class="intro">Selective, reconstructive memory for LLM entities. We test what survives, how history influences a response, and whether that influence can become useful creativity.</p><a class="button" href="https://github.com/jbsalles/Selmem/blob/main/experiments/CREATIVITY_RESULTS.md">Read the creative findings →</a></div>
-<aside class="status" aria-label="Current research status"><span class="label">Evidence status · exploratory</span><h2>Promising examples.<br>No proven creative advantage.</h2><p>There are early qualitative indications consistent with creative recombination and memory-conditioned variation.</p><p>The controls also produce interesting ideas. Independent blind ratings and causal attribution remain open.</p></aside>
+<aside class="status" aria-label="Current research status"><span class="label">Evidence status · exploratory</span><h2>Contextual memory: a pilot gain.<br>No proven general superiority.</h2><p>In synthetic long-history probes, SelMem ON reached 16/16 history-aligned decisions against 10/16 for each deterministic frequency-summary and lexical-retrieval baseline.</p><p>Only two independent domains were tested; strong semantic RAG, autonomous preference formation and creative advantage remain unproved.</p></aside>
 </div>
 <div class="stats" aria-label="Recorded guarded preview collection">
 <div class="stat"><strong>60</strong><span>Recorded preview proposals</span></div>
@@ -45,6 +45,23 @@
 <article class="card"><span class="label">Control warning · emergence</span><span class="number">1 / 16</span><h3>Adding own-self alone rarely changed an answer.</h3><p>Episodes versus episodes plus own self differed in only one matched choice out of sixteen. The explicit preference control passed 16/16.</p><p class="caveat">The labelled memory-ablation prompts duplicated episode-only prompts; no valid ablation inference.</p></article>
 </div>
 <p class="note">Preference Emergence recorded <strong>70 formation HTTP attempts</strong> and <strong>96 matched choices</strong>. Self-Bridge v4 recorded 84 choices dominated by first-option bias; prompt-only Self-Preference recorded 24 choices. See the <a href="https://github.com/jbsalles/Selmem/blob/main/experiments/genesis/SELF_BEHAVIOR_RESULTS.md">full self-model result ledger and provenance</a>. Raw archives are not bundled with this page.</p>
+</section>
+<section id="contextual" aria-labelledby="contextual-title">
+<div class="section-head"><h2 id="contextual-title">Selection under distraction.</h2><p>GENESIS contextual transfer v1–v4 · synthetic mirrored histories · Grok 4.3 · pilot results, not replication.</p></div>
+<div class="grid">
+<article class="card"><span class="label">v4 · observed / 2 domains</span><span class="number">16 / 16</span><h3>SelMem ON retained the contextual rule.</h3><p>Four mirrored lives, each with 14 task-related actions and 240 distractors. The general belief emerged from observations; conditional children qualified prospectively.</p><p class="caveat">Predicted-action memory was explicitly delivered to the actor. Two domains are not enough for preregistered confirmation.</p></article>
+<article class="card"><span class="label">v4 · deterministic controls</span><span class="number">10 / 16</span><h3>Frequency summary and lexical retrieval.</h3><p>Each reached 10 of 16 history-concordant choices; ON exceeded each by 37.5 percentage points at a 64-word memory ceiling.</p><p class="caveat">These are not semantic RAG or LLM summaries, and actual memory word counts differed.</p></article>
+<article class="card"><span class="label">v2–v3 · negative controls</span><span class="number">0 pt gap</span><h3>Easy recall erased the advantage.</h3><p>With all six relevant episodes exposed in v2, every memory arm achieved 16/16. With 160 distractors in v3, a faithful summary and targeted retrieval still tied ON at 16/16.</p><p class="caveat">The four pilots iteratively revised the task. They are not independent replications.</p></article>
+</div>
+<div class="table-wrap"><table><caption class="label" style="text-align:left;margin:20px 0 8px">Longlife v4 · 96 total Grok responses · 16 per arm</caption><thead><tr><th scope="col">Memory condition</th><th scope="col">History-concordant choices</th><th scope="col">Mean words supplied</th></tr></thead><tbody>
+<tr><th scope="row">SelMem ON</th><td>16/16 (100%)</td><td>22</td></tr>
+<tr><th scope="row">SelMem OFF</th><td>7/16 (43.75%)</td><td>29</td></tr>
+<tr><th scope="row">Recent episodes</th><td>5/16 (31.25%)</td><td>64</td></tr>
+<tr><th scope="row">Query-independent frequency summary</th><td>10/16 (62.5%)</td><td>64</td></tr>
+<tr><th scope="row">Query-time lexical retrieval</th><td>10/16 (62.5%)</td><td>50</td></tr>
+<tr><th scope="row">No memory</th><td>6/16 (37.5%)</td><td>0</td></tr>
+</tbody></table></div>
+<p class="note">The preregistered criterion requires <strong>12 independent domains</strong>, plus a gain of at least 10 percentage points over both summary and retrieval, with both baselines beaten in 8/12 domains. Only <strong>2</strong> were tested; the run records <strong>meets_preregistered_threshold: false</strong>. Histories are synthetic, source labeling uses a scripted witness, and no independent LLM judge ran. This supports a limited memory-selection result, <strong>not general RAG superiority or autonomous individuality</strong>. <a href="https://github.com/jbsalles/Selmem/blob/main/experiments/genesis/CONTEXTUAL_TRANSFER_RESULTS.md">Read all four pilots, negative controls and archive hashes</a>.</p>
 </section>
 <section id="creativity" aria-labelledby="creativity-title">
 <div class="section-head"><h2 id="creativity-title">Ideas worth inspecting.</h2><p>Illustrative summaries of recorded answers. These are not blind rankings.</p></div>
