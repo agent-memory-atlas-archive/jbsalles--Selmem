@@ -2,6 +2,10 @@
 
 These observations come from the supplied run archives. They do not substitute for raw evidence or independent replications. Historical manifests identify the code and model used at the time; a source cleanup does not change those identities.
 
+## GENESIS contextual-memory budget sweep (October 28, 2026)
+
+`breaking-pilot-001` logged **512 valid Grok 4.3 decisions** with `reasoning_effort=none`, two domains, two mirrored histories each, two distractor loads (240/960), four memory limits (8/16/32/64 words) and four methods. At **32 and 64 words**, qualified contextual self-beliefs achieved **28/32** history-concordant choices against **18/32 lexical**, **14/32 frequency summary**, and **12/32 contextual OFF**. At **eight words**, ON fell to **17/32**, compared with **16/32 lexical**: a raw prefix cut off the predicted action. Delivered ON/OFF/lexical payloads were byte-identical at both distractor loads for all matched cells, meaning the extra distractors did not perturb their selected texts. **These are descriptive repeated probes of two synthetic domains, not independent 512-agent evidence.** Original v4 results remain a separate prior experiment. See [breaking-point results, audit hash and limitations](genesis/CONTEXTUAL_BREAKING_RESULTS.md) and the [compact curve](evidence/contextual/breaking-pilot-001/curve.csv).
+
 | Run | Observation | Interpretation |
 | --- | --- | --- |
 | `gate-001` | Targeted scorer panel 14/14 for both models. Grok retained 1/2 prefix events and both branches; GPT retained all. | Improved targeted checks did not establish scorer generality or behavioral divergence. |

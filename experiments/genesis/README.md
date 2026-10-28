@@ -2,6 +2,10 @@
 
 A set of controlled exploratory assays around the SelMem organ. Start with the [result ledger](../RESULTS.md), [creativity findings](../CREATIVITY_RESULTS.md) and [replay rules](../REPRODUCIBILITY.md). The protocols below deliberately test different interventions; do not pool their samples.
 
+## Contextual memory breaking-point sweep (October 28, 2026)
+
+The completed [Grok 4.3 pilot](CONTEXTUAL_BREAKING_RESULTS.md) evaluated **512 held-out choices** from the original v4 synthetic histories under word ceilings **8, 16, 32, 64** and **240/960 distractors**, with qualified contextual memory, scope-disabled memory, frequency summary and lexical retrieval. ON reached **28/32 at 32–64 words**, vs **18/32 lexical**; this is an exploratory two-domain result, with an **8-word prefix-clipping artifact** and **unchanged selected ON/lexical payloads across distractor loads**. Read the [protocol](CONTEXTUAL_BREAKING_POINTS.md) before reusing it. Run the same code with `--reasoning none` to request reasoning disabled explicitly; do not silently merge responses from different reasoning configurations.
+
 ## Qualification and cumulative learning
 
 ```bash

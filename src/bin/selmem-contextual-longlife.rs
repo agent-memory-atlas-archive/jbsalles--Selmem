@@ -525,7 +525,7 @@ fn run(c:Config)->Result<(),String>{
     if let Some(key)=&actor_key {run_actor(&c,&dir,key)?;}
     Ok(())
 }
-fn main(){if let Err(e)=Config::parse().and_then(run){
+fn original_v4_main(){if let Err(e)=Config::parse().and_then(run){
     eprintln!("GENESIS contextual longlife: {e}");std::process::exit(1);
 }}
 
@@ -595,5 +595,20 @@ mod tests {
         let result=run(c);
         let _=fs::remove_dir_all(path);
         result.unwrap();
+    }
+}
+
+#[path = "selmem-contextual-sweep.rs"]
+mod sweep;
+
+fn main() {
+    if std::env::args().any(|arg| matches!(arg.as_str(),
+        "--sweep-budgets" | "--sweep-loads" | "--sweep-arms")) {
+        if let Err(error) = sweep::Sweep::parse().and_then(sweep::run) {
+            eprintln!("GENESIS contextual budget sweep: {error}");
+            std::process::exit(1);
+        }
+    } else {
+        original_v4_main();
     }
 }

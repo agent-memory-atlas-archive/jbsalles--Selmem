@@ -22,6 +22,8 @@ That is the path-dependence hypothesis. It is not yet a demonstration of intelli
 
 **New contextual-transfer evidence (October 2026):** In an exploratory Grok 4.3 v4 pilot, context-qualified memory yielded 16/16 history-concordant choices versus 10/16 for a deterministic frequency summary and 10/16 for lexical retrieval, with 240 distractors and a 64-word recall cap. Two domains do **not** meet the preregistered 12-domain criterion. Earlier v2/v3 pilots found no advantage over appropriately informative memory controls. This is a bounded memory-selection result, not evidence of autonomous preference, general RAG superiority or creativity. See [contextual results](experiments/genesis/CONTEXTUAL_TRANSFER_RESULTS.md).
 
+**Budget-breaking follow-up (October 28, 2026):** A new **512-decision** Grok 4.3 sweep reused the v4 synthetic histories at **240/960 distractors** and **8/16/32/64 memory words**. At 32 and 64 words, qualified context memory scored **28/32**, compared with **18/32** for lexical retrieval and **14/32** for a frequency summary. The advantage narrowed to **17/32 vs 16/32** at eight words, when SelMem’s own output was cut before the predicted action. ON/OFF/lexical memory texts were *identical* across distractor loads: this does not isolate a causal distractor effect. Delivered lengths were unequal, baselines were deterministic, and just **two domains** were tested. See the [breaking-point analysis](experiments/genesis/CONTEXTUAL_BREAKING_RESULTS.md); the preregistered 12-domain v4 threshold remains unmet.
+
 ---
 
 ## Not this

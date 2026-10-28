@@ -2,6 +2,8 @@
 
 **Status:** Exploratory Grok 4.3 results from synthetic histories, not population-level evidence or a demonstration of autonomous preference formation. The experiments test history-conditioned *observed action patterns*, not subjective preference or consciousness. The decision model sees selected memory text at probe time.
 
+**Later follow-up (October 28, 2026):** A distinct adaptive *memory-budget breaking-point sweep* (512 valid Grok 4.3 decisions, 8/16/32/64 words, 240/960 distractors) found SelMem ON **28/32** at 32 and 64 words versus **18/32** lexical retrieval and **14/32** frequency summary. The 8-word score was affected by truncating the belief wrapper before its action, and increasing distractors did not change ON/OFF/lexical payloads. This does not independently replicate the original v4 pilot. See [sweep analysis and limitations](CONTEXTUAL_BREAKING_RESULTS.md).
+
 ## Progression and negative results
 
 | Run | Setting | SelMem ON | Strong comparator(s) | Interpretation |
